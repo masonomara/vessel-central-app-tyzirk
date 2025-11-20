@@ -1,32 +1,22 @@
 
-import React, { useState } from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { colors, commonStyles } from "@/styles/commonStyles";
 import { useAuth } from "@/contexts/AuthContext";
+import { useData } from "@/contexts/DataContext";
 import { IconSymbol } from "@/components/IconSymbol";
 import { router } from "expo-router";
 
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  priority: 'high' | 'medium' | 'low';
-  completed: boolean;
-  dueTime: string;
-}
-
 export default function CrewDashboard() {
   const theme = useTheme();
-  const { userName, setUserRole } = useAuth();
-
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: 1, title: "Deck Cleaning", description: "Clean and polish main deck area", priority: "high", completed: false, dueTime: "10:00 AM" },
-    { id: 2, title: "Safety Equipment Check", description: "Inspect life jackets and fire extinguishers", priority: "high", completed: false, dueTime: "11:30 AM" },
-    { id: 3, title: "Engine Room Inspection", description: "Check oil levels and temperature gauges", priority: "medium", completed: false, dueTime: "2:00 PM" },
-    { id: 4, title: "Inventory Count", description: "Count and log cleaning supplies", priority: "low", completed: true, dueTime: "Completed" },
-    { id: 5, title: "Guest Cabin Preparation", description: "Prepare cabins for incoming guests", priority: "medium", completed: false, dueTime: "4:00 PM" },
-  ]);
+  const { userName, userId, userRole, setUserRole } = useAuth();
+  const { 
+    getVesselsForUser,
+    getMaintenanceTasksForUser,
+    getSupplyRequestsForUser,
+    updateMaintenanceTask
+  } = useData();
 
   const handleLogout = () => {
     console.log('Logging out');
@@ -34,20 +24,51 @@ export default function CrewDashboard() {
     router.replace('/(tabs)/(home)/');
   };
 
-  const toggleTaskCompletion = (taskId: number) => {
-    setTasks(tasks.map(task => 
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
-    console.log('Task toggled:', taskId);
+  const myVessels = useMemo(() => {
+    if (!userId || !userRole) {
+      return [];
+    }
+    return getVesselsForUser(userId, userRole);
+  }, [userId, userRole, getVesselsForUser]);
+
+  const myTasks = useMemo(() => {
+    if (!userId || !userRole) {
+      return [];
+    }
+    return getMaintenanceTasksForUser(userId, userRole);
+  }, [userId, userRole, getMaintenanceTasksForUser]);
+
+  const mySupplyRequests = useMemo(() => {
+    if (!userId || !userRole) {
+      return [];
+    }
+    return getSupplyRequestsForUser(userId, userRole);
+  }, [userId, userRole, getSupplyRequestsForUser]);
+
+  const toggleTaskCompletion = (taskId: string) => {
+    const task = myTasks.find(t => t.id === taskId);
+    if (task) {
+      const newStatus = task.status === 'completed' ? 'open' : 'completed';
+      updateMaintenanceTask(taskId, { status: newStatus });
+      console.log('Task toggled:', taskId, newStatus);
+    }
   };
 
-  const pendingTasks = tasks.filter(t => !t.completed);
-  const completedTasks = tasks.filter(t => t.completed);
+  const pendingTasks = useMemo(() => {
+    return myTasks.filter(t => t.status !== 'completed');
+  }, [myTasks]);
 
-  const supplyRequests = [
-    { id: 1, item: "Cleaning Supplies", quantity: "5 units", status: "Pending" },
-    { id: 2, item: "Engine Oil", quantity: "20L", status: "Approved" },
-  ];
+  const completedTasks = useMemo(() => {
+    return myTasks.filter(t => t.status === 'completed');
+  }, [myTasks]);
+
+  const formatTime = (date: Date) => {
+    return new Date(date).toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -81,6 +102,24 @@ export default function CrewDashboard() {
           </View>
         </View>
 
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>My Vessels</Text>
+          {myVessels.map((vessel) => (
+            <View key={vessel.id} style={styles.vesselCard}>
+              <IconSymbol 
+                ios_icon_name="sailboat.fill" 
+                android_material_icon_name="sailing" 
+                size={24} 
+                color={colors.accent} 
+              />
+              <View style={styles.vesselInfo}>
+                <Text style={styles.vesselName}>{vessel.name}</Text>
+                <Text style={styles.vesselLocation}>{vessel.location}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>{pendingTasks.length}</Text>
@@ -88,100 +127,120 @@ export default function CrewDashboard() {
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>{completedTasks.length}</Text>
-            <Text style={styles.statLabel}>Completed Today</Text>
+            <Text style={styles.statLabel}>Completed</Text>
           </View>
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Today&apos;s Tasks</Text>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{pendingTasks.length}</Text>
-            </View>
+            <Text style={styles.sectionTitle}>My Tasks</Text>
+            {pendingTasks.length > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{pendingTasks.length}</Text>
+              </View>
+            )}
           </View>
 
-          {tasks.map((task) => (
-            <TouchableOpacity 
-              key={task.id}
-              style={[styles.taskCard, task.completed && styles.taskCardCompleted]}
-              onPress={() => toggleTaskCompletion(task.id)}
-              activeOpacity={0.7}
-            >
-              <View style={styles.taskCheckbox}>
-                {task.completed ? (
-                  <IconSymbol 
-                    ios_icon_name="checkmark.circle.fill" 
-                    android_material_icon_name="check_circle" 
-                    size={28} 
-                    color={colors.success} 
-                  />
-                ) : (
-                  <IconSymbol 
-                    ios_icon_name="circle" 
-                    android_material_icon_name="radio_button_unchecked" 
-                    size={28} 
-                    color={colors.textSecondary} 
-                  />
-                )}
-              </View>
-              <View style={styles.taskContent}>
-                <View style={styles.taskHeader}>
-                  <Text style={[styles.taskTitle, task.completed && styles.taskTitleCompleted]}>
-                    {task.title}
+          {myTasks.length > 0 ? (
+            myTasks.map((task) => (
+              <TouchableOpacity 
+                key={task.id}
+                style={[styles.taskCard, task.status === 'completed' && styles.taskCardCompleted]}
+                onPress={() => toggleTaskCompletion(task.id)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.taskCheckbox}>
+                  {task.status === 'completed' ? (
+                    <IconSymbol 
+                      ios_icon_name="checkmark.circle.fill" 
+                      android_material_icon_name="check_circle" 
+                      size={28} 
+                      color={colors.success} 
+                    />
+                  ) : (
+                    <IconSymbol 
+                      ios_icon_name="circle" 
+                      android_material_icon_name="radio_button_unchecked" 
+                      size={28} 
+                      color={colors.textSecondary} 
+                    />
+                  )}
+                </View>
+                <View style={styles.taskContent}>
+                  <View style={styles.taskHeader}>
+                    <Text style={[styles.taskTitle, task.status === 'completed' && styles.taskTitleCompleted]}>
+                      {task.title}
+                    </Text>
+                    <View style={[
+                      styles.priorityBadge,
+                      task.priority === 'high' || task.priority === 'urgent' ? styles.priorityHigh :
+                      task.priority === 'medium' ? styles.priorityMedium :
+                      styles.priorityLow
+                    ]}>
+                      <Text style={styles.priorityText}>{task.priority.toUpperCase()}</Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.taskDescription, task.status === 'completed' && styles.taskDescriptionCompleted]}>
+                    {task.description}
                   </Text>
-                  <View style={[
-                    styles.priorityBadge,
-                    task.priority === 'high' ? styles.priorityHigh :
-                    task.priority === 'medium' ? styles.priorityMedium :
-                    styles.priorityLow
-                  ]}>
-                    <Text style={styles.priorityText}>{task.priority.toUpperCase()}</Text>
+                  <Text style={styles.taskVessel}>{task.vesselName}</Text>
+                  <View style={styles.taskFooter}>
+                    <IconSymbol 
+                      ios_icon_name="clock" 
+                      android_material_icon_name="schedule" 
+                      size={16} 
+                      color={colors.textSecondary} 
+                    />
+                    <Text style={styles.taskTime}>
+                      {task.status === 'completed' ? 'Completed' : `Due: ${formatTime(task.dueDate)}`}
+                    </Text>
                   </View>
                 </View>
-                <Text style={[styles.taskDescription, task.completed && styles.taskDescriptionCompleted]}>
-                  {task.description}
-                </Text>
-                <View style={styles.taskFooter}>
-                  <IconSymbol 
-                    ios_icon_name="clock" 
-                    android_material_icon_name="schedule" 
-                    size={16} 
-                    color={colors.textSecondary} 
-                  />
-                  <Text style={styles.taskTime}>{task.dueTime}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            ))
+          ) : (
+            <Text style={styles.emptyText}>No tasks assigned</Text>
+          )}
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Supply Requests</Text>
-          {supplyRequests.map((request) => (
-            <View key={request.id} style={styles.supplyCard}>
-              <View style={styles.supplyHeader}>
-                <IconSymbol 
-                  ios_icon_name="shippingbox.fill" 
-                  android_material_icon_name="inventory_2" 
-                  size={24} 
-                  color={colors.accent} 
-                />
-                <View style={styles.supplyInfo}>
-                  <Text style={styles.supplyItem}>{request.item}</Text>
-                  <Text style={styles.supplyQuantity}>{request.quantity}</Text>
+          {mySupplyRequests.length > 0 ? (
+            mySupplyRequests.map((request) => (
+              <View key={request.id} style={styles.supplyCard}>
+                <View style={styles.supplyHeader}>
+                  <IconSymbol 
+                    ios_icon_name="shippingbox.fill" 
+                    android_material_icon_name="inventory_2" 
+                    size={24} 
+                    color={colors.accent} 
+                  />
+                  <View style={styles.supplyInfo}>
+                    <Text style={styles.supplyItem}>{request.itemName}</Text>
+                    <Text style={styles.supplyQuantity}>
+                      {request.quantity} {request.unit} - ${request.estimatedCost}
+                    </Text>
+                    <Text style={styles.supplyVessel}>{request.vesselName}</Text>
+                  </View>
+                </View>
+                <View style={[
+                  styles.supplyStatus,
+                  request.status === 'approved' ? styles.supplyStatusApproved : 
+                  request.status === 'denied' ? styles.supplyStatusDenied :
+                  styles.supplyStatusPending
+                ]}>
+                  <Text style={[
+                    styles.supplyStatusText,
+                    request.status === 'approved' ? styles.supplyStatusTextApproved : 
+                    request.status === 'denied' ? styles.supplyStatusTextDenied :
+                    styles.supplyStatusTextPending
+                  ]}>{request.status.toUpperCase()}</Text>
                 </View>
               </View>
-              <View style={[
-                styles.supplyStatus,
-                request.status === 'Approved' ? styles.supplyStatusApproved : styles.supplyStatusPending
-              ]}>
-                <Text style={[
-                  styles.supplyStatusText,
-                  request.status === 'Approved' ? styles.supplyStatusTextApproved : styles.supplyStatusTextPending
-                ]}>{request.status}</Text>
-              </View>
-            </View>
-          ))}
+            ))
+          ) : (
+            <Text style={styles.emptyText}>No supply requests</Text>
+          )}
         </View>
 
         <View style={styles.quickActions}>
@@ -261,6 +320,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 16,
+  },
+  vesselCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 12,
+  },
+  vesselInfo: {
+    flex: 1,
+  },
+  vesselName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 2,
+  },
+  vesselLocation: {
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
   statsRow: {
     flexDirection: 'row',
     gap: 12,
@@ -286,19 +378,11 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
   },
-  section: {
-    marginBottom: 24,
-  },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
     gap: 12,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
   },
   badge: {
     backgroundColor: colors.warning,
@@ -354,11 +438,17 @@ const styles = StyleSheet.create({
   taskDescription: {
     fontSize: 14,
     color: colors.textSecondary,
-    marginBottom: 8,
+    marginBottom: 4,
     lineHeight: 20,
   },
   taskDescriptionCompleted: {
     textDecorationLine: 'line-through',
+  },
+  taskVessel: {
+    fontSize: 13,
+    color: colors.accent,
+    marginBottom: 8,
+    fontWeight: '500',
   },
   taskFooter: {
     flexDirection: 'row',
@@ -417,6 +507,12 @@ const styles = StyleSheet.create({
   supplyQuantity: {
     fontSize: 14,
     color: colors.textSecondary,
+    marginBottom: 2,
+  },
+  supplyVessel: {
+    fontSize: 13,
+    color: colors.accent,
+    fontWeight: '500',
   },
   supplyStatus: {
     paddingHorizontal: 12,
@@ -429,6 +525,9 @@ const styles = StyleSheet.create({
   supplyStatusPending: {
     backgroundColor: colors.warning + '30',
   },
+  supplyStatusDenied: {
+    backgroundColor: colors.danger + '30',
+  },
   supplyStatusText: {
     fontSize: 12,
     fontWeight: '600',
@@ -438,6 +537,15 @@ const styles = StyleSheet.create({
   },
   supplyStatusTextPending: {
     color: colors.warning,
+  },
+  supplyStatusTextDenied: {
+    color: colors.danger,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    padding: 20,
   },
   quickActions: {
     gap: 12,

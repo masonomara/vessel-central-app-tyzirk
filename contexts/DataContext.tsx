@@ -25,6 +25,15 @@ interface DataContextType {
   notifications: Notification[];
   expenses: Expense[];
   
+  getVesselsForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => Vessel[];
+  getMaintenanceTasksForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => MaintenanceTask[];
+  getIssuesForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => Issue[];
+  getSupplyRequestsForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => SupplyRequest[];
+  getDocumentsForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => Document[];
+  getActivityLogsForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => ActivityLog[];
+  getNotificationsForUser: (userId: string) => Notification[];
+  getExpensesForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => Expense[];
+  
   addMaintenanceTask: (task: Omit<MaintenanceTask, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateMaintenanceTask: (id: string, updates: Partial<MaintenanceTask>) => void;
   deleteMaintenanceTask: (id: string) => void;
@@ -70,6 +79,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       crewCount: 8,
       ownerId: 'owner1',
       managerId: 'manager1',
+      crewIds: ['crew1', 'crew2'],
     },
     {
       id: '2',
@@ -77,8 +87,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
       status: 'maintenance',
       location: 'Port of Miami',
       crewCount: 6,
+      ownerId: 'owner2',
+      managerId: 'manager2',
+      crewIds: ['crew3'],
+    },
+    {
+      id: '3',
+      name: 'Sea Breeze',
+      status: 'active',
+      location: 'Caribbean Marina',
+      crewCount: 5,
       ownerId: 'owner1',
       managerId: 'manager1',
+      crewIds: ['crew1'],
     },
   ]);
 
@@ -112,7 +133,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       description: 'Inspect all life jackets, fire extinguishers, and emergency equipment',
       vesselId: '2',
       vesselName: 'Ocean Pearl',
-      assignedTo: 'crew2',
+      assignedTo: 'crew3',
       assignedToName: 'Jane Smith',
       assignedToType: 'crew',
       status: 'in_progress',
@@ -121,13 +142,33 @@ export function DataProvider({ children }: { children: ReactNode }) {
       isRecurring: true,
       frequency: 'monthly',
       frequencyValue: 1,
-      createdBy: 'manager1',
+      createdBy: 'manager2',
       createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
       updatedAt: new Date(),
       attachments: [],
       completionHistory: [],
       estimatedCost: 500,
       notes: 'Check expiry dates on all equipment',
+    },
+    {
+      id: '3',
+      title: 'Deck Cleaning',
+      description: 'Clean and polish main deck area',
+      vesselId: '1',
+      vesselName: 'Azure Dream',
+      assignedTo: 'crew1',
+      assignedToName: 'Mike Davis',
+      assignedToType: 'crew',
+      status: 'open',
+      priority: 'high',
+      dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
+      isRecurring: false,
+      createdBy: 'manager1',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      attachments: [],
+      completionHistory: [],
+      notes: '',
     },
   ]);
 
@@ -148,6 +189,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
       location: 'Forward Deck',
       createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
       updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+      attachments: [],
+      comments: [],
+    },
+    {
+      id: '2',
+      title: 'Navigation Light Malfunction',
+      description: 'Port side navigation light not working',
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      reportedBy: 'crew3',
+      reportedByName: 'Jane Smith',
+      assignedTo: null,
+      assignedToName: null,
+      status: 'open',
+      priority: 'medium',
+      category: 'Electrical',
+      location: 'Port Side',
+      createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
       attachments: [],
       comments: [],
     },
@@ -195,6 +255,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
       notes: 'For upcoming engine service',
       attachments: [],
     },
+    {
+      id: '3',
+      itemName: 'Safety Equipment',
+      description: 'Life jackets and fire extinguishers',
+      quantity: 10,
+      unit: 'units',
+      estimatedCost: 1500,
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      requestedBy: 'crew3',
+      requestedByName: 'Jane Smith',
+      status: 'pending',
+      priority: 'high',
+      category: 'Safety',
+      createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
+      notes: 'Urgent replacement needed',
+      attachments: [],
+    },
   ]);
 
   const [documents, setDocuments] = useState<Document[]>([
@@ -234,6 +313,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
       tags: ['insurance', 'required'],
       isImportant: true,
     },
+    {
+      id: '3',
+      title: 'Safety Manual',
+      description: 'Vessel safety procedures and protocols',
+      category: 'safety',
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      uploadedBy: 'manager2',
+      uploadedByName: 'Tom Wilson',
+      uploadedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      fileUri: 'file://documents/safety_manual.pdf',
+      fileName: 'safety_manual.pdf',
+      fileSize: 5242880,
+      fileType: 'application/pdf',
+      tags: ['safety', 'manual'],
+      isImportant: true,
+    },
   ]);
 
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([
@@ -265,6 +361,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
       relatedType: 'supply',
       timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
     },
+    {
+      id: '3',
+      type: 'issue',
+      title: 'New Issue Reported',
+      description: 'Navigation Light Malfunction on Ocean Pearl',
+      userId: 'crew3',
+      userName: 'Jane Smith',
+      userRole: 'crew',
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      relatedId: '2',
+      relatedType: 'issue',
+      timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
+    },
   ]);
 
   const [notifications, setNotifications] = useState<Notification[]>([
@@ -288,6 +398,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
       priority: 'medium',
     },
+    {
+      id: '3',
+      type: 'issue',
+      title: 'New Issue Reported',
+      message: 'Navigation Light Malfunction on Ocean Pearl',
+      userId: 'manager2',
+      read: false,
+      createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
+      priority: 'medium',
+    },
+    {
+      id: '4',
+      type: 'supply',
+      title: 'Supply Request Pending',
+      message: 'Safety Equipment request awaiting approval',
+      userId: 'manager2',
+      read: false,
+      createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
+      priority: 'high',
+    },
   ]);
 
   const [expenses, setExpenses] = useState<Expense[]>([
@@ -304,6 +434,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
       paidByName: 'Sarah Johnson',
       approvedBy: 'owner1',
       approvedByName: 'John Smith',
+      status: 'paid',
+      attachments: [],
+    },
+    {
+      id: '2',
+      title: 'Maintenance Supplies',
+      description: 'Various maintenance supplies and tools',
+      amount: 3200,
+      category: 'Maintenance',
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      paidBy: 'manager2',
+      paidByName: 'Tom Wilson',
+      approvedBy: 'owner2',
+      approvedByName: 'Emily Brown',
       status: 'paid',
       attachments: [],
     },
@@ -326,7 +472,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const parsed = JSON.parse(data);
         console.log('Data loaded from storage');
         
-        // Parse dates back to Date objects
+        if (parsed.vessels) {
+          setVessels(parsed.vessels);
+        }
+        
         if (parsed.maintenanceTasks) {
           setMaintenanceTasks(parsed.maintenanceTasks.map((task: MaintenanceTask) => ({
             ...task,
@@ -394,6 +543,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const saveData = async () => {
     try {
       const data = {
+        vessels,
         maintenanceTasks,
         issues,
         supplyRequests,
@@ -411,6 +561,81 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const generateId = () => {
     return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+  };
+
+  // Filtering functions based on user role and vessel access
+  const getVesselsForUser = (userId: string, userRole: 'owner' | 'manager' | 'crew'): Vessel[] => {
+    console.log('Getting vessels for user:', userId, userRole);
+    if (userRole === 'owner') {
+      return vessels.filter(v => v.ownerId === userId);
+    } else if (userRole === 'manager') {
+      return vessels.filter(v => v.managerId === userId);
+    } else if (userRole === 'crew') {
+      return vessels.filter(v => v.crewIds?.includes(userId));
+    }
+    return [];
+  };
+
+  const getMaintenanceTasksForUser = (userId: string, userRole: 'owner' | 'manager' | 'crew'): MaintenanceTask[] => {
+    const userVessels = getVesselsForUser(userId, userRole);
+    const vesselIds = userVessels.map(v => v.id);
+    
+    if (userRole === 'crew') {
+      return maintenanceTasks.filter(t => 
+        vesselIds.includes(t.vesselId) && t.assignedTo === userId
+      );
+    }
+    
+    return maintenanceTasks.filter(t => vesselIds.includes(t.vesselId));
+  };
+
+  const getIssuesForUser = (userId: string, userRole: 'owner' | 'manager' | 'crew'): Issue[] => {
+    const userVessels = getVesselsForUser(userId, userRole);
+    const vesselIds = userVessels.map(v => v.id);
+    
+    if (userRole === 'crew') {
+      return issues.filter(i => 
+        vesselIds.includes(i.vesselId) && 
+        (i.reportedBy === userId || i.assignedTo === userId)
+      );
+    }
+    
+    return issues.filter(i => vesselIds.includes(i.vesselId));
+  };
+
+  const getSupplyRequestsForUser = (userId: string, userRole: 'owner' | 'manager' | 'crew'): SupplyRequest[] => {
+    const userVessels = getVesselsForUser(userId, userRole);
+    const vesselIds = userVessels.map(v => v.id);
+    
+    if (userRole === 'crew') {
+      return supplyRequests.filter(s => 
+        vesselIds.includes(s.vesselId) && s.requestedBy === userId
+      );
+    }
+    
+    return supplyRequests.filter(s => vesselIds.includes(s.vesselId));
+  };
+
+  const getDocumentsForUser = (userId: string, userRole: 'owner' | 'manager' | 'crew'): Document[] => {
+    const userVessels = getVesselsForUser(userId, userRole);
+    const vesselIds = userVessels.map(v => v.id);
+    return documents.filter(d => vesselIds.includes(d.vesselId));
+  };
+
+  const getActivityLogsForUser = (userId: string, userRole: 'owner' | 'manager' | 'crew'): ActivityLog[] => {
+    const userVessels = getVesselsForUser(userId, userRole);
+    const vesselIds = userVessels.map(v => v.id);
+    return activityLogs.filter(a => a.vesselId && vesselIds.includes(a.vesselId));
+  };
+
+  const getNotificationsForUser = (userId: string): Notification[] => {
+    return notifications.filter(n => n.userId === userId);
+  };
+
+  const getExpensesForUser = (userId: string, userRole: 'owner' | 'manager' | 'crew'): Expense[] => {
+    const userVessels = getVesselsForUser(userId, userRole);
+    const vesselIds = userVessels.map(v => v.id);
+    return expenses.filter(e => vesselIds.includes(e.vesselId));
   };
 
   // Maintenance Task functions
@@ -467,7 +692,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       actualCost: record.cost,
     };
 
-    // If recurring, calculate next due date
     if (task.isRecurring && task.frequency && task.frequencyValue) {
       const nextDate = new Date(task.dueDate);
       switch (task.frequency) {
@@ -534,14 +758,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
       relatedType: 'issue',
     });
     
-    // Notify manager
-    addNotification({
-      type: 'issue',
-      title: 'New Issue Reported',
-      message: `${issue.title} on ${issue.vesselName}`,
-      userId: 'manager1',
-      priority: issue.priority === 'high' || issue.priority === 'urgent' ? 'high' : 'medium',
-    });
+    const vessel = vessels.find(v => v.id === issue.vesselId);
+    if (vessel) {
+      addNotification({
+        type: 'issue',
+        title: 'New Issue Reported',
+        message: `${issue.title} on ${issue.vesselName}`,
+        userId: vessel.managerId,
+        priority: issue.priority === 'high' || issue.priority === 'urgent' ? 'high' : 'medium',
+      });
+    }
   };
 
   const updateIssue = (id: string, updates: Partial<Issue>) => {
@@ -591,14 +817,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
       relatedType: 'supply',
     });
     
-    // Notify manager
-    addNotification({
-      type: 'supply',
-      title: 'New Supply Request',
-      message: `${request.itemName} requested for ${request.vesselName}`,
-      userId: 'manager1',
-      priority: request.priority === 'high' || request.priority === 'urgent' ? 'high' : 'medium',
-    });
+    const vessel = vessels.find(v => v.id === request.vesselId);
+    if (vessel) {
+      addNotification({
+        type: 'supply',
+        title: 'New Supply Request',
+        message: `${request.itemName} requested for ${request.vesselName}`,
+        userId: vessel.managerId,
+        priority: request.priority === 'high' || request.priority === 'urgent' ? 'high' : 'medium',
+      });
+    }
   };
 
   const updateSupplyRequest = (id: string, updates: Partial<SupplyRequest>) => {
@@ -630,7 +858,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
         relatedType: 'supply',
       });
       
-      // Notify requester
       addNotification({
         type: 'approval',
         title: 'Supply Request Approved',
@@ -649,7 +876,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
     
     const request = supplyRequests.find(r => r.id === id);
     if (request) {
-      // Notify requester
       addNotification({
         type: 'approval',
         title: 'Supply Request Denied',
@@ -763,6 +989,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
         activityLogs,
         notifications,
         expenses,
+        getVesselsForUser,
+        getMaintenanceTasksForUser,
+        getIssuesForUser,
+        getSupplyRequestsForUser,
+        getDocumentsForUser,
+        getActivityLogsForUser,
+        getNotificationsForUser,
+        getExpensesForUser,
         addMaintenanceTask,
         updateMaintenanceTask,
         deleteMaintenanceTask,

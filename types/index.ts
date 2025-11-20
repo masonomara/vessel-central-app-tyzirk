@@ -27,6 +27,7 @@ export interface Vessel {
   crewCount: number;
   ownerId: string;
   managerId: string;
+  crewIds?: string[];
 }
 
 export interface MaintenanceTask {

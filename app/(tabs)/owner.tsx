@@ -1,15 +1,22 @@
 
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { colors, commonStyles } from "@/styles/commonStyles";
 import { useAuth } from "@/contexts/AuthContext";
+import { useData } from "@/contexts/DataContext";
 import { IconSymbol } from "@/components/IconSymbol";
 import { router } from "expo-router";
 
 export default function OwnerDashboard() {
   const theme = useTheme();
-  const { userName, setUserRole } = useAuth();
+  const { userName, userId, userRole, setUserRole } = useAuth();
+  const { 
+    getVesselsForUser, 
+    getMaintenanceTasksForUser, 
+    getExpensesForUser,
+    getActivityLogsForUser 
+  } = useData();
 
   const handleLogout = () => {
     console.log('Logging out');
@@ -17,20 +24,57 @@ export default function OwnerDashboard() {
     router.replace('/(tabs)/(home)/');
   };
 
-  const vesselData = {
-    name: "Azure Dream",
-    status: "At Marina",
-    location: "Monaco Yacht Club",
-    nextMaintenance: "Engine Service - 15 days",
-    upcomingCharter: "Mediterranean Tour - 22 days",
-    monthlyExpenses: "$45,230",
-  };
+  const myVessels = useMemo(() => {
+    if (!userId || !userRole) {
+      return [];
+    }
+    return getVesselsForUser(userId, userRole);
+  }, [userId, userRole, getVesselsForUser]);
 
-  const recentUpdates = [
-    { id: 1, title: "Maintenance Completed", description: "Hull cleaning and inspection", time: "2 hours ago", type: "success" },
-    { id: 2, title: "Expense Report", description: "Fuel and provisions - $8,450", time: "5 hours ago", type: "warning" },
-    { id: 3, title: "Charter Booking", description: "New booking for July 15-22", time: "1 day ago", type: "info" },
-  ];
+  const myMaintenanceTasks = useMemo(() => {
+    if (!userId || !userRole) {
+      return [];
+    }
+    return getMaintenanceTasksForUser(userId, userRole);
+  }, [userId, userRole, getMaintenanceTasksForUser]);
+
+  const myExpenses = useMemo(() => {
+    if (!userId || !userRole) {
+      return [];
+    }
+    return getExpensesForUser(userId, userRole);
+  }, [userId, userRole, getExpensesForUser]);
+
+  const myActivityLogs = useMemo(() => {
+    if (!userId || !userRole) {
+      return [];
+    }
+    return getActivityLogsForUser(userId, userRole).slice(0, 5);
+  }, [userId, userRole, getActivityLogsForUser]);
+
+  const totalMonthlyExpenses = useMemo(() => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    return myExpenses
+      .filter(exp => {
+        const expDate = new Date(exp.date);
+        return expDate.getMonth() === currentMonth && expDate.getFullYear() === currentYear;
+      })
+      .reduce((sum, exp) => sum + exp.amount, 0);
+  }, [myExpenses]);
+
+  const upcomingMaintenance = useMemo(() => {
+    return myMaintenanceTasks
+      .filter(task => task.status !== 'completed')
+      .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
+  }, [myMaintenanceTasks]);
+
+  const getDaysUntil = (date: Date) => {
+    const now = new Date();
+    const diff = new Date(date).getTime() - now.getTime();
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    return days;
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -64,32 +108,49 @@ export default function OwnerDashboard() {
           </View>
         </View>
 
-        <View style={styles.vesselCard}>
-          <View style={styles.vesselHeader}>
-            <IconSymbol 
-              ios_icon_name="sailboat.fill" 
-              android_material_icon_name="sailing" 
-              size={32} 
-              color={colors.accent} 
-            />
-            <Text style={styles.vesselName}>{vesselData.name}</Text>
-          </View>
-          <View style={styles.statusRow}>
-            <View style={[styles.statusBadge, styles.statusActive]}>
-              <Text style={styles.statusText}>{vesselData.status}</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>My Vessels ({myVessels.length})</Text>
+          {myVessels.map((vessel) => (
+            <View key={vessel.id} style={styles.vesselCard}>
+              <View style={styles.vesselHeader}>
+                <IconSymbol 
+                  ios_icon_name="sailboat.fill" 
+                  android_material_icon_name="sailing" 
+                  size={32} 
+                  color={colors.accent} 
+                />
+                <Text style={styles.vesselName}>{vessel.name}</Text>
+              </View>
+              <View style={styles.statusRow}>
+                <View style={[
+                  styles.statusBadge, 
+                  vessel.status === 'active' ? styles.statusActive : styles.statusMaintenance
+                ]}>
+                  <Text style={styles.statusText}>{vessel.status.toUpperCase()}</Text>
+                </View>
+              </View>
+              <View style={styles.vesselInfo}>
+                <View style={styles.infoRow}>
+                  <IconSymbol 
+                    ios_icon_name="location.fill" 
+                    android_material_icon_name="location_on" 
+                    size={20} 
+                    color={colors.textSecondary} 
+                  />
+                  <Text style={styles.infoText}>{vessel.location}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <IconSymbol 
+                    ios_icon_name="person.2.fill" 
+                    android_material_icon_name="groups" 
+                    size={20} 
+                    color={colors.textSecondary} 
+                  />
+                  <Text style={styles.infoText}>{vessel.crewCount} Crew Members</Text>
+                </View>
+              </View>
             </View>
-          </View>
-          <View style={styles.vesselInfo}>
-            <View style={styles.infoRow}>
-              <IconSymbol 
-                ios_icon_name="location.fill" 
-                android_material_icon_name="location_on" 
-                size={20} 
-                color={colors.textSecondary} 
-              />
-              <Text style={styles.infoText}>{vesselData.location}</Text>
-            </View>
-          </View>
+          ))}
         </View>
 
         <View style={styles.section}>
@@ -104,18 +165,29 @@ export default function OwnerDashboard() {
                 color={colors.warning} 
               />
               <Text style={styles.statLabel}>Next Maintenance</Text>
-              <Text style={styles.statValue}>{vesselData.nextMaintenance}</Text>
+              {upcomingMaintenance ? (
+                <React.Fragment>
+                  <Text style={styles.statValue}>{upcomingMaintenance.title}</Text>
+                  <Text style={styles.statSubtext}>
+                    {getDaysUntil(upcomingMaintenance.dueDate)} days
+                  </Text>
+                </React.Fragment>
+              ) : (
+                <Text style={styles.statValue}>None scheduled</Text>
+              )}
             </View>
 
             <View style={[styles.statCard, styles.statCardSecondary]}>
               <IconSymbol 
-                ios_icon_name="calendar.badge.clock" 
-                android_material_icon_name="event" 
+                ios_icon_name="list.bullet" 
+                android_material_icon_name="list" 
                 size={28} 
                 color={colors.accent} 
               />
-              <Text style={styles.statLabel}>Upcoming Charter</Text>
-              <Text style={styles.statValue}>{vesselData.upcomingCharter}</Text>
+              <Text style={styles.statLabel}>Active Tasks</Text>
+              <Text style={styles.statValue}>
+                {myMaintenanceTasks.filter(t => t.status !== 'completed').length}
+              </Text>
             </View>
           </View>
 
@@ -129,42 +201,50 @@ export default function OwnerDashboard() {
               />
               <Text style={styles.expenseTitle}>Monthly Expenses</Text>
             </View>
-            <Text style={styles.expenseAmount}>{vesselData.monthlyExpenses}</Text>
+            <Text style={styles.expenseAmount}>
+              ${totalMonthlyExpenses.toLocaleString()}
+            </Text>
             <Text style={styles.expenseSubtext}>Current month to date</Text>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Updates</Text>
-          {recentUpdates.map((update) => (
-            <View key={update.id} style={styles.updateCard}>
-              <View style={styles.updateIcon}>
-                <IconSymbol 
-                  ios_icon_name={
-                    update.type === 'success' ? 'checkmark.circle.fill' :
-                    update.type === 'warning' ? 'exclamationmark.circle.fill' :
-                    'info.circle.fill'
-                  }
-                  android_material_icon_name={
-                    update.type === 'success' ? 'check_circle' :
-                    update.type === 'warning' ? 'warning' :
-                    'info'
-                  }
-                  size={24} 
-                  color={
-                    update.type === 'success' ? colors.success :
-                    update.type === 'warning' ? colors.warning :
-                    colors.accent
-                  }
-                />
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          {myActivityLogs.length > 0 ? (
+            myActivityLogs.map((log) => (
+              <View key={log.id} style={styles.updateCard}>
+                <View style={styles.updateIcon}>
+                  <IconSymbol 
+                    ios_icon_name={
+                      log.type === 'maintenance' || log.type === 'task' ? 'checkmark.circle.fill' :
+                      log.type === 'issue' ? 'exclamationmark.circle.fill' :
+                      'info.circle.fill'
+                    }
+                    android_material_icon_name={
+                      log.type === 'maintenance' || log.type === 'task' ? 'check_circle' :
+                      log.type === 'issue' ? 'warning' :
+                      'info'
+                    }
+                    size={24} 
+                    color={
+                      log.type === 'maintenance' || log.type === 'task' ? colors.success :
+                      log.type === 'issue' ? colors.warning :
+                      colors.accent
+                    }
+                  />
+                </View>
+                <View style={styles.updateContent}>
+                  <Text style={styles.updateTitle}>{log.title}</Text>
+                  <Text style={styles.updateDescription}>{log.description}</Text>
+                  <Text style={styles.updateTime}>
+                    {new Date(log.timestamp).toLocaleString()}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.updateContent}>
-                <Text style={styles.updateTitle}>{update.title}</Text>
-                <Text style={styles.updateDescription}>{update.description}</Text>
-                <Text style={styles.updateTime}>{update.time}</Text>
-              </View>
-            </View>
-          ))}
+            ))
+          ) : (
+            <Text style={styles.emptyText}>No recent activity</Text>
+          )}
         </View>
 
         <View style={styles.actionsSection}>
@@ -234,11 +314,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 16,
+  },
   vesselCard: {
     backgroundColor: colors.card,
     borderRadius: 16,
     padding: 20,
-    marginBottom: 24,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -265,6 +354,9 @@ const styles = StyleSheet.create({
   statusActive: {
     backgroundColor: colors.success + '30',
   },
+  statusMaintenance: {
+    backgroundColor: colors.warning + '30',
+  },
   statusText: {
     color: colors.success,
     fontSize: 14,
@@ -281,15 +373,6 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 16,
     color: colors.textSecondary,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 16,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -322,6 +405,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.text,
+  },
+  statSubtext: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
   },
   expenseCard: {
     backgroundColor: colors.card,
@@ -382,6 +470,12 @@ const styles = StyleSheet.create({
   updateTime: {
     fontSize: 12,
     color: colors.grey,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    padding: 20,
   },
   actionsSection: {
     gap: 12,

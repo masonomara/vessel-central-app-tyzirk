@@ -8,6 +8,8 @@ interface AuthContextType {
   setUserRole: (role: UserRole) => void;
   userName: string;
   setUserName: (name: string) => void;
+  userId: string;
+  setUserId: (id: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -15,9 +17,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [userName, setUserName] = useState<string>('');
+  const [userId, setUserId] = useState<string>('');
 
   return (
-    <AuthContext.Provider value={{ userRole, setUserRole, userName, setUserName }}>
+    <AuthContext.Provider value={{ userRole, setUserRole, userName, setUserName, userId, setUserId }}>
       {children}
     </AuthContext.Provider>
   );
