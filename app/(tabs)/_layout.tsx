@@ -3,11 +3,15 @@ import React, { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import FloatingTabBar, { TabBarItem } from '@/components/FloatingTabBar';
 import { useAuth } from '@/contexts/AuthContext';
+import { useData } from '@/contexts/DataContext';
 
 export default function TabLayout() {
   const { userRole } = useAuth();
+  const { notifications } = useData();
   const router = useRouter();
   const segments = useSegments();
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
     console.log('Current role:', userRole);
@@ -41,8 +45,20 @@ export default function TabLayout() {
         {
           name: 'owner',
           route: '/(tabs)/owner',
-          icon: 'star',
+          icon: 'dashboard',
           label: 'Dashboard',
+        },
+        {
+          name: 'maintenance',
+          route: '/(tabs)/maintenance',
+          icon: 'build',
+          label: 'Maintenance',
+        },
+        {
+          name: 'documents',
+          route: '/(tabs)/documents',
+          icon: 'description',
+          label: 'Documents',
         },
         {
           name: 'profile',
@@ -56,8 +72,26 @@ export default function TabLayout() {
         {
           name: 'manager',
           route: '/(tabs)/manager',
-          icon: 'business',
+          icon: 'dashboard',
           label: 'Dashboard',
+        },
+        {
+          name: 'maintenance',
+          route: '/(tabs)/maintenance',
+          icon: 'build',
+          label: 'Maintenance',
+        },
+        {
+          name: 'issues',
+          route: '/(tabs)/issues',
+          icon: 'report_problem',
+          label: 'Issues',
+        },
+        {
+          name: 'supplies',
+          route: '/(tabs)/supplies',
+          icon: 'inventory_2',
+          label: 'Supplies',
         },
         {
           name: 'profile',
@@ -73,6 +107,18 @@ export default function TabLayout() {
           route: '/(tabs)/crew',
           icon: 'list',
           label: 'Tasks',
+        },
+        {
+          name: 'issues',
+          route: '/(tabs)/issues',
+          icon: 'report_problem',
+          label: 'Issues',
+        },
+        {
+          name: 'supplies',
+          route: '/(tabs)/supplies',
+          icon: 'inventory_2',
+          label: 'Supplies',
         },
         {
           name: 'profile',
@@ -108,6 +154,10 @@ export default function TabLayout() {
         <Stack.Screen key="owner" name="owner" />
         <Stack.Screen key="manager" name="manager" />
         <Stack.Screen key="crew" name="crew" />
+        <Stack.Screen key="maintenance" name="maintenance" />
+        <Stack.Screen key="issues" name="issues" />
+        <Stack.Screen key="supplies" name="supplies" />
+        <Stack.Screen key="documents" name="documents" />
         <Stack.Screen key="profile" name="profile" />
       </Stack>
       <FloatingTabBar tabs={tabs} />

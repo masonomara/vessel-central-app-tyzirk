@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from 'react-native';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { DataProvider } from '@/contexts/DataContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -29,15 +30,17 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="formsheet" options={{ presentation: 'formSheet' }} />
-          <Stack.Screen name="transparent-modal" options={{ presentation: 'transparentModal' }} />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <DataProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="formsheet" options={{ presentation: 'formSheet' }} />
+            <Stack.Screen name="transparent-modal" options={{ presentation: 'transparentModal' }} />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </DataProvider>
     </AuthProvider>
   );
 }
