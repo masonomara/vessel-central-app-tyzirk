@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { 
   StyleSheet, 
   View, 
@@ -11,11 +11,13 @@ import {
   Platform
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import { colors, commonStyles, shadows } from "@/styles/commonStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
 import { IconSymbol } from "@/components/IconSymbol";
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type FilterType = 'All' | 'On Charter' | 'In Port' | 'Yard' | 'Issues';
 type VesselStatus = 'active' | 'maintenance' | 'charter' | 'docked';
@@ -38,12 +40,44 @@ const FILTER_CHIPS: FilterType[] = ['All', 'On Charter', 'In Port', 'Yard', 'Iss
 
 export default function HomeScreen() {
   const theme = useTheme();
-  const { setUserRole, setUserName, setUserId } = useAuth();
+  const router = useRouter();
+  const { userRole, setUserRole, setUserName, setUserId } = useAuth();
   const { vessels, issues, maintenanceTasks } = useData();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('All');
   const [scaleAnim] = useState(new Animated.Value(1));
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check authentication on mount
+  useEffect(() => {
+    checkAuthentication();
+  }, []);
+
+  const checkAuthentication = async () => {
+    console.log('Checking authentication...');
+    try {
+      const authToken = await AsyncStorage.getItem('authToken');
+      const userId = await AsyncStorage.getItem('userId');
+      const userRole = await AsyncStorage.getItem('userRole');
+      const userName = await AsyncStorage.getItem('userName');
+      
+      if (!authToken || !userId || !userRole || !userName) {
+        console.log('No authentication found, redirecting to login');
+        router.replace('/login');
+      } else {
+        console.log('User authenticated:', userName, 'Role:', userRole);
+        setUserRole(userRole as 'owner' | 'manager' | 'crew');
+        setUserName(userName);
+        setUserId(userId);
+      }
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+      router.replace('/login');
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  };
 
   // Build user cards with operational data
   const userCards: UserCardData[] = useMemo(() => {
@@ -232,6 +266,38 @@ export default function HomeScreen() {
     // TODO: Show quick details modal
   };
 
+  const handleLogout = async () => {
+    console.log('Logging out...');
+    try {
+      await AsyncStorage.removeItem('authToken');
+      await AsyncStorage.removeItem('userId');
+      await AsyncStorage.removeItem('userRole');
+      await AsyncStorage.removeItem('userName');
+      
+      setUserRole(null);
+      setUserName('');
+      setUserId('');
+      
+      router.replace('/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
+  if (isCheckingAuth) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <IconSymbol 
+          ios_icon_name="sailboat.fill" 
+          android_material_icon_name="sailing" 
+          size={64} 
+          color={colors.gold} 
+        />
+        <Text style={[styles.headerTitle, { marginTop: 16 }]}>Vessel & Co.</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header with gradient */}
@@ -251,6 +317,21 @@ export default function HomeScreen() {
           <Text style={styles.headerTitle}>Vessel & Co.</Text>
           <Text style={styles.headerSubtitle}>Choose Your Vessel or Role</Text>
         </View>
+        
+        {/* Logout Button */}
+        <TouchableOpacity 
+          style={styles.logoutButton}
+          onPress={handleLogout}
+          activeOpacity={0.7}
+        >
+          <IconSymbol 
+            ios_icon_name="rectangle.portrait.and.arrow.right" 
+            android_material_icon_name="logout" 
+            size={20} 
+            color={colors.text} 
+          />
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        </TouchableOpacity>
       </LinearGradient>
 
       <ScrollView 
@@ -422,6 +503,25 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
     color: colors.textSecondary,
+    letterSpacing: 0.2,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: colors.card,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 8,
+  },
+  logoutButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
     letterSpacing: 0.2,
   },
   scrollContent: {
