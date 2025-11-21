@@ -16,7 +16,7 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, shadows } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
-import { useAuth, UserRole } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -26,7 +26,7 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [selectedRole, setSelectedRole] = useState<UserRole>('crew');
+  const [role, setRole] = useState<'owner' | 'manager' | 'crew'>('crew');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,60 +42,55 @@ export default function SignUpScreen() {
   };
 
   const handleSignUp = async () => {
-    console.log('Sign up attempt');
+    console.log('Sign up attempt with email:', email);
     
     setNameError('');
     setEmailError('');
     setPasswordError('');
     setConfirmPasswordError('');
     
-    let hasError = false;
-    
     if (!name.trim()) {
       setNameError('Name is required');
-      hasError = true;
+      return;
     }
     
     if (!email.trim()) {
       setEmailError('Email is required');
-      hasError = true;
-    } else if (!validateEmail(email)) {
+      return;
+    }
+    
+    if (!validateEmail(email)) {
       setEmailError('Please enter a valid email');
-      hasError = true;
+      return;
     }
     
     if (!password.trim()) {
       setPasswordError('Password is required');
-      hasError = true;
-    } else if (password.length < 6) {
-      setPasswordError('Password must be at least 6 characters');
-      hasError = true;
-    }
-    
-    if (!confirmPassword.trim()) {
-      setConfirmPasswordError('Please confirm your password');
-      hasError = true;
-    } else if (password !== confirmPassword) {
-      setConfirmPasswordError('Passwords do not match');
-      hasError = true;
-    }
-    
-    if (hasError) {
       return;
     }
-
+    
+    if (password.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      setConfirmPasswordError('Passwords do not match');
+      return;
+    }
+    
     if (!isSupabaseEnabled) {
       Alert.alert(
-        'Supabase Required',
-        'Please enable Supabase by pressing the Supabase button and connecting to a project to use sign up functionality.',
-        [{ text: 'OK' }]
+        'Demo Mode',
+        'Sign up is not available in demo mode. Please use the quick login options on the login screen.',
+        [{ text: 'OK', onPress: () => router.back() }]
       );
       return;
     }
     
     setIsLoading(true);
     
-    const { error } = await signUp(email, password, { name, role: selectedRole });
+    const { error } = await signUp(email, password, { name, role });
     
     setIsLoading(false);
     
@@ -103,19 +98,15 @@ export default function SignUpScreen() {
       console.error('Sign up error:', error);
       Alert.alert(
         'Sign Up Failed',
-        error.message || 'An error occurred during sign up. Please try again.',
+        error.message || 'Unable to create account. Please try again.',
         [{ text: 'OK' }]
       );
     } else {
+      console.log('Sign up successful');
       Alert.alert(
-        'Success!',
-        'Your account has been created. Please check your email to verify your account.',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.replace('/login'),
-          },
-        ]
+        'Success',
+        'Account created successfully! Please check your email to verify your account.',
+        [{ text: 'OK', onPress: () => router.replace('/login') }]
       );
     }
   };
@@ -181,6 +172,7 @@ export default function SignUpScreen() {
                   setNameError('');
                 }}
                 autoCapitalize="words"
+                autoCorrect={false}
                 editable={!isLoading}
               />
             </View>
@@ -217,37 +209,23 @@ export default function SignUpScreen() {
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Role</Text>
             <View style={styles.roleContainer}>
-              {(['owner', 'manager', 'crew'] as UserRole[]).map((role) => (
+              {(['owner', 'manager', 'crew'] as const).map((r, index) => (
                 <TouchableOpacity
-                  key={role}
+                  key={index}
                   style={[
                     styles.roleButton,
-                    selectedRole === role && styles.roleButtonActive,
+                    role === r && styles.roleButtonActive,
                   ]}
-                  onPress={() => setSelectedRole(role)}
+                  onPress={() => setRole(r)}
                   disabled={isLoading}
                 >
-                  <IconSymbol
-                    ios_icon_name={
-                      role === 'owner' ? 'crown.fill' :
-                      role === 'manager' ? 'chart.bar.fill' :
-                      'person.2.fill'
-                    }
-                    android_material_icon_name={
-                      role === 'owner' ? 'workspace_premium' :
-                      role === 'manager' ? 'dashboard' :
-                      'groups'
-                    }
-                    size={20}
-                    color={selectedRole === role ? colors.text : colors.textSecondary}
-                  />
                   <Text
                     style={[
                       styles.roleButtonText,
-                      selectedRole === role && styles.roleButtonTextActive,
+                      role === r && styles.roleButtonTextActive,
                     ]}
                   >
-                    {role.charAt(0).toUpperCase() + role.slice(1)}
+                    {r.charAt(0).toUpperCase() + r.slice(1)}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -331,7 +309,7 @@ export default function SignUpScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.signupButton, isLoading && styles.signupButtonDisabled]}
+            style={[styles.signUpButton, isLoading && styles.signUpButtonDisabled]}
             onPress={handleSignUp}
             disabled={isLoading}
             activeOpacity={0.8}
@@ -340,20 +318,12 @@ export default function SignUpScreen() {
               colors={[colors.accent, colors.primary]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={styles.signupButtonGradient}
+              style={styles.signUpButtonGradient}
             >
               {isLoading ? (
                 <ActivityIndicator color={colors.text} size="small" />
               ) : (
-                <React.Fragment>
-                  <Text style={styles.signupButtonText}>Create Account</Text>
-                  <IconSymbol
-                    ios_icon_name="arrow.right"
-                    android_material_icon_name="arrow_forward"
-                    size={20}
-                    color={colors.text}
-                  />
-                </React.Fragment>
+                <Text style={styles.signUpButtonText}>Create Account</Text>
               )}
             </LinearGradient>
           </TouchableOpacity>
@@ -387,13 +357,15 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 32,
   },
   backButton: {
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 60 : 50,
+    left: 24,
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.card + '40',
+    backgroundColor: colors.card + '80',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
   },
   logoContainer: {
     alignItems: 'center',
@@ -460,16 +432,13 @@ const styles = StyleSheet.create({
   },
   roleButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.card,
-    borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    gap: 8,
+    alignItems: 'center',
   },
   roleButtonActive: {
     backgroundColor: colors.accent,
@@ -483,24 +452,23 @@ const styles = StyleSheet.create({
   roleButtonTextActive: {
     color: colors.text,
   },
-  signupButton: {
+  signUpButton: {
     borderRadius: 12,
     overflow: 'hidden',
     marginTop: 12,
     ...shadows.medium,
   },
-  signupButtonDisabled: {
+  signUpButtonDisabled: {
     opacity: 0.6,
   },
-  signupButtonGradient: {
+  signUpButtonGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 16,
     paddingHorizontal: 24,
-    gap: 8,
   },
-  signupButtonText: {
+  signUpButtonText: {
     fontSize: 17,
     fontWeight: '700',
     color: colors.text,

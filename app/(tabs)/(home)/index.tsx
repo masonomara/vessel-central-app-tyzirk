@@ -374,24 +374,22 @@ export default function HomeScreen() {
           contentContainerStyle={styles.filterContainer}
         >
           {FILTER_CHIPS.map((filter, index) => (
-            <React.Fragment key={index}>
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.filterChip,
-                  selectedFilter === filter && styles.filterChipActive
-                ]}
-                onPress={() => setSelectedFilter(filter)}
-                activeOpacity={0.7}
-              >
-                <Text style={[
-                  styles.filterChipText,
-                  selectedFilter === filter && styles.filterChipTextActive
-                ]}>
-                  {filter}
-                </Text>
-              </TouchableOpacity>
-            </React.Fragment>
+            <TouchableOpacity
+              key={`filter-${index}`}
+              style={[
+                styles.filterChip,
+                selectedFilter === filter && styles.filterChipActive
+              ]}
+              onPress={() => setSelectedFilter(filter)}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.filterChipText,
+                selectedFilter === filter && styles.filterChipTextActive
+              ]}>
+                {filter}
+              </Text>
+            </TouchableOpacity>
           ))}
         </ScrollView>
 
@@ -412,65 +410,63 @@ export default function HomeScreen() {
             </View>
           ) : (
             filteredCards.map((card, index) => (
-              <React.Fragment key={index}>
-                <TouchableOpacity 
-                  key={index}
-                  style={styles.userCard}
-                  onPress={() => handleRoleSelect(card)}
-                  activeOpacity={0.8}
-                >
-                  {/* Icon Circle */}
-                  <View style={[styles.iconCircle, { backgroundColor: card.color + '15' }]}>
+              <TouchableOpacity 
+                key={`card-${index}`}
+                style={styles.userCard}
+                onPress={() => handleRoleSelect(card)}
+                activeOpacity={0.8}
+              >
+                {/* Icon Circle */}
+                <View style={[styles.iconCircle, { backgroundColor: card.color + '15' }]}>
+                  <IconSymbol 
+                    ios_icon_name={card.icon} 
+                    android_material_icon_name={card.iconAndroid} 
+                    size={28} 
+                    color={card.color} 
+                  />
+                </View>
+
+                {/* Card Content */}
+                <View style={styles.cardContent}>
+                  {/* Primary Title */}
+                  <Text style={styles.cardTitle}>
+                    {card.vessels.length > 0 ? card.vessels[0] : card.name}
+                  </Text>
+                  
+                  {/* Subtitle Line 1: Role */}
+                  <Text style={styles.cardRole}>
+                    {card.role.charAt(0).toUpperCase() + card.role.slice(1)} • {card.name}
+                  </Text>
+                  
+                  {/* Subtitle Line 2: Operational Data */}
+                  <Text style={styles.cardOperational} numberOfLines={1}>
+                    {card.operationalData}
+                  </Text>
+                </View>
+
+                {/* Right Side: Status Pill & Info Icon */}
+                <View style={styles.cardRight}>
+                  <View style={[styles.statusPill, { backgroundColor: card.statusColor + '20' }]}>
+                    <View style={[styles.statusDot, { backgroundColor: card.statusColor }]} />
+                    <Text style={[styles.statusText, { color: card.statusColor }]}>
+                      {card.statusPill}
+                    </Text>
+                  </View>
+                  
+                  <TouchableOpacity 
+                    style={styles.infoButton}
+                    onPress={() => handleInfoPress(card)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
                     <IconSymbol 
-                      ios_icon_name={card.icon} 
-                      android_material_icon_name={card.iconAndroid} 
-                      size={28} 
-                      color={card.color} 
+                      ios_icon_name="info.circle" 
+                      android_material_icon_name="info" 
+                      size={22} 
+                      color={colors.textSecondary} 
                     />
-                  </View>
-
-                  {/* Card Content */}
-                  <View style={styles.cardContent}>
-                    {/* Primary Title */}
-                    <Text style={styles.cardTitle}>
-                      {card.vessels.length > 0 ? card.vessels[0] : card.name}
-                    </Text>
-                    
-                    {/* Subtitle Line 1: Role */}
-                    <Text style={styles.cardRole}>
-                      {card.role.charAt(0).toUpperCase() + card.role.slice(1)} • {card.name}
-                    </Text>
-                    
-                    {/* Subtitle Line 2: Operational Data */}
-                    <Text style={styles.cardOperational} numberOfLines={1}>
-                      {card.operationalData}
-                    </Text>
-                  </View>
-
-                  {/* Right Side: Status Pill & Info Icon */}
-                  <View style={styles.cardRight}>
-                    <View style={[styles.statusPill, { backgroundColor: card.statusColor + '20' }]}>
-                      <View style={[styles.statusDot, { backgroundColor: card.statusColor }]} />
-                      <Text style={[styles.statusText, { color: card.statusColor }]}>
-                        {card.statusPill}
-                      </Text>
-                    </View>
-                    
-                    <TouchableOpacity 
-                      style={styles.infoButton}
-                      onPress={() => handleInfoPress(card)}
-                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                    >
-                      <IconSymbol 
-                        ios_icon_name="info.circle" 
-                        android_material_icon_name="info" 
-                        size={22} 
-                        color={colors.textSecondary} 
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </TouchableOpacity>
-              </React.Fragment>
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
             ))
           )}
         </View>
