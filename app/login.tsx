@@ -17,7 +17,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { colors, shadows } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
 import { useAuth } from '@/contexts/AuthContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface MockUser {
   id: string;
@@ -27,24 +26,19 @@ interface MockUser {
   role: 'owner' | 'manager' | 'crew';
 }
 
-// Mock user database
+// Mock user database for demo mode
 const MOCK_USERS: MockUser[] = [
-  // Owners
   { id: 'owner1', name: 'John Smith', email: 'john@vesselco.com', password: 'owner123', role: 'owner' },
   { id: 'owner2', name: 'Emily Brown', email: 'emily@vesselco.com', password: 'owner123', role: 'owner' },
-  
-  // Managers
   { id: 'manager1', name: 'Sarah Johnson', email: 'sarah@vesselco.com', password: 'manager123', role: 'manager' },
   { id: 'manager2', name: 'Tom Wilson', email: 'tom@vesselco.com', password: 'manager123', role: 'manager' },
-  
-  // Crew
   { id: 'crew1', name: 'Mike Davis', email: 'mike@vesselco.com', password: 'crew123', role: 'crew' },
   { id: 'crew3', name: 'Jane Smith', email: 'jane@vesselco.com', password: 'crew123', role: 'crew' },
 ];
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { setUserRole, setUserName, setUserId } = useAuth();
+  const { signIn, isSupabaseEnabled, setUserRole, setUserName, setUserId } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -61,11 +55,9 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     console.log('Login attempt with email:', email);
     
-    // Reset errors
     setEmailError('');
     setPasswordError('');
     
-    // Validation
     if (!email.trim()) {
       setEmailError('Email is required');
       return;
@@ -88,45 +80,58 @@ export default function LoginScreen() {
     
     setIsLoading(true);
     
-    // Simulate network delay
-    setTimeout(async () => {
-      // Find user in mock database
-      const user = MOCK_USERS.find(
-        u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-      );
+    if (isSupabaseEnabled) {
+      // Use Supabase authentication
+      const { error } = await signIn(email, password);
       
-      if (user) {
-        console.log('Login successful for user:', user.name, 'Role:', user.role);
-        
-        // Store authentication data
-        try {
-          await AsyncStorage.setItem('authToken', `token_${user.id}`);
-          await AsyncStorage.setItem('userId', user.id);
-          await AsyncStorage.setItem('userRole', user.role);
-          await AsyncStorage.setItem('userName', user.name);
-        } catch (error) {
-          console.error('Error storing auth data:', error);
-        }
-        
-        // Update auth context
-        setUserRole(user.role);
-        setUserName(user.name);
-        setUserId(user.id);
-        
-        setIsLoading(false);
-        
-        // Navigate to home screen (role selection will happen there)
-        router.replace('/(tabs)/(home)');
-      } else {
-        console.log('Login failed: Invalid credentials');
-        setIsLoading(false);
+      setIsLoading(false);
+      
+      if (error) {
+        console.error('Supabase login error:', error);
         Alert.alert(
           'Login Failed',
-          'Invalid email or password. Please try again.',
+          error.message || 'Invalid email or password. Please try again.',
           [{ text: 'OK' }]
         );
+      } else {
+        console.log('Supabase login successful');
+        router.replace('/(tabs)/(home)');
       }
-    }, 1000);
+    } else {
+      // Use mock authentication for demo
+      setTimeout(async () => {
+        const user = MOCK_USERS.find(
+          u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+        );
+        
+        if (user) {
+          console.log('Mock login successful for user:', user.name, 'Role:', user.role);
+          
+          setUserRole(user.role);
+          setUserName(user.name);
+          setUserId(user.id);
+          
+          setIsLoading(false);
+          router.replace('/(tabs)/(home)');
+        } else {
+          console.log('Mock login failed: Invalid credentials');
+          setIsLoading(false);
+          Alert.alert(
+            'Login Failed',
+            'Invalid email or password. Please try again.',
+            [{ text: 'OK' }]
+          );
+        }
+      }, 1000);
+    }
+  };
+
+  const handleForgotPassword = () => {
+    router.push('/forgot-password');
+  };
+
+  const handleSignUp = () => {
+    router.push('/signup');
   };
 
   const handleQuickLogin = (role: 'owner' | 'manager' | 'crew') => {
@@ -148,7 +153,6 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Header with Gradient */}
         <LinearGradient
           colors={[colors.primary, colors.secondary]}
           start={{ x: 0, y: 0 }}
@@ -164,15 +168,22 @@ export default function LoginScreen() {
             />
             <Text style={styles.logoText}>Vessel & Co.</Text>
             <Text style={styles.logoSubtext}>Yacht Management Platform</Text>
+            {!isSupabaseEnabled && (
+              <View style={styles.demoModeBadge}>
+                <Text style={styles.demoModeText}>Demo Mode</Text>
+              </View>
+            )}
           </View>
         </LinearGradient>
 
-        {/* Login Form */}
         <View style={styles.formContainer}>
           <Text style={styles.welcomeText}>Welcome Back</Text>
-          <Text style={styles.welcomeSubtext}>Sign in to access your dashboard</Text>
+          <Text style={styles.welcomeSubtext}>
+            {isSupabaseEnabled 
+              ? 'Sign in with your Supabase account' 
+              : 'Sign in to access your dashboard'}
+          </Text>
 
-          {/* Email Input */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Email Address</Text>
             <View style={[styles.inputWrapper, emailError ? styles.inputError : null]}>
@@ -200,7 +211,6 @@ export default function LoginScreen() {
             {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
           </View>
 
-          {/* Password Input */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Password</Text>
             <View style={[styles.inputWrapper, passwordError ? styles.inputError : null]}>
@@ -239,12 +249,10 @@ export default function LoginScreen() {
             {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
           </View>
 
-          {/* Forgot Password Link */}
-          <TouchableOpacity style={styles.forgotPassword}>
+          <TouchableOpacity style={styles.forgotPassword} onPress={handleForgotPassword}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
 
-          {/* Login Button */}
           <TouchableOpacity
             style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
             onPress={handleLogin}
@@ -273,75 +281,83 @@ export default function LoginScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* Divider */}
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>Quick Login (Demo)</Text>
-            <View style={styles.divider} />
-          </View>
-
-          {/* Quick Login Buttons */}
-          <View style={styles.quickLoginContainer}>
-            <TouchableOpacity
-              style={styles.quickLoginButton}
-              onPress={() => handleQuickLogin('owner')}
-              disabled={isLoading}
-            >
-              <View style={[styles.quickLoginIcon, { backgroundColor: colors.gold + '20' }]}>
-                <IconSymbol
-                  ios_icon_name="crown.fill"
-                  android_material_icon_name="workspace_premium"
-                  size={24}
-                  color={colors.gold}
-                />
+          {!isSupabaseEnabled && (
+            <React.Fragment>
+              <View style={styles.dividerContainer}>
+                <View style={styles.divider} />
+                <Text style={styles.dividerText}>Quick Login (Demo)</Text>
+                <View style={styles.divider} />
               </View>
-              <Text style={styles.quickLoginText}>Owner</Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.quickLoginButton}
-              onPress={() => handleQuickLogin('manager')}
-              disabled={isLoading}
-            >
-              <View style={[styles.quickLoginIcon, { backgroundColor: colors.accent + '20' }]}>
-                <IconSymbol
-                  ios_icon_name="chart.bar.fill"
-                  android_material_icon_name="dashboard"
-                  size={24}
-                  color={colors.accent}
-                />
+              <View style={styles.quickLoginContainer}>
+                <TouchableOpacity
+                  style={styles.quickLoginButton}
+                  onPress={() => handleQuickLogin('owner')}
+                  disabled={isLoading}
+                >
+                  <View style={[styles.quickLoginIcon, { backgroundColor: colors.gold + '20' }]}>
+                    <IconSymbol
+                      ios_icon_name="crown.fill"
+                      android_material_icon_name="workspace_premium"
+                      size={24}
+                      color={colors.gold}
+                    />
+                  </View>
+                  <Text style={styles.quickLoginText}>Owner</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.quickLoginButton}
+                  onPress={() => handleQuickLogin('manager')}
+                  disabled={isLoading}
+                >
+                  <View style={[styles.quickLoginIcon, { backgroundColor: colors.accent + '20' }]}>
+                    <IconSymbol
+                      ios_icon_name="chart.bar.fill"
+                      android_material_icon_name="dashboard"
+                      size={24}
+                      color={colors.accent}
+                    />
+                  </View>
+                  <Text style={styles.quickLoginText}>Manager</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.quickLoginButton}
+                  onPress={() => handleQuickLogin('crew')}
+                  disabled={isLoading}
+                >
+                  <View style={[styles.quickLoginIcon, { backgroundColor: colors.success + '20' }]}>
+                    <IconSymbol
+                      ios_icon_name="person.2.fill"
+                      android_material_icon_name="groups"
+                      size={24}
+                      color={colors.success}
+                    />
+                  </View>
+                  <Text style={styles.quickLoginText}>Crew</Text>
+                </TouchableOpacity>
               </View>
-              <Text style={styles.quickLoginText}>Manager</Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.quickLoginButton}
-              onPress={() => handleQuickLogin('crew')}
-              disabled={isLoading}
-            >
-              <View style={[styles.quickLoginIcon, { backgroundColor: colors.success + '20' }]}>
+              <View style={styles.demoInfo}>
                 <IconSymbol
-                  ios_icon_name="person.2.fill"
-                  android_material_icon_name="groups"
-                  size={24}
-                  color={colors.success}
+                  ios_icon_name="info.circle.fill"
+                  android_material_icon_name="info"
+                  size={16}
+                  color={colors.textSecondary}
                 />
+                <Text style={styles.demoInfoText}>
+                  Tap a role above to auto-fill demo credentials
+                </Text>
               </View>
-              <Text style={styles.quickLoginText}>Crew</Text>
-            </TouchableOpacity>
-          </View>
+            </React.Fragment>
+          )}
 
-          {/* Demo Credentials Info */}
-          <View style={styles.demoInfo}>
-            <IconSymbol
-              ios_icon_name="info.circle.fill"
-              android_material_icon_name="info"
-              size={16}
-              color={colors.textSecondary}
-            />
-            <Text style={styles.demoInfoText}>
-              Tap a role above to auto-fill demo credentials
-            </Text>
+          <View style={styles.signupContainer}>
+            <Text style={styles.signupText}>Don&apos;t have an account? </Text>
+            <TouchableOpacity onPress={handleSignUp}>
+              <Text style={styles.signupLink}>Sign Up</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -358,8 +374,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 40,
   },
-  
-  // Header
   headerGradient: {
     paddingTop: Platform.OS === 'android' ? 80 : 60,
     paddingBottom: 40,
@@ -384,8 +398,20 @@ const styles = StyleSheet.create({
     marginTop: 4,
     letterSpacing: 0.5,
   },
-  
-  // Form
+  demoModeBadge: {
+    marginTop: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: colors.warning + '30',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.warning,
+  },
+  demoModeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.warning,
+  },
   formContainer: {
     paddingHorizontal: 24,
     paddingTop: 32,
@@ -403,8 +429,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginBottom: 32,
   },
-  
-  // Input
   inputContainer: {
     marginBottom: 20,
   },
@@ -443,8 +467,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginLeft: 4,
   },
-  
-  // Forgot Password
   forgotPassword: {
     alignSelf: 'flex-end',
     marginBottom: 24,
@@ -454,8 +476,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.accent,
   },
-  
-  // Login Button
   loginButton: {
     borderRadius: 12,
     overflow: 'hidden',
@@ -478,8 +498,6 @@ const styles = StyleSheet.create({
     color: colors.text,
     letterSpacing: 0.3,
   },
-  
-  // Divider
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -497,8 +515,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     letterSpacing: 0.2,
   },
-  
-  // Quick Login
   quickLoginContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -528,8 +544,6 @@ const styles = StyleSheet.create({
     color: colors.text,
     letterSpacing: 0.2,
   },
-  
-  // Demo Info
   demoInfo: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -546,5 +560,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     color: colors.textSecondary,
+  },
+  signupContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  signupText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textSecondary,
+  },
+  signupLink: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.accent,
   },
 });
