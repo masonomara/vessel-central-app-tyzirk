@@ -18,6 +18,16 @@ export default function OwnerDashboard() {
     router.replace('/(tabs)/(home)/');
   };
 
+  const handleViewReports = () => {
+    console.log('View reports pressed');
+    router.push('/(tabs)/documents');
+  };
+
+  const handleApproveRequests = () => {
+    console.log('Approve requests pressed');
+    router.push('/(tabs)/supplies');
+  };
+
   const vesselData = {
     name: "Azure Dream",
     status: "At Marina",
@@ -177,7 +187,10 @@ export default function OwnerDashboard() {
           </View>
 
           <View style={styles.actionsSection}>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={handleViewReports}
+            >
               <IconSymbol 
                 ios_icon_name="doc.text.fill" 
                 android_material_icon_name="description" 
@@ -187,7 +200,10 @@ export default function OwnerDashboard() {
               <Text style={styles.actionButtonText}>View Reports</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={handleApproveRequests}
+            >
               <IconSymbol 
                 ios_icon_name="checkmark.circle.fill" 
                 android_material_icon_name="check_circle" 

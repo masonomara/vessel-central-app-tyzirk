@@ -18,6 +18,19 @@ export default function ManagerDashboard() {
     router.replace('/(tabs)/(home)/');
   };
 
+  const handleViewAllRequests = () => {
+    console.log('Navigating to supplies screen');
+    router.push('/(tabs)/supplies');
+  };
+
+  const handleApprove = (id: number) => {
+    console.log('Approved request:', id);
+  };
+
+  const handleReject = (id: number) => {
+    console.log('Rejected request:', id);
+  };
+
   const vessels = [
     { id: 1, name: "Azure Dream", status: "Active", crew: 8, pendingTasks: 3 },
     { id: 2, name: "Ocean Pearl", status: "Maintenance", crew: 6, pendingTasks: 7 },
@@ -143,7 +156,10 @@ export default function ManagerDashboard() {
                 <Text style={styles.approvalTitle}>{approval.title}</Text>
                 <Text style={styles.approvalVessel}>{approval.vessel}</Text>
                 <View style={styles.approvalActions}>
-                  <TouchableOpacity style={styles.approveButton}>
+                  <TouchableOpacity 
+                    style={styles.approveButton}
+                    onPress={() => handleApprove(approval.id)}
+                  >
                     <IconSymbol 
                       ios_icon_name="checkmark.circle.fill" 
                       android_material_icon_name="check_circle" 
@@ -152,7 +168,10 @@ export default function ManagerDashboard() {
                     />
                     <Text style={styles.approveButtonText}>Approve</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.rejectButton}>
+                  <TouchableOpacity 
+                    style={styles.rejectButton}
+                    onPress={() => handleReject(approval.id)}
+                  >
                     <IconSymbol 
                       ios_icon_name="xmark.circle.fill" 
                       android_material_icon_name="cancel" 
@@ -164,6 +183,20 @@ export default function ManagerDashboard() {
                 </View>
               </View>
             ))}
+            <TouchableOpacity 
+              style={styles.viewAllButton}
+              onPress={handleViewAllRequests}
+            >
+              <Text style={styles.viewAllButtonText}>
+                View All {pendingApprovals.length} Requests
+              </Text>
+              <IconSymbol 
+                ios_icon_name="chevron.right" 
+                android_material_icon_name="chevron_right" 
+                size={20} 
+                color={colors.accent} 
+              />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.section}>
@@ -441,6 +474,23 @@ const styles = StyleSheet.create({
     color: colors.danger,
     fontSize: 14,
     fontWeight: '600',
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 8,
+  },
+  viewAllButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.accent,
   },
   maintenanceCard: {
     backgroundColor: colors.card,
