@@ -15,7 +15,8 @@ export default function OwnerDashboard() {
     getVesselsForUser, 
     getMaintenanceTasksForUser, 
     getExpensesForUser,
-    getActivityLogsForUser 
+    getActivityLogsForUser,
+    getSupplyRequestsForUser
   } = useData();
 
   const handleLogout = () => {
@@ -52,6 +53,17 @@ export default function OwnerDashboard() {
     return getActivityLogsForUser(userId, userRole).slice(0, 5);
   }, [userId, userRole, getActivityLogsForUser]);
 
+  const mySupplyRequests = useMemo(() => {
+    if (!userId || !userRole) {
+      return [];
+    }
+    return getSupplyRequestsForUser(userId, userRole);
+  }, [userId, userRole, getSupplyRequestsForUser]);
+
+  const pendingApprovals = useMemo(() => {
+    return mySupplyRequests.filter(req => req.status === 'pending');
+  }, [mySupplyRequests]);
+
   const totalMonthlyExpenses = useMemo(() => {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
@@ -74,6 +86,16 @@ export default function OwnerDashboard() {
     const diff = new Date(date).getTime() - now.getTime();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
     return days;
+  };
+
+  const handleViewReports = () => {
+    console.log('View reports pressed');
+    router.push('/(tabs)/documents');
+  };
+
+  const handleApproveRequests = () => {
+    console.log('Approve requests pressed');
+    router.push('/(tabs)/supplies');
   };
 
   return (
@@ -206,6 +228,37 @@ export default function OwnerDashboard() {
             </Text>
             <Text style={styles.expenseSubtext}>Current month to date</Text>
           </View>
+
+          {pendingApprovals.length > 0 && (
+            <View style={styles.pendingCard}>
+              <View style={styles.pendingHeader}>
+                <IconSymbol 
+                  ios_icon_name="exclamationmark.circle.fill" 
+                  android_material_icon_name="pending_actions" 
+                  size={28} 
+                  color={colors.warning} 
+                />
+                <View style={styles.pendingInfo}>
+                  <Text style={styles.pendingTitle}>Pending Approvals</Text>
+                  <Text style={styles.pendingSubtext}>
+                    {pendingApprovals.length} request{pendingApprovals.length > 1 ? 's' : ''} awaiting review
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity 
+                style={styles.reviewButton}
+                onPress={handleApproveRequests}
+              >
+                <Text style={styles.reviewButtonText}>Review Requests</Text>
+                <IconSymbol 
+                  ios_icon_name="chevron.right" 
+                  android_material_icon_name="chevron_right" 
+                  size={20} 
+                  color={colors.text} 
+                />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -248,7 +301,10 @@ export default function OwnerDashboard() {
         </View>
 
         <View style={styles.actionsSection}>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={handleViewReports}
+          >
             <IconSymbol 
               ios_icon_name="doc.text.fill" 
               android_material_icon_name="description" 
@@ -258,14 +314,19 @@ export default function OwnerDashboard() {
             <Text style={styles.actionButtonText}>View Reports</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={handleApproveRequests}
+          >
             <IconSymbol 
               ios_icon_name="checkmark.circle.fill" 
               android_material_icon_name="check_circle" 
               size={24} 
               color={colors.text} 
             />
-            <Text style={styles.actionButtonText}>Approve Requests</Text>
+            <Text style={styles.actionButtonText}>
+              Approve Requests {pendingApprovals.length > 0 && `(${pendingApprovals.length})`}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -419,6 +480,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderLeftWidth: 4,
     borderLeftColor: colors.success,
+    marginBottom: 12,
   },
   expenseHeader: {
     flexDirection: 'row',
@@ -440,6 +502,48 @@ const styles = StyleSheet.create({
   expenseSubtext: {
     fontSize: 14,
     color: colors.textSecondary,
+  },
+  pendingCard: {
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.warning,
+  },
+  pendingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  pendingInfo: {
+    flex: 1,
+  },
+  pendingTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  pendingSubtext: {
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  reviewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.warning + '30',
+    borderRadius: 8,
+    padding: 12,
+    gap: 8,
+  },
+  reviewButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.text,
   },
   updateCard: {
     flexDirection: 'row',

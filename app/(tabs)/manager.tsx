@@ -15,7 +15,9 @@ export default function ManagerDashboard() {
     getVesselsForUser, 
     getMaintenanceTasksForUser,
     getSupplyRequestsForUser,
-    getIssuesForUser
+    getIssuesForUser,
+    approveSupplyRequest,
+    denySupplyRequest
   } = useData();
 
   const handleLogout = () => {
@@ -68,6 +70,25 @@ export default function ManagerDashboard() {
     const diff = new Date(date).getTime() - now.getTime();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
     return days;
+  };
+
+  const handleApprove = (id: string) => {
+    if (!userId || !userName) {
+      console.log('User not logged in');
+      return;
+    }
+    approveSupplyRequest(id, userId, userName);
+    console.log('Approved request:', id);
+  };
+
+  const handleReject = (id: string) => {
+    denySupplyRequest(id, 'Rejected by manager');
+    console.log('Rejected request:', id);
+  };
+
+  const handleViewAllRequests = () => {
+    console.log('Navigating to supplies screen');
+    router.push('/(tabs)/supplies');
   };
 
   return (
@@ -176,39 +197,63 @@ export default function ManagerDashboard() {
             )}
           </View>
           {pendingApprovals.length > 0 ? (
-            pendingApprovals.map((approval) => (
-              <View key={approval.id} style={styles.approvalCard}>
-                <View style={styles.approvalHeader}>
-                  <View style={styles.approvalType}>
-                    <Text style={styles.approvalTypeText}>{approval.category}</Text>
+            <React.Fragment>
+              {pendingApprovals.slice(0, 3).map((approval) => (
+                <View key={approval.id} style={styles.approvalCard}>
+                  <View style={styles.approvalHeader}>
+                    <View style={styles.approvalType}>
+                      <Text style={styles.approvalTypeText}>{approval.category}</Text>
+                    </View>
+                    <Text style={styles.approvalAmount}>${approval.estimatedCost}</Text>
                   </View>
-                  <Text style={styles.approvalAmount}>${approval.estimatedCost}</Text>
+                  <Text style={styles.approvalTitle}>{approval.itemName}</Text>
+                  <Text style={styles.approvalVessel}>{approval.vesselName}</Text>
+                  <Text style={styles.approvalDescription}>{approval.description}</Text>
+                  <View style={styles.approvalActions}>
+                    <TouchableOpacity 
+                      style={styles.approveButton}
+                      onPress={() => handleApprove(approval.id)}
+                    >
+                      <IconSymbol 
+                        ios_icon_name="checkmark.circle.fill" 
+                        android_material_icon_name="check_circle" 
+                        size={20} 
+                        color={colors.success} 
+                      />
+                      <Text style={styles.approveButtonText}>Approve</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.rejectButton}
+                      onPress={() => handleReject(approval.id)}
+                    >
+                      <IconSymbol 
+                        ios_icon_name="xmark.circle.fill" 
+                        android_material_icon_name="cancel" 
+                        size={20} 
+                        color={colors.danger} 
+                      />
+                      <Text style={styles.rejectButtonText}>Reject</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-                <Text style={styles.approvalTitle}>{approval.itemName}</Text>
-                <Text style={styles.approvalVessel}>{approval.vesselName}</Text>
-                <Text style={styles.approvalDescription}>{approval.description}</Text>
-                <View style={styles.approvalActions}>
-                  <TouchableOpacity style={styles.approveButton}>
-                    <IconSymbol 
-                      ios_icon_name="checkmark.circle.fill" 
-                      android_material_icon_name="check_circle" 
-                      size={20} 
-                      color={colors.success} 
-                    />
-                    <Text style={styles.approveButtonText}>Approve</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.rejectButton}>
-                    <IconSymbol 
-                      ios_icon_name="xmark.circle.fill" 
-                      android_material_icon_name="cancel" 
-                      size={20} 
-                      color={colors.danger} 
-                    />
-                    <Text style={styles.rejectButtonText}>Reject</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))
+              ))}
+              {pendingApprovals.length > 3 && (
+                <TouchableOpacity 
+                  style={styles.viewAllButton}
+                  onPress={handleViewAllRequests}
+                >
+                  <Text style={styles.viewAllButtonText}>
+                    View All {pendingApprovals.length} Requests
+                  </Text>
+                  <IconSymbol 
+                    ios_icon_name="chevron.right" 
+                    android_material_icon_name="chevron_right" 
+                    size={20} 
+                    color={colors.accent} 
+                  />
+                </TouchableOpacity>
+              )}
+            </React.Fragment>
           ) : (
             <Text style={styles.emptyText}>No pending approvals</Text>
           )}
@@ -254,7 +299,10 @@ export default function ManagerDashboard() {
         </View>
 
         <View style={styles.quickActions}>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => console.log('Add crew pressed')}
+          >
             <IconSymbol 
               ios_icon_name="person.badge.plus.fill" 
               android_material_icon_name="person_add" 
@@ -264,7 +312,10 @@ export default function ManagerDashboard() {
             <Text style={styles.actionButtonText}>Add Crew</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => console.log('Schedule task pressed')}
+          >
             <IconSymbol 
               ios_icon_name="calendar.badge.plus" 
               android_material_icon_name="event_available" 
@@ -274,7 +325,10 @@ export default function ManagerDashboard() {
             <Text style={styles.actionButtonText}>Schedule Task</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => console.log('Generate report pressed')}
+          >
             <IconSymbol 
               ios_icon_name="doc.text.fill" 
               android_material_icon_name="description" 
@@ -500,6 +554,23 @@ const styles = StyleSheet.create({
     color: colors.danger,
     fontSize: 14,
     fontWeight: '600',
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 8,
+  },
+  viewAllButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.accent,
   },
   maintenanceCard: {
     backgroundColor: colors.card,
