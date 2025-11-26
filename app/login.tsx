@@ -17,6 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { colors, shadows } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
 import { useAuth } from '@/contexts/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface MockUser {
   id: string;
@@ -50,6 +51,24 @@ export default function LoginScreen() {
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  };
+
+  const handleMockLogin = async (user: MockUser) => {
+    console.log('Mock login successful for user:', user.name, 'Role:', user.role);
+    
+    // Set auth context
+    setUserRole(user.role);
+    setUserName(user.name);
+    setUserId(user.id);
+    
+    // Store in AsyncStorage
+    await AsyncStorage.setItem('authToken', 'demo-token-' + user.id);
+    await AsyncStorage.setItem('userId', user.id);
+    await AsyncStorage.setItem('userRole', user.role);
+    await AsyncStorage.setItem('userName', user.name);
+    
+    setIsLoading(false);
+    router.replace('/(tabs)/(home)');
   };
 
   const handleLogin = async () => {
@@ -105,14 +124,7 @@ export default function LoginScreen() {
         );
         
         if (user) {
-          console.log('Mock login successful for user:', user.name, 'Role:', user.role);
-          
-          setUserRole(user.role);
-          setUserName(user.name);
-          setUserId(user.id);
-          
-          setIsLoading(false);
-          router.replace('/(tabs)/(home)');
+          await handleMockLogin(user);
         } else {
           console.log('Mock login failed: Invalid credentials');
           setIsLoading(false);
@@ -134,12 +146,15 @@ export default function LoginScreen() {
     router.push('/signup');
   };
 
-  const handleQuickLogin = (role: 'owner' | 'manager' | 'crew') => {
+  const handleQuickLogin = async (role: 'owner' | 'manager' | 'crew') => {
     console.log('Quick login for role:', role);
     const user = MOCK_USERS.find(u => u.role === role);
     if (user) {
-      setEmail(user.email);
-      setPassword(user.password);
+      setIsLoading(true);
+      // Simulate a brief loading state for better UX
+      setTimeout(async () => {
+        await handleMockLogin(user);
+      }, 500);
     }
   };
 
@@ -347,7 +362,7 @@ export default function LoginScreen() {
                   color={colors.textSecondary}
                 />
                 <Text style={styles.demoInfoText}>
-                  Tap a role above to auto-fill demo credentials
+                  Tap a role above to instantly log in as that user
                 </Text>
               </View>
             </React.Fragment>
