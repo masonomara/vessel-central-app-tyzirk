@@ -28,17 +28,25 @@ export default function ProfileScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              console.log("Logging out...");
+              console.log("=== LOGOUT INITIATED ===");
+              
+              // Call signOut and wait for it to complete
               const { error } = await signOut();
               
               if (error) {
                 console.error("Logout error:", error);
                 Alert.alert("Error", "Failed to log out. Please try again.");
-              } else {
-                console.log("Logout successful, redirecting to login...");
-                // Use replace to prevent going back to authenticated screens
-                router.replace("/login");
+                return;
               }
+              
+              console.log("Logout successful, navigating to login...");
+              
+              // Use a small delay to ensure state is cleared
+              setTimeout(() => {
+                console.log("Navigating to login screen...");
+                router.replace("/login");
+              }, 100);
+              
             } catch (err) {
               console.error("Logout exception:", err);
               Alert.alert("Error", "An unexpected error occurred. Please try again.");

@@ -82,7 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (metadata?.name) {
             await AsyncStorage.setItem('userName', metadata.name);
           }
-        } else {
+        } else if (event === 'SIGNED_OUT') {
+          console.log('User signed out, clearing state...');
           setSession(null);
           setUser(null);
           setUserId('');
@@ -214,15 +215,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Sign out
   const signOut = async (): Promise<{ error: AuthError | null }> => {
     try {
+      console.log('SignOut called, isSupabaseEnabled:', isSupabaseEnabled);
+      
       if (!isSupabaseEnabled) {
         // Clear local storage for backward compatibility
+        console.log('Clearing AsyncStorage for mock auth...');
         await AsyncStorage.multiRemove(['authToken', 'userId', 'userRole', 'userName']);
+        
+        // Clear state immediately
         setUserId('');
         setUserName('');
         setUserRole(null);
+        setUser(null);
+        setSession(null);
+        
+        console.log('Mock auth cleared successfully');
         return { error: null };
       }
 
+      console.log('Signing out from Supabase...');
       const { error } = await supabase.auth.signOut();
 
       if (error) {
@@ -230,10 +241,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error };
       }
 
-      console.log('Sign out successful');
+      console.log('Supabase sign out successful');
+      
+      // Manually clear AsyncStorage as a fallback
+      await AsyncStorage.multiRemove(['authToken', 'userId', 'userRole', 'userName']);
+      
+      // Clear state immediately
+      setUserId('');
+      setUserName('');
+      setUserRole(null);
+      setUser(null);
+      setSession(null);
+      
       return { error: null };
     } catch (error: any) {
       console.error('Sign out exception:', error);
+      
+      // Even if there's an error, try to clear local state
+      try {
+        await AsyncStorage.multiRemove(['authToken', 'userId', 'userRole', 'userName']);
+        setUserId('');
+        setUserName('');
+        setUserRole(null);
+        setUser(null);
+        setSession(null);
+      } catch (clearError) {
+        console.error('Error clearing state after sign out exception:', clearError);
+      }
+      
       return { error: error as AuthError };
     }
   };
