@@ -35,9 +35,9 @@ interface AuthContextType {
   refreshSession: () => Promise<{ error: AuthError | null }>;
   
   // Legacy setters for backward compatibility
-  setUserRole: (role: UserRole) => void;
-  setUserName: (name: string) => void;
-  setUserId: (id: string) => void;
+  setUserRole: (role: UserRole) => Promise<void>;
+  setUserName: (name: string) => Promise<void>;
+  setUserId: (id: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,9 +45,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [userRole, setUserRole] = useState<UserRole>(null);
-  const [userName, setUserName] = useState<string>('');
-  const [userId, setUserId] = useState<string>('');
+  const [userRole, setUserRoleState] = useState<UserRole>(null);
+  const [userName, setUserNameState] = useState<string>('');
+  const [userId, setUserIdState] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSupabaseEnabled] = useState<boolean>(isSupabaseConfigured());
 
@@ -64,13 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (currentSession) {
           setSession(currentSession);
           setUser(currentSession.user);
-          setUserId(currentSession.user.id);
+          setUserIdState(currentSession.user.id);
           
           // Extract user metadata
           const metadata = currentSession.user.user_metadata;
           if (metadata) {
-            setUserName(metadata.name || metadata.full_name || '');
-            setUserRole(metadata.role || null);
+            setUserNameState(metadata.name || metadata.full_name || '');
+            setUserRoleState(metadata.role || null);
           }
           
           // Store session info
@@ -86,9 +86,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log('User signed out, clearing state...');
           setSession(null);
           setUser(null);
-          setUserId('');
-          setUserName('');
-          setUserRole(null);
+          setUserIdState('');
+          setUserNameState('');
+          setUserRoleState(null);
           
           // Clear stored data
           await AsyncStorage.multiRemove(['authToken', 'userId', 'userRole', 'userName']);
@@ -113,9 +113,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const storedName = await AsyncStorage.getItem('userName');
         
         if (storedUserId) {
-          setUserId(storedUserId);
-          setUserRole(storedRole as UserRole);
-          setUserName(storedName || '');
+          setUserIdState(storedUserId);
+          setUserRoleState(storedRole as UserRole);
+          setUserNameState(storedName || '');
         }
         setIsLoading(false);
         return;
@@ -133,12 +133,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (currentSession) {
         setSession(currentSession);
         setUser(currentSession.user);
-        setUserId(currentSession.user.id);
+        setUserIdState(currentSession.user.id);
         
         const metadata = currentSession.user.user_metadata;
         if (metadata) {
-          setUserName(metadata.name || metadata.full_name || '');
-          setUserRole(metadata.role || null);
+          setUserNameState(metadata.name || metadata.full_name || '');
+          setUserRoleState(metadata.role || null);
         }
       }
       
@@ -223,9 +223,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await AsyncStorage.multiRemove(['authToken', 'userId', 'userRole', 'userName']);
         
         // Clear state immediately
-        setUserId('');
-        setUserName('');
-        setUserRole(null);
+        setUserIdState('');
+        setUserNameState('');
+        setUserRoleState(null);
         setUser(null);
         setSession(null);
         
@@ -247,9 +247,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await AsyncStorage.multiRemove(['authToken', 'userId', 'userRole', 'userName']);
       
       // Clear state immediately
-      setUserId('');
-      setUserName('');
-      setUserRole(null);
+      setUserIdState('');
+      setUserNameState('');
+      setUserRoleState(null);
       setUser(null);
       setSession(null);
       
@@ -260,9 +260,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Even if there's an error, try to clear local state
       try {
         await AsyncStorage.multiRemove(['authToken', 'userId', 'userRole', 'userName']);
-        setUserId('');
-        setUserName('');
-        setUserRole(null);
+        setUserIdState('');
+        setUserNameState('');
+        setUserRoleState(null);
         setUser(null);
         setSession(null);
       } catch (clearError) {
@@ -464,12 +464,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Setter functions that update both state and AsyncStorage
+  const setUserRole = async (role: UserRole) => {
+    console.log('Setting user role:', role);
+    setUserRoleState(role);
+    if (role) {
+      await AsyncStorage.setItem('userRole', role);
+    } else {
+      await AsyncStorage.removeItem('userRole');
+    }
+  };
+
+  const setUserName = async (name: string) => {
+    console.log('Setting user name:', name);
+    setUserNameState(name);
+    if (name) {
+      await AsyncStorage.setItem('userName', name);
+    } else {
+      await AsyncStorage.removeItem('userName');
+    }
+  };
+
+  const setUserId = async (id: string) => {
+    console.log('Setting user ID:', id);
+    setUserIdState(id);
+    if (id) {
+      await AsyncStorage.setItem('userId', id);
+    } else {
+      await AsyncStorage.removeItem('userId');
+    }
+  };
+
   const value: AuthContextType = {
     user,
     session,
-    userRole,
-    userName,
-    userId,
+    userRole: userRoleState,
+    userName: userNameState,
+    userId: userIdState,
     isLoading,
     isSupabaseEnabled,
     signUp,
