@@ -14,7 +14,7 @@ export default function ProfileScreen() {
   const { signOut, user, userName, userRole } = useAuth();
   const router = useRouter();
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     Alert.alert(
       "Log Out",
       "Are you sure you want to log out?",
@@ -27,14 +27,21 @@ export default function ProfileScreen() {
           text: "Log Out",
           style: "destructive",
           onPress: async () => {
-            console.log("Logging out...");
-            const { error } = await signOut();
-            if (error) {
-              console.error("Logout error:", error);
-              Alert.alert("Error", "Failed to log out. Please try again.");
-            } else {
-              console.log("Logout successful, redirecting to login...");
-              router.replace("/login");
+            try {
+              console.log("Logging out...");
+              const { error } = await signOut();
+              
+              if (error) {
+                console.error("Logout error:", error);
+                Alert.alert("Error", "Failed to log out. Please try again.");
+              } else {
+                console.log("Logout successful, redirecting to login...");
+                // Use replace to prevent going back to authenticated screens
+                router.replace("/login");
+              }
+            } catch (err) {
+              console.error("Logout exception:", err);
+              Alert.alert("Error", "An unexpected error occurred. Please try again.");
             }
           }
         }
