@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@react-navigation/native';
 import { colors } from '@/styles/commonStyles';
 import { useData } from '@/contexts/DataContext';
@@ -10,6 +11,7 @@ import { SupplyRequest, SupplyRequestStatus } from '@/types';
 import { formatDate } from '@/utils/dateUtils';
 
 export default function SuppliesScreen() {
+  const router = useRouter();
   const theme = useTheme();
   const { supplyRequests, approveSupplyRequest, denySupplyRequest } = useData();
   const { userRole } = useAuth();
@@ -51,7 +53,7 @@ export default function SuppliesScreen() {
 
   const handleAddRequest = () => {
     console.log('Add request pressed');
-    // Navigate to add request screen
+    router.push('/add-supply-request');
   };
 
   return (

@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@react-navigation/native';
 import { colors } from '@/styles/commonStyles';
 import { useData } from '@/contexts/DataContext';
@@ -11,6 +12,7 @@ import { formatDate, formatDueDate, isOverdue } from '@/utils/dateUtils';
 import { formatFileSize } from '@/utils/fileUtils';
 
 export default function DocumentsScreen() {
+  const router = useRouter();
   const theme = useTheme();
   const { documents } = useData();
   const { userRole } = useAuth();
@@ -45,7 +47,7 @@ export default function DocumentsScreen() {
 
   const handleAddDocument = () => {
     console.log('Add document pressed');
-    // Navigate to add document screen
+    router.push('/add-document');
   };
 
   return (

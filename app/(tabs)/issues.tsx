@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@react-navigation/native';
 import { colors } from '@/styles/commonStyles';
 import { useData } from '@/contexts/DataContext';
@@ -10,6 +11,7 @@ import { Issue, TaskStatus, TaskPriority } from '@/types';
 import { formatDate } from '@/utils/dateUtils';
 
 export default function IssuesScreen() {
+  const router = useRouter();
   const theme = useTheme();
   const { issues } = useData();
   const { userRole } = useAuth();
@@ -50,7 +52,7 @@ export default function IssuesScreen() {
 
   const handleAddIssue = () => {
     console.log('Add issue pressed');
-    // Navigate to add issue screen
+    router.push('/add-issue');
   };
 
   return (
