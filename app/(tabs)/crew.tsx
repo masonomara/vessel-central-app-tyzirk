@@ -279,7 +279,10 @@ export default function CrewDashboard() {
         </View>
 
         <View style={styles.quickActions}>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => router.push('/add-issue')}
+          >
             <IconSymbol 
               ios_icon_name="exclamationmark.triangle.fill" 
               android_material_icon_name="report_problem" 
@@ -289,7 +292,23 @@ export default function CrewDashboard() {
             <Text style={styles.actionButtonText}>Report Issue</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => router.push('/add-parts-request')}
+          >
+            <IconSymbol 
+              ios_icon_name="wrench.and.screwdriver.fill" 
+              android_material_icon_name="build" 
+              size={24} 
+              color={colors.text} 
+            />
+            <Text style={styles.actionButtonText}>Request Parts</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => router.push('/add-supply-request')}
+          >
             <IconSymbol 
               ios_icon_name="plus.circle.fill" 
               android_material_icon_name="add_circle" 
@@ -297,16 +316,6 @@ export default function CrewDashboard() {
               color={colors.text} 
             />
             <Text style={styles.actionButtonText}>Request Supplies</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton}>
-            <IconSymbol 
-              ios_icon_name="camera.fill" 
-              android_material_icon_name="photo_camera" 
-              size={24} 
-              color={colors.text} 
-            />
-            <Text style={styles.actionButtonText}>Upload Photo</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
