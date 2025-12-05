@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { colors } from '@/styles/commonStyles';
 import { useData } from '@/contexts/DataContext';
@@ -11,6 +11,8 @@ import FilterModal, { FilterOptions } from '@/components/FilterModal';
 import { MaintenanceTask, TaskStatus, TaskPriority } from '@/types';
 import { formatDueDate, isOverdue } from '@/utils/dateUtils';
 import { router } from 'expo-router';
+
+const ITEMS_PER_PAGE = 10;
 
 const MaintenanceTaskItem = React.memo(({ 
   task, 
@@ -153,6 +155,8 @@ export default function MaintenanceScreen() {
     priority: 'all',
     dateRange: 'all',
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const filteredTasks = useMemo(() => {
     return maintenanceTasks.filter(task => {
@@ -180,6 +184,14 @@ export default function MaintenanceScreen() {
       return matchesStatus && matchesPriority && matchesSearch && matchesDate;
     });
   }, [maintenanceTasks, filters, searchQuery]);
+
+  const paginatedTasks = useMemo(() => {
+    return filteredTasks.slice(0, currentPage * ITEMS_PER_PAGE);
+  }, [filteredTasks, currentPage]);
+
+  const hasMore = useMemo(() => {
+    return paginatedTasks.length < filteredTasks.length;
+  }, [paginatedTasks.length, filteredTasks.length]);
 
   const stats = useMemo(() => ({
     total: filteredTasks.length,
@@ -212,6 +224,25 @@ export default function MaintenanceScreen() {
 
   const handleApplyFilters = useCallback((newFilters: FilterOptions) => {
     setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, []);
+
+  const handleLoadMore = useCallback(() => {
+    if (!isLoadingMore && hasMore) {
+      console.log('Loading more tasks...');
+      setIsLoadingMore(true);
+      
+      // Simulate loading delay for smooth UX
+      setTimeout(() => {
+        setCurrentPage(prev => prev + 1);
+        setIsLoadingMore(false);
+      }, 300);
+    }
+  }, [isLoadingMore, hasMore]);
+
+  const handleSearchChange = useCallback((text: string) => {
+    setSearchQuery(text);
+    setCurrentPage(1); // Reset to first page when search changes
   }, []);
 
   const renderItem = useCallback(({ item }: { item: MaintenanceTask }) => (
@@ -236,7 +267,7 @@ export default function MaintenanceScreen() {
           placeholder="Search tasks..."
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
-          onChangeText={setSearchQuery}
+          onChangeText={handleSearchChange}
         />
         <TouchableOpacity onPress={() => setShowFilters(true)} style={styles.filterButton}>
           <IconSymbol 
@@ -272,7 +303,44 @@ export default function MaintenanceScreen() {
         </View>
       </View>
     </>
-  ), [searchQuery, activeFilterCount, stats]);
+  ), [searchQuery, activeFilterCount, stats, handleSearchChange]);
+
+  const ListFooterComponent = useCallback(() => {
+    if (paginatedTasks.length === 0) {
+      return null;
+    }
+
+    if (isLoadingMore) {
+      return (
+        <View style={styles.loadingMore}>
+          <ActivityIndicator size="small" color={colors.accent} />
+          <Text style={styles.loadingMoreText}>Loading more tasks...</Text>
+        </View>
+      );
+    }
+
+    if (hasMore) {
+      return (
+        <TouchableOpacity style={styles.loadMoreButton} onPress={handleLoadMore}>
+          <Text style={styles.loadMoreText}>Load More</Text>
+          <IconSymbol 
+            ios_icon_name="chevron.down" 
+            android_material_icon_name="expand_more" 
+            size={20} 
+            color={colors.accent} 
+          />
+        </TouchableOpacity>
+      );
+    }
+
+    return (
+      <View style={styles.endOfList}>
+        <Text style={styles.endOfListText}>
+          Showing all {paginatedTasks.length} task{paginatedTasks.length !== 1 ? 's' : ''}
+        </Text>
+      </View>
+    );
+  }, [paginatedTasks.length, isLoadingMore, hasMore, handleLoadMore]);
 
   const ListEmptyComponent = useCallback(() => (
     <View style={styles.emptyState}>
@@ -318,10 +386,11 @@ export default function MaintenanceScreen() {
       </View>
 
       <FlatList
-        data={filteredTasks}
+        data={paginatedTasks}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         ListHeaderComponent={ListHeaderComponent}
+        ListFooterComponent={ListFooterComponent}
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
@@ -559,5 +628,43 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.accent,
+  },
+  loadMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    paddingVertical: 16,
+    marginTop: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 8,
+  },
+  loadMoreText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.accent,
+  },
+  loadingMore: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    gap: 12,
+  },
+  loadingMoreText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  endOfList: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  endOfListText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
   },
 });

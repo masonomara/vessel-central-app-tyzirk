@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useMemo, useCallback } from 'react';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@react-navigation/native';
 import { colors } from '@/styles/commonStyles';
@@ -11,6 +11,8 @@ import { Document, DocumentCategory } from '@/types';
 import { formatDate, formatDueDate, isOverdue } from '@/utils/dateUtils';
 import { formatFileSize } from '@/utils/fileUtils';
 
+const ITEMS_PER_PAGE = 10;
+
 export default function DocumentsScreen() {
   const router = useRouter();
   const theme = useTheme();
@@ -18,14 +20,26 @@ export default function DocumentsScreen() {
   const { userRole } = useAuth();
   const [filterCategory, setFilterCategory] = useState<DocumentCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const filteredDocuments = documents.filter(doc => {
-    const matchesCategory = filterCategory === 'all' || doc.category === filterCategory;
-    const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         doc.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         doc.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesCategory && matchesSearch;
-  });
+  const filteredDocuments = useMemo(() => {
+    return documents.filter(doc => {
+      const matchesCategory = filterCategory === 'all' || doc.category === filterCategory;
+      const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           doc.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           doc.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesCategory && matchesSearch;
+    });
+  }, [documents, filterCategory, searchQuery]);
+
+  const paginatedDocuments = useMemo(() => {
+    return filteredDocuments.slice(0, currentPage * ITEMS_PER_PAGE);
+  }, [filteredDocuments, currentPage]);
+
+  const hasMore = useMemo(() => {
+    return paginatedDocuments.length < filteredDocuments.length;
+  }, [paginatedDocuments.length, filteredDocuments.length]);
 
   const getCategoryIcon = (category: DocumentCategory) => {
     switch (category) {
@@ -40,15 +54,38 @@ export default function DocumentsScreen() {
     }
   };
 
-  const handleDocumentPress = (doc: Document) => {
+  const handleDocumentPress = useCallback((doc: Document) => {
     console.log('Document pressed:', doc.id);
     // Open document viewer
-  };
+  }, []);
 
-  const handleAddDocument = () => {
+  const handleAddDocument = useCallback(() => {
     console.log('Add document pressed');
     router.push('/add-document');
-  };
+  }, []);
+
+  const handleLoadMore = useCallback(() => {
+    if (!isLoadingMore && hasMore) {
+      console.log('Loading more documents...');
+      setIsLoadingMore(true);
+      
+      // Simulate loading delay for smooth UX
+      setTimeout(() => {
+        setCurrentPage(prev => prev + 1);
+        setIsLoadingMore(false);
+      }, 300);
+    }
+  }, [isLoadingMore, hasMore]);
+
+  const handleSearchChange = useCallback((text: string) => {
+    setSearchQuery(text);
+    setCurrentPage(1); // Reset to first page when search changes
+  }, []);
+
+  const handleFilterChange = useCallback((category: DocumentCategory | 'all') => {
+    setFilterCategory(category);
+    setCurrentPage(1); // Reset to first page when filter changes
+  }, []);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -78,7 +115,7 @@ export default function DocumentsScreen() {
           placeholder="Search documents..."
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
-          onChangeText={setSearchQuery}
+          onChangeText={handleSearchChange}
         />
       </View>
 
@@ -95,7 +132,7 @@ export default function DocumentsScreen() {
               styles.filterChip,
               filterCategory === category && styles.filterChipActive,
             ]}
-            onPress={() => setFilterCategory(category as DocumentCategory | 'all')}
+            onPress={() => handleFilterChange(category as DocumentCategory | 'all')}
           >
             <Text style={[
               styles.filterChipText,
@@ -111,7 +148,7 @@ export default function DocumentsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {filteredDocuments.length === 0 ? (
+        {paginatedDocuments.length === 0 ? (
           <View style={styles.emptyState}>
             <IconSymbol 
               ios_icon_name="doc.text" 
@@ -122,105 +159,134 @@ export default function DocumentsScreen() {
             <Text style={styles.emptyStateText}>No documents found</Text>
           </View>
         ) : (
-          filteredDocuments.map((doc) => (
-            <TouchableOpacity
-              key={doc.id}
-              style={[
-                styles.documentCard,
-                doc.isImportant && styles.documentCardImportant,
-                doc.expiryDate && isOverdue(doc.expiryDate) && styles.documentCardExpired,
-              ]}
-              onPress={() => handleDocumentPress(doc)}
-              activeOpacity={0.7}
-            >
-              <View style={styles.documentHeader}>
-                <View style={styles.documentIconContainer}>
-                  <IconSymbol 
-                    ios_icon_name="doc.fill" 
-                    android_material_icon_name={getCategoryIcon(doc.category)} 
-                    size={32} 
-                    color={colors.accent} 
-                  />
-                </View>
-                <View style={styles.documentInfo}>
-                  <View style={styles.documentTitleRow}>
-                    <Text style={styles.documentTitle}>{doc.title}</Text>
-                    {doc.isImportant && (
-                      <IconSymbol 
-                        ios_icon_name="star.fill" 
-                        android_material_icon_name="star" 
-                        size={16} 
-                        color={colors.gold} 
-                      />
-                    )}
+          <>
+            {paginatedDocuments.map((doc) => (
+              <TouchableOpacity
+                key={doc.id}
+                style={[
+                  styles.documentCard,
+                  doc.isImportant && styles.documentCardImportant,
+                  doc.expiryDate && isOverdue(doc.expiryDate) && styles.documentCardExpired,
+                ]}
+                onPress={() => handleDocumentPress(doc)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.documentHeader}>
+                  <View style={styles.documentIconContainer}>
+                    <IconSymbol 
+                      ios_icon_name="doc.fill" 
+                      android_material_icon_name={getCategoryIcon(doc.category)} 
+                      size={32} 
+                      color={colors.accent} 
+                    />
                   </View>
-                  <Text style={styles.documentDescription} numberOfLines={1}>
-                    {doc.description}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.documentMeta}>
-                <View style={styles.metaItem}>
-                  <IconSymbol 
-                    ios_icon_name="sailboat.fill" 
-                    android_material_icon_name="sailing" 
-                    size={16} 
-                    color={colors.textSecondary} 
-                  />
-                  <Text style={styles.metaText}>{doc.vesselName}</Text>
-                </View>
-                <View style={styles.metaItem}>
-                  <IconSymbol 
-                    ios_icon_name="doc.text" 
-                    android_material_icon_name="insert_drive_file" 
-                    size={16} 
-                    color={colors.textSecondary} 
-                  />
-                  <Text style={styles.metaText}>{formatFileSize(doc.fileSize)}</Text>
-                </View>
-              </View>
-
-              {doc.expiryDate && (
-                <View style={[
-                  styles.expiryContainer,
-                  isOverdue(doc.expiryDate) && styles.expiryContainerExpired,
-                ]}>
-                  <IconSymbol 
-                    ios_icon_name="calendar" 
-                    android_material_icon_name="event" 
-                    size={16} 
-                    color={isOverdue(doc.expiryDate) ? colors.danger : colors.textSecondary} 
-                  />
-                  <Text style={[
-                    styles.expiryText,
-                    isOverdue(doc.expiryDate) && styles.expiryTextExpired,
-                  ]}>
-                    {isOverdue(doc.expiryDate) ? 'Expired' : 'Expires'}: {formatDueDate(doc.expiryDate)}
-                  </Text>
-                </View>
-              )}
-
-              {doc.tags.length > 0 && (
-                <View style={styles.tagsContainer}>
-                  {doc.tags.map((tag, index) => (
-                    <View key={index} style={styles.tag}>
-                      <Text style={styles.tagText}>{tag}</Text>
+                  <View style={styles.documentInfo}>
+                    <View style={styles.documentTitleRow}>
+                      <Text style={styles.documentTitle}>{doc.title}</Text>
+                      {doc.isImportant && (
+                        <IconSymbol 
+                          ios_icon_name="star.fill" 
+                          android_material_icon_name="star" 
+                          size={16} 
+                          color={colors.gold} 
+                        />
+                      )}
                     </View>
-                  ))}
+                    <Text style={styles.documentDescription} numberOfLines={1}>
+                      {doc.description}
+                    </Text>
+                  </View>
                 </View>
-              )}
 
-              <View style={styles.documentFooter}>
-                <View style={styles.categoryBadge}>
-                  <Text style={styles.categoryText}>{doc.category.toUpperCase()}</Text>
+                <View style={styles.documentMeta}>
+                  <View style={styles.metaItem}>
+                    <IconSymbol 
+                      ios_icon_name="sailboat.fill" 
+                      android_material_icon_name="sailing" 
+                      size={16} 
+                      color={colors.textSecondary} 
+                    />
+                    <Text style={styles.metaText}>{doc.vesselName}</Text>
+                  </View>
+                  <View style={styles.metaItem}>
+                    <IconSymbol 
+                      ios_icon_name="doc.text" 
+                      android_material_icon_name="insert_drive_file" 
+                      size={16} 
+                      color={colors.textSecondary} 
+                    />
+                    <Text style={styles.metaText}>{formatFileSize(doc.fileSize)}</Text>
+                  </View>
                 </View>
-                <Text style={styles.uploadedText}>
-                  Uploaded {formatDate(doc.uploadedAt)}
+
+                {doc.expiryDate && (
+                  <View style={[
+                    styles.expiryContainer,
+                    isOverdue(doc.expiryDate) && styles.expiryContainerExpired,
+                  ]}>
+                    <IconSymbol 
+                      ios_icon_name="calendar" 
+                      android_material_icon_name="event" 
+                      size={16} 
+                      color={isOverdue(doc.expiryDate) ? colors.danger : colors.textSecondary} 
+                    />
+                    <Text style={[
+                      styles.expiryText,
+                      isOverdue(doc.expiryDate) && styles.expiryTextExpired,
+                    ]}>
+                      {isOverdue(doc.expiryDate) ? 'Expired' : 'Expires'}: {formatDueDate(doc.expiryDate)}
+                    </Text>
+                  </View>
+                )}
+
+                {doc.tags.length > 0 && (
+                  <View style={styles.tagsContainer}>
+                    {doc.tags.map((tag, index) => (
+                      <View key={index} style={styles.tag}>
+                        <Text style={styles.tagText}>{tag}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                <View style={styles.documentFooter}>
+                  <View style={styles.categoryBadge}>
+                    <Text style={styles.categoryText}>{doc.category.toUpperCase()}</Text>
+                  </View>
+                  <Text style={styles.uploadedText}>
+                    Uploaded {formatDate(doc.uploadedAt)}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+
+            {isLoadingMore && (
+              <View style={styles.loadingMore}>
+                <ActivityIndicator size="small" color={colors.accent} />
+                <Text style={styles.loadingMoreText}>Loading more documents...</Text>
+              </View>
+            )}
+
+            {!isLoadingMore && hasMore && (
+              <TouchableOpacity style={styles.loadMoreButton} onPress={handleLoadMore}>
+                <Text style={styles.loadMoreText}>Load More</Text>
+                <IconSymbol 
+                  ios_icon_name="chevron.down" 
+                  android_material_icon_name="expand_more" 
+                  size={20} 
+                  color={colors.accent} 
+                />
+              </TouchableOpacity>
+            )}
+
+            {!hasMore && paginatedDocuments.length > 0 && (
+              <View style={styles.endOfList}>
+                <Text style={styles.endOfListText}>
+                  Showing all {paginatedDocuments.length} document{paginatedDocuments.length !== 1 ? 's' : ''}
                 </Text>
               </View>
-            </TouchableOpacity>
-          ))
+            )}
+          </>
         )}
       </ScrollView>
     </View>
@@ -423,5 +489,43 @@ const styles = StyleSheet.create({
   uploadedText: {
     fontSize: 12,
     color: colors.grey,
+  },
+  loadMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    paddingVertical: 16,
+    marginTop: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 8,
+  },
+  loadMoreText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.accent,
+  },
+  loadingMore: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    gap: 12,
+  },
+  loadingMoreText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  endOfList: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  endOfListText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
   },
 });

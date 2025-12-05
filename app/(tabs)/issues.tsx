@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@react-navigation/native';
 import { colors } from '@/styles/commonStyles';
@@ -9,6 +9,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { IconSymbol } from '@/components/IconSymbol';
 import { Issue, TaskStatus, TaskPriority } from '@/types';
 import { formatDate } from '@/utils/dateUtils';
+
+const ITEMS_PER_PAGE = 10;
 
 const IssueItem = React.memo(({ 
   issue, 
@@ -156,6 +158,8 @@ export default function IssuesScreen() {
   const { userRole } = useAuth();
   const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const filteredIssues = useMemo(() => {
     return issues.filter(issue => {
@@ -166,6 +170,14 @@ export default function IssuesScreen() {
     });
   }, [issues, filterStatus, searchQuery]);
 
+  const paginatedIssues = useMemo(() => {
+    return filteredIssues.slice(0, currentPage * ITEMS_PER_PAGE);
+  }, [filteredIssues, currentPage]);
+
+  const hasMore = useMemo(() => {
+    return paginatedIssues.length < filteredIssues.length;
+  }, [paginatedIssues.length, filteredIssues.length]);
+
   const handleIssuePress = useCallback((issue: Issue) => {
     console.log('Issue pressed:', issue.id);
   }, []);
@@ -173,6 +185,29 @@ export default function IssuesScreen() {
   const handleAddIssue = useCallback(() => {
     console.log('Add issue pressed');
     router.push('/add-issue');
+  }, []);
+
+  const handleLoadMore = useCallback(() => {
+    if (!isLoadingMore && hasMore) {
+      console.log('Loading more issues...');
+      setIsLoadingMore(true);
+      
+      // Simulate loading delay for smooth UX
+      setTimeout(() => {
+        setCurrentPage(prev => prev + 1);
+        setIsLoadingMore(false);
+      }, 300);
+    }
+  }, [isLoadingMore, hasMore]);
+
+  const handleSearchChange = useCallback((text: string) => {
+    setSearchQuery(text);
+    setCurrentPage(1); // Reset to first page when search changes
+  }, []);
+
+  const handleFilterChange = useCallback((status: TaskStatus | 'all') => {
+    setFilterStatus(status);
+    setCurrentPage(1); // Reset to first page when filter changes
   }, []);
 
   const renderItem = useCallback(({ item }: { item: Issue }) => (
@@ -195,7 +230,7 @@ export default function IssuesScreen() {
           placeholder="Search issues..."
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
-          onChangeText={setSearchQuery}
+          onChangeText={handleSearchChange}
         />
       </View>
 
@@ -210,7 +245,7 @@ export default function IssuesScreen() {
                 styles.filterChip,
                 filterStatus === status && styles.filterChipActive,
               ]}
-              onPress={() => setFilterStatus(status as TaskStatus | 'all')}
+              onPress={() => handleFilterChange(status as TaskStatus | 'all')}
             >
               <Text style={[
                 styles.filterChipText,
@@ -225,7 +260,44 @@ export default function IssuesScreen() {
         />
       </View>
     </>
-  ), [searchQuery, filterStatus]);
+  ), [searchQuery, filterStatus, handleSearchChange, handleFilterChange]);
+
+  const ListFooterComponent = useCallback(() => {
+    if (paginatedIssues.length === 0) {
+      return null;
+    }
+
+    if (isLoadingMore) {
+      return (
+        <View style={styles.loadingMore}>
+          <ActivityIndicator size="small" color={colors.danger} />
+          <Text style={styles.loadingMoreText}>Loading more issues...</Text>
+        </View>
+      );
+    }
+
+    if (hasMore) {
+      return (
+        <TouchableOpacity style={styles.loadMoreButton} onPress={handleLoadMore}>
+          <Text style={styles.loadMoreText}>Load More</Text>
+          <IconSymbol 
+            ios_icon_name="chevron.down" 
+            android_material_icon_name="expand_more" 
+            size={20} 
+            color={colors.danger} 
+          />
+        </TouchableOpacity>
+      );
+    }
+
+    return (
+      <View style={styles.endOfList}>
+        <Text style={styles.endOfListText}>
+          Showing all {paginatedIssues.length} issue{paginatedIssues.length !== 1 ? 's' : ''}
+        </Text>
+      </View>
+    );
+  }, [paginatedIssues.length, isLoadingMore, hasMore, handleLoadMore]);
 
   const ListEmptyComponent = useCallback(() => (
     <View style={styles.emptyState}>
@@ -255,10 +327,11 @@ export default function IssuesScreen() {
       </View>
 
       <FlatList
-        data={filteredIssues}
+        data={paginatedIssues}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         ListHeaderComponent={ListHeaderComponent}
+        ListFooterComponent={ListFooterComponent}
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
@@ -468,5 +541,43 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.accent,
     fontWeight: '500',
+  },
+  loadMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    paddingVertical: 16,
+    marginTop: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 8,
+  },
+  loadMoreText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.danger,
+  },
+  loadingMore: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    gap: 12,
+  },
+  loadingMoreText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  endOfList: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  endOfListText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
   },
 });
