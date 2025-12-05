@@ -6,6 +6,9 @@ import { colors, commonStyles } from "@/styles/commonStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
 import { IconSymbol } from "@/components/IconSymbol";
+import { StatCard } from "@/components/StatCard";
+import { ProgressRing } from "@/components/ProgressRing";
+import { MiniChart } from "@/components/MiniChart";
 import { router } from "expo-router";
 
 export default function OwnerDashboard() {
@@ -16,7 +19,8 @@ export default function OwnerDashboard() {
     getMaintenanceTasksForUser, 
     getExpensesForUser,
     getActivityLogsForUser,
-    getSupplyRequestsForUser
+    getSupplyRequestsForUser,
+    getIssuesForUser
   } = useData();
 
   const handleLogout = () => {
@@ -95,6 +99,13 @@ export default function OwnerDashboard() {
     return getSupplyRequestsForUser(userId, userRole);
   }, [userId, userRole, getSupplyRequestsForUser]);
 
+  const myIssues = useMemo(() => {
+    if (!userId || !userRole) {
+      return [];
+    }
+    return getIssuesForUser(userId, userRole);
+  }, [userId, userRole, getIssuesForUser]);
+
   const pendingApprovals = useMemo(() => {
     return mySupplyRequests.filter(req => req.status === 'pending');
   }, [mySupplyRequests]);
@@ -110,11 +121,65 @@ export default function OwnerDashboard() {
       .reduce((sum, exp) => sum + exp.amount, 0);
   }, [myExpenses]);
 
+  const lastMonthExpenses = useMemo(() => {
+    const lastMonth = new Date().getMonth() - 1;
+    const year = lastMonth < 0 ? new Date().getFullYear() - 1 : new Date().getFullYear();
+    const month = lastMonth < 0 ? 11 : lastMonth;
+    
+    return myExpenses
+      .filter(exp => {
+        const expDate = new Date(exp.date);
+        return expDate.getMonth() === month && expDate.getFullYear() === year;
+      })
+      .reduce((sum, exp) => sum + exp.amount, 0);
+  }, [myExpenses]);
+
+  const expenseTrend = useMemo(() => {
+    if (lastMonthExpenses === 0) {
+      return { direction: 'neutral' as const, value: '0%' };
+    }
+    const change = ((totalMonthlyExpenses - lastMonthExpenses) / lastMonthExpenses) * 100;
+    return {
+      direction: change > 0 ? 'up' as const : change < 0 ? 'down' as const : 'neutral' as const,
+      value: `${Math.abs(Math.round(change))}%`
+    };
+  }, [totalMonthlyExpenses, lastMonthExpenses]);
+
+  const last6MonthsExpenses = useMemo(() => {
+    const data: number[] = [];
+    const now = new Date();
+    
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthExpenses = myExpenses
+        .filter(exp => {
+          const expDate = new Date(exp.date);
+          return expDate.getMonth() === date.getMonth() && expDate.getFullYear() === date.getFullYear();
+        })
+        .reduce((sum, exp) => sum + exp.amount, 0);
+      data.push(monthExpenses);
+    }
+    
+    return data;
+  }, [myExpenses]);
+
   const upcomingMaintenance = useMemo(() => {
     return myMaintenanceTasks
       .filter(task => task.status !== 'completed')
       .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
   }, [myMaintenanceTasks]);
+
+  const completionRate = useMemo(() => {
+    if (myMaintenanceTasks.length === 0) {
+      return 0;
+    }
+    const completed = myMaintenanceTasks.filter(t => t.status === 'completed').length;
+    return (completed / myMaintenanceTasks.length) * 100;
+  }, [myMaintenanceTasks]);
+
+  const openIssuesCount = useMemo(() => {
+    return myIssues.filter(i => i.status !== 'completed').length;
+  }, [myIssues]);
 
   const getDaysUntil = (date: Date) => {
     const now = new Date();
@@ -171,146 +236,231 @@ export default function OwnerDashboard() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>My Vessels ({myVessels.length})</Text>
-          {myVessels.map((vessel) => (
-            <View key={vessel.id} style={styles.vesselCard}>
-              <View style={styles.vesselHeader}>
-                <IconSymbol 
-                  ios_icon_name="sailboat.fill" 
-                  android_material_icon_name="sailing" 
-                  size={32} 
-                  color={colors.accent} 
-                />
+          <Text style={styles.sectionTitle}>Fleet Overview</Text>
+          <View style={styles.fleetGrid}>
+            {myVessels.map((vessel, index) => (
+              <View key={vessel.id} style={styles.vesselCard}>
+                <View style={styles.vesselHeader}>
+                  <IconSymbol 
+                    ios_icon_name="sailboat.fill" 
+                    android_material_icon_name="sailing" 
+                    size={28} 
+                    color={colors.accent} 
+                  />
+                  <View style={[
+                    styles.statusDot, 
+                    vessel.status === 'active' ? styles.statusDotActive : styles.statusDotMaintenance
+                  ]} />
+                </View>
                 <Text style={styles.vesselName}>{vessel.name}</Text>
-              </View>
-              <View style={styles.statusRow}>
-                <View style={[
-                  styles.statusBadge, 
-                  vessel.status === 'active' ? styles.statusActive : styles.statusMaintenance
-                ]}>
-                  <Text style={styles.statusText}>{vessel.status.toUpperCase()}</Text>
+                <Text style={styles.vesselLocation}>{vessel.location}</Text>
+                <View style={styles.vesselFooter}>
+                  <View style={styles.vesselStat}>
+                    <IconSymbol 
+                      ios_icon_name="person.2.fill" 
+                      android_material_icon_name="groups" 
+                      size={14} 
+                      color={colors.textSecondary} 
+                    />
+                    <Text style={styles.vesselStatText}>{vessel.crewCount}</Text>
+                  </View>
+                  <View style={[
+                    styles.statusBadge, 
+                    vessel.status === 'active' ? styles.statusActive : styles.statusMaintenance
+                  ]}>
+                    <Text style={styles.statusText}>{vessel.status.toUpperCase()}</Text>
+                  </View>
                 </View>
               </View>
-              <View style={styles.vesselInfo}>
-                <View style={styles.infoRow}>
-                  <IconSymbol 
-                    ios_icon_name="location.fill" 
-                    android_material_icon_name="location_on" 
-                    size={20} 
-                    color={colors.textSecondary} 
-                  />
-                  <Text style={styles.infoText}>{vessel.location}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <IconSymbol 
-                    ios_icon_name="person.2.fill" 
-                    android_material_icon_name="groups" 
-                    size={20} 
-                    color={colors.textSecondary} 
-                  />
-                  <Text style={styles.infoText}>{vessel.crewCount} Crew Members</Text>
-                </View>
-              </View>
-            </View>
-          ))}
+            ))}
+          </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Overview</Text>
+          <Text style={styles.sectionTitle}>Key Metrics</Text>
           
           <View style={styles.statsGrid}>
-            <View style={[styles.statCard, styles.statCardPrimary]}>
-              <IconSymbol 
-                ios_icon_name="wrench.and.screwdriver.fill" 
-                android_material_icon_name="build" 
-                size={28} 
-                color={colors.warning} 
-              />
-              <Text style={styles.statLabel}>Next Maintenance</Text>
-              {upcomingMaintenance ? (
-                <React.Fragment>
-                  <Text style={styles.statValue}>{upcomingMaintenance.title}</Text>
-                  <Text style={styles.statSubtext}>
-                    {getDaysUntil(upcomingMaintenance.dueDate)} days
-                  </Text>
-                </React.Fragment>
-              ) : (
-                <Text style={styles.statValue}>None scheduled</Text>
-              )}
-            </View>
+            <StatCard
+              icon="dollarsign.circle.fill"
+              androidIcon="payments"
+              iconColor={colors.success}
+              label="Monthly Expenses"
+              value={`$${totalMonthlyExpenses.toLocaleString()}`}
+              subtext="Current month"
+              trend={expenseTrend.direction}
+              trendValue={expenseTrend.value}
+              onPress={handleViewAnalytics}
+            />
 
-            <View style={[styles.statCard, styles.statCardSecondary]}>
-              <IconSymbol 
-                ios_icon_name="list.bullet" 
-                android_material_icon_name="list" 
-                size={28} 
-                color={colors.accent} 
+            <StatCard
+              icon="wrench.and.screwdriver.fill"
+              androidIcon="build"
+              iconColor={colors.warning}
+              label="Active Tasks"
+              value={myMaintenanceTasks.filter(t => t.status !== 'completed').length}
+              subtext={`${myMaintenanceTasks.length} total`}
+              onPress={() => router.push('/(tabs)/maintenance')}
+            />
+
+            <StatCard
+              icon="exclamationmark.triangle.fill"
+              androidIcon="warning"
+              iconColor={colors.danger}
+              label="Open Issues"
+              value={openIssuesCount}
+              subtext={openIssuesCount > 0 ? 'Needs attention' : 'All clear'}
+              onPress={() => router.push('/(tabs)/issues')}
+            />
+
+            <StatCard
+              icon="shippingbox.fill"
+              androidIcon="inventory_2"
+              iconColor={colors.accent}
+              label="Pending Approvals"
+              value={pendingApprovals.length}
+              subtext="Supply requests"
+              onPress={handleApproveRequests}
+            />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Performance</Text>
+          
+          <View style={styles.performanceCard}>
+            <View style={styles.performanceLeft}>
+              <ProgressRing
+                progress={completionRate}
+                size={100}
+                strokeWidth={10}
+                color={colors.success}
+                label="Complete"
               />
-              <Text style={styles.statLabel}>Active Tasks</Text>
-              <Text style={styles.statValue}>
-                {myMaintenanceTasks.filter(t => t.status !== 'completed').length}
+            </View>
+            <View style={styles.performanceRight}>
+              <Text style={styles.performanceTitle}>Task Completion</Text>
+              <Text style={styles.performanceValue}>
+                {myMaintenanceTasks.filter(t => t.status === 'completed').length} of {myMaintenanceTasks.length}
+              </Text>
+              <Text style={styles.performanceSubtext}>
+                {myMaintenanceTasks.filter(t => t.status !== 'completed').length} tasks remaining
               </Text>
             </View>
           </View>
 
-          <View style={styles.expenseCard}>
-            <View style={styles.expenseHeader}>
-              <IconSymbol 
-                ios_icon_name="dollarsign.circle.fill" 
-                android_material_icon_name="payments" 
-                size={28} 
-                color={colors.success} 
-              />
-              <Text style={styles.expenseTitle}>Monthly Expenses</Text>
+          <View style={styles.expenseChartCard}>
+            <View style={styles.expenseChartHeader}>
+              <Text style={styles.expenseChartTitle}>Expense Trend</Text>
+              <Text style={styles.expenseChartSubtitle}>Last 6 months</Text>
             </View>
-            <Text style={styles.expenseAmount}>
-              ${totalMonthlyExpenses.toLocaleString()}
-            </Text>
-            <Text style={styles.expenseSubtext}>Current month to date</Text>
+            <MiniChart data={last6MonthsExpenses} color={colors.success} height={80} />
           </View>
+        </View>
 
-          {pendingApprovals.length > 0 && (
-            <View style={styles.pendingCard}>
-              <View style={styles.pendingHeader}>
-                <IconSymbol 
-                  ios_icon_name="exclamationmark.circle.fill" 
-                  android_material_icon_name="pending_actions" 
-                  size={28} 
-                  color={colors.warning} 
-                />
-                <View style={styles.pendingInfo}>
-                  <Text style={styles.pendingTitle}>Pending Approvals</Text>
-                  <Text style={styles.pendingSubtext}>
-                    {pendingApprovals.length} request{pendingApprovals.length > 1 ? 's' : ''} awaiting review
+        {upcomingMaintenance && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Next Maintenance</Text>
+            <View style={styles.maintenanceCard}>
+              <View style={styles.maintenanceHeader}>
+                <View style={[styles.iconCircle, { backgroundColor: colors.warning + '20' }]}>
+                  <IconSymbol 
+                    ios_icon_name="wrench.and.screwdriver.fill" 
+                    android_material_icon_name="build" 
+                    size={24} 
+                    color={colors.warning} 
+                  />
+                </View>
+                <View style={styles.maintenanceInfo}>
+                  <Text style={styles.maintenanceTitle}>{upcomingMaintenance.title}</Text>
+                  <Text style={styles.maintenanceVessel}>{upcomingMaintenance.vesselName}</Text>
+                </View>
+              </View>
+              <View style={styles.maintenanceFooter}>
+                <View style={styles.maintenanceDue}>
+                  <IconSymbol 
+                    ios_icon_name="clock.fill" 
+                    android_material_icon_name="schedule" 
+                    size={16} 
+                    color={colors.textSecondary} 
+                  />
+                  <Text style={styles.maintenanceDueText}>
+                    Due in {getDaysUntil(upcomingMaintenance.dueDate)} days
+                  </Text>
+                </View>
+                <View style={[
+                  styles.priorityBadge,
+                  upcomingMaintenance.priority === 'high' || upcomingMaintenance.priority === 'urgent' 
+                    ? styles.priorityHigh 
+                    : upcomingMaintenance.priority === 'medium' 
+                    ? styles.priorityMedium 
+                    : styles.priorityLow
+                ]}>
+                  <Text style={styles.priorityText}>{upcomingMaintenance.priority.toUpperCase()}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {pendingApprovals.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Pending Approvals</Text>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{pendingApprovals.length}</Text>
+              </View>
+            </View>
+            {pendingApprovals.slice(0, 2).map((approval, index) => (
+              <View key={approval.id} style={styles.approvalCard}>
+                <View style={styles.approvalHeader}>
+                  <View style={styles.approvalLeft}>
+                    <Text style={styles.approvalItem}>{approval.itemName}</Text>
+                    <Text style={styles.approvalVessel}>{approval.vesselName}</Text>
+                  </View>
+                  <Text style={styles.approvalAmount}>${approval.estimatedCost}</Text>
+                </View>
+                <View style={styles.approvalFooter}>
+                  <View style={styles.approvalCategory}>
+                    <Text style={styles.approvalCategoryText}>{approval.category}</Text>
+                  </View>
+                  <Text style={styles.approvalQuantity}>
+                    {approval.quantity} {approval.unit}
                   </Text>
                 </View>
               </View>
-              <TouchableOpacity 
-                style={styles.reviewButton}
-                onPress={handleApproveRequests}
-              >
-                <Text style={styles.reviewButtonText}>Review Requests</Text>
-                <IconSymbol 
-                  ios_icon_name="chevron.right" 
-                  android_material_icon_name="chevron_right" 
-                  size={20} 
-                  color={colors.text} 
-                />
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
+            ))}
+            <TouchableOpacity 
+              style={styles.viewAllButton}
+              onPress={handleApproveRequests}
+            >
+              <Text style={styles.viewAllButtonText}>Review All Requests</Text>
+              <IconSymbol 
+                ios_icon_name="chevron.right" 
+                android_material_icon_name="chevron_right" 
+                size={20} 
+                color={colors.accent} 
+              />
+            </TouchableOpacity>
+          </View>
+        )}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Recent Activity</Text>
           {myActivityLogs.length > 0 ? (
-            myActivityLogs.map((log) => (
-              <View key={log.id} style={styles.updateCard}>
-                <View style={styles.updateIcon}>
+            myActivityLogs.map((log, index) => (
+              <View key={log.id} style={styles.activityCard}>
+                <View style={[
+                  styles.activityIcon,
+                  { backgroundColor: 
+                    log.type === 'maintenance' || log.type === 'task' ? colors.success + '20' :
+                    log.type === 'issue' ? colors.danger + '20' :
+                    colors.accent + '20'
+                  }
+                ]}>
                   <IconSymbol 
                     ios_icon_name={
                       log.type === 'maintenance' || log.type === 'task' ? 'checkmark.circle.fill' :
-                      log.type === 'issue' ? 'exclamationmark.circle.fill' :
+                      log.type === 'issue' ? 'exclamationmark.triangle.fill' :
                       'info.circle.fill'
                     }
                     android_material_icon_name={
@@ -318,18 +468,18 @@ export default function OwnerDashboard() {
                       log.type === 'issue' ? 'warning' :
                       'info'
                     }
-                    size={24} 
+                    size={20} 
                     color={
                       log.type === 'maintenance' || log.type === 'task' ? colors.success :
-                      log.type === 'issue' ? colors.warning :
+                      log.type === 'issue' ? colors.danger :
                       colors.accent
                     }
                   />
                 </View>
-                <View style={styles.updateContent}>
-                  <Text style={styles.updateTitle}>{log.title}</Text>
-                  <Text style={styles.updateDescription}>{log.description}</Text>
-                  <Text style={styles.updateTime}>
+                <View style={styles.activityContent}>
+                  <Text style={styles.activityTitle}>{log.title}</Text>
+                  <Text style={styles.activityDescription}>{log.description}</Text>
+                  <Text style={styles.activityTime}>
                     {new Date(log.timestamp).toLocaleString()}
                   </Text>
                 </View>
@@ -364,22 +514,7 @@ export default function OwnerDashboard() {
               size={24} 
               color={colors.text} 
             />
-            <Text style={styles.actionButtonText}>View Reports</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={handleApproveRequests}
-          >
-            <IconSymbol 
-              ios_icon_name="checkmark.circle.fill" 
-              android_material_icon_name="check_circle" 
-              size={24} 
-              color={colors.text} 
-            />
-            <Text style={styles.actionButtonText}>
-              Approve Requests {pendingApprovals.length > 0 && `(${pendingApprovals.length})`}
-            </Text>
+            <Text style={styles.actionButtonText}>View Documents</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -431,174 +566,304 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 24,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 12,
+  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: colors.text,
     marginBottom: 16,
   },
+  fleetGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
   vesselCard: {
+    flex: 1,
+    minWidth: '47%',
     backgroundColor: colors.card,
     borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
+    padding: 16,
     borderWidth: 1,
     borderColor: colors.border,
   },
   vesselHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
-    gap: 12,
+  },
+  statusDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  statusDotActive: {
+    backgroundColor: colors.success,
+  },
+  statusDotMaintenance: {
+    backgroundColor: colors.warning,
   },
   vesselName: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: '700',
     color: colors.text,
+    marginBottom: 4,
   },
-  statusRow: {
-    marginBottom: 16,
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-  },
-  statusActive: {
-    backgroundColor: colors.success + '30',
-  },
-  statusMaintenance: {
-    backgroundColor: colors.warning + '30',
-  },
-  statusText: {
-    color: colors.success,
+  vesselLocation: {
     fontSize: 14,
-    fontWeight: '600',
+    color: colors.textSecondary,
+    marginBottom: 12,
   },
-  vesselInfo: {
-    gap: 8,
+  vesselFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  infoRow: {
+  vesselStat: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 4,
   },
-  infoText: {
-    fontSize: 16,
+  vesselStatText: {
+    fontSize: 13,
     color: colors.textSecondary,
+    fontWeight: '600',
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  statusActive: {
+    backgroundColor: colors.success + '20',
+  },
+  statusMaintenance: {
+    backgroundColor: colors.warning + '20',
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.text,
   },
   statsGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
+  },
+  performanceCard: {
+    flexDirection: 'row',
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
     marginBottom: 12,
   },
-  statCard: {
+  performanceLeft: {
+    marginRight: 20,
+    justifyContent: 'center',
+  },
+  performanceRight: {
     flex: 1,
+    justifyContent: 'center',
+  },
+  performanceTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 6,
+  },
+  performanceValue: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  performanceSubtext: {
+    fontSize: 13,
+    color: colors.textSecondary,
+  },
+  expenseChartCard: {
     backgroundColor: colors.card,
-    borderRadius: 12,
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  expenseChartHeader: {
+    marginBottom: 16,
+  },
+  expenseChartTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 2,
+  },
+  expenseChartSubtitle: {
+    fontSize: 13,
+    color: colors.textSecondary,
+  },
+  maintenanceCard: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
     padding: 16,
     borderWidth: 1,
     borderColor: colors.border,
-  },
-  statCardPrimary: {
     borderLeftWidth: 4,
     borderLeftColor: colors.warning,
   },
-  statCardSecondary: {
-    borderLeftWidth: 4,
-    borderLeftColor: colors.accent,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  statValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  statSubtext: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-  expenseCard: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.success,
-    marginBottom: 12,
-  },
-  expenseHeader: {
+  maintenanceHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
     marginBottom: 12,
-  },
-  expenseTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  expenseAmount: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: colors.success,
-    marginBottom: 4,
-  },
-  expenseSubtext: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  pendingCard: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.warning,
-  },
-  pendingHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: 12,
-    marginBottom: 16,
   },
-  pendingInfo: {
+  iconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  maintenanceInfo: {
     flex: 1,
   },
-  pendingTitle: {
+  maintenanceTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.text,
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  pendingSubtext: {
+  maintenanceVessel: {
     fontSize: 14,
     color: colors.textSecondary,
   },
-  reviewButton: {
+  maintenanceFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  maintenanceDue: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  maintenanceDueText: {
+    fontSize: 13,
+    color: colors.textSecondary,
+  },
+  priorityBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  priorityHigh: {
+    backgroundColor: colors.danger + '30',
+  },
+  priorityMedium: {
+    backgroundColor: colors.warning + '30',
+  },
+  priorityLow: {
+    backgroundColor: colors.success + '30',
+  },
+  priorityText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  badge: {
+    backgroundColor: colors.warning,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    minWidth: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  approvalCard: {
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.warning,
+  },
+  approvalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  approvalLeft: {
+    flex: 1,
+    marginRight: 12,
+  },
+  approvalItem: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 2,
+  },
+  approvalVessel: {
+    fontSize: 13,
+    color: colors.textSecondary,
+  },
+  approvalAmount: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.text,
+  },
+  approvalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  approvalCategory: {
+    backgroundColor: colors.accent + '20',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  approvalCategoryText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.accent,
+  },
+  approvalQuantity: {
+    fontSize: 13,
+    color: colors.textSecondary,
+  },
+  viewAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.warning + '30',
-    borderRadius: 8,
-    padding: 12,
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: colors.border,
     gap: 8,
   },
-  reviewButtonText: {
-    fontSize: 15,
+  viewAllButtonText: {
+    fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.accent,
   },
-  updateCard: {
+  activityCard: {
     flexDirection: 'row',
     backgroundColor: colors.card,
     borderRadius: 12,
@@ -607,26 +872,31 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  updateIcon: {
+  activityIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 12,
   },
-  updateContent: {
+  activityContent: {
     flex: 1,
   },
-  updateTitle: {
-    fontSize: 16,
+  activityTitle: {
+    fontSize: 15,
     fontWeight: '600',
     color: colors.text,
     marginBottom: 4,
   },
-  updateDescription: {
+  activityDescription: {
     fontSize: 14,
     color: colors.textSecondary,
     marginBottom: 4,
   },
-  updateTime: {
+  activityTime: {
     fontSize: 12,
-    color: colors.grey,
+    color: colors.textTertiary,
   },
   emptyText: {
     fontSize: 14,

@@ -6,6 +6,8 @@ import { colors, commonStyles } from "@/styles/commonStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
 import { IconSymbol } from "@/components/IconSymbol";
+import { StatCard } from "@/components/StatCard";
+import { ProgressRing } from "@/components/ProgressRing";
 import { router } from "expo-router";
 
 export default function ManagerDashboard() {
@@ -100,6 +102,24 @@ export default function ManagerDashboard() {
       .slice(0, 3);
   }, [myMaintenanceTasks]);
 
+  const completionRate = useMemo(() => {
+    if (myMaintenanceTasks.length === 0) {
+      return 0;
+    }
+    const completed = myMaintenanceTasks.filter(t => t.status === 'completed').length;
+    return (completed / myMaintenanceTasks.length) * 100;
+  }, [myMaintenanceTasks]);
+
+  const openIssuesCount = useMemo(() => {
+    return myIssues.filter(i => i.status !== 'completed').length;
+  }, [myIssues]);
+
+  const urgentTasksCount = useMemo(() => {
+    return myMaintenanceTasks.filter(t => 
+      t.status !== 'completed' && (t.priority === 'high' || t.priority === 'urgent')
+    ).length;
+  }, [myMaintenanceTasks]);
+
   const getDaysUntil = (date: Date) => {
     const now = new Date();
     const diff = new Date(date).getTime() - now.getTime();
@@ -159,23 +179,74 @@ export default function ManagerDashboard() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Fleet Overview ({myVessels.length})</Text>
-          {myVessels.map((vessel) => {
+          <Text style={styles.sectionTitle}>Overview</Text>
+          
+          <View style={styles.statsGrid}>
+            <StatCard
+              icon="sailboat.fill"
+              androidIcon="sailing"
+              iconColor={colors.accent}
+              label="Vessels"
+              value={myVessels.length}
+              subtext={`${myVessels.filter(v => v.status === 'active').length} active`}
+            />
+
+            <StatCard
+              icon="exclamationmark.triangle.fill"
+              androidIcon="warning"
+              iconColor={colors.danger}
+              label="Urgent Tasks"
+              value={urgentTasksCount}
+              subtext="Needs attention"
+              onPress={() => router.push('/(tabs)/maintenance')}
+            />
+
+            <StatCard
+              icon="list.bullet"
+              androidIcon="list"
+              iconColor={colors.warning}
+              label="Open Issues"
+              value={openIssuesCount}
+              subtext="Reported"
+              onPress={() => router.push('/(tabs)/issues')}
+            />
+
+            <StatCard
+              icon="checkmark.circle.fill"
+              androidIcon="check_circle"
+              iconColor={colors.success}
+              label="Pending Approvals"
+              value={pendingApprovals.length}
+              subtext="Supply requests"
+              onPress={handleViewAllRequests}
+            />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Fleet Status</Text>
+          {myVessels.map((vessel, index) => {
             const vesselTasks = myMaintenanceTasks.filter(t => t.vesselId === vessel.id && t.status !== 'completed');
             const vesselIssues = myIssues.filter(i => i.vesselId === vessel.id && i.status !== 'completed');
+            const vesselCompletion = myMaintenanceTasks.filter(t => t.vesselId === vessel.id).length > 0
+              ? (myMaintenanceTasks.filter(t => t.vesselId === vessel.id && t.status === 'completed').length / 
+                 myMaintenanceTasks.filter(t => t.vesselId === vessel.id).length) * 100
+              : 0;
             
             return (
               <View key={vessel.id} style={styles.vesselCard}>
                 <View style={styles.vesselHeader}>
-                  <IconSymbol 
-                    ios_icon_name="sailboat.fill" 
-                    android_material_icon_name="sailing" 
-                    size={28} 
-                    color={colors.accent} 
-                  />
-                  <View style={styles.vesselInfo}>
-                    <Text style={styles.vesselName}>{vessel.name}</Text>
-                    <View style={styles.vesselMeta}>
+                  <View style={styles.vesselLeft}>
+                    <View style={[styles.iconCircle, { backgroundColor: colors.accent + '20' }]}>
+                      <IconSymbol 
+                        ios_icon_name="sailboat.fill" 
+                        android_material_icon_name="sailing" 
+                        size={24} 
+                        color={colors.accent} 
+                      />
+                    </View>
+                    <View style={styles.vesselInfo}>
+                      <Text style={styles.vesselName}>{vessel.name}</Text>
                       <View style={[
                         styles.statusBadge, 
                         vessel.status === 'active' ? styles.statusActive : styles.statusMaintenance
@@ -187,13 +258,20 @@ export default function ManagerDashboard() {
                       </View>
                     </View>
                   </View>
+                  <ProgressRing
+                    progress={vesselCompletion}
+                    size={60}
+                    strokeWidth={6}
+                    color={colors.success}
+                    showPercentage={false}
+                  />
                 </View>
                 <View style={styles.vesselStats}>
                   <View style={styles.statItem}>
                     <IconSymbol 
                       ios_icon_name="person.2.fill" 
                       android_material_icon_name="groups" 
-                      size={18} 
+                      size={16} 
                       color={colors.textSecondary} 
                     />
                     <Text style={styles.statText}>{vessel.crewCount} Crew</Text>
@@ -202,7 +280,7 @@ export default function ManagerDashboard() {
                     <IconSymbol 
                       ios_icon_name="list.bullet" 
                       android_material_icon_name="list" 
-                      size={18} 
+                      size={16} 
                       color={colors.warning} 
                     />
                     <Text style={styles.statText}>{vesselTasks.length} Tasks</Text>
@@ -211,7 +289,7 @@ export default function ManagerDashboard() {
                     <IconSymbol 
                       ios_icon_name="exclamationmark.triangle" 
                       android_material_icon_name="warning" 
-                      size={18} 
+                      size={16} 
                       color={colors.danger} 
                     />
                     <Text style={styles.statText}>{vesselIssues.length} Issues</Text>
@@ -233,7 +311,7 @@ export default function ManagerDashboard() {
           </View>
           {pendingApprovals.length > 0 ? (
             <React.Fragment>
-              {pendingApprovals.slice(0, 3).map((approval) => (
+              {pendingApprovals.slice(0, 3).map((approval, index) => (
                 <View key={approval.id} style={styles.approvalCard}>
                   <View style={styles.approvalHeader}>
                     <View style={styles.approvalType}>
@@ -243,7 +321,7 @@ export default function ManagerDashboard() {
                   </View>
                   <Text style={styles.approvalTitle}>{approval.itemName}</Text>
                   <Text style={styles.approvalVessel}>{approval.vesselName}</Text>
-                  <Text style={styles.approvalDescription}>{approval.description}</Text>
+                  <Text style={styles.approvalDescription} numberOfLines={2}>{approval.description}</Text>
                   <View style={styles.approvalActions}>
                     <TouchableOpacity 
                       style={styles.approveButton}
@@ -295,21 +373,30 @@ export default function ManagerDashboard() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Maintenance Schedule</Text>
+          <Text style={styles.sectionTitle}>Upcoming Maintenance</Text>
           {upcomingMaintenance.length > 0 ? (
-            upcomingMaintenance.map((item) => (
+            upcomingMaintenance.map((item, index) => (
               <View key={item.id} style={styles.maintenanceCard}>
                 <View style={styles.maintenanceHeader}>
-                  <IconSymbol 
-                    ios_icon_name="wrench.and.screwdriver.fill" 
-                    android_material_icon_name="build" 
-                    size={24} 
-                    color={
-                      item.priority === 'high' || item.priority === 'urgent' ? colors.danger :
-                      item.priority === 'medium' ? colors.warning :
-                      colors.success
+                  <View style={[
+                    styles.iconCircle,
+                    { backgroundColor: 
+                      item.priority === 'high' || item.priority === 'urgent' ? colors.danger + '20' :
+                      item.priority === 'medium' ? colors.warning + '20' :
+                      colors.success + '20'
                     }
-                  />
+                  ]}>
+                    <IconSymbol 
+                      ios_icon_name="wrench.and.screwdriver.fill" 
+                      android_material_icon_name="build" 
+                      size={20} 
+                      color={
+                        item.priority === 'high' || item.priority === 'urgent' ? colors.danger :
+                        item.priority === 'medium' ? colors.warning :
+                        colors.success
+                      }
+                    />
+                  </View>
                   <View style={styles.maintenanceInfo}>
                     <Text style={styles.maintenanceTask}>{item.title}</Text>
                     <Text style={styles.maintenanceVessel}>{item.vesselName}</Text>
@@ -336,20 +423,7 @@ export default function ManagerDashboard() {
         <View style={styles.quickActions}>
           <TouchableOpacity 
             style={styles.actionButton}
-            onPress={() => console.log('Add crew pressed')}
-          >
-            <IconSymbol 
-              ios_icon_name="person.badge.plus.fill" 
-              android_material_icon_name="person_add" 
-              size={24} 
-              color={colors.text} 
-            />
-            <Text style={styles.actionButtonText}>Add Crew</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => console.log('Schedule task pressed')}
+            onPress={() => router.push('/add-maintenance-task')}
           >
             <IconSymbol 
               ios_icon_name="calendar.badge.plus" 
@@ -362,15 +436,15 @@ export default function ManagerDashboard() {
 
           <TouchableOpacity 
             style={styles.actionButton}
-            onPress={() => console.log('Generate report pressed')}
+            onPress={() => router.push('/analytics')}
           >
             <IconSymbol 
-              ios_icon_name="doc.text.fill" 
-              android_material_icon_name="description" 
+              ios_icon_name="chart.bar.fill" 
+              android_material_icon_name="analytics" 
               size={24} 
               color={colors.text} 
             />
-            <Text style={styles.actionButtonText}>Generate Report</Text>
+            <Text style={styles.actionButtonText}>View Analytics</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -432,6 +506,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: colors.text,
+    marginBottom: 16,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
   },
   badge: {
     backgroundColor: colors.danger,
@@ -449,7 +529,7 @@ const styles = StyleSheet.create({
   },
   vesselCard: {
     backgroundColor: colors.card,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
@@ -457,9 +537,22 @@ const styles = StyleSheet.create({
   },
   vesselHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
+  },
+  vesselLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
+    flex: 1,
+  },
+  iconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   vesselInfo: {
     flex: 1,
@@ -470,14 +563,11 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: 4,
   },
-  vesselMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
+    alignSelf: 'flex-start',
   },
   statusActive: {
     backgroundColor: colors.success + '30',
@@ -486,8 +576,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.warning + '30',
   },
   statusText: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
   },
   statusTextActive: {
     color: colors.success,
@@ -505,8 +595,9 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   statText: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.textSecondary,
+    fontWeight: '500',
   },
   approvalCard: {
     backgroundColor: colors.card,
@@ -659,7 +750,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   dueDate: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.textSecondary,
   },
   emptyText: {
