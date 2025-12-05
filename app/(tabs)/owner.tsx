@@ -133,6 +133,11 @@ export default function OwnerDashboard() {
     router.push('/(tabs)/supplies');
   };
 
+  const handleViewAnalytics = () => {
+    console.log('View analytics pressed');
+    router.push('/analytics');
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView 
@@ -336,6 +341,19 @@ export default function OwnerDashboard() {
         </View>
 
         <View style={styles.actionsSection}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={handleViewAnalytics}
+          >
+            <IconSymbol 
+              ios_icon_name="chart.bar.fill" 
+              android_material_icon_name="analytics" 
+              size={24} 
+              color={colors.text} 
+            />
+            <Text style={styles.actionButtonText}>View Analytics</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={handleViewReports}

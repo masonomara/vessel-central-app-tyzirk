@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, TextInput, Modal, Alert } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { colors } from '@/styles/commonStyles';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { IconSymbol } from '@/components/IconSymbol';
+import FilterModal, { FilterOptions } from '@/components/FilterModal';
 import { MaintenanceTask, TaskStatus, TaskPriority } from '@/types';
 import { formatDueDate, isOverdue } from '@/utils/dateUtils';
 import { router } from 'expo-router';
@@ -14,15 +15,40 @@ export default function MaintenanceScreen() {
   const theme = useTheme();
   const { maintenanceTasks, updateMaintenanceTask } = useData();
   const { userRole } = useAuth();
-  const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredTasks = maintenanceTasks.filter(task => {
-    const matchesStatus = filterStatus === 'all' || task.status === filterStatus;
-    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         task.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesSearch;
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState<FilterOptions>({
+    status: 'all',
+    priority: 'all',
+    dateRange: 'all',
   });
+
+  const filteredTasks = useMemo(() => {
+    return maintenanceTasks.filter(task => {
+      const matchesStatus = filters.status === 'all' || task.status === filters.status;
+      const matchesPriority = filters.priority === 'all' || task.priority === filters.priority;
+      const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           task.description.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      let matchesDate = true;
+      if (filters.dateRange !== 'all') {
+        const now = new Date();
+        const taskDate = new Date(task.dueDate);
+        
+        if (filters.dateRange === 'today') {
+          matchesDate = taskDate.toDateString() === now.toDateString();
+        } else if (filters.dateRange === 'week') {
+          const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+          matchesDate = taskDate <= weekFromNow;
+        } else if (filters.dateRange === 'month') {
+          const monthFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+          matchesDate = taskDate <= monthFromNow;
+        }
+      }
+
+      return matchesStatus && matchesPriority && matchesSearch && matchesDate;
+    });
+  }, [maintenanceTasks, filters, searchQuery]);
 
   const getPriorityColor = (priority: TaskPriority) => {
     switch (priority) {
@@ -46,7 +72,7 @@ export default function MaintenanceScreen() {
 
   const handleTaskPress = (task: MaintenanceTask) => {
     console.log('Task pressed:', task.id);
-    // Navigate to task detail screen (to be implemented)
+    router.push(`/maintenance-detail?id=${task.id}`);
   };
 
   const handleAddTask = () => {
@@ -54,20 +80,49 @@ export default function MaintenanceScreen() {
     router.push('/add-maintenance-task');
   };
 
+  const handleAnalytics = () => {
+    console.log('Analytics pressed');
+    router.push('/analytics');
+  };
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.status !== 'all') {
+      count++;
+    }
+    if (filters.priority !== 'all') {
+      count++;
+    }
+    if (filters.dateRange !== 'all') {
+      count++;
+    }
+    return count;
+  }, [filters]);
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Maintenance</Text>
-        {(userRole === 'manager' || userRole === 'owner') && (
-          <TouchableOpacity style={styles.addButton} onPress={handleAddTask}>
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.iconButton} onPress={handleAnalytics}>
             <IconSymbol 
-              ios_icon_name="plus.circle.fill" 
-              android_material_icon_name="add_circle" 
-              size={32} 
+              ios_icon_name="chart.bar.fill" 
+              android_material_icon_name="analytics" 
+              size={24} 
               color={colors.accent} 
             />
           </TouchableOpacity>
-        )}
+          {(userRole === 'manager' || userRole === 'owner') && (
+            <TouchableOpacity style={styles.iconButton} onPress={handleAddTask}>
+              <IconSymbol 
+                ios_icon_name="plus.circle.fill" 
+                android_material_icon_name="add_circle" 
+                size={32} 
+                color={colors.accent} 
+              />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <View style={styles.searchContainer}>
@@ -84,32 +139,39 @@ export default function MaintenanceScreen() {
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
+        <TouchableOpacity onPress={() => setShowFilters(true)} style={styles.filterButton}>
+          <IconSymbol 
+            ios_icon_name="line.3.horizontal.decrease.circle" 
+            android_material_icon_name="filter_list" 
+            size={24} 
+            color={activeFilterCount > 0 ? colors.accent : colors.textSecondary} 
+          />
+          {activeFilterCount > 0 && (
+            <View style={styles.filterBadge}>
+              <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
 
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false}
-        style={styles.filterContainer}
-        contentContainerStyle={styles.filterContent}
-      >
-        {['all', 'open', 'in_progress', 'waiting_on_parts', 'completed'].map((status) => (
-          <TouchableOpacity
-            key={status}
-            style={[
-              styles.filterChip,
-              filterStatus === status && styles.filterChipActive,
-            ]}
-            onPress={() => setFilterStatus(status as TaskStatus | 'all')}
-          >
-            <Text style={[
-              styles.filterChipText,
-              filterStatus === status && styles.filterChipTextActive,
-            ]}>
-              {status.replace('_', ' ').toUpperCase()}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>{filteredTasks.length}</Text>
+          <Text style={styles.statLabel}>Total</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: colors.warning }]}>
+            {filteredTasks.filter(t => isOverdue(t.dueDate) && t.status !== 'completed').length}
+          </Text>
+          <Text style={styles.statLabel}>Overdue</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: colors.success }]}>
+            {filteredTasks.filter(t => t.status === 'completed').length}
+          </Text>
+          <Text style={styles.statLabel}>Completed</Text>
+        </View>
+      </View>
 
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
@@ -231,6 +293,14 @@ export default function MaintenanceScreen() {
           ))
         )}
       </ScrollView>
+
+      <FilterModal
+        visible={showFilters}
+        onClose={() => setShowFilters(false)}
+        onApply={setFilters}
+        filterType="maintenance"
+        currentFilters={filters}
+      />
     </View>
   );
 }
@@ -252,7 +322,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.text,
   },
-  addButton: {
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  iconButton: {
     padding: 4,
   },
   searchContainer: {
@@ -273,32 +347,50 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text,
   },
-  filterContainer: {
-    marginBottom: 16,
+  filterButton: {
+    padding: 4,
+    position: 'relative',
   },
-  filterContent: {
+  filterBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: colors.accent,
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterBadgeText: {
+    color: colors.text,
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  statsRow: {
+    flexDirection: 'row',
     paddingHorizontal: 20,
-    gap: 8,
+    marginBottom: 16,
+    gap: 12,
   },
-  filterChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+  statItem: {
+    flex: 1,
     backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
   },
-  filterChipActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  filterChipText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  filterChipTextActive: {
+  statValue: {
+    fontSize: 24,
+    fontWeight: '700',
     color: colors.text,
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: colors.textSecondary,
   },
   scrollContent: {
     paddingHorizontal: 20,
