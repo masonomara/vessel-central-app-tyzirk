@@ -39,6 +39,14 @@ function RootLayoutContent() {
           headerShown: false,
         }}
       />
+      <Stack.Screen 
+        name="add-maintenance-task" 
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+          animation: 'slide_from_bottom',
+        }}
+      />
     </Stack>
   );
 }

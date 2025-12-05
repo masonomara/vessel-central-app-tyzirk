@@ -51,7 +51,7 @@ export default function MaintenanceScreen() {
 
   const handleAddTask = () => {
     console.log('Add task pressed');
-    // Navigate to add task screen (to be implemented)
+    router.push('/add-maintenance-task');
   };
 
   return (
@@ -124,6 +124,11 @@ export default function MaintenanceScreen() {
               color={colors.textSecondary} 
             />
             <Text style={styles.emptyStateText}>No maintenance tasks found</Text>
+            {(userRole === 'manager' || userRole === 'owner') && (
+              <TouchableOpacity style={styles.emptyStateButton} onPress={handleAddTask}>
+                <Text style={styles.emptyStateButtonText}>Create First Task</Text>
+              </TouchableOpacity>
+            )}
           </View>
         ) : (
           filteredTasks.map((task) => (
@@ -308,6 +313,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.textSecondary,
     marginTop: 16,
+    marginBottom: 24,
+  },
+  emptyStateButton: {
+    backgroundColor: colors.accent,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  emptyStateButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
   },
   taskCard: {
     backgroundColor: colors.card,
