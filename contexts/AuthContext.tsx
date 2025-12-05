@@ -45,9 +45,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [userRole, setUserRoleState] = useState<UserRole>(null);
-  const [userName, setUserNameState] = useState<string>('');
-  const [userId, setUserIdState] = useState<string>('');
+  const [userRoleState, setUserRoleState] = useState<UserRole>(null);
+  const [userNameState, setUserNameState] = useState<string>('');
+  const [userIdState, setUserIdState] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSupabaseEnabled] = useState<boolean>(isSupabaseConfigured());
 
