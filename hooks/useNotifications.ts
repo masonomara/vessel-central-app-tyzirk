@@ -45,6 +45,7 @@ export function useNotifications() {
     );
 
     return () => {
+      console.log('Cleaning up notification listeners...');
       if (notificationListener.current) {
         notificationListener.current.remove();
       }

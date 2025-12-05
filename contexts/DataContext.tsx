@@ -570,14 +570,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Load data from storage on mount only
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   // Save data whenever it changes (debounced)
   useEffect(() => {
     if (hasLoadedData.current) {
       saveData();
     }
-  }, [vessels, maintenanceTasks, issues, supplyRequests, documents, activityLogs, notifications, expenses]);
+  }, [saveData]);
 
   const generateId = () => {
     return Date.now().toString() + Math.random().toString(36).substr(2, 9);

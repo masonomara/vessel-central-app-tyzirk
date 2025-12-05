@@ -12,8 +12,6 @@ export default function TabLayout() {
   const segments = useSegments();
   const hasRedirected = useRef(false);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
-
   const handleRoleRedirect = useCallback(() => {
     console.log('Current role:', userRole);
     console.log('Current segments:', segments);
@@ -40,6 +38,8 @@ export default function TabLayout() {
   useEffect(() => {
     hasRedirected.current = false;
   }, [userRole]);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   // Define the tabs configuration based on role
   const getTabsForRole = (): TabBarItem[] => {

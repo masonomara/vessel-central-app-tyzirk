@@ -86,7 +86,7 @@ export default function HomeScreen() {
   // Check authentication on mount only
   useEffect(() => {
     checkAuthentication();
-  }, []);
+  }, [checkAuthentication]);
 
   // Build user cards with operational data
   const userCards: UserCardData[] = useMemo(() => {

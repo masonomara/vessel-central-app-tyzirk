@@ -37,7 +37,7 @@ export default function Index() {
 
   useEffect(() => {
     checkAuthAndRedirect();
-  }, []);
+  }, [checkAuthAndRedirect]);
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
