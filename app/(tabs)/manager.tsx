@@ -9,7 +9,7 @@ import { IconSymbol } from "@/components/IconSymbol";
 import { StatCard } from "@/components/StatCard";
 import { ProgressRing } from "@/components/ProgressRing";
 import GlobalSearch from "@/components/GlobalSearch";
-import RealtimeFeed from "@/components/RealtimeFeed";
+import { RealtimeFeed } from "@/components/RealtimeFeed";
 import { router } from "expo-router";
 
 export default function ManagerDashboard() {
@@ -239,7 +239,7 @@ export default function ManagerDashboard() {
         </View>
 
         <View style={styles.section}>
-          <RealtimeFeed userId={userId} maxItems={5} />
+          <RealtimeFeed userId={userId} limit={5} />
         </View>
 
         <View style={styles.section}>
@@ -488,6 +488,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 12,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  searchButton: {
+    padding: 8,
   },
   greeting: {
     fontSize: 16,
