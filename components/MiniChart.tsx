@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { colors } from '@/styles/commonStyles';
 
@@ -10,49 +10,59 @@ interface MiniChartProps {
   showAxis?: boolean;
 }
 
-export function MiniChart({
+export const MiniChart = memo(function MiniChart({
   data,
   color = colors.accent,
   height = 60,
   showAxis = false,
 }: MiniChartProps) {
-  if (data.length === 0) {
+  const chartData = useMemo(() => {
+    if (data.length === 0) {
+      return null;
+    }
+
+    const max = Math.max(...data);
+    const min = Math.min(...data);
+    const range = max - min || 1;
+
+    return {
+      max,
+      min,
+      range,
+      normalizedData: data.map(value => ((value - min) / range) * (height - 10)),
+    };
+  }, [data, height]);
+
+  if (!chartData) {
     return null;
   }
-
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const range = max - min || 1;
 
   return (
     <View style={[styles.container, { height }]}>
       <View style={styles.chartContainer}>
-        {data.map((value, index) => {
-          const normalizedHeight = ((value - min) / range) * (height - 10);
-          return (
-            <View key={index} style={styles.barContainer}>
-              <View
-                style={[
-                  styles.bar,
-                  {
-                    height: normalizedHeight || 2,
-                    backgroundColor: color,
-                  },
-                ]}
-              />
-            </View>
-          );
-        })}
+        {chartData.normalizedData.map((normalizedHeight, index) => (
+          <View key={index} style={styles.barContainer}>
+            <View
+              style={[
+                styles.bar,
+                {
+                  height: normalizedHeight || 2,
+                  backgroundColor: color,
+                },
+              ]}
+            />
+          </View>
+        ))}
       </View>
       {showAxis && (
         <View style={styles.axis}>
-          <Text style={styles.axisLabel}>{min}</Text>
-          <Text style={styles.axisLabel}>{max}</Text>
+          <Text style={styles.axisLabel}>{chartData.min}</Text>
+          <Text style={styles.axisLabel}>{chartData.max}</Text>
         </View>
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

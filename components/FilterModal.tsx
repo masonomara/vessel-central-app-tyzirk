@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, memo, useCallback } from 'react';
 import { StyleSheet, View, Text, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { colors } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
@@ -20,15 +20,46 @@ export interface FilterOptions {
   vessel?: string | 'all';
 }
 
-export default function FilterModal({ visible, onClose, onApply, filterType, currentFilters }: FilterModalProps) {
+const FilterChip = memo(({ 
+  label, 
+  isActive, 
+  onPress 
+}: { 
+  label: string; 
+  isActive: boolean; 
+  onPress: () => void;
+}) => (
+  <TouchableOpacity
+    style={[
+      styles.filterChip,
+      isActive && styles.filterChipActive,
+    ]}
+    onPress={onPress}
+  >
+    <Text style={[
+      styles.filterChipText,
+      isActive && styles.filterChipTextActive,
+    ]}>
+      {label}
+    </Text>
+  </TouchableOpacity>
+));
+
+export default memo(function FilterModal({ 
+  visible, 
+  onClose, 
+  onApply, 
+  filterType, 
+  currentFilters 
+}: FilterModalProps) {
   const [filters, setFilters] = useState<FilterOptions>(currentFilters);
 
-  const handleApply = () => {
+  const handleApply = useCallback(() => {
     onApply(filters);
     onClose();
-  };
+  }, [filters, onApply, onClose]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     const resetFilters: FilterOptions = {
       status: 'all',
       priority: 'all',
@@ -36,14 +67,26 @@ export default function FilterModal({ visible, onClose, onApply, filterType, cur
       vessel: 'all',
     };
     setFilters(resetFilters);
-  };
+  }, []);
 
-  const getStatusOptions = () => {
+  const getStatusOptions = useCallback(() => {
     if (filterType === 'supplies') {
       return ['all', 'pending', 'approved', 'denied', 'ordered', 'received'];
     }
     return ['all', 'open', 'in_progress', 'waiting_on_parts', 'completed'];
-  };
+  }, [filterType]);
+
+  const handleStatusChange = useCallback((status: string) => {
+    setFilters(prev => ({ ...prev, status: status as any }));
+  }, []);
+
+  const handlePriorityChange = useCallback((priority: string) => {
+    setFilters(prev => ({ ...prev, priority: priority as any }));
+  }, []);
+
+  const handleDateRangeChange = useCallback((range: string) => {
+    setFilters(prev => ({ ...prev, dateRange: range as any }));
+  }, []);
 
   return (
     <Modal
@@ -71,21 +114,12 @@ export default function FilterModal({ visible, onClose, onApply, filterType, cur
               <Text style={styles.filterLabel}>Status</Text>
               <View style={styles.filterOptions}>
                 {getStatusOptions().map((status) => (
-                  <TouchableOpacity
+                  <FilterChip
                     key={status}
-                    style={[
-                      styles.filterChip,
-                      filters.status === status && styles.filterChipActive,
-                    ]}
-                    onPress={() => setFilters({ ...filters, status: status as any })}
-                  >
-                    <Text style={[
-                      styles.filterChipText,
-                      filters.status === status && styles.filterChipTextActive,
-                    ]}>
-                      {status.replace('_', ' ').toUpperCase()}
-                    </Text>
-                  </TouchableOpacity>
+                    label={status.replace('_', ' ').toUpperCase()}
+                    isActive={filters.status === status}
+                    onPress={() => handleStatusChange(status)}
+                  />
                 ))}
               </View>
             </View>
@@ -95,21 +129,12 @@ export default function FilterModal({ visible, onClose, onApply, filterType, cur
                 <Text style={styles.filterLabel}>Priority</Text>
                 <View style={styles.filterOptions}>
                   {['all', 'low', 'medium', 'high', 'urgent'].map((priority) => (
-                    <TouchableOpacity
+                    <FilterChip
                       key={priority}
-                      style={[
-                        styles.filterChip,
-                        filters.priority === priority && styles.filterChipActive,
-                      ]}
-                      onPress={() => setFilters({ ...filters, priority: priority as any })}
-                    >
-                      <Text style={[
-                        styles.filterChipText,
-                        filters.priority === priority && styles.filterChipTextActive,
-                      ]}>
-                        {priority.toUpperCase()}
-                      </Text>
-                    </TouchableOpacity>
+                      label={priority.toUpperCase()}
+                      isActive={filters.priority === priority}
+                      onPress={() => handlePriorityChange(priority)}
+                    />
                   ))}
                 </View>
               </View>
@@ -119,21 +144,12 @@ export default function FilterModal({ visible, onClose, onApply, filterType, cur
               <Text style={styles.filterLabel}>Date Range</Text>
               <View style={styles.filterOptions}>
                 {['all', 'today', 'week', 'month'].map((range) => (
-                  <TouchableOpacity
+                  <FilterChip
                     key={range}
-                    style={[
-                      styles.filterChip,
-                      filters.dateRange === range && styles.filterChipActive,
-                    ]}
-                    onPress={() => setFilters({ ...filters, dateRange: range as any })}
-                  >
-                    <Text style={[
-                      styles.filterChipText,
-                      filters.dateRange === range && styles.filterChipTextActive,
-                    ]}>
-                      {range.toUpperCase()}
-                    </Text>
-                  </TouchableOpacity>
+                    label={range.toUpperCase()}
+                    isActive={filters.dateRange === range}
+                    onPress={() => handleDateRangeChange(range)}
+                  />
                 ))}
               </View>
             </View>
@@ -151,7 +167,7 @@ export default function FilterModal({ visible, onClose, onApply, filterType, cur
       </View>
     </Modal>
   );
-}
+});
 
 const styles = StyleSheet.create({
   modalOverlay: {

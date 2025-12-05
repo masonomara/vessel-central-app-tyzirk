@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useMemo, useCallback } from 'react';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@react-navigation/native';
 import { colors } from '@/styles/commonStyles';
@@ -10,21 +10,13 @@ import { IconSymbol } from '@/components/IconSymbol';
 import { Issue, TaskStatus, TaskPriority } from '@/types';
 import { formatDate } from '@/utils/dateUtils';
 
-export default function IssuesScreen() {
-  const router = useRouter();
-  const theme = useTheme();
-  const { issues } = useData();
-  const { userRole } = useAuth();
-  const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredIssues = issues.filter(issue => {
-    const matchesStatus = filterStatus === 'all' || issue.status === filterStatus;
-    const matchesSearch = issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         issue.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesSearch;
-  });
-
+const IssueItem = React.memo(({ 
+  issue, 
+  onPress 
+}: { 
+  issue: Issue; 
+  onPress: (issue: Issue) => void;
+}) => {
   const getPriorityColor = (priority: TaskPriority) => {
     switch (priority) {
       case 'urgent': return colors.danger;
@@ -45,30 +37,152 @@ export default function IssuesScreen() {
     }
   };
 
-  const handleIssuePress = (issue: Issue) => {
-    console.log('Issue pressed:', issue.id);
-    // Navigate to issue detail screen
-  };
-
-  const handleAddIssue = () => {
-    console.log('Add issue pressed');
-    router.push('/add-issue');
-  };
+  const handlePress = useCallback(() => {
+    onPress(issue);
+  }, [issue, onPress]);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Issues</Text>
-        <TouchableOpacity style={styles.addButton} onPress={handleAddIssue}>
+    <TouchableOpacity
+      style={[
+        styles.issueCard,
+        issue.priority === 'urgent' && styles.issueCardUrgent,
+      ]}
+      onPress={handlePress}
+      activeOpacity={0.7}
+    >
+      <View style={styles.issueHeader}>
+        <View style={styles.issueTitleRow}>
           <IconSymbol 
-            ios_icon_name="plus.circle.fill" 
-            android_material_icon_name="add_circle" 
-            size={32} 
-            color={colors.danger} 
+            ios_icon_name="exclamationmark.triangle.fill" 
+            android_material_icon_name="report_problem" 
+            size={24} 
+            color={getPriorityColor(issue.priority)} 
           />
-        </TouchableOpacity>
+          <Text style={styles.issueTitle}>{issue.title}</Text>
+        </View>
+        <View style={[
+          styles.priorityBadge,
+          { backgroundColor: getPriorityColor(issue.priority) + '30' },
+        ]}>
+          <Text style={[
+            styles.priorityText,
+            { color: getPriorityColor(issue.priority) },
+          ]}>
+            {issue.priority.toUpperCase()}
+          </Text>
+        </View>
       </View>
 
+      <Text style={styles.issueDescription} numberOfLines={2}>
+        {issue.description}
+      </Text>
+
+      <View style={styles.issueMeta}>
+        <View style={styles.metaItem}>
+          <IconSymbol 
+            ios_icon_name="sailboat.fill" 
+            android_material_icon_name="sailing" 
+            size={16} 
+            color={colors.textSecondary} 
+          />
+          <Text style={styles.metaText}>{issue.vesselName}</Text>
+        </View>
+        <View style={styles.metaItem}>
+          <IconSymbol 
+            ios_icon_name="location.fill" 
+            android_material_icon_name="location_on" 
+            size={16} 
+            color={colors.textSecondary} 
+          />
+          <Text style={styles.metaText}>{issue.location}</Text>
+        </View>
+      </View>
+
+      <View style={styles.issueFooter}>
+        <View style={[
+          styles.statusBadge,
+          { backgroundColor: getStatusColor(issue.status) + '30' },
+        ]}>
+          <Text style={[
+            styles.statusText,
+            { color: getStatusColor(issue.status) },
+          ]}>
+            {issue.status.replace('_', ' ').toUpperCase()}
+          </Text>
+        </View>
+        <View style={styles.reportedBy}>
+          <Text style={styles.reportedByText}>
+            Reported by {issue.reportedByName}
+          </Text>
+          <Text style={styles.timeText}>{formatDate(issue.createdAt)}</Text>
+        </View>
+      </View>
+
+      {issue.attachments.length > 0 && (
+        <View style={styles.attachmentsIndicator}>
+          <IconSymbol 
+            ios_icon_name="paperclip" 
+            android_material_icon_name="attach_file" 
+            size={16} 
+            color={colors.accent} 
+          />
+          <Text style={styles.attachmentsText}>
+            {issue.attachments.length} attachment{issue.attachments.length > 1 ? 's' : ''}
+          </Text>
+        </View>
+      )}
+
+      {issue.comments.length > 0 && (
+        <View style={styles.commentsIndicator}>
+          <IconSymbol 
+            ios_icon_name="bubble.left.fill" 
+            android_material_icon_name="comment" 
+            size={16} 
+            color={colors.accent} 
+          />
+          <Text style={styles.commentsText}>
+            {issue.comments.length} comment{issue.comments.length > 1 ? 's' : ''}
+          </Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+});
+
+export default function IssuesScreen() {
+  const router = useRouter();
+  const theme = useTheme();
+  const { issues } = useData();
+  const { userRole } = useAuth();
+  const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredIssues = useMemo(() => {
+    return issues.filter(issue => {
+      const matchesStatus = filterStatus === 'all' || issue.status === filterStatus;
+      const matchesSearch = issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           issue.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesStatus && matchesSearch;
+    });
+  }, [issues, filterStatus, searchQuery]);
+
+  const handleIssuePress = useCallback((issue: Issue) => {
+    console.log('Issue pressed:', issue.id);
+  }, []);
+
+  const handleAddIssue = useCallback(() => {
+    console.log('Add issue pressed');
+    router.push('/add-issue');
+  }, []);
+
+  const renderItem = useCallback(({ item }: { item: Issue }) => (
+    <IssueItem issue={item} onPress={handleIssuePress} />
+  ), [handleIssuePress]);
+
+  const keyExtractor = useCallback((item: Issue) => item.id, []);
+
+  const ListHeaderComponent = useCallback(() => (
+    <>
       <View style={styles.searchContainer}>
         <IconSymbol 
           ios_icon_name="magnifyingglass" 
@@ -85,156 +199,75 @@ export default function IssuesScreen() {
         />
       </View>
 
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false}
-        style={styles.filterContainer}
-        contentContainerStyle={styles.filterContent}
-      >
-        {['all', 'open', 'in_progress', 'waiting_on_parts', 'completed'].map((status) => (
-          <TouchableOpacity
-            key={status}
-            style={[
-              styles.filterChip,
-              filterStatus === status && styles.filterChipActive,
-            ]}
-            onPress={() => setFilterStatus(status as TaskStatus | 'all')}
-          >
-            <Text style={[
-              styles.filterChipText,
-              filterStatus === status && styles.filterChipTextActive,
-            ]}>
-              {status.replace('_', ' ').toUpperCase()}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {filteredIssues.length === 0 ? (
-          <View style={styles.emptyState}>
-            <IconSymbol 
-              ios_icon_name="checkmark.circle" 
-              android_material_icon_name="check_circle" 
-              size={64} 
-              color={colors.success} 
-            />
-            <Text style={styles.emptyStateText}>No issues found</Text>
-            <Text style={styles.emptyStateSubtext}>All systems running smoothly!</Text>
-          </View>
-        ) : (
-          filteredIssues.map((issue) => (
+      <View style={styles.filterContainer}>
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={['all', 'open', 'in_progress', 'waiting_on_parts', 'completed']}
+          renderItem={({ item: status }) => (
             <TouchableOpacity
-              key={issue.id}
               style={[
-                styles.issueCard,
-                issue.priority === 'urgent' && styles.issueCardUrgent,
+                styles.filterChip,
+                filterStatus === status && styles.filterChipActive,
               ]}
-              onPress={() => handleIssuePress(issue)}
-              activeOpacity={0.7}
+              onPress={() => setFilterStatus(status as TaskStatus | 'all')}
             >
-              <View style={styles.issueHeader}>
-                <View style={styles.issueTitleRow}>
-                  <IconSymbol 
-                    ios_icon_name="exclamationmark.triangle.fill" 
-                    android_material_icon_name="report_problem" 
-                    size={24} 
-                    color={getPriorityColor(issue.priority)} 
-                  />
-                  <Text style={styles.issueTitle}>{issue.title}</Text>
-                </View>
-                <View style={[
-                  styles.priorityBadge,
-                  { backgroundColor: getPriorityColor(issue.priority) + '30' },
-                ]}>
-                  <Text style={[
-                    styles.priorityText,
-                    { color: getPriorityColor(issue.priority) },
-                  ]}>
-                    {issue.priority.toUpperCase()}
-                  </Text>
-                </View>
-              </View>
-
-              <Text style={styles.issueDescription} numberOfLines={2}>
-                {issue.description}
+              <Text style={[
+                styles.filterChipText,
+                filterStatus === status && styles.filterChipTextActive,
+              ]}>
+                {status.replace('_', ' ').toUpperCase()}
               </Text>
-
-              <View style={styles.issueMeta}>
-                <View style={styles.metaItem}>
-                  <IconSymbol 
-                    ios_icon_name="sailboat.fill" 
-                    android_material_icon_name="sailing" 
-                    size={16} 
-                    color={colors.textSecondary} 
-                  />
-                  <Text style={styles.metaText}>{issue.vesselName}</Text>
-                </View>
-                <View style={styles.metaItem}>
-                  <IconSymbol 
-                    ios_icon_name="location.fill" 
-                    android_material_icon_name="location_on" 
-                    size={16} 
-                    color={colors.textSecondary} 
-                  />
-                  <Text style={styles.metaText}>{issue.location}</Text>
-                </View>
-              </View>
-
-              <View style={styles.issueFooter}>
-                <View style={[
-                  styles.statusBadge,
-                  { backgroundColor: getStatusColor(issue.status) + '30' },
-                ]}>
-                  <Text style={[
-                    styles.statusText,
-                    { color: getStatusColor(issue.status) },
-                  ]}>
-                    {issue.status.replace('_', ' ').toUpperCase()}
-                  </Text>
-                </View>
-                <View style={styles.reportedBy}>
-                  <Text style={styles.reportedByText}>
-                    Reported by {issue.reportedByName}
-                  </Text>
-                  <Text style={styles.timeText}>{formatDate(issue.createdAt)}</Text>
-                </View>
-              </View>
-
-              {issue.attachments.length > 0 && (
-                <View style={styles.attachmentsIndicator}>
-                  <IconSymbol 
-                    ios_icon_name="paperclip" 
-                    android_material_icon_name="attach_file" 
-                    size={16} 
-                    color={colors.accent} 
-                  />
-                  <Text style={styles.attachmentsText}>
-                    {issue.attachments.length} attachment{issue.attachments.length > 1 ? 's' : ''}
-                  </Text>
-                </View>
-              )}
-
-              {issue.comments.length > 0 && (
-                <View style={styles.commentsIndicator}>
-                  <IconSymbol 
-                    ios_icon_name="bubble.left.fill" 
-                    android_material_icon_name="comment" 
-                    size={16} 
-                    color={colors.accent} 
-                  />
-                  <Text style={styles.commentsText}>
-                    {issue.comments.length} comment{issue.comments.length > 1 ? 's' : ''}
-                  </Text>
-                </View>
-              )}
             </TouchableOpacity>
-          ))
-        )}
-      </ScrollView>
+          )}
+          keyExtractor={(item) => item}
+          contentContainerStyle={styles.filterContent}
+        />
+      </View>
+    </>
+  ), [searchQuery, filterStatus]);
+
+  const ListEmptyComponent = useCallback(() => (
+    <View style={styles.emptyState}>
+      <IconSymbol 
+        ios_icon_name="checkmark.circle" 
+        android_material_icon_name="check_circle" 
+        size={64} 
+        color={colors.success} 
+      />
+      <Text style={styles.emptyStateText}>No issues found</Text>
+      <Text style={styles.emptyStateSubtext}>All systems running smoothly!</Text>
+    </View>
+  ), []);
+
+  return (
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Issues</Text>
+        <TouchableOpacity style={styles.addButton} onPress={handleAddIssue}>
+          <IconSymbol 
+            ios_icon_name="plus.circle.fill" 
+            android_material_icon_name="add_circle" 
+            size={32} 
+            color={colors.danger} 
+          />
+        </TouchableOpacity>
+      </View>
+
+      <FlatList
+        data={filteredIssues}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        ListHeaderComponent={ListHeaderComponent}
+        ListEmptyComponent={ListEmptyComponent}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        updateCellsBatchingPeriod={50}
+        initialNumToRender={10}
+        windowSize={10}
+      />
     </View>
   );
 }
@@ -291,6 +324,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
+    marginRight: 8,
   },
   filterChipActive: {
     backgroundColor: colors.danger,
@@ -304,7 +338,7 @@ const styles = StyleSheet.create({
   filterChipTextActive: {
     color: colors.text,
   },
-  scrollContent: {
+  listContent: {
     paddingHorizontal: 20,
     paddingBottom: 120,
   },

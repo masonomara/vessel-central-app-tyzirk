@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { colors } from '@/styles/commonStyles';
 import { IconSymbol } from './IconSymbol';
@@ -17,7 +17,7 @@ interface StatCardProps {
   backgroundColor?: string;
 }
 
-export function StatCard({
+export const StatCard = memo(function StatCard({
   icon,
   androidIcon,
   iconColor,
@@ -73,7 +73,7 @@ export function StatCard({
   }
 
   return <View style={styles.wrapper}>{content}</View>;
-}
+});
 
 const styles = StyleSheet.create({
   wrapper: {

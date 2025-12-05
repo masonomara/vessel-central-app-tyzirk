@@ -1,6 +1,6 @@
 
-import React, { useState, useMemo } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useMemo, useCallback } from 'react';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { colors } from '@/styles/commonStyles';
 import { useData } from '@/contexts/DataContext';
@@ -11,9 +11,139 @@ import { MaintenanceTask, TaskStatus, TaskPriority } from '@/types';
 import { formatDueDate, isOverdue } from '@/utils/dateUtils';
 import { router } from 'expo-router';
 
+const MaintenanceTaskItem = React.memo(({ 
+  task, 
+  onPress 
+}: { 
+  task: MaintenanceTask; 
+  onPress: (task: MaintenanceTask) => void;
+}) => {
+  const getPriorityColor = (priority: TaskPriority) => {
+    switch (priority) {
+      case 'urgent': return colors.danger;
+      case 'high': return colors.warning;
+      case 'medium': return colors.accent;
+      case 'low': return colors.success;
+      default: return colors.grey;
+    }
+  };
+
+  const getStatusColor = (status: TaskStatus) => {
+    switch (status) {
+      case 'completed': return colors.success;
+      case 'in_progress': return colors.accent;
+      case 'waiting_on_parts': return colors.warning;
+      case 'open': return colors.grey;
+      default: return colors.grey;
+    }
+  };
+
+  const handlePress = useCallback(() => {
+    onPress(task);
+  }, [task, onPress]);
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.taskCard,
+        isOverdue(task.dueDate) && task.status !== 'completed' && styles.taskCardOverdue,
+      ]}
+      onPress={handlePress}
+      activeOpacity={0.7}
+    >
+      <View style={styles.taskHeader}>
+        <View style={styles.taskTitleRow}>
+          <Text style={styles.taskTitle}>{task.title}</Text>
+          {task.isRecurring && (
+            <IconSymbol 
+              ios_icon_name="arrow.clockwise" 
+              android_material_icon_name="repeat" 
+              size={16} 
+              color={colors.accent} 
+            />
+          )}
+        </View>
+        <View style={[
+          styles.priorityBadge,
+          { backgroundColor: getPriorityColor(task.priority) + '30' },
+        ]}>
+          <Text style={[
+            styles.priorityText,
+            { color: getPriorityColor(task.priority) },
+          ]}>
+            {task.priority.toUpperCase()}
+          </Text>
+        </View>
+      </View>
+
+      <Text style={styles.taskDescription} numberOfLines={2}>
+        {task.description}
+      </Text>
+
+      <View style={styles.taskMeta}>
+        <View style={styles.metaItem}>
+          <IconSymbol 
+            ios_icon_name="sailboat.fill" 
+            android_material_icon_name="sailing" 
+            size={16} 
+            color={colors.textSecondary} 
+          />
+          <Text style={styles.metaText}>{task.vesselName}</Text>
+        </View>
+        {task.assignedToName && (
+          <View style={styles.metaItem}>
+            <IconSymbol 
+              ios_icon_name="person.fill" 
+              android_material_icon_name="person" 
+              size={16} 
+              color={colors.textSecondary} 
+            />
+            <Text style={styles.metaText}>{task.assignedToName}</Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.taskFooter}>
+        <View style={[
+          styles.statusBadge,
+          { backgroundColor: getStatusColor(task.status) + '30' },
+        ]}>
+          <Text style={[
+            styles.statusText,
+            { color: getStatusColor(task.status) },
+          ]}>
+            {task.status.replace('_', ' ').toUpperCase()}
+          </Text>
+        </View>
+        <View style={styles.dueDateContainer}>
+          <IconSymbol 
+            ios_icon_name="calendar" 
+            android_material_icon_name="event" 
+            size={16} 
+            color={isOverdue(task.dueDate) && task.status !== 'completed' ? colors.danger : colors.textSecondary} 
+          />
+          <Text style={[
+            styles.dueDateText,
+            isOverdue(task.dueDate) && task.status !== 'completed' && styles.dueDateOverdue,
+          ]}>
+            {formatDueDate(task.dueDate)}
+          </Text>
+        </View>
+      </View>
+
+      {task.estimatedCost && (
+        <View style={styles.costContainer}>
+          <Text style={styles.costLabel}>Est. Cost:</Text>
+          <Text style={styles.costValue}>${task.estimatedCost.toLocaleString()}</Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+});
+
 export default function MaintenanceScreen() {
   const theme = useTheme();
-  const { maintenanceTasks, updateMaintenanceTask } = useData();
+  const { maintenanceTasks } = useData();
   const { userRole } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -50,81 +180,47 @@ export default function MaintenanceScreen() {
     });
   }, [maintenanceTasks, filters, searchQuery]);
 
-  const getPriorityColor = (priority: TaskPriority) => {
-    switch (priority) {
-      case 'urgent': return colors.danger;
-      case 'high': return colors.warning;
-      case 'medium': return colors.accent;
-      case 'low': return colors.success;
-      default: return colors.grey;
-    }
-  };
-
-  const getStatusColor = (status: TaskStatus) => {
-    switch (status) {
-      case 'completed': return colors.success;
-      case 'in_progress': return colors.accent;
-      case 'waiting_on_parts': return colors.warning;
-      case 'open': return colors.grey;
-      default: return colors.grey;
-    }
-  };
-
-  const handleTaskPress = (task: MaintenanceTask) => {
-    console.log('Task pressed:', task.id);
-    router.push(`/maintenance-detail?id=${task.id}`);
-  };
-
-  const handleAddTask = () => {
-    console.log('Add task pressed');
-    router.push('/add-maintenance-task');
-  };
-
-  const handleAnalytics = () => {
-    console.log('Analytics pressed');
-    router.push('/analytics');
-  };
+  const stats = useMemo(() => ({
+    total: filteredTasks.length,
+    overdue: filteredTasks.filter(t => isOverdue(t.dueDate) && t.status !== 'completed').length,
+    completed: filteredTasks.filter(t => t.status === 'completed').length,
+  }), [filteredTasks]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (filters.status !== 'all') {
-      count++;
-    }
-    if (filters.priority !== 'all') {
-      count++;
-    }
-    if (filters.dateRange !== 'all') {
-      count++;
-    }
+    if (filters.status !== 'all') count++;
+    if (filters.priority !== 'all') count++;
+    if (filters.dateRange !== 'all') count++;
     return count;
   }, [filters]);
 
-  return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Maintenance</Text>
-        <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.iconButton} onPress={handleAnalytics}>
-            <IconSymbol 
-              ios_icon_name="chart.bar.fill" 
-              android_material_icon_name="analytics" 
-              size={24} 
-              color={colors.accent} 
-            />
-          </TouchableOpacity>
-          {(userRole === 'manager' || userRole === 'owner') && (
-            <TouchableOpacity style={styles.iconButton} onPress={handleAddTask}>
-              <IconSymbol 
-                ios_icon_name="plus.circle.fill" 
-                android_material_icon_name="add_circle" 
-                size={32} 
-                color={colors.accent} 
-              />
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
+  const handleTaskPress = useCallback((task: MaintenanceTask) => {
+    console.log('Task pressed:', task.id);
+    router.push(`/maintenance-detail?id=${task.id}`);
+  }, []);
 
+  const handleAddTask = useCallback(() => {
+    console.log('Add task pressed');
+    router.push('/add-maintenance-task');
+  }, []);
+
+  const handleAnalytics = useCallback(() => {
+    console.log('Analytics pressed');
+    router.push('/analytics');
+  }, []);
+
+  const handleApplyFilters = useCallback((newFilters: FilterOptions) => {
+    setFilters(newFilters);
+  }, []);
+
+  const renderItem = useCallback(({ item }: { item: MaintenanceTask }) => (
+    <MaintenanceTaskItem task={item} onPress={handleTaskPress} />
+  ), [handleTaskPress]);
+
+  const keyExtractor = useCallback((item: MaintenanceTask) => item.id, []);
+
+  const ListHeaderComponent = useCallback(() => (
+    <>
       <View style={styles.searchContainer}>
         <IconSymbol 
           ios_icon_name="magnifyingglass" 
@@ -156,148 +252,87 @@ export default function MaintenanceScreen() {
 
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
-          <Text style={styles.statValue}>{filteredTasks.length}</Text>
+          <Text style={styles.statValue}>{stats.total}</Text>
           <Text style={styles.statLabel}>Total</Text>
         </View>
         <View style={styles.statItem}>
           <Text style={[styles.statValue, { color: colors.warning }]}>
-            {filteredTasks.filter(t => isOverdue(t.dueDate) && t.status !== 'completed').length}
+            {stats.overdue}
           </Text>
           <Text style={styles.statLabel}>Overdue</Text>
         </View>
         <View style={styles.statItem}>
           <Text style={[styles.statValue, { color: colors.success }]}>
-            {filteredTasks.filter(t => t.status === 'completed').length}
+            {stats.completed}
           </Text>
           <Text style={styles.statLabel}>Completed</Text>
         </View>
       </View>
+    </>
+  ), [searchQuery, activeFilterCount, stats]);
 
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {filteredTasks.length === 0 ? (
-          <View style={styles.emptyState}>
+  const ListEmptyComponent = useCallback(() => (
+    <View style={styles.emptyState}>
+      <IconSymbol 
+        ios_icon_name="wrench.and.screwdriver" 
+        android_material_icon_name="build" 
+        size={64} 
+        color={colors.textSecondary} 
+      />
+      <Text style={styles.emptyStateText}>No maintenance tasks found</Text>
+      {(userRole === 'manager' || userRole === 'owner') && (
+        <TouchableOpacity style={styles.emptyStateButton} onPress={handleAddTask}>
+          <Text style={styles.emptyStateButtonText}>Create First Task</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  ), [userRole, handleAddTask]);
+
+  return (
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Maintenance</Text>
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.iconButton} onPress={handleAnalytics}>
             <IconSymbol 
-              ios_icon_name="wrench.and.screwdriver" 
-              android_material_icon_name="build" 
-              size={64} 
-              color={colors.textSecondary} 
+              ios_icon_name="chart.bar.fill" 
+              android_material_icon_name="analytics" 
+              size={24} 
+              color={colors.accent} 
             />
-            <Text style={styles.emptyStateText}>No maintenance tasks found</Text>
-            {(userRole === 'manager' || userRole === 'owner') && (
-              <TouchableOpacity style={styles.emptyStateButton} onPress={handleAddTask}>
-                <Text style={styles.emptyStateButtonText}>Create First Task</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        ) : (
-          filteredTasks.map((task) => (
-            <TouchableOpacity
-              key={task.id}
-              style={[
-                styles.taskCard,
-                isOverdue(task.dueDate) && task.status !== 'completed' && styles.taskCardOverdue,
-              ]}
-              onPress={() => handleTaskPress(task)}
-              activeOpacity={0.7}
-            >
-              <View style={styles.taskHeader}>
-                <View style={styles.taskTitleRow}>
-                  <Text style={styles.taskTitle}>{task.title}</Text>
-                  {task.isRecurring && (
-                    <IconSymbol 
-                      ios_icon_name="arrow.clockwise" 
-                      android_material_icon_name="repeat" 
-                      size={16} 
-                      color={colors.accent} 
-                    />
-                  )}
-                </View>
-                <View style={[
-                  styles.priorityBadge,
-                  { backgroundColor: getPriorityColor(task.priority) + '30' },
-                ]}>
-                  <Text style={[
-                    styles.priorityText,
-                    { color: getPriorityColor(task.priority) },
-                  ]}>
-                    {task.priority.toUpperCase()}
-                  </Text>
-                </View>
-              </View>
-
-              <Text style={styles.taskDescription} numberOfLines={2}>
-                {task.description}
-              </Text>
-
-              <View style={styles.taskMeta}>
-                <View style={styles.metaItem}>
-                  <IconSymbol 
-                    ios_icon_name="sailboat.fill" 
-                    android_material_icon_name="sailing" 
-                    size={16} 
-                    color={colors.textSecondary} 
-                  />
-                  <Text style={styles.metaText}>{task.vesselName}</Text>
-                </View>
-                {task.assignedToName && (
-                  <View style={styles.metaItem}>
-                    <IconSymbol 
-                      ios_icon_name="person.fill" 
-                      android_material_icon_name="person" 
-                      size={16} 
-                      color={colors.textSecondary} 
-                    />
-                    <Text style={styles.metaText}>{task.assignedToName}</Text>
-                  </View>
-                )}
-              </View>
-
-              <View style={styles.taskFooter}>
-                <View style={[
-                  styles.statusBadge,
-                  { backgroundColor: getStatusColor(task.status) + '30' },
-                ]}>
-                  <Text style={[
-                    styles.statusText,
-                    { color: getStatusColor(task.status) },
-                  ]}>
-                    {task.status.replace('_', ' ').toUpperCase()}
-                  </Text>
-                </View>
-                <View style={styles.dueDateContainer}>
-                  <IconSymbol 
-                    ios_icon_name="calendar" 
-                    android_material_icon_name="event" 
-                    size={16} 
-                    color={isOverdue(task.dueDate) && task.status !== 'completed' ? colors.danger : colors.textSecondary} 
-                  />
-                  <Text style={[
-                    styles.dueDateText,
-                    isOverdue(task.dueDate) && task.status !== 'completed' && styles.dueDateOverdue,
-                  ]}>
-                    {formatDueDate(task.dueDate)}
-                  </Text>
-                </View>
-              </View>
-
-              {task.estimatedCost && (
-                <View style={styles.costContainer}>
-                  <Text style={styles.costLabel}>Est. Cost:</Text>
-                  <Text style={styles.costValue}>${task.estimatedCost.toLocaleString()}</Text>
-                </View>
-              )}
+          </TouchableOpacity>
+          {(userRole === 'manager' || userRole === 'owner') && (
+            <TouchableOpacity style={styles.iconButton} onPress={handleAddTask}>
+              <IconSymbol 
+                ios_icon_name="plus.circle.fill" 
+                android_material_icon_name="add_circle" 
+                size={32} 
+                color={colors.accent} 
+              />
             </TouchableOpacity>
-          ))
-        )}
-      </ScrollView>
+          )}
+        </View>
+      </View>
+
+      <FlatList
+        data={filteredTasks}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        ListHeaderComponent={ListHeaderComponent}
+        ListEmptyComponent={ListEmptyComponent}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        updateCellsBatchingPeriod={50}
+        initialNumToRender={10}
+        windowSize={10}
+      />
 
       <FilterModal
         visible={showFilters}
         onClose={() => setShowFilters(false)}
-        onApply={setFilters}
+        onApply={handleApplyFilters}
         filterType="maintenance"
         currentFilters={filters}
       />
@@ -392,7 +427,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.textSecondary,
   },
-  scrollContent: {
+  listContent: {
     paddingHorizontal: 20,
     paddingBottom: 120,
   },

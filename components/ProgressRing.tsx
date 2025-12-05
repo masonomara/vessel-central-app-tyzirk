@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { colors } from '@/styles/commonStyles';
@@ -14,7 +14,7 @@ interface ProgressRingProps {
   label?: string;
 }
 
-export function ProgressRing({
+export const ProgressRing = memo(function ProgressRing({
   progress,
   size = 120,
   strokeWidth = 12,
@@ -59,7 +59,7 @@ export function ProgressRing({
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
