@@ -248,7 +248,7 @@ export default function HomeScreen() {
     return filtered;
   }, [userCards, searchQuery, selectedFilter]);
 
-  const handleRoleSelect = async (card: UserCardData) => {
+  const handleRoleSelect = useCallback(async (card: UserCardData) => {
     console.log('Role selected:', card.role, 'User ID:', card.id);
     
     // Animate press
@@ -268,14 +268,14 @@ export default function HomeScreen() {
     await setUserRole(card.role);
     await setUserName(card.name);
     await setUserId(card.id);
-  };
+  }, [scaleAnim, setUserRole, setUserName, setUserId]);
 
-  const handleInfoPress = (card: UserCardData) => {
+  const handleInfoPress = useCallback((card: UserCardData) => {
     console.log('Info pressed for:', card.name);
     // TODO: Show quick details modal
-  };
+  }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     console.log('Logging out...');
     try {
       await AsyncStorage.removeItem('authToken');
@@ -292,7 +292,7 @@ export default function HomeScreen() {
     } catch (error) {
       console.error('Error logging out:', error);
     }
-  };
+  }, [router, setUserRole, setUserName, setUserId]);
 
   if (isCheckingAuth) {
     return (

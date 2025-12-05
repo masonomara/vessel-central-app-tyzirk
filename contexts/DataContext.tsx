@@ -542,6 +542,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const saveData = useCallback(async () => {
+    // Only save if data has been loaded
+    if (!hasLoadedData.current) {
+      return;
+    }
+
     // Debounce saves to prevent excessive writes
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -574,9 +579,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // Save data whenever it changes (debounced)
   useEffect(() => {
-    if (hasLoadedData.current) {
-      saveData();
-    }
+    saveData();
   }, [saveData]);
 
   const generateId = () => {
