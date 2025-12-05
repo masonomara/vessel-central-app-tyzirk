@@ -1,5 +1,5 @@
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { colors, commonStyles } from "@/styles/commonStyles";
@@ -8,11 +8,14 @@ import { useData } from "@/contexts/DataContext";
 import { IconSymbol } from "@/components/IconSymbol";
 import { StatCard } from "@/components/StatCard";
 import { ProgressRing } from "@/components/ProgressRing";
+import GlobalSearch from "@/components/GlobalSearch";
+import RealtimeFeed from "@/components/RealtimeFeed";
 import { router } from "expo-router";
 
 export default function ManagerDashboard() {
   const theme = useTheme();
   const { userName, userId, userRole, signOut } = useAuth();
+  const [showSearch, setShowSearch] = useState(false);
   const { 
     getVesselsForUser, 
     getMaintenanceTasksForUser,
@@ -148,6 +151,8 @@ export default function ManagerDashboard() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <GlobalSearch visible={showSearch} onClose={() => setShowSearch(false)} />
+      
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -158,14 +163,24 @@ export default function ManagerDashboard() {
               <Text style={styles.greeting}>Manager Portal</Text>
               <Text style={commonStyles.title}>{userName}</Text>
             </View>
-            <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-              <IconSymbol 
-                ios_icon_name="rectangle.portrait.and.arrow.right" 
-                android_material_icon_name="logout" 
-                size={24} 
-                color={colors.text} 
-              />
-            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              <TouchableOpacity onPress={() => setShowSearch(true)} style={styles.searchButton}>
+                <IconSymbol 
+                  ios_icon_name="magnifyingglass" 
+                  android_material_icon_name="search" 
+                  size={24} 
+                  color={colors.text} 
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+                <IconSymbol 
+                  ios_icon_name="rectangle.portrait.and.arrow.right" 
+                  android_material_icon_name="logout" 
+                  size={24} 
+                  color={colors.text} 
+                />
+              </TouchableOpacity>
+            </View>
           </View>
           <View style={styles.roleTag}>
             <IconSymbol 
@@ -221,6 +236,10 @@ export default function ManagerDashboard() {
               onPress={handleViewAllRequests}
             />
           </View>
+        </View>
+
+        <View style={styles.section}>
+          <RealtimeFeed userId={userId} maxItems={5} />
         </View>
 
         <View style={styles.section}>

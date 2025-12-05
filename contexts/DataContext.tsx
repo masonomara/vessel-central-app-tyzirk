@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect, useCa
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { cacheManager, CACHE_KEYS, CACHE_EXPIRATION, cacheHelpers } from '@/utils/cacheManager';
 import { offlineManager } from '@/utils/offlineManager';
+import { realtimeManager } from '@/utils/realtimeManager';
 import {
   MaintenanceTask,
   Issue,
@@ -790,6 +791,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       });
     }
     
+    // Publish realtime event
+    await realtimeManager.publishEvent('task_assigned', {
+      title: task.title,
+      vesselName: task.vesselName,
+    }, task.assignedTo, task.vesselId);
+    
     addActivityLog({
       type: 'maintenance',
       title: 'Maintenance Task Created',
@@ -805,6 +812,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   const updateMaintenanceTask = async (id: string, updates: Partial<MaintenanceTask>) => {
+    const task = maintenanceTasks.find(t => t.id === id);
+    
     setMaintenanceTasks(maintenanceTasks.map(task =>
       task.id === id ? { ...task, ...updates, updatedAt: new Date() } : task
     ));
@@ -819,6 +828,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
         entity: 'maintenance',
         data: { id, updates },
       });
+    }
+    
+    // Publish realtime event
+    if (task && updates.status === 'completed') {
+      await realtimeManager.publishEvent('task_completed', {
+        title: task.title,
+        vesselName: task.vesselName,
+      }, task.assignedTo, task.vesselId);
+    } else if (task) {
+      await realtimeManager.publishEvent('maintenance_updated', {
+        title: task.title,
+        vesselName: task.vesselName,
+      }, task.assignedTo, task.vesselId);
     }
   };
 
@@ -911,6 +933,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
       });
     }
     
+    // Publish realtime event
+    const vessel = vessels.find(v => v.id === issue.vesselId);
+    if (vessel) {
+      await realtimeManager.publishEvent('issue_created', {
+        title: issue.title,
+        vesselName: issue.vesselName,
+        priority: issue.priority,
+      }, vessel.managerId, issue.vesselId);
+    }
+    
     addActivityLog({
       type: 'issue',
       title: 'Issue Reported',
@@ -924,7 +956,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       relatedType: 'issue',
     });
     
-    const vessel = vessels.find(v => v.id === issue.vesselId);
     if (vessel) {
       addNotification({
         type: 'issue',
@@ -1001,7 +1032,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     ));
   };
 
-  const approveSupplyRequest = (id: string, approvedBy: string, approvedByName: string) => {
+  const approveSupplyRequest = async (id: string, approvedBy: string, approvedByName: string) => {
     updateSupplyRequest(id, {
       status: 'approved',
       approvedBy,
@@ -1011,6 +1042,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
     
     const request = supplyRequests.find(r => r.id === id);
     if (request) {
+      // Publish realtime event
+      await realtimeManager.publishEvent('supply_approved', {
+        itemName: request.itemName,
+        vesselName: request.vesselName,
+      }, request.requestedBy, request.vesselId);
+      
       addActivityLog({
         type: 'approval',
         title: 'Supply Request Approved',
@@ -1034,7 +1071,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const denySupplyRequest = (id: string, reason: string) => {
+  const denySupplyRequest = async (id: string, reason: string) => {
     updateSupplyRequest(id, {
       status: 'denied',
       deniedReason: reason,
@@ -1042,6 +1079,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     
     const request = supplyRequests.find(r => r.id === id);
     if (request) {
+      // Publish realtime event
+      await realtimeManager.publishEvent('supply_denied', {
+        itemName: request.itemName,
+        vesselName: request.vesselName,
+        reason,
+      }, request.requestedBy, request.vesselId);
+      
       addNotification({
         type: 'approval',
         title: 'Supply Request Denied',
