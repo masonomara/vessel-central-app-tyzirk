@@ -6,6 +6,7 @@ import { colors } from '@/styles/commonStyles';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { IconSymbol } from '@/components/IconSymbol';
+import { CacheStatus } from '@/components/CacheStatus';
 import FilterModal, { FilterOptions } from '@/components/FilterModal';
 import { MaintenanceTask, TaskStatus, TaskPriority } from '@/types';
 import { formatDueDate, isOverdue } from '@/utils/dateUtils';
@@ -221,6 +222,8 @@ export default function MaintenanceScreen() {
 
   const ListHeaderComponent = useCallback(() => (
     <>
+      <CacheStatus onRefresh={() => console.log('Cache refreshed')} />
+      
       <View style={styles.searchContainer}>
         <IconSymbol 
           ios_icon_name="magnifyingglass" 

@@ -1,6 +1,8 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { cacheManager, CACHE_KEYS, CACHE_EXPIRATION, cacheHelpers } from '@/utils/cacheManager';
+import { offlineManager } from '@/utils/offlineManager';
 import {
   MaintenanceTask,
   Issue,
@@ -34,12 +36,12 @@ interface DataContextType {
   getNotificationsForUser: (userId: string) => Notification[];
   getExpensesForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => Expense[];
   
-  addMaintenanceTask: (task: Omit<MaintenanceTask, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateMaintenanceTask: (id: string, updates: Partial<MaintenanceTask>) => void;
+  addMaintenanceTask: (task: Omit<MaintenanceTask, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateMaintenanceTask: (id: string, updates: Partial<MaintenanceTask>) => Promise<void>;
   deleteMaintenanceTask: (id: string) => void;
   completeMaintenanceTask: (id: string, record: Omit<CompletionRecord, 'id' | 'taskId'>) => void;
   
-  addIssue: (issue: Omit<Issue, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  addIssue: (issue: Omit<Issue, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateIssue: (id: string, updates: Partial<Issue>) => void;
   addIssueComment: (issueId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
   
@@ -466,76 +468,165 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
     
     try {
-      const data = await AsyncStorage.getItem(STORAGE_KEY);
-      if (data) {
-        const parsed = JSON.parse(data);
-        console.log('Data loaded from storage');
-        
-        if (parsed.vessels) {
-          setVessels(parsed.vessels);
-        }
-        
-        if (parsed.maintenanceTasks) {
-          setMaintenanceTasks(parsed.maintenanceTasks.map((task: MaintenanceTask) => ({
-            ...task,
-            dueDate: new Date(task.dueDate),
-            createdAt: new Date(task.createdAt),
-            updatedAt: new Date(task.updatedAt),
-            completedDate: task.completedDate ? new Date(task.completedDate) : undefined,
-            nextDueDate: task.nextDueDate ? new Date(task.nextDueDate) : undefined,
-          })));
-        }
-        
-        if (parsed.issues) {
-          setIssues(parsed.issues.map((issue: Issue) => ({
-            ...issue,
-            createdAt: new Date(issue.createdAt),
-            updatedAt: new Date(issue.updatedAt),
-            resolvedAt: issue.resolvedAt ? new Date(issue.resolvedAt) : undefined,
-          })));
-        }
-        
-        if (parsed.supplyRequests) {
-          setSupplyRequests(parsed.supplyRequests.map((req: SupplyRequest) => ({
-            ...req,
-            createdAt: new Date(req.createdAt),
-            updatedAt: new Date(req.updatedAt),
-            approvedAt: req.approvedAt ? new Date(req.approvedAt) : undefined,
-            receivedAt: req.receivedAt ? new Date(req.receivedAt) : undefined,
-          })));
-        }
-        
-        if (parsed.documents) {
-          setDocuments(parsed.documents.map((doc: Document) => ({
-            ...doc,
-            uploadedAt: new Date(doc.uploadedAt),
-            expiryDate: doc.expiryDate ? new Date(doc.expiryDate) : undefined,
-          })));
-        }
-        
-        if (parsed.activityLogs) {
-          setActivityLogs(parsed.activityLogs.map((log: ActivityLog) => ({
-            ...log,
-            timestamp: new Date(log.timestamp),
-          })));
-        }
-        
-        if (parsed.notifications) {
-          setNotifications(parsed.notifications.map((notif: Notification) => ({
-            ...notif,
-            createdAt: new Date(notif.createdAt),
-          })));
-        }
-        
-        if (parsed.expenses) {
-          setExpenses(parsed.expenses.map((exp: Expense) => ({
-            ...exp,
-            date: new Date(exp.date),
-          })));
-        }
-        
-        hasLoadedData.current = true;
+      console.log('Loading data from cache...');
+      
+      // Try to load from new cache system first
+      const cachedVessels = await cacheManager.get<Vessel[]>(CACHE_KEYS.VESSELS);
+      const cachedMaintenanceTasks = await cacheManager.get<MaintenanceTask[]>(CACHE_KEYS.MAINTENANCE_TASKS);
+      const cachedIssues = await cacheManager.get<Issue[]>(CACHE_KEYS.ISSUES);
+      const cachedSupplyRequests = await cacheManager.get<SupplyRequest[]>(CACHE_KEYS.SUPPLY_REQUESTS);
+      const cachedDocuments = await cacheManager.get<Document[]>(CACHE_KEYS.DOCUMENTS);
+      const cachedActivityLogs = await cacheManager.get<ActivityLog[]>(CACHE_KEYS.ACTIVITY_LOGS);
+      const cachedNotifications = await cacheManager.get<Notification[]>(CACHE_KEYS.NOTIFICATIONS);
+      const cachedExpenses = await cacheManager.get<Expense[]>(CACHE_KEYS.EXPENSES);
+
+      // If cache exists, use it
+      if (cachedVessels) {
+        console.log('Using cached vessels');
+        setVessels(cachedVessels);
       }
+      
+      if (cachedMaintenanceTasks) {
+        console.log('Using cached maintenance tasks');
+        setMaintenanceTasks(cachedMaintenanceTasks.map((task: MaintenanceTask) => ({
+          ...task,
+          dueDate: new Date(task.dueDate),
+          createdAt: new Date(task.createdAt),
+          updatedAt: new Date(task.updatedAt),
+          completedDate: task.completedDate ? new Date(task.completedDate) : undefined,
+          nextDueDate: task.nextDueDate ? new Date(task.nextDueDate) : undefined,
+        })));
+      }
+      
+      if (cachedIssues) {
+        console.log('Using cached issues');
+        setIssues(cachedIssues.map((issue: Issue) => ({
+          ...issue,
+          createdAt: new Date(issue.createdAt),
+          updatedAt: new Date(issue.updatedAt),
+          resolvedAt: issue.resolvedAt ? new Date(issue.resolvedAt) : undefined,
+        })));
+      }
+      
+      if (cachedSupplyRequests) {
+        console.log('Using cached supply requests');
+        setSupplyRequests(cachedSupplyRequests.map((req: SupplyRequest) => ({
+          ...req,
+          createdAt: new Date(req.createdAt),
+          updatedAt: new Date(req.updatedAt),
+          approvedAt: req.approvedAt ? new Date(req.approvedAt) : undefined,
+          receivedAt: req.receivedAt ? new Date(req.receivedAt) : undefined,
+        })));
+      }
+      
+      if (cachedDocuments) {
+        console.log('Using cached documents');
+        setDocuments(cachedDocuments.map((doc: Document) => ({
+          ...doc,
+          uploadedAt: new Date(doc.uploadedAt),
+          expiryDate: doc.expiryDate ? new Date(doc.expiryDate) : undefined,
+        })));
+      }
+      
+      if (cachedActivityLogs) {
+        console.log('Using cached activity logs');
+        setActivityLogs(cachedActivityLogs.map((log: ActivityLog) => ({
+          ...log,
+          timestamp: new Date(log.timestamp),
+        })));
+      }
+      
+      if (cachedNotifications) {
+        console.log('Using cached notifications');
+        setNotifications(cachedNotifications.map((notif: Notification) => ({
+          ...notif,
+          createdAt: new Date(notif.createdAt),
+        })));
+      }
+      
+      if (cachedExpenses) {
+        console.log('Using cached expenses');
+        setExpenses(cachedExpenses.map((exp: Expense) => ({
+          ...exp,
+          date: new Date(exp.date),
+        })));
+      }
+
+      // If no cache exists, try legacy storage
+      if (!cachedVessels && !cachedMaintenanceTasks) {
+        console.log('No cache found, trying legacy storage...');
+        const data = await AsyncStorage.getItem(STORAGE_KEY);
+        if (data) {
+          const parsed = JSON.parse(data);
+          console.log('Data loaded from legacy storage');
+          
+          if (parsed.vessels) {
+            setVessels(parsed.vessels);
+          }
+          
+          if (parsed.maintenanceTasks) {
+            setMaintenanceTasks(parsed.maintenanceTasks.map((task: MaintenanceTask) => ({
+              ...task,
+              dueDate: new Date(task.dueDate),
+              createdAt: new Date(task.createdAt),
+              updatedAt: new Date(task.updatedAt),
+              completedDate: task.completedDate ? new Date(task.completedDate) : undefined,
+              nextDueDate: task.nextDueDate ? new Date(task.nextDueDate) : undefined,
+            })));
+          }
+          
+          if (parsed.issues) {
+            setIssues(parsed.issues.map((issue: Issue) => ({
+              ...issue,
+              createdAt: new Date(issue.createdAt),
+              updatedAt: new Date(issue.updatedAt),
+              resolvedAt: issue.resolvedAt ? new Date(issue.resolvedAt) : undefined,
+            })));
+          }
+          
+          if (parsed.supplyRequests) {
+            setSupplyRequests(parsed.supplyRequests.map((req: SupplyRequest) => ({
+              ...req,
+              createdAt: new Date(req.createdAt),
+              updatedAt: new Date(req.updatedAt),
+              approvedAt: req.approvedAt ? new Date(req.approvedAt) : undefined,
+              receivedAt: req.receivedAt ? new Date(req.receivedAt) : undefined,
+            })));
+          }
+          
+          if (parsed.documents) {
+            setDocuments(parsed.documents.map((doc: Document) => ({
+              ...doc,
+              uploadedAt: new Date(doc.uploadedAt),
+              expiryDate: doc.expiryDate ? new Date(doc.expiryDate) : undefined,
+            })));
+          }
+          
+          if (parsed.activityLogs) {
+            setActivityLogs(parsed.activityLogs.map((log: ActivityLog) => ({
+              ...log,
+              timestamp: new Date(log.timestamp),
+            })));
+          }
+          
+          if (parsed.notifications) {
+            setNotifications(parsed.notifications.map((notif: Notification) => ({
+              ...notif,
+              createdAt: new Date(notif.createdAt),
+            })));
+          }
+          
+          if (parsed.expenses) {
+            setExpenses(parsed.expenses.map((exp: Expense) => ({
+              ...exp,
+              date: new Date(exp.date),
+            })));
+          }
+        }
+      }
+      
+      hasLoadedData.current = true;
+      console.log('Data loading completed');
     } catch (error) {
       console.error('Error loading data:', error);
     }
@@ -554,6 +645,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
     
     saveTimeoutRef.current = setTimeout(async () => {
       try {
+        console.log('Saving data to cache...');
+        
+        // Save to new cache system with appropriate expiration times
+        await cacheManager.setMultiple([
+          { key: CACHE_KEYS.VESSELS, data: vessels, expiration: CACHE_EXPIRATION.LONG },
+          { key: CACHE_KEYS.MAINTENANCE_TASKS, data: maintenanceTasks, expiration: CACHE_EXPIRATION.MEDIUM },
+          { key: CACHE_KEYS.ISSUES, data: issues, expiration: CACHE_EXPIRATION.MEDIUM },
+          { key: CACHE_KEYS.SUPPLY_REQUESTS, data: supplyRequests, expiration: CACHE_EXPIRATION.MEDIUM },
+          { key: CACHE_KEYS.DOCUMENTS, data: documents, expiration: CACHE_EXPIRATION.LONG },
+          { key: CACHE_KEYS.ACTIVITY_LOGS, data: activityLogs, expiration: CACHE_EXPIRATION.SHORT },
+          { key: CACHE_KEYS.NOTIFICATIONS, data: notifications, expiration: CACHE_EXPIRATION.SHORT },
+          { key: CACHE_KEYS.EXPENSES, data: expenses, expiration: CACHE_EXPIRATION.MEDIUM },
+        ]);
+        
+        // Also save to legacy storage for backward compatibility
         const data = {
           vessels,
           maintenanceTasks,
@@ -565,7 +671,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
           expenses,
         };
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        console.log('Data saved to storage');
+        
+        console.log('Data saved successfully');
       } catch (error) {
         console.error('Error saving data:', error);
       }
@@ -662,7 +769,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   // Maintenance Task functions
-  const addMaintenanceTask = (task: Omit<MaintenanceTask, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addMaintenanceTask = async (task: Omit<MaintenanceTask, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newTask: MaintenanceTask = {
       ...task,
       id: generateId(),
@@ -670,6 +777,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date(),
     };
     setMaintenanceTasks([...maintenanceTasks, newTask]);
+    
+    // Invalidate cache
+    await cacheHelpers.invalidateCache('MAINTENANCE_TASKS');
+    
+    // Add to offline queue if offline
+    if (!(await offlineManager.getNetworkStatus())) {
+      await offlineManager.addToOfflineQueue({
+        type: 'create',
+        entity: 'maintenance',
+        data: newTask,
+      });
+    }
     
     addActivityLog({
       type: 'maintenance',
@@ -685,10 +804,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const updateMaintenanceTask = (id: string, updates: Partial<MaintenanceTask>) => {
+  const updateMaintenanceTask = async (id: string, updates: Partial<MaintenanceTask>) => {
     setMaintenanceTasks(maintenanceTasks.map(task =>
       task.id === id ? { ...task, ...updates, updatedAt: new Date() } : task
     ));
+    
+    // Invalidate cache
+    await cacheHelpers.invalidateCache('MAINTENANCE_TASKS');
+    
+    // Add to offline queue if offline
+    if (!(await offlineManager.getNetworkStatus())) {
+      await offlineManager.addToOfflineQueue({
+        type: 'update',
+        entity: 'maintenance',
+        data: { id, updates },
+      });
+    }
   };
 
   const deleteMaintenanceTask = (id: string) => {
@@ -759,7 +890,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   // Issue functions
-  const addIssue = (issue: Omit<Issue, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addIssue = async (issue: Omit<Issue, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newIssue: Issue = {
       ...issue,
       id: generateId(),
@@ -767,6 +898,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date(),
     };
     setIssues([...issues, newIssue]);
+    
+    // Invalidate cache
+    await cacheHelpers.invalidateCache('ISSUES');
+    
+    // Add to offline queue if offline
+    if (!(await offlineManager.getNetworkStatus())) {
+      await offlineManager.addToOfflineQueue({
+        type: 'create',
+        entity: 'issue',
+        data: newIssue,
+      });
+    }
     
     addActivityLog({
       type: 'issue',
