@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { 
   StyleSheet, 
   View, 
@@ -48,9 +48,18 @@ export default function HomeScreen() {
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('All');
   const [scaleAnim] = useState(new Animated.Value(1));
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const hasCheckedAuth = useRef(false);
 
   const checkAuthentication = useCallback(async () => {
+    // Only check once
+    if (hasCheckedAuth.current) {
+      console.log('Already checked authentication, skipping...');
+      return;
+    }
+    
+    hasCheckedAuth.current = true;
     console.log('Checking authentication...');
+    
     try {
       const authToken = await AsyncStorage.getItem('authToken');
       const userId = await AsyncStorage.getItem('userId');
@@ -62,9 +71,9 @@ export default function HomeScreen() {
         router.replace('/login');
       } else {
         console.log('User authenticated:', userName, 'Role:', userRole);
-        setUserRole(userRole as 'owner' | 'manager' | 'crew');
-        setUserName(userName);
-        setUserId(userId);
+        await setUserRole(userRole as 'owner' | 'manager' | 'crew');
+        await setUserName(userName);
+        await setUserId(userId);
       }
     } catch (error) {
       console.error('Error checking authentication:', error);
@@ -74,10 +83,10 @@ export default function HomeScreen() {
     }
   }, [router, setUserRole, setUserName, setUserId]);
 
-  // Check authentication on mount
+  // Check authentication on mount only
   useEffect(() => {
     checkAuthentication();
-  }, [checkAuthentication]);
+  }, []);
 
   // Build user cards with operational data
   const userCards: UserCardData[] = useMemo(() => {
@@ -239,7 +248,7 @@ export default function HomeScreen() {
     return filtered;
   }, [userCards, searchQuery, selectedFilter]);
 
-  const handleRoleSelect = (card: UserCardData) => {
+  const handleRoleSelect = async (card: UserCardData) => {
     console.log('Role selected:', card.role, 'User ID:', card.id);
     
     // Animate press
@@ -256,9 +265,9 @@ export default function HomeScreen() {
       }),
     ]).start();
     
-    setUserRole(card.role);
-    setUserName(card.name);
-    setUserId(card.id);
+    await setUserRole(card.role);
+    await setUserName(card.name);
+    await setUserId(card.id);
   };
 
   const handleInfoPress = (card: UserCardData) => {
@@ -274,10 +283,11 @@ export default function HomeScreen() {
       await AsyncStorage.removeItem('userRole');
       await AsyncStorage.removeItem('userName');
       
-      setUserRole(null);
-      setUserName('');
-      setUserId('');
+      await setUserRole(null);
+      await setUserName('');
+      await setUserId('');
       
+      hasCheckedAuth.current = false;
       router.replace('/login');
     } catch (error) {
       console.error('Error logging out:', error);

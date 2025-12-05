@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   MaintenanceTask,
@@ -455,7 +455,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
     },
   ]);
 
+  // Use ref to track if data has been loaded
+  const hasLoadedData = useRef(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const loadData = useCallback(async () => {
+    if (hasLoadedData.current) {
+      console.log('Data already loaded, skipping...');
+      return;
+    }
+    
     try {
       const data = await AsyncStorage.getItem(STORAGE_KEY);
       if (data) {
@@ -524,6 +533,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
             date: new Date(exp.date),
           })));
         }
+        
+        hasLoadedData.current = true;
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -531,33 +542,42 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const saveData = useCallback(async () => {
-    try {
-      const data = {
-        vessels,
-        maintenanceTasks,
-        issues,
-        supplyRequests,
-        documents,
-        activityLogs,
-        notifications,
-        expenses,
-      };
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      console.log('Data saved to storage');
-    } catch (error) {
-      console.error('Error saving data:', error);
+    // Debounce saves to prevent excessive writes
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
+    
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        const data = {
+          vessels,
+          maintenanceTasks,
+          issues,
+          supplyRequests,
+          documents,
+          activityLogs,
+          notifications,
+          expenses,
+        };
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        console.log('Data saved to storage');
+      } catch (error) {
+        console.error('Error saving data:', error);
+      }
+    }, 1000); // Save after 1 second of inactivity
   }, [vessels, maintenanceTasks, issues, supplyRequests, documents, activityLogs, notifications, expenses]);
 
-  // Load data from storage on mount
+  // Load data from storage on mount only
   useEffect(() => {
     loadData();
-  }, [loadData]);
+  }, []);
 
-  // Save data whenever it changes
+  // Save data whenever it changes (debounced)
   useEffect(() => {
-    saveData();
-  }, [saveData]);
+    if (hasLoadedData.current) {
+      saveData();
+    }
+  }, [vessels, maintenanceTasks, issues, supplyRequests, documents, activityLogs, notifications, expenses]);
 
   const generateId = () => {
     return Date.now().toString() + Math.random().toString(36).substr(2, 9);

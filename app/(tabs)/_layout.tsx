@@ -1,5 +1,5 @@
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import FloatingTabBar, { TabBarItem } from '@/components/FloatingTabBar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,6 +10,7 @@ export default function TabLayout() {
   const { notifications } = useData();
   const router = useRouter();
   const segments = useSegments();
+  const hasRedirected = useRef(false);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -17,7 +18,9 @@ export default function TabLayout() {
     console.log('Current role:', userRole);
     console.log('Current segments:', segments);
 
-    if (userRole && segments[1] === '(home)') {
+    // Only redirect once when role is set and we're on home
+    if (userRole && segments[1] === '(home)' && !hasRedirected.current) {
+      hasRedirected.current = true;
       // Redirect to appropriate dashboard based on role
       if (userRole === 'owner') {
         router.replace('/(tabs)/owner');
@@ -32,6 +35,11 @@ export default function TabLayout() {
   useEffect(() => {
     handleRoleRedirect();
   }, [handleRoleRedirect]);
+
+  // Reset redirect flag when role changes
+  useEffect(() => {
+    hasRedirected.current = false;
+  }, [userRole]);
 
   // Define the tabs configuration based on role
   const getTabsForRole = (): TabBarItem[] => {
