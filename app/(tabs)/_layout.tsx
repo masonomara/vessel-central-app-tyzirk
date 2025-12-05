@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import FloatingTabBar, { TabBarItem } from '@/components/FloatingTabBar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,7 +13,7 @@ export default function TabLayout() {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  useEffect(() => {
+  const handleRoleRedirect = useCallback(() => {
     console.log('Current role:', userRole);
     console.log('Current segments:', segments);
 
@@ -27,7 +27,11 @@ export default function TabLayout() {
         router.replace('/(tabs)/crew');
       }
     }
-  }, [userRole, segments]);
+  }, [userRole, segments, router]);
+
+  useEffect(() => {
+    handleRoleRedirect();
+  }, [handleRoleRedirect]);
 
   // Define the tabs configuration based on role
   const getTabsForRole = (): TabBarItem[] => {

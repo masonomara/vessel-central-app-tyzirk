@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { View, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,11 +8,7 @@ import { colors } from '@/styles/commonStyles';
 export default function Index() {
   const router = useRouter();
 
-  useEffect(() => {
-    checkAuthAndRedirect();
-  }, []);
-
-  const checkAuthAndRedirect = async () => {
+  const checkAuthAndRedirect = useCallback(async () => {
     console.log('Checking initial authentication...');
     try {
       const authToken = await AsyncStorage.getItem('authToken');
@@ -28,7 +24,11 @@ export default function Index() {
       console.error('Error checking authentication:', error);
       router.replace('/login');
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    checkAuthAndRedirect();
+  }, [checkAuthAndRedirect]);
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>

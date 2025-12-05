@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { 
   StyleSheet, 
   View, 
@@ -49,12 +49,7 @@ export default function HomeScreen() {
   const [scaleAnim] = useState(new Animated.Value(1));
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  // Check authentication on mount
-  useEffect(() => {
-    checkAuthentication();
-  }, []);
-
-  const checkAuthentication = async () => {
+  const checkAuthentication = useCallback(async () => {
     console.log('Checking authentication...');
     try {
       const authToken = await AsyncStorage.getItem('authToken');
@@ -77,7 +72,12 @@ export default function HomeScreen() {
     } finally {
       setIsCheckingAuth(false);
     }
-  };
+  }, [router, setUserRole, setUserName, setUserId]);
+
+  // Check authentication on mount
+  useEffect(() => {
+    checkAuthentication();
+  }, [checkAuthentication]);
 
   // Build user cards with operational data
   const userCards: UserCardData[] = useMemo(() => {

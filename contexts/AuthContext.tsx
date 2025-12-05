@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { supabase, isSupabaseConfigured } from '@/utils/supabase';
 import { Session, User, AuthError } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -51,6 +51,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSupabaseEnabled] = useState<boolean>(isSupabaseConfigured());
 
+  const initializeAuth = useCallback(async () => {
+    try {
+      if (!isSupabaseEnabled) {
+        console.log('Supabase not configured, loading from AsyncStorage...');
+        // Load from AsyncStorage for backward compatibility
+        const storedUserId = await AsyncStorage.getItem('userId');
+        const storedRole = await AsyncStorage.getItem('userRole');
+        const storedName = await AsyncStorage.getItem('userName');
+        
+        if (storedUserId) {
+          setUserIdState(storedUserId);
+          setUserRoleState(storedRole as UserRole);
+          setUserNameState(storedName || '');
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      // Get current session from Supabase
+      const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error getting session:', error);
+        setIsLoading(false);
+        return;
+      }
+
+      if (currentSession) {
+        setSession(currentSession);
+        setUser(currentSession.user);
+        setUserIdState(currentSession.user.id);
+        
+        const metadata = currentSession.user.user_metadata;
+        if (metadata) {
+          setUserNameState(metadata.name || metadata.full_name || '');
+          setUserRoleState(metadata.role || null);
+        }
+      }
+      
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error initializing auth:', error);
+      setIsLoading(false);
+    }
+  }, [isSupabaseEnabled]);
+
   // Initialize auth state
   useEffect(() => {
     console.log('Initializing auth state...');
@@ -101,53 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       authListener?.subscription.unsubscribe();
     };
-  }, []);
-
-  const initializeAuth = async () => {
-    try {
-      if (!isSupabaseEnabled) {
-        console.log('Supabase not configured, loading from AsyncStorage...');
-        // Load from AsyncStorage for backward compatibility
-        const storedUserId = await AsyncStorage.getItem('userId');
-        const storedRole = await AsyncStorage.getItem('userRole');
-        const storedName = await AsyncStorage.getItem('userName');
-        
-        if (storedUserId) {
-          setUserIdState(storedUserId);
-          setUserRoleState(storedRole as UserRole);
-          setUserNameState(storedName || '');
-        }
-        setIsLoading(false);
-        return;
-      }
-
-      // Get current session from Supabase
-      const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Error getting session:', error);
-        setIsLoading(false);
-        return;
-      }
-
-      if (currentSession) {
-        setSession(currentSession);
-        setUser(currentSession.user);
-        setUserIdState(currentSession.user.id);
-        
-        const metadata = currentSession.user.user_metadata;
-        if (metadata) {
-          setUserNameState(metadata.name || metadata.full_name || '');
-          setUserRoleState(metadata.role || null);
-        }
-      }
-      
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error initializing auth:', error);
-      setIsLoading(false);
-    }
-  };
+  }, [initializeAuth]);
 
   // Sign up with email and password
   const signUp = async (

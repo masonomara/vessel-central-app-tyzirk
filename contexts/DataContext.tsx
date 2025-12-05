@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   MaintenanceTask,
@@ -455,17 +455,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     },
   ]);
 
-  // Load data from storage on mount
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  // Save data whenever it changes
-  useEffect(() => {
-    saveData();
-  }, [maintenanceTasks, issues, supplyRequests, documents, activityLogs, notifications, expenses]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const data = await AsyncStorage.getItem(STORAGE_KEY);
       if (data) {
@@ -538,9 +528,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error loading data:', error);
     }
-  };
+  }, []);
 
-  const saveData = async () => {
+  const saveData = useCallback(async () => {
     try {
       const data = {
         vessels,
@@ -557,7 +547,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error saving data:', error);
     }
-  };
+  }, [vessels, maintenanceTasks, issues, supplyRequests, documents, activityLogs, notifications, expenses]);
+
+  // Load data from storage on mount
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Save data whenever it changes
+  useEffect(() => {
+    saveData();
+  }, [saveData]);
 
   const generateId = () => {
     return Date.now().toString() + Math.random().toString(36).substr(2, 9);
