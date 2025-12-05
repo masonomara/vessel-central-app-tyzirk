@@ -1,49 +1,53 @@
 
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-import { useColorScheme } from 'react-native';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { DataProvider } from '@/contexts/DataContext';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useEffect } from 'react';
 
-SplashScreen.preventAutoHideAsync();
+function RootLayoutContent() {
+  useNotifications();
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="login" />
+      <Stack.Screen name="signup" />
+      <Stack.Screen name="forgot-password" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen 
+        name="modal" 
+        options={{
+          presentation: 'modal',
+          headerShown: true,
+          title: 'Modal',
+        }}
+      />
+      <Stack.Screen 
+        name="formsheet" 
+        options={{
+          presentation: 'formSheet',
+          headerShown: true,
+          title: 'Form Sheet',
+        }}
+      />
+      <Stack.Screen 
+        name="transparent-modal" 
+        options={{
+          presentation: 'transparentModal',
+          animation: 'fade',
+          headerShown: false,
+        }}
+      />
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
   return (
     <AuthProvider>
       <DataProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="login" options={{ headerShown: false }} />
-            <Stack.Screen name="signup" options={{ headerShown: false }} />
-            <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="formsheet" options={{ presentation: 'formSheet' }} />
-            <Stack.Screen name="transparent-modal" options={{ presentation: 'transparentModal' }} />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
+        <RootLayoutContent />
       </DataProvider>
     </AuthProvider>
   );

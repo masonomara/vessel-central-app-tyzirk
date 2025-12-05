@@ -1,6 +1,6 @@
 
 import React, { useMemo } from "react";
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { colors, commonStyles } from "@/styles/commonStyles";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,7 +10,7 @@ import { router } from "expo-router";
 
 export default function ManagerDashboard() {
   const theme = useTheme();
-  const { userName, userId, userRole, setUserRole } = useAuth();
+  const { userName, userId, userRole, signOut } = useAuth();
   const { 
     getVesselsForUser, 
     getMaintenanceTasksForUser,
@@ -21,9 +21,44 @@ export default function ManagerDashboard() {
   } = useData();
 
   const handleLogout = () => {
-    console.log('Logging out');
-    setUserRole(null);
-    router.replace('/(tabs)/(home)/');
+    Alert.alert(
+      "Log Out",
+      "Are you sure you want to log out?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Log Out",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              console.log("=== LOGOUT INITIATED FROM MANAGER DASHBOARD ===");
+              
+              const { error } = await signOut();
+              
+              if (error) {
+                console.error("Logout error:", error);
+                Alert.alert("Error", "Failed to log out. Please try again.");
+                return;
+              }
+              
+              console.log("Logout successful, navigating to login...");
+              
+              setTimeout(() => {
+                console.log("Navigating to login screen...");
+                router.replace("/login");
+              }, 100);
+              
+            } catch (err) {
+              console.error("Logout exception:", err);
+              Alert.alert("Error", "An unexpected error occurred. Please try again.");
+            }
+          }
+        }
+      ]
+    );
   };
 
   const myVessels = useMemo(() => {
