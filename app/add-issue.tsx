@@ -10,6 +10,7 @@ import {
   Alert,
   Image,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@react-navigation/native';
@@ -19,6 +20,7 @@ import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { IconSymbol } from '@/components/IconSymbol';
 import { TaskPriority, Attachment } from '@/types';
+import { optimizeImage, formatFileSize, validateImage } from '@/utils/imageUtils';
 
 const ISSUE_CATEGORIES = [
   'Structural',
@@ -51,6 +53,8 @@ export default function AddIssueScreen() {
   const [location, setLocation] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [optimizationProgress, setOptimizationProgress] = useState({ current: 0, total: 0 });
 
   const selectedVessel = vessels.find(v => v.id === selectedVesselId);
 
@@ -59,26 +63,87 @@ export default function AddIssueScreen() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images', 'videos'],
         allowsMultipleSelection: true,
-        quality: 0.8,
+        quality: 1, // Get full quality, we'll optimize it ourselves
       });
 
       if (!result.canceled) {
-        const newAttachments: Attachment[] = result.assets.map(asset => ({
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-          name: asset.fileName || `attachment_${Date.now()}`,
-          uri: asset.uri,
-          type: asset.type === 'video' ? 'video' : 'image',
-          size: asset.fileSize || 0,
-          uploadedBy: userId,
-          uploadedAt: new Date(),
-          mimeType: asset.mimeType,
-        }));
+        setIsOptimizing(true);
+        setOptimizationProgress({ current: 0, total: result.assets.length });
+
+        const newAttachments: Attachment[] = [];
+
+        for (let i = 0; i < result.assets.length; i++) {
+          const asset = result.assets[i];
+          
+          // Update progress
+          setOptimizationProgress({ current: i + 1, total: result.assets.length });
+
+          if (asset.type === 'video') {
+            // Don't optimize videos, just add them
+            newAttachments.push({
+              id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+              name: asset.fileName || `video_${Date.now()}`,
+              uri: asset.uri,
+              type: 'video',
+              size: asset.fileSize || 0,
+              uploadedBy: userId,
+              uploadedAt: new Date(),
+              mimeType: asset.mimeType,
+            });
+          } else {
+            // Validate image
+            const validation = validateImage(asset.mimeType, asset.fileSize);
+            if (!validation.valid) {
+              Alert.alert('Invalid Image', validation.error || 'Image validation failed');
+              continue;
+            }
+
+            try {
+              // Optimize image
+              const optimized = await optimizeImage(asset.uri, {
+                maxWidth: 1920,
+                maxHeight: 1920,
+                quality: 0.8,
+                format: 'jpeg',
+              });
+
+              newAttachments.push({
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                name: asset.fileName || `photo_${Date.now()}`,
+                uri: optimized.uri,
+                type: 'image',
+                size: optimized.size || 0,
+                uploadedBy: userId,
+                uploadedAt: new Date(),
+                mimeType: 'image/jpeg',
+              });
+
+              console.log(`Image optimized: ${formatFileSize(optimized.originalSize || 0)} → ${formatFileSize(optimized.size || 0)}`);
+            } catch (error) {
+              console.error('Error optimizing image:', error);
+              // Fall back to original image if optimization fails
+              newAttachments.push({
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                name: asset.fileName || `photo_${Date.now()}`,
+                uri: asset.uri,
+                type: 'image',
+                size: asset.fileSize || 0,
+                uploadedBy: userId,
+                uploadedAt: new Date(),
+                mimeType: asset.mimeType,
+              });
+            }
+          }
+        }
 
         setAttachments([...attachments, ...newAttachments]);
+        setIsOptimizing(false);
+        setOptimizationProgress({ current: 0, total: 0 });
       }
     } catch (error) {
       console.error('Error picking image:', error);
       Alert.alert('Error', 'Failed to pick image. Please try again.');
+      setIsOptimizing(false);
     }
   };
 
@@ -93,27 +158,66 @@ export default function AddIssueScreen() {
 
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: false,
-        quality: 0.8,
+        quality: 1, // Get full quality, we'll optimize it ourselves
       });
 
       if (!result.canceled) {
         const asset = result.assets[0];
-        const newAttachment: Attachment = {
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-          name: asset.fileName || `photo_${Date.now()}`,
-          uri: asset.uri,
-          type: 'image',
-          size: asset.fileSize || 0,
-          uploadedBy: userId,
-          uploadedAt: new Date(),
-          mimeType: asset.mimeType,
-        };
+        
+        // Validate image
+        const validation = validateImage(asset.mimeType, asset.fileSize);
+        if (!validation.valid) {
+          Alert.alert('Invalid Image', validation.error || 'Image validation failed');
+          return;
+        }
 
-        setAttachments([...attachments, newAttachment]);
+        setIsOptimizing(true);
+
+        try {
+          // Optimize image
+          const optimized = await optimizeImage(asset.uri, {
+            maxWidth: 1920,
+            maxHeight: 1920,
+            quality: 0.8,
+            format: 'jpeg',
+          });
+
+          const newAttachment: Attachment = {
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            name: asset.fileName || `photo_${Date.now()}`,
+            uri: optimized.uri,
+            type: 'image',
+            size: optimized.size || 0,
+            uploadedBy: userId,
+            uploadedAt: new Date(),
+            mimeType: 'image/jpeg',
+          };
+
+          setAttachments([...attachments, newAttachment]);
+          console.log(`Photo optimized: ${formatFileSize(optimized.originalSize || 0)} → ${formatFileSize(optimized.size || 0)}`);
+        } catch (error) {
+          console.error('Error optimizing photo:', error);
+          // Fall back to original image if optimization fails
+          const newAttachment: Attachment = {
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            name: asset.fileName || `photo_${Date.now()}`,
+            uri: asset.uri,
+            type: 'image',
+            size: asset.fileSize || 0,
+            uploadedBy: userId,
+            uploadedAt: new Date(),
+            mimeType: asset.mimeType,
+          };
+
+          setAttachments([...attachments, newAttachment]);
+        } finally {
+          setIsOptimizing(false);
+        }
       }
     } catch (error) {
       console.error('Error taking photo:', error);
       Alert.alert('Error', 'Failed to take photo. Please try again.');
+      setIsOptimizing(false);
     }
   };
 
@@ -212,6 +316,20 @@ export default function AddIssueScreen() {
         <Text style={styles.headerTitle}>Report Issue</Text>
         <View style={styles.headerSpacer} />
       </View>
+
+      {isOptimizing && (
+        <View style={styles.optimizingOverlay}>
+          <View style={styles.optimizingCard}>
+            <ActivityIndicator size="large" color={colors.accent} />
+            <Text style={styles.optimizingText}>Optimizing images...</Text>
+            {optimizationProgress.total > 0 && (
+              <Text style={styles.optimizingProgress}>
+                {optimizationProgress.current} / {optimizationProgress.total}
+              </Text>
+            )}
+          </View>
+        </View>
+      )}
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -348,24 +466,42 @@ export default function AddIssueScreen() {
         <View style={styles.section}>
           <Text style={styles.label}>Attachments (Photos/Videos)</Text>
           <View style={styles.attachmentButtons}>
-            <TouchableOpacity style={styles.attachmentButton} onPress={handleTakePhoto}>
+            <TouchableOpacity 
+              style={styles.attachmentButton} 
+              onPress={handleTakePhoto}
+              disabled={isOptimizing}
+            >
               <IconSymbol
                 ios_icon_name="camera.fill"
                 android_material_icon_name="photo_camera"
                 size={24}
-                color={colors.accent}
+                color={isOptimizing ? colors.textSecondary : colors.accent}
               />
-              <Text style={styles.attachmentButtonText}>Take Photo</Text>
+              <Text style={[
+                styles.attachmentButtonText,
+                isOptimizing && styles.attachmentButtonTextDisabled
+              ]}>
+                Take Photo
+              </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.attachmentButton} onPress={handlePickImage}>
+            <TouchableOpacity 
+              style={styles.attachmentButton} 
+              onPress={handlePickImage}
+              disabled={isOptimizing}
+            >
               <IconSymbol
                 ios_icon_name="photo.fill"
                 android_material_icon_name="photo_library"
                 size={24}
-                color={colors.accent}
+                color={isOptimizing ? colors.textSecondary : colors.accent}
               />
-              <Text style={styles.attachmentButtonText}>Choose from Library</Text>
+              <Text style={[
+                styles.attachmentButtonText,
+                isOptimizing && styles.attachmentButtonTextDisabled
+              ]}>
+                Choose from Library
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -385,6 +521,11 @@ export default function AddIssueScreen() {
                       />
                     </View>
                   )}
+                  <View style={styles.attachmentInfo}>
+                    <Text style={styles.attachmentSize}>
+                      {formatFileSize(attachment.size)}
+                    </Text>
+                  </View>
                   <TouchableOpacity
                     style={styles.removeAttachmentButton}
                     onPress={() => handleRemoveAttachment(attachment.id)}
@@ -440,6 +581,33 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     width: 40,
+  },
+  optimizingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  optimizingCard: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 32,
+    alignItems: 'center',
+    gap: 16,
+  },
+  optimizingText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  optimizingProgress: {
+    fontSize: 14,
+    color: colors.textSecondary,
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -513,6 +681,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.accent,
   },
+  attachmentButtonTextDisabled: {
+    color: colors.textSecondary,
+  },
   attachmentsList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -536,6 +707,21 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  attachmentInfo: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+    padding: 4,
+  },
+  attachmentSize: {
+    fontSize: 10,
+    color: colors.text,
+    textAlign: 'center',
   },
   removeAttachmentButton: {
     position: 'absolute',
