@@ -30,7 +30,6 @@ export default function ProfileScreen() {
             try {
               console.log("=== LOGOUT INITIATED ===");
               
-              // Call signOut and wait for it to complete
               const { error } = await signOut();
               
               if (error) {
@@ -41,7 +40,6 @@ export default function ProfileScreen() {
               
               console.log("Logout successful, navigating to login...");
               
-              // Use a small delay to ensure state is cleared
               setTimeout(() => {
                 console.log("Navigating to login screen...");
                 router.replace("/login");
@@ -98,6 +96,73 @@ export default function ProfileScreen() {
           </View>
         </GlassView>
 
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Settings</Text>
+
+        <GlassView style={[
+          styles.settingsSection,
+          Platform.OS !== 'ios' && { backgroundColor: theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }
+        ]} glassEffectStyle="regular">
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => router.push('/notification-settings')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingItemLeft}>
+              <IconSymbol
+                ios_icon_name="bell.fill"
+                android_material_icon_name="notifications"
+                size={24}
+                color={colors.primary}
+              />
+              <View style={styles.settingItemText}>
+                <Text style={[styles.settingItemTitle, { color: theme.colors.text }]}>
+                  Notifications
+                </Text>
+                <Text style={[styles.settingItemDescription, { color: theme.dark ? '#98989D' : '#666' }]}>
+                  Manage notification preferences
+                </Text>
+              </View>
+            </View>
+            <IconSymbol
+              ios_icon_name="chevron.right"
+              android_material_icon_name="chevron-right"
+              size={20}
+              color={theme.dark ? '#98989D' : '#666'}
+            />
+          </TouchableOpacity>
+
+          <View style={[styles.settingDivider, { backgroundColor: theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]} />
+
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => router.push('/cache-settings')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingItemLeft}>
+              <IconSymbol
+                ios_icon_name="internaldrive.fill"
+                android_material_icon_name="storage"
+                size={24}
+                color={colors.primary}
+              />
+              <View style={styles.settingItemText}>
+                <Text style={[styles.settingItemTitle, { color: theme.colors.text }]}>
+                  Cache & Storage
+                </Text>
+                <Text style={[styles.settingItemDescription, { color: theme.dark ? '#98989D' : '#666' }]}>
+                  Manage app data and cache
+                </Text>
+              </View>
+            </View>
+            <IconSymbol
+              ios_icon_name="chevron.right"
+              android_material_icon_name="chevron-right"
+              size={20}
+              color={theme.dark ? '#98989D' : '#666'}
+            />
+          </TouchableOpacity>
+        </GlassView>
+
         <TouchableOpacity 
           style={[styles.logoutButton, { backgroundColor: colors.danger }]}
           onPress={handleLogout}
@@ -119,7 +184,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    // backgroundColor handled dynamically
   },
   container: {
     flex: 1,
@@ -128,7 +192,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   contentContainerWithTabBar: {
-    paddingBottom: 100, // Extra padding for floating tab bar
+    paddingBottom: 100,
   },
   profileHeader: {
     alignItems: 'center',
@@ -140,11 +204,9 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: 'bold',
-    // color handled dynamically
   },
   email: {
     fontSize: 16,
-    // color handled dynamically
   },
   rolePill: {
     paddingHorizontal: 16,
@@ -171,7 +233,45 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 16,
-    // color handled dynamically
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginTop: 8,
+    marginBottom: 12,
+    marginLeft: 4,
+  },
+  settingsSection: {
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 16,
+  },
+  settingItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  settingItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 12,
+  },
+  settingItemText: {
+    flex: 1,
+  },
+  settingItemTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  settingItemDescription: {
+    fontSize: 13,
+  },
+  settingDivider: {
+    height: 1,
+    marginHorizontal: 16,
   },
   logoutButton: {
     flexDirection: 'row',

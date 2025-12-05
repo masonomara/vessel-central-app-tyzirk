@@ -1,174 +1,223 @@
 
-import React from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { colors } from '@/styles/commonStyles';
-import { IconSymbol } from '@/components/IconSymbol';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { useRealtime } from '@/hooks/useRealtime';
 import { RealtimeEvent } from '@/utils/realtimeManager';
+import { colors } from '@/styles/commonStyles';
+import { IconSymbol } from './IconSymbol';
+import { formatDistanceToNow } from '@/utils/dateUtils';
 
 interface RealtimeFeedProps {
   userId?: string;
-  maxItems?: number;
+  limit?: number;
+  showUnreadOnly?: boolean;
 }
 
-export default function RealtimeFeed({ userId, maxItems = 10 }: RealtimeFeedProps) {
-  const { events, unreadCount, markAsRead, markAllAsRead } = useRealtime({ userId });
+const EVENT_ICONS: Record<string, { ios: string; android: string; color: string }> = {
+  maintenance_updated: {
+    ios: 'wrench.fill',
+    android: 'build',
+    color: colors.warning,
+  },
+  issue_created: {
+    ios: 'exclamationmark.triangle.fill',
+    android: 'warning',
+    color: colors.error,
+  },
+  issue_updated: {
+    ios: 'exclamationmark.triangle.fill',
+    android: 'warning',
+    color: colors.warning,
+  },
+  supply_approved: {
+    ios: 'checkmark.circle.fill',
+    android: 'check-circle',
+    color: colors.success,
+  },
+  supply_denied: {
+    ios: 'xmark.circle.fill',
+    android: 'cancel',
+    color: colors.error,
+  },
+  document_uploaded: {
+    ios: 'doc.fill',
+    android: 'description',
+    color: colors.primary,
+  },
+  notification_received: {
+    ios: 'bell.fill',
+    android: 'notifications',
+    color: colors.accent,
+  },
+  vessel_status_changed: {
+    ios: 'sailboat.fill',
+    android: 'directions-boat',
+    color: colors.primary,
+  },
+  task_assigned: {
+    ios: 'person.fill.checkmark',
+    android: 'assignment',
+    color: colors.accent,
+  },
+  task_completed: {
+    ios: 'checkmark.circle.fill',
+    android: 'check-circle',
+    color: colors.success,
+  },
+};
+
+export function RealtimeFeed({ userId, limit = 20, showUnreadOnly = false }: RealtimeFeedProps) {
+  const { events, unreadCount, markAsRead, markAllAsRead, refresh } = useRealtime({ userId });
+  const [refreshing, setRefreshing] = useState(false);
+
+  const filteredEvents = showUnreadOnly ? events.filter(e => !e.read) : events;
+  const displayEvents = filteredEvents.slice(0, limit);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refresh();
+    setRefreshing(false);
+  };
 
   const getEventIcon = (type: string) => {
-    switch (type) {
-      case 'maintenance_updated':
-      case 'task_completed':
-        return { ios: 'checkmark.circle.fill', android: 'check_circle', color: colors.success };
-      case 'issue_created':
-      case 'issue_updated':
-        return { ios: 'exclamationmark.triangle.fill', android: 'warning', color: colors.danger };
-      case 'supply_approved':
-        return { ios: 'checkmark.circle.fill', android: 'check_circle', color: colors.success };
-      case 'supply_denied':
-        return { ios: 'xmark.circle.fill', android: 'cancel', color: colors.danger };
-      case 'document_uploaded':
-        return { ios: 'doc.text.fill', android: 'description', color: colors.accent };
-      case 'vessel_status_changed':
-        return { ios: 'sailboat.fill', android: 'sailing', color: colors.accent };
-      case 'task_assigned':
-        return { ios: 'person.badge.plus.fill', android: 'person_add', color: colors.warning };
-      default:
-        return { ios: 'bell.fill', android: 'notifications', color: colors.accent };
-    }
+    return EVENT_ICONS[type] || {
+      ios: 'bell.fill',
+      android: 'notifications',
+      color: colors.textSecondary,
+    };
   };
 
-  const formatEventMessage = (event: RealtimeEvent): string => {
+  const getEventTitle = (event: RealtimeEvent): string => {
     switch (event.type) {
       case 'maintenance_updated':
-        return `Maintenance task "${event.data.title}" was updated`;
-      case 'task_completed':
-        return `Task "${event.data.title}" was completed`;
+        return 'Maintenance Updated';
       case 'issue_created':
-        return `New issue: "${event.data.title}"`;
+        return 'New Issue Reported';
       case 'issue_updated':
-        return `Issue "${event.data.title}" was updated`;
+        return 'Issue Updated';
       case 'supply_approved':
-        return `Supply request for "${event.data.itemName}" was approved`;
+        return 'Supply Request Approved';
       case 'supply_denied':
-        return `Supply request for "${event.data.itemName}" was denied`;
+        return 'Supply Request Denied';
       case 'document_uploaded':
-        return `Document "${event.data.title}" was uploaded`;
+        return 'Document Uploaded';
+      case 'notification_received':
+        return 'New Notification';
       case 'vessel_status_changed':
-        return `Vessel "${event.data.vesselName}" status changed to ${event.data.status}`;
+        return 'Vessel Status Changed';
       case 'task_assigned':
-        return `You were assigned to "${event.data.title}"`;
+        return 'Task Assigned';
+      case 'task_completed':
+        return 'Task Completed';
       default:
-        return 'New activity';
+        return 'Update';
     }
   };
 
-  const formatTime = (date: Date): string => {
-    const now = new Date();
-    const diff = now.getTime() - new Date(date).getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (minutes < 1) {
-      return 'Just now';
+  const getEventDescription = (event: RealtimeEvent): string => {
+    if (event.data?.message) {
+      return event.data.message;
     }
-    if (minutes < 60) {
-      return `${minutes}m ago`;
+    if (event.data?.title) {
+      return event.data.title;
     }
-    if (hours < 24) {
-      return `${hours}h ago`;
-    }
-    return `${days}d ago`;
+    return 'Tap to view details';
   };
 
-  const displayEvents = events.slice(0, maxItems);
+  const renderEvent = ({ item }: { item: RealtimeEvent }) => {
+    const icon = getEventIcon(item.type);
+    const title = getEventTitle(item);
+    const description = getEventDescription(item);
+
+    return (
+      <TouchableOpacity
+        style={[styles.eventCard, !item.read && styles.eventCardUnread]}
+        onPress={() => markAsRead(item.id)}
+        activeOpacity={0.7}
+      >
+        <View style={[styles.eventIcon, { backgroundColor: icon.color + '20' }]}>
+          <IconSymbol
+            ios_icon_name={icon.ios}
+            android_material_icon_name={icon.android}
+            size={24}
+            color={icon.color}
+          />
+        </View>
+
+        <View style={styles.eventContent}>
+          <View style={styles.eventHeader}>
+            <Text style={styles.eventTitle}>{title}</Text>
+            {!item.read && <View style={styles.unreadDot} />}
+          </View>
+          <Text style={styles.eventDescription} numberOfLines={2}>
+            {description}
+          </Text>
+          <Text style={styles.eventTime}>
+            {formatDistanceToNow(item.timestamp)}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <IconSymbol 
-            ios_icon_name="bolt.fill" 
-            android_material_icon_name="flash_on" 
-            size={20} 
-            color={colors.accent} 
-          />
-          <Text style={styles.headerTitle}>Live Updates</Text>
+          <Text style={styles.headerTitle}>Activity Feed</Text>
           {unreadCount > 0 && (
-            <View style={styles.unreadBadge}>
-              <Text style={styles.unreadText}>{unreadCount}</Text>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{unreadCount}</Text>
             </View>
           )}
         </View>
         {unreadCount > 0 && (
-          <TouchableOpacity onPress={markAllAsRead}>
-            <Text style={styles.markAllText}>Mark all read</Text>
+          <TouchableOpacity onPress={markAllAsRead} style={styles.markAllButton}>
+            <Text style={styles.markAllButtonText}>Mark all read</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      {displayEvents.length === 0 ? (
-        <View style={styles.emptyState}>
-          <IconSymbol 
-            ios_icon_name="bell.slash" 
-            android_material_icon_name="notifications_off" 
-            size={32} 
-            color={colors.textSecondary} 
+      <FlatList
+        data={displayEvents}
+        renderItem={renderEvent}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
           />
-          <Text style={styles.emptyText}>No recent updates</Text>
-        </View>
-      ) : (
-        <ScrollView 
-          style={styles.eventsList}
-          showsVerticalScrollIndicator={false}
-          nestedScrollEnabled
-        >
-          {displayEvents.map((event, index) => {
-            const icon = getEventIcon(event.type);
-            
-            return (
-              <TouchableOpacity
-                key={event.id}
-                style={[styles.eventItem, !event.read && styles.eventItemUnread]}
-                onPress={() => markAsRead(event.id)}
-              >
-                <View style={[styles.eventIcon, { backgroundColor: icon.color + '20' }]}>
-                  <IconSymbol 
-                    ios_icon_name={icon.ios} 
-                    android_material_icon_name={icon.android} 
-                    size={20} 
-                    color={icon.color} 
-                  />
-                </View>
-                <View style={styles.eventContent}>
-                  <Text style={[styles.eventMessage, !event.read && styles.eventMessageUnread]}>
-                    {formatEventMessage(event)}
-                  </Text>
-                  <Text style={styles.eventTime}>{formatTime(event.timestamp)}</Text>
-                </View>
-                {!event.read && <View style={styles.unreadDot} />}
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      )}
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <IconSymbol
+              ios_icon_name="bell.slash.fill"
+              android_material_icon_name="notifications-off"
+              size={48}
+              color={colors.textSecondary}
+            />
+            <Text style={styles.emptyText}>No recent activity</Text>
+          </View>
+        }
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
+    flex: 1,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -176,78 +225,95 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  unreadBadge: {
-    backgroundColor: colors.danger,
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    minWidth: 20,
-    alignItems: 'center',
-  },
-  unreadText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  markAllText: {
-    fontSize: 13,
+    fontSize: 20,
     fontWeight: '600',
-    color: colors.accent,
+    color: colors.text,
   },
-  eventsList: {
-    maxHeight: 300,
-  },
-  eventItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    gap: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  eventItemUnread: {
-    backgroundColor: colors.accent + '05',
-  },
-  eventIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  badge: {
+    backgroundColor: colors.error,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    minWidth: 24,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  badgeText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  markAllButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  markAllButtonText: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  listContent: {
+    padding: 16,
+  },
+  eventCard: {
+    flexDirection: 'row',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  eventCardUnread: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  eventIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   eventContent: {
     flex: 1,
   },
-  eventMessage: {
-    fontSize: 14,
-    color: colors.textSecondary,
+  eventHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 4,
   },
-  eventMessageUnread: {
-    color: colors.text,
+  eventTitle: {
+    fontSize: 16,
     fontWeight: '600',
-  },
-  eventTime: {
-    fontSize: 12,
-    color: colors.textTertiary,
+    color: colors.text,
+    flex: 1,
   },
   unreadDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.accent,
+    backgroundColor: colors.primary,
+    marginLeft: 8,
   },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  emptyText: {
+  eventDescription: {
     fontSize: 14,
     color: colors.textSecondary,
-    marginTop: 8,
+    marginBottom: 4,
+  },
+  eventTime: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    marginTop: 12,
   },
 });

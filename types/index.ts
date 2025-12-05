@@ -202,3 +202,6 @@ export interface Expense {
   relatedTaskId?: string;
   relatedSupplyId?: string;
 }
+
+// Re-export notification types
+export type { NotificationCategory, NotificationPreferences } from './notifications';

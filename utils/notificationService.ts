@@ -2,19 +2,37 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { notificationPreferencesManager } from './notificationPreferences';
+import { NotificationCategory } from '@/types/notifications';
 
 const PUSH_TOKEN_KEY = '@vessel_co_push_token';
 
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
+  handleNotification: async (notification) => {
+    const category = notification.request.content.data?.category as NotificationCategory;
+    
+    if (category) {
+      const shouldShow = notificationPreferencesManager.shouldShowInAppNotification(category);
+      const shouldPlaySound = notificationPreferencesManager.shouldPlaySound(category);
+      
+      return {
+        shouldShowAlert: shouldShow,
+        shouldPlaySound: shouldPlaySound,
+        shouldSetBadge: true,
+      };
+    }
+
+    return {
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    };
+  },
 });
 
 export interface NotificationData {
-  type: 'issue' | 'supply' | 'maintenance' | 'approval' | 'system';
+  type: 'issue' | 'supply' | 'maintenance' | 'approval' | 'system' | 'task' | 'document';
+  category: NotificationCategory;
   title: string;
   body: string;
   data?: Record<string, any>;
@@ -22,10 +40,17 @@ export interface NotificationData {
 
 class NotificationService {
   private pushToken: string | null = null;
+  private initialized: boolean = false;
 
   async initialize(): Promise<boolean> {
+    if (this.initialized) {
+      return true;
+    }
+
     try {
       console.log('Initializing notification service...');
+      
+      await notificationPreferencesManager.initialize();
       
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
@@ -43,33 +68,85 @@ class NotificationService {
       console.log('Notification permissions granted');
       
       if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('default', {
-          name: 'default',
-          importance: Notifications.AndroidImportance.MAX,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#FF231F7C',
-        });
-        
-        await Notifications.setNotificationChannelAsync('high-priority', {
-          name: 'High Priority',
-          importance: Notifications.AndroidImportance.HIGH,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#FF0000',
-        });
+        await this.setupAndroidChannels();
       }
       
-      const tokenData = await Notifications.getExpoPushTokenAsync({
-        projectId: 'your-project-id',
-      });
+      try {
+        const tokenData = await Notifications.getExpoPushTokenAsync({
+          projectId: 'your-project-id',
+        });
+        
+        this.pushToken = tokenData.data;
+        await AsyncStorage.setItem(PUSH_TOKEN_KEY, this.pushToken);
+        console.log('Push token:', this.pushToken);
+      } catch (error) {
+        console.log('Could not get push token (this is normal in development):', error);
+      }
       
-      this.pushToken = tokenData.data;
-      await AsyncStorage.setItem(PUSH_TOKEN_KEY, this.pushToken);
-      console.log('Push token:', this.pushToken);
-      
+      this.initialized = true;
       return true;
     } catch (error) {
       console.error('Error initializing notifications:', error);
       return false;
+    }
+  }
+
+  private async setupAndroidChannels(): Promise<void> {
+    const channels: Array<{
+      id: string;
+      name: string;
+      importance: Notifications.AndroidImportance;
+      sound?: string;
+      vibrationPattern?: number[];
+    }> = [
+      {
+        id: 'maintenance',
+        name: 'Maintenance',
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 250, 250, 250],
+      },
+      {
+        id: 'issues',
+        name: 'Issues',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+      },
+      {
+        id: 'supplies',
+        name: 'Supplies',
+        importance: Notifications.AndroidImportance.DEFAULT,
+      },
+      {
+        id: 'documents',
+        name: 'Documents',
+        importance: Notifications.AndroidImportance.LOW,
+      },
+      {
+        id: 'tasks',
+        name: 'Tasks',
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 250, 250, 250],
+      },
+      {
+        id: 'approvals',
+        name: 'Approvals',
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 250, 250, 250],
+      },
+      {
+        id: 'system',
+        name: 'System',
+        importance: Notifications.AndroidImportance.LOW,
+      },
+    ];
+
+    for (const channel of channels) {
+      await Notifications.setNotificationChannelAsync(channel.id, {
+        name: channel.name,
+        importance: channel.importance,
+        vibrationPattern: channel.vibrationPattern,
+        lightColor: '#FF231F7C',
+      });
     }
   }
 
@@ -93,13 +170,22 @@ class NotificationService {
 
   async scheduleLocalNotification(notification: NotificationData): Promise<string | null> {
     try {
+      if (!notificationPreferencesManager.shouldShowPushNotification(notification.category)) {
+        console.log('Notification suppressed by user preferences:', notification.category);
+        return null;
+      }
+
+      const shouldPlaySound = notificationPreferencesManager.shouldPlaySound(notification.category);
+      const shouldVibrate = notificationPreferencesManager.shouldVibrate(notification.category);
+
       const notificationId = await Notifications.scheduleNotificationAsync({
         content: {
           title: notification.title,
           body: notification.body,
-          data: notification.data || {},
-          sound: true,
+          data: { ...notification.data, category: notification.category },
+          sound: shouldPlaySound,
           priority: Notifications.AndroidNotificationPriority.HIGH,
+          vibrate: shouldVibrate ? [0, 250, 250, 250] : undefined,
         },
         trigger: null,
       });
@@ -117,16 +203,26 @@ class NotificationService {
     delaySeconds: number
   ): Promise<string | null> {
     try {
+      if (!notificationPreferencesManager.shouldShowPushNotification(notification.category)) {
+        console.log('Delayed notification suppressed by user preferences:', notification.category);
+        return null;
+      }
+
+      const shouldPlaySound = notificationPreferencesManager.shouldPlaySound(notification.category);
+      const shouldVibrate = notificationPreferencesManager.shouldVibrate(notification.category);
+
       const notificationId = await Notifications.scheduleNotificationAsync({
         content: {
           title: notification.title,
           body: notification.body,
-          data: notification.data || {},
-          sound: true,
+          data: { ...notification.data, category: notification.category },
+          sound: shouldPlaySound,
           priority: Notifications.AndroidNotificationPriority.HIGH,
+          vibrate: shouldVibrate ? [0, 250, 250, 250] : undefined,
         },
         trigger: {
           seconds: delaySeconds,
+          channelId: notification.category,
         },
       });
       
@@ -198,6 +294,7 @@ class NotificationService {
   async sendIssueNotification(issueTitle: string, vesselName: string): Promise<void> {
     await this.scheduleLocalNotification({
       type: 'issue',
+      category: 'issues',
       title: 'New Issue Reported',
       body: `${issueTitle} on ${vesselName}`,
       data: { type: 'issue', issueTitle, vesselName },
@@ -207,6 +304,7 @@ class NotificationService {
   async sendSupplyRequestNotification(itemName: string, vesselName: string): Promise<void> {
     await this.scheduleLocalNotification({
       type: 'supply',
+      category: 'supplies',
       title: 'New Supply Request',
       body: `${itemName} requested for ${vesselName}`,
       data: { type: 'supply', itemName, vesselName },
@@ -216,6 +314,7 @@ class NotificationService {
   async sendApprovalNotification(itemName: string, approved: boolean): Promise<void> {
     await this.scheduleLocalNotification({
       type: 'approval',
+      category: 'approvals',
       title: approved ? 'Request Approved' : 'Request Denied',
       body: `Your request for ${itemName} has been ${approved ? 'approved' : 'denied'}`,
       data: { type: 'approval', itemName, approved },
@@ -225,9 +324,40 @@ class NotificationService {
   async sendMaintenanceReminderNotification(taskTitle: string, daysUntilDue: number): Promise<void> {
     await this.scheduleLocalNotification({
       type: 'maintenance',
+      category: 'maintenance',
       title: 'Maintenance Reminder',
       body: `${taskTitle} is due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}`,
       data: { type: 'maintenance', taskTitle, daysUntilDue },
+    });
+  }
+
+  async sendTaskNotification(taskTitle: string, assignedTo: string): Promise<void> {
+    await this.scheduleLocalNotification({
+      type: 'task',
+      category: 'tasks',
+      title: 'New Task Assigned',
+      body: `${taskTitle} assigned to ${assignedTo}`,
+      data: { type: 'task', taskTitle, assignedTo },
+    });
+  }
+
+  async sendDocumentNotification(documentName: string, uploadedBy: string): Promise<void> {
+    await this.scheduleLocalNotification({
+      type: 'document',
+      category: 'documents',
+      title: 'New Document Uploaded',
+      body: `${documentName} uploaded by ${uploadedBy}`,
+      data: { type: 'document', documentName, uploadedBy },
+    });
+  }
+
+  async sendSystemNotification(title: string, body: string): Promise<void> {
+    await this.scheduleLocalNotification({
+      type: 'system',
+      category: 'system',
+      title,
+      body,
+      data: { type: 'system' },
     });
   }
 }
