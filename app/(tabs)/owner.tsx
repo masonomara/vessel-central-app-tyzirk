@@ -2,6 +2,8 @@
 import React, { useMemo, useState } from "react";
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useTheme } from "@react-navigation/native";
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import { colors, commonStyles } from "@/styles/commonStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
@@ -9,6 +11,10 @@ import { IconSymbol } from "@/components/IconSymbol";
 import { StatCard } from "@/components/StatCard";
 import { ProgressRing } from "@/components/ProgressRing";
 import { MiniChart } from "@/components/MiniChart";
+import { AnimatedCard } from "@/components/AnimatedCard";
+import { GlassCard } from "@/components/GlassCard";
+import { PressableCard } from "@/components/PressableCard";
+import { GradientButton } from "@/components/GradientButton";
 import GlobalSearch from "@/components/GlobalSearch";
 import RealtimeFeed from "@/components/RealtimeFeed";
 import { router } from "expo-router";
@@ -27,6 +33,7 @@ export default function OwnerDashboard() {
   } = useData();
 
   const handleLogout = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert(
       "Log Out",
       "Are you sure you want to log out?",
@@ -192,16 +199,19 @@ export default function OwnerDashboard() {
   };
 
   const handleViewReports = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     console.log('View reports pressed');
     router.push('/(tabs)/documents');
   };
 
   const handleApproveRequests = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     console.log('Approve requests pressed');
     router.push('/(tabs)/supplies');
   };
 
   const handleViewAnalytics = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     console.log('View analytics pressed');
     router.push('/analytics');
   };
@@ -214,328 +224,385 @@ export default function OwnerDashboard() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <View>
-              <Text style={styles.greeting}>Welcome back,</Text>
-              <Text style={commonStyles.title}>{userName}</Text>
-            </View>
-            <View style={styles.headerActions}>
-              <TouchableOpacity onPress={() => setShowSearch(true)} style={styles.searchButton}>
-                <IconSymbol 
-                  ios_icon_name="magnifyingglass" 
-                  android_material_icon_name="search" 
-                  size={24} 
-                  color={colors.text} 
-                />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-                <IconSymbol 
-                  ios_icon_name="rectangle.portrait.and.arrow.right" 
-                  android_material_icon_name="logout" 
-                  size={24} 
-                  color={colors.text} 
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View style={styles.roleTag}>
-            <IconSymbol 
-              ios_icon_name="crown.fill" 
-              android_material_icon_name="workspace_premium" 
-              size={16} 
-              color={colors.gold} 
-            />
-            <Text style={styles.roleText}>Owner</Text>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Fleet Overview</Text>
-          <View style={styles.fleetGrid}>
-            {myVessels.map((vessel, index) => (
-              <View key={vessel.id} style={styles.vesselCard}>
-                <View style={styles.vesselHeader}>
-                  <IconSymbol 
-                    ios_icon_name="sailboat.fill" 
-                    android_material_icon_name="sailing" 
-                    size={28} 
-                    color={colors.accent} 
-                  />
-                  <View style={[
-                    styles.statusDot, 
-                    vessel.status === 'active' ? styles.statusDotActive : styles.statusDotMaintenance
-                  ]} />
-                </View>
-                <Text style={styles.vesselName}>{vessel.name}</Text>
-                <Text style={styles.vesselLocation}>{vessel.location}</Text>
-                <View style={styles.vesselFooter}>
-                  <View style={styles.vesselStat}>
-                    <IconSymbol 
-                      ios_icon_name="person.2.fill" 
-                      android_material_icon_name="groups" 
-                      size={14} 
-                      color={colors.textSecondary} 
-                    />
-                    <Text style={styles.vesselStatText}>{vessel.crewCount}</Text>
-                  </View>
-                  <View style={[
-                    styles.statusBadge, 
-                    vessel.status === 'active' ? styles.statusActive : styles.statusMaintenance
-                  ]}>
-                    <Text style={styles.statusText}>{vessel.status.toUpperCase()}</Text>
-                  </View>
-                </View>
+        <AnimatedCard delay={0}>
+          <View style={styles.header}>
+            <View style={styles.headerTop}>
+              <View>
+                <Text style={styles.greeting}>Welcome back,</Text>
+                <Text style={commonStyles.title}>{userName}</Text>
               </View>
-            ))}
+              <View style={styles.headerActions}>
+                <TouchableOpacity 
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setShowSearch(true);
+                  }} 
+                  style={styles.iconButton}
+                >
+                  <LinearGradient
+                    colors={[colors.card, colors.cardElevated]}
+                    style={styles.iconButtonGradient}
+                  >
+                    <IconSymbol 
+                      ios_icon_name="magnifyingglass" 
+                      android_material_icon_name="search" 
+                      size={20} 
+                      color={colors.text} 
+                    />
+                  </LinearGradient>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleLogout} style={styles.iconButton}>
+                  <LinearGradient
+                    colors={[colors.card, colors.cardElevated]}
+                    style={styles.iconButtonGradient}
+                  >
+                    <IconSymbol 
+                      ios_icon_name="rectangle.portrait.and.arrow.right" 
+                      android_material_icon_name="logout" 
+                      size={20} 
+                      color={colors.text} 
+                    />
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <LinearGradient
+              colors={[colors.gold + '30', colors.gold + '10']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.roleTag}
+            >
+              <IconSymbol 
+                ios_icon_name="crown.fill" 
+                android_material_icon_name="workspace_premium" 
+                size={16} 
+                color={colors.gold} 
+              />
+              <Text style={styles.roleText}>Owner</Text>
+            </LinearGradient>
           </View>
-        </View>
+        </AnimatedCard>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Key Metrics</Text>
-          
-          <View style={styles.statsGrid}>
-            <StatCard
-              icon="dollarsign.circle.fill"
-              androidIcon="payments"
-              iconColor={colors.success}
-              label="Monthly Expenses"
-              value={`$${totalMonthlyExpenses.toLocaleString()}`}
-              subtext="Current month"
-              trend={expenseTrend.direction}
-              trendValue={expenseTrend.value}
-              onPress={handleViewAnalytics}
-            />
-
-            <StatCard
-              icon="wrench.and.screwdriver.fill"
-              androidIcon="build"
-              iconColor={colors.warning}
-              label="Active Tasks"
-              value={myMaintenanceTasks.filter(t => t.status !== 'completed').length}
-              subtext={`${myMaintenanceTasks.length} total`}
-              onPress={() => router.push('/(tabs)/maintenance')}
-            />
-
-            <StatCard
-              icon="exclamationmark.triangle.fill"
-              androidIcon="warning"
-              iconColor={colors.danger}
-              label="Open Issues"
-              value={openIssuesCount}
-              subtext={openIssuesCount > 0 ? 'Needs attention' : 'All clear'}
-              onPress={() => router.push('/(tabs)/issues')}
-            />
-
-            <StatCard
-              icon="shippingbox.fill"
-              androidIcon="inventory_2"
-              iconColor={colors.accent}
-              label="Pending Approvals"
-              value={pendingApprovals.length}
-              subtext="Supply requests"
-              onPress={handleApproveRequests}
-            />
+        <AnimatedCard delay={100}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Fleet Overview</Text>
+            <View style={styles.fleetGrid}>
+              {myVessels.map((vessel, index) => (
+                <PressableCard key={vessel.id} style={styles.vesselCard}>
+                  <View style={styles.vesselHeader}>
+                    <LinearGradient
+                      colors={[colors.accent + '30', colors.accent + '10']}
+                      style={styles.vesselIconCircle}
+                    >
+                      <IconSymbol 
+                        ios_icon_name="sailboat.fill" 
+                        android_material_icon_name="sailing" 
+                        size={28} 
+                        color={colors.accent} 
+                      />
+                    </LinearGradient>
+                    <View style={[
+                      styles.statusDot, 
+                      vessel.status === 'active' ? styles.statusDotActive : styles.statusDotMaintenance
+                    ]} />
+                  </View>
+                  <Text style={styles.vesselName}>{vessel.name}</Text>
+                  <Text style={styles.vesselLocation}>{vessel.location}</Text>
+                  <View style={styles.vesselFooter}>
+                    <View style={styles.vesselStat}>
+                      <IconSymbol 
+                        ios_icon_name="person.2.fill" 
+                        android_material_icon_name="groups" 
+                        size={14} 
+                        color={colors.textSecondary} 
+                      />
+                      <Text style={styles.vesselStatText}>{vessel.crewCount}</Text>
+                    </View>
+                    <View style={[
+                      styles.statusBadge, 
+                      vessel.status === 'active' ? styles.statusActive : styles.statusMaintenance
+                    ]}>
+                      <Text style={styles.statusText}>{vessel.status.toUpperCase()}</Text>
+                    </View>
+                  </View>
+                </PressableCard>
+              ))}
+            </View>
           </View>
-        </View>
+        </AnimatedCard>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Performance</Text>
-          
-          <View style={styles.performanceCard}>
-            <View style={styles.performanceLeft}>
-              <ProgressRing
-                progress={completionRate}
-                size={100}
-                strokeWidth={10}
-                color={colors.success}
-                label="Complete"
+        <AnimatedCard delay={200}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Key Metrics</Text>
+            
+            <View style={styles.statsGrid}>
+              <StatCard
+                icon="dollarsign.circle.fill"
+                androidIcon="payments"
+                iconColor={colors.success}
+                label="Monthly Expenses"
+                value={`$${totalMonthlyExpenses.toLocaleString()}`}
+                subtext="Current month"
+                trend={expenseTrend.direction}
+                trendValue={expenseTrend.value}
+                onPress={handleViewAnalytics}
+                useGradient={true}
+              />
+
+              <StatCard
+                icon="wrench.and.screwdriver.fill"
+                androidIcon="build"
+                iconColor={colors.warning}
+                label="Active Tasks"
+                value={myMaintenanceTasks.filter(t => t.status !== 'completed').length}
+                subtext={`${myMaintenanceTasks.length} total`}
+                onPress={() => router.push('/(tabs)/maintenance')}
+                useGradient={true}
+              />
+
+              <StatCard
+                icon="exclamationmark.triangle.fill"
+                androidIcon="warning"
+                iconColor={colors.danger}
+                label="Open Issues"
+                value={openIssuesCount}
+                subtext={openIssuesCount > 0 ? 'Needs attention' : 'All clear'}
+                onPress={() => router.push('/(tabs)/issues')}
+                useGradient={true}
+              />
+
+              <StatCard
+                icon="shippingbox.fill"
+                androidIcon="inventory_2"
+                iconColor={colors.accent}
+                label="Pending Approvals"
+                value={pendingApprovals.length}
+                subtext="Supply requests"
+                onPress={handleApproveRequests}
+                useGradient={true}
               />
             </View>
-            <View style={styles.performanceRight}>
-              <Text style={styles.performanceTitle}>Task Completion</Text>
-              <Text style={styles.performanceValue}>
-                {myMaintenanceTasks.filter(t => t.status === 'completed').length} of {myMaintenanceTasks.length}
-              </Text>
-              <Text style={styles.performanceSubtext}>
-                {myMaintenanceTasks.filter(t => t.status !== 'completed').length} tasks remaining
-              </Text>
-            </View>
           </View>
+        </AnimatedCard>
 
-          <View style={styles.expenseChartCard}>
-            <View style={styles.expenseChartHeader}>
-              <Text style={styles.expenseChartTitle}>Expense Trend</Text>
-              <Text style={styles.expenseChartSubtitle}>Last 6 months</Text>
-            </View>
-            <MiniChart data={last6MonthsExpenses} color={colors.success} height={80} />
-          </View>
-        </View>
-
-        {upcomingMaintenance && (
+        <AnimatedCard delay={300}>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Next Maintenance</Text>
-            <View style={styles.maintenanceCard}>
-              <View style={styles.maintenanceHeader}>
-                <View style={[styles.iconCircle, { backgroundColor: colors.warning + '20' }]}>
-                  <IconSymbol 
-                    ios_icon_name="wrench.and.screwdriver.fill" 
-                    android_material_icon_name="build" 
-                    size={24} 
-                    color={colors.warning} 
+            <Text style={styles.sectionTitle}>Performance</Text>
+            
+            <GlassCard style={styles.performanceCard}>
+              <View style={styles.performanceContent}>
+                <View style={styles.performanceLeft}>
+                  <ProgressRing
+                    progress={completionRate}
+                    size={100}
+                    strokeWidth={10}
+                    color={colors.success}
+                    label="Complete"
                   />
                 </View>
-                <View style={styles.maintenanceInfo}>
-                  <Text style={styles.maintenanceTitle}>{upcomingMaintenance.title}</Text>
-                  <Text style={styles.maintenanceVessel}>{upcomingMaintenance.vesselName}</Text>
-                </View>
-              </View>
-              <View style={styles.maintenanceFooter}>
-                <View style={styles.maintenanceDue}>
-                  <IconSymbol 
-                    ios_icon_name="clock.fill" 
-                    android_material_icon_name="schedule" 
-                    size={16} 
-                    color={colors.textSecondary} 
-                  />
-                  <Text style={styles.maintenanceDueText}>
-                    Due in {getDaysUntil(upcomingMaintenance.dueDate)} days
+                <View style={styles.performanceRight}>
+                  <Text style={styles.performanceTitle}>Task Completion</Text>
+                  <Text style={styles.performanceValue}>
+                    {myMaintenanceTasks.filter(t => t.status === 'completed').length} of {myMaintenanceTasks.length}
+                  </Text>
+                  <Text style={styles.performanceSubtext}>
+                    {myMaintenanceTasks.filter(t => t.status !== 'completed').length} tasks remaining
                   </Text>
                 </View>
-                <View style={[
-                  styles.priorityBadge,
-                  upcomingMaintenance.priority === 'high' || upcomingMaintenance.priority === 'urgent' 
-                    ? styles.priorityHigh 
-                    : upcomingMaintenance.priority === 'medium' 
-                    ? styles.priorityMedium 
-                    : styles.priorityLow
-                ]}>
-                  <Text style={styles.priorityText}>{upcomingMaintenance.priority.toUpperCase()}</Text>
-                </View>
               </View>
+            </GlassCard>
+
+            <View style={styles.expenseChartCard}>
+              <LinearGradient
+                colors={[colors.card, colors.cardElevated]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.expenseChartGradient}
+              >
+                <View style={styles.expenseChartHeader}>
+                  <Text style={styles.expenseChartTitle}>Expense Trend</Text>
+                  <Text style={styles.expenseChartSubtitle}>Last 6 months</Text>
+                </View>
+                <MiniChart data={last6MonthsExpenses} color={colors.success} height={80} />
+              </LinearGradient>
             </View>
           </View>
+        </AnimatedCard>
+
+        {upcomingMaintenance && (
+          <AnimatedCard delay={400}>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Next Maintenance</Text>
+              <PressableCard style={styles.maintenanceCard}>
+                <View style={styles.maintenanceHeader}>
+                  <LinearGradient
+                    colors={[colors.warning + '30', colors.warning + '10']}
+                    style={styles.iconCircle}
+                  >
+                    <IconSymbol 
+                      ios_icon_name="wrench.and.screwdriver.fill" 
+                      android_material_icon_name="build" 
+                      size={24} 
+                      color={colors.warning} 
+                    />
+                  </LinearGradient>
+                  <View style={styles.maintenanceInfo}>
+                    <Text style={styles.maintenanceTitle}>{upcomingMaintenance.title}</Text>
+                    <Text style={styles.maintenanceVessel}>{upcomingMaintenance.vesselName}</Text>
+                  </View>
+                </View>
+                <View style={styles.maintenanceFooter}>
+                  <View style={styles.maintenanceDue}>
+                    <IconSymbol 
+                      ios_icon_name="clock.fill" 
+                      android_material_icon_name="schedule" 
+                      size={16} 
+                      color={colors.textSecondary} 
+                    />
+                    <Text style={styles.maintenanceDueText}>
+                      Due in {getDaysUntil(upcomingMaintenance.dueDate)} days
+                    </Text>
+                  </View>
+                  <LinearGradient
+                    colors={
+                      upcomingMaintenance.priority === 'high' || upcomingMaintenance.priority === 'urgent' 
+                        ? [colors.danger + '40', colors.danger + '20']
+                        : upcomingMaintenance.priority === 'medium' 
+                        ? [colors.warning + '40', colors.warning + '20']
+                        : [colors.success + '40', colors.success + '20']
+                    }
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.priorityBadge}
+                  >
+                    <Text style={styles.priorityText}>{upcomingMaintenance.priority.toUpperCase()}</Text>
+                  </LinearGradient>
+                </View>
+              </PressableCard>
+            </View>
+          </AnimatedCard>
         )}
 
         {pendingApprovals.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Pending Approvals</Text>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{pendingApprovals.length}</Text>
+          <AnimatedCard delay={500}>
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Pending Approvals</Text>
+                <LinearGradient
+                  colors={[colors.warning, colors.warningLight]}
+                  style={styles.badge}
+                >
+                  <Text style={styles.badgeText}>{pendingApprovals.length}</Text>
+                </LinearGradient>
               </View>
-            </View>
-            {pendingApprovals.slice(0, 2).map((approval, index) => (
-              <View key={approval.id} style={styles.approvalCard}>
-                <View style={styles.approvalHeader}>
-                  <View style={styles.approvalLeft}>
-                    <Text style={styles.approvalItem}>{approval.itemName}</Text>
-                    <Text style={styles.approvalVessel}>{approval.vesselName}</Text>
+              {pendingApprovals.slice(0, 2).map((approval, index) => (
+                <PressableCard key={approval.id} style={styles.approvalCard}>
+                  <View style={styles.approvalHeader}>
+                    <View style={styles.approvalLeft}>
+                      <Text style={styles.approvalItem}>{approval.itemName}</Text>
+                      <Text style={styles.approvalVessel}>{approval.vesselName}</Text>
+                    </View>
+                    <Text style={styles.approvalAmount}>${approval.estimatedCost}</Text>
                   </View>
-                  <Text style={styles.approvalAmount}>${approval.estimatedCost}</Text>
-                </View>
-                <View style={styles.approvalFooter}>
-                  <View style={styles.approvalCategory}>
-                    <Text style={styles.approvalCategoryText}>{approval.category}</Text>
+                  <View style={styles.approvalFooter}>
+                    <LinearGradient
+                      colors={[colors.accent + '30', colors.accent + '10']}
+                      style={styles.approvalCategory}
+                    >
+                      <Text style={styles.approvalCategoryText}>{approval.category}</Text>
+                    </LinearGradient>
+                    <Text style={styles.approvalQuantity}>
+                      {approval.quantity} {approval.unit}
+                    </Text>
                   </View>
-                  <Text style={styles.approvalQuantity}>
-                    {approval.quantity} {approval.unit}
-                  </Text>
-                </View>
-              </View>
-            ))}
-            <TouchableOpacity 
-              style={styles.viewAllButton}
-              onPress={handleApproveRequests}
-            >
-              <Text style={styles.viewAllButtonText}>Review All Requests</Text>
-              <IconSymbol 
-                ios_icon_name="chevron.right" 
-                android_material_icon_name="chevron_right" 
-                size={20} 
-                color={colors.accent} 
+                </PressableCard>
+              ))}
+              <GradientButton
+                title="Review All Requests"
+                onPress={handleApproveRequests}
+                icon="checkmark.circle.fill"
+                androidIcon="check_circle"
+                style={styles.viewAllButton}
               />
-            </TouchableOpacity>
-          </View>
+            </View>
+          </AnimatedCard>
         )}
 
-        <View style={styles.section}>
-          <RealtimeFeed userId={userId} maxItems={5} />
-        </View>
+        <AnimatedCard delay={600}>
+          <View style={styles.section}>
+            <RealtimeFeed userId={userId} maxItems={5} />
+          </View>
+        </AnimatedCard>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
-          {myActivityLogs.length > 0 ? (
-            myActivityLogs.map((log, index) => (
-              <View key={log.id} style={styles.activityCard}>
-                <View style={[
-                  styles.activityIcon,
-                  { backgroundColor: 
-                    log.type === 'maintenance' || log.type === 'task' ? colors.success + '20' :
-                    log.type === 'issue' ? colors.danger + '20' :
-                    colors.accent + '20'
-                  }
-                ]}>
-                  <IconSymbol 
-                    ios_icon_name={
-                      log.type === 'maintenance' || log.type === 'task' ? 'checkmark.circle.fill' :
-                      log.type === 'issue' ? 'exclamationmark.triangle.fill' :
-                      'info.circle.fill'
+        <AnimatedCard delay={700}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Recent Activity</Text>
+            {myActivityLogs.length > 0 ? (
+              myActivityLogs.map((log, index) => (
+                <PressableCard key={log.id} style={styles.activityCard}>
+                  <LinearGradient
+                    colors={
+                      log.type === 'maintenance' || log.type === 'task' 
+                        ? [colors.success + '30', colors.success + '10']
+                        : log.type === 'issue' 
+                        ? [colors.danger + '30', colors.danger + '10']
+                        : [colors.accent + '30', colors.accent + '10']
                     }
-                    android_material_icon_name={
-                      log.type === 'maintenance' || log.type === 'task' ? 'check_circle' :
-                      log.type === 'issue' ? 'warning' :
-                      'info'
-                    }
-                    size={20} 
-                    color={
-                      log.type === 'maintenance' || log.type === 'task' ? colors.success :
-                      log.type === 'issue' ? colors.danger :
-                      colors.accent
-                    }
-                  />
-                </View>
-                <View style={styles.activityContent}>
-                  <Text style={styles.activityTitle}>{log.title}</Text>
-                  <Text style={styles.activityDescription}>{log.description}</Text>
-                  <Text style={styles.activityTime}>
-                    {new Date(log.timestamp).toLocaleString()}
-                  </Text>
-                </View>
-              </View>
-            ))
-          ) : (
-            <Text style={styles.emptyText}>No recent activity</Text>
-          )}
-        </View>
+                    style={styles.activityIcon}
+                  >
+                    <IconSymbol 
+                      ios_icon_name={
+                        log.type === 'maintenance' || log.type === 'task' ? 'checkmark.circle.fill' :
+                        log.type === 'issue' ? 'exclamationmark.triangle.fill' :
+                        'info.circle.fill'
+                      }
+                      android_material_icon_name={
+                        log.type === 'maintenance' || log.type === 'task' ? 'check_circle' :
+                        log.type === 'issue' ? 'warning' :
+                        'info'
+                      }
+                      size={20} 
+                      color={
+                        log.type === 'maintenance' || log.type === 'task' ? colors.success :
+                        log.type === 'issue' ? colors.danger :
+                        colors.accent
+                      }
+                    />
+                  </LinearGradient>
+                  <View style={styles.activityContent}>
+                    <Text style={styles.activityTitle}>{log.title}</Text>
+                    <Text style={styles.activityDescription}>{log.description}</Text>
+                    <Text style={styles.activityTime}>
+                      {new Date(log.timestamp).toLocaleString()}
+                    </Text>
+                  </View>
+                </PressableCard>
+              ))
+            ) : (
+              <Text style={styles.emptyText}>No recent activity</Text>
+            )}
+          </View>
+        </AnimatedCard>
 
-        <View style={styles.actionsSection}>
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={handleViewAnalytics}
-          >
-            <IconSymbol 
-              ios_icon_name="chart.bar.fill" 
-              android_material_icon_name="analytics" 
-              size={24} 
-              color={colors.text} 
+        <AnimatedCard delay={800}>
+          <View style={styles.actionsSection}>
+            <GradientButton
+              title="View Analytics"
+              onPress={handleViewAnalytics}
+              icon="chart.bar.fill"
+              androidIcon="analytics"
+              gradientColors={[colors.gradientAccentStart, colors.gradientAccentEnd]}
             />
-            <Text style={styles.actionButtonText}>View Analytics</Text>
-          </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={handleViewReports}
-          >
-            <IconSymbol 
-              ios_icon_name="doc.text.fill" 
-              android_material_icon_name="description" 
-              size={24} 
-              color={colors.text} 
+            <GradientButton
+              title="View Documents"
+              onPress={handleViewReports}
+              icon="doc.text.fill"
+              androidIcon="description"
+              gradientColors={[colors.primary, colors.secondary]}
             />
-            <Text style={styles.actionButtonText}>View Documents</Text>
-          </TouchableOpacity>
-        </View>
+          </View>
+        </AnimatedCard>
       </ScrollView>
     </View>
   );
@@ -557,37 +624,53 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   greeting: {
     fontSize: 16,
     color: colors.textSecondary,
     marginBottom: 4,
+    fontWeight: '500',
   },
   headerActions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 12,
   },
-  searchButton: {
-    padding: 8,
+  iconButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  logoutButton: {
-    padding: 8,
+  iconButtonGradient: {
+    padding: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   roleTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 24,
     alignSelf: 'flex-start',
-    gap: 6,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: colors.gold + '30',
+    shadowColor: colors.gold,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
   roleText: {
     color: colors.gold,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   section: {
     marginBottom: 24,
@@ -599,10 +682,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '800',
     color: colors.text,
     marginBottom: 16,
+    letterSpacing: -0.3,
   },
   fleetGrid: {
     flexDirection: 'row',
@@ -612,11 +696,7 @@ const styles = StyleSheet.create({
   vesselCard: {
     flex: 1,
     minWidth: '47%',
-    backgroundColor: colors.card,
-    borderRadius: 16,
     padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   vesselHeader: {
     flexDirection: 'row',
@@ -624,10 +704,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
+  vesselIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.accent,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+  },
   statusDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2,
   },
   statusDotActive: {
     backgroundColor: colors.success,
@@ -640,6 +737,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.text,
     marginBottom: 4,
+    letterSpacing: -0.2,
   },
   vesselLocation: {
     fontSize: 14,
@@ -662,20 +760,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 8,
   },
   statusActive: {
-    backgroundColor: colors.success + '20',
+    backgroundColor: colors.success + '30',
   },
   statusMaintenance: {
-    backgroundColor: colors.warning + '20',
+    backgroundColor: colors.warning + '30',
   },
   statusText: {
     fontSize: 10,
     fontWeight: '700',
     color: colors.text,
+    letterSpacing: 0.5,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -683,13 +782,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   performanceCard: {
-    flexDirection: 'row',
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
     marginBottom: 12,
+  },
+  performanceContent: {
+    flexDirection: 'row',
   },
   performanceLeft: {
     marginRight: 20,
@@ -710,17 +806,23 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: colors.text,
     marginBottom: 4,
+    letterSpacing: -0.5,
   },
   performanceSubtext: {
     fontSize: 13,
     color: colors.textSecondary,
   },
   expenseChartCard: {
-    backgroundColor: colors.card,
     borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  expenseChartGradient: {
     padding: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   expenseChartHeader: {
     marginBottom: 16,
@@ -736,11 +838,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   maintenanceCard: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
     padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
     borderLeftWidth: 4,
     borderLeftColor: colors.warning,
   },
@@ -785,32 +883,28 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   priorityBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 8,
-  },
-  priorityHigh: {
-    backgroundColor: colors.danger + '30',
-  },
-  priorityMedium: {
-    backgroundColor: colors.warning + '30',
-  },
-  priorityLow: {
-    backgroundColor: colors.success + '30',
   },
   priorityText: {
     fontSize: 11,
     fontWeight: '700',
     color: colors.text,
+    letterSpacing: 0.5,
   },
   badge: {
-    backgroundColor: colors.warning,
     borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    minWidth: 24,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    minWidth: 28,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: colors.warning,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
   badgeText: {
     color: colors.text,
@@ -818,12 +912,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   approvalCard: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
     borderLeftWidth: 4,
     borderLeftColor: colors.warning,
   },
@@ -851,6 +941,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '800',
     color: colors.text,
+    letterSpacing: -0.5,
   },
   approvalFooter: {
     flexDirection: 'row',
@@ -858,9 +949,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   approvalCategory: {
-    backgroundColor: colors.accent + '20',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 8,
   },
   approvalCategoryText: {
@@ -873,30 +963,12 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   viewAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 4,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 8,
-  },
-  viewAllButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.accent,
+    marginTop: 8,
   },
   activityCard: {
     flexDirection: 'row',
-    backgroundColor: colors.card,
-    borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   activityIcon: {
     width: 40,
@@ -919,6 +991,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
     marginBottom: 4,
+    lineHeight: 20,
   },
   activityTime: {
     fontSize: 12,
@@ -933,18 +1006,5 @@ const styles = StyleSheet.create({
   actionsSection: {
     gap: 12,
     marginBottom: 24,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    padding: 16,
-    gap: 12,
-  },
-  actionButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
   },
 });

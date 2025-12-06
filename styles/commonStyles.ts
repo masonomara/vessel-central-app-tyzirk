@@ -11,13 +11,17 @@ export const colors = {
   
   // Accent Colors
   accent: '#3B82F6',         // Bright Blue (operational)
+  accentLight: '#60A5FA',    // Light Blue
   gold: '#D4AF37',           // Subtle Gold (premium accent)
   goldLight: '#E8C547',      // Light Gold
   
   // Status Colors
   success: '#10B981',        // Green for completed/active
+  successLight: '#34D399',   // Light Green
   warning: '#F59E0B',        // Amber for pending
+  warningLight: '#FBBF24',   // Light Amber
   danger: '#EF4444',         // Red for urgent/issues
+  dangerLight: '#F87171',    // Light Red
   info: '#3B82F6',           // Blue for info
   
   // Status Pills
@@ -32,6 +36,7 @@ export const colors = {
   backgroundLight: '#252B33',   // Lighter dark
   card: '#1E2530',              // Card background
   cardHover: '#252D3A',         // Card hover state
+  cardElevated: '#242B38',      // Elevated card
   
   // Text
   text: '#F8FAFC',              // Almost white
@@ -47,10 +52,17 @@ export const colors = {
   // Overlays
   overlay: 'rgba(0, 0, 0, 0.6)',
   overlayLight: 'rgba(0, 0, 0, 0.3)',
+  overlayDark: 'rgba(0, 0, 0, 0.8)',
+  
+  // Glass effect
+  glass: 'rgba(30, 37, 48, 0.7)',
+  glassBorder: 'rgba(148, 163, 184, 0.1)',
   
   // Gradients (for use in LinearGradient)
   gradientStart: '#0A2540',
   gradientEnd: '#1E3A5F',
+  gradientAccentStart: '#3B82F6',
+  gradientAccentEnd: '#1E40AF',
 };
 
 export const shadows = {
@@ -81,6 +93,20 @@ export const shadows = {
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 4,
+  },
+  glow: {
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  glowGold: {
+    shadowColor: '#D4AF37',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
   },
 };
 
@@ -128,6 +154,16 @@ export const buttonStyles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  glassButton: {
+    backgroundColor: colors.glass,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -238,13 +274,22 @@ export const commonStyles = StyleSheet.create({
     ...shadows.small,
   },
   cardElevated: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.cardElevated,
     borderRadius: 16,
     padding: 20,
     marginVertical: 8,
     borderWidth: 1,
     borderColor: colors.borderLight,
     ...shadows.large,
+  },
+  cardGlass: {
+    backgroundColor: colors.glass,
+    borderRadius: 16,
+    padding: 20,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+    ...shadows.medium,
   },
   
   // Sections
