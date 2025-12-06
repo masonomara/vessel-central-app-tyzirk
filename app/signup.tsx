@@ -18,6 +18,14 @@ import { colors, shadows } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Valid manager codes (in production, these would be stored in Supabase)
+const VALID_MANAGER_CODES = [
+  'VESSEL2024',
+  'YACHT2024',
+  'CREW2024',
+  'MANAGER2024'
+];
+
 export default function SignUpScreen() {
   const router = useRouter();
   const { signUp, isSupabaseEnabled } = useAuth();
@@ -26,7 +34,8 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState<'owner' | 'manager' | 'crew'>('crew');
+  const [role, setRole] = useState<'owner' | 'crew'>('crew');
+  const [managerCode, setManagerCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,25 +44,34 @@ export default function SignUpScreen() {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [managerCodeError, setManagerCodeError] = useState('');
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
+  const validateManagerCode = (code: string): boolean => {
+    return VALID_MANAGER_CODES.includes(code.toUpperCase());
+  };
+
   const handleSignUp = async () => {
-    console.log('Sign up attempt with email:', email);
+    console.log('Sign up attempt with email:', email, 'role:', role);
     
+    // Reset errors
     setNameError('');
     setEmailError('');
     setPasswordError('');
     setConfirmPasswordError('');
+    setManagerCodeError('');
     
+    // Validate name
     if (!name.trim()) {
       setNameError('Name is required');
       return;
     }
     
+    // Validate email
     if (!email.trim()) {
       setEmailError('Email is required');
       return;
@@ -64,6 +82,18 @@ export default function SignUpScreen() {
       return;
     }
     
+    // Validate manager code
+    if (!managerCode.trim()) {
+      setManagerCodeError('Manager code is required');
+      return;
+    }
+    
+    if (!validateManagerCode(managerCode)) {
+      setManagerCodeError('Invalid manager code. Please contact your manager.');
+      return;
+    }
+    
+    // Validate password
     if (!password.trim()) {
       setPasswordError('Password is required');
       return;
@@ -82,8 +112,8 @@ export default function SignUpScreen() {
     if (!isSupabaseEnabled) {
       Alert.alert(
         'Demo Mode',
-        'Sign up is not available in demo mode. Please use the quick login options on the login screen.',
-        [{ text: 'OK', onPress: () => router.back() }]
+        'Sign up is not available in demo mode. Please enable Supabase to register new users.\n\nTo enable Supabase:\n1. Press the Supabase button\n2. Connect to your Supabase project\n3. Try signing up again',
+        [{ text: 'OK' }]
       );
       return;
     }
@@ -104,8 +134,8 @@ export default function SignUpScreen() {
     } else {
       console.log('Sign up successful');
       Alert.alert(
-        'Success',
-        'Account created successfully! Please check your email to verify your account.',
+        'Success!',
+        'Account created successfully! Please check your email to verify your account before logging in.',
         [{ text: 'OK', onPress: () => router.replace('/login') }]
       );
     }
@@ -142,17 +172,29 @@ export default function SignUpScreen() {
           
           <View style={styles.logoContainer}>
             <IconSymbol
-              ios_icon_name="sailboat.fill"
-              android_material_icon_name="sailing"
+              ios_icon_name="person.badge.plus.fill"
+              android_material_icon_name="person_add"
               size={64}
               color={colors.gold}
             />
-            <Text style={styles.logoText}>Create Account</Text>
-            <Text style={styles.logoSubtext}>Join Vessel & Co.</Text>
+            <Text style={styles.logoText}>Join Our Crew</Text>
+            <Text style={styles.logoSubtext}>Owner & Crew Registration</Text>
           </View>
         </LinearGradient>
 
         <View style={styles.formContainer}>
+          <View style={styles.infoCard}>
+            <IconSymbol
+              ios_icon_name="info.circle.fill"
+              android_material_icon_name="info"
+              size={20}
+              color={colors.accent}
+            />
+            <Text style={styles.infoText}>
+              You need a special manager code to register. Contact your manager to get your code.
+            </Text>
+          </View>
+
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Full Name</Text>
             <View style={[styles.inputWrapper, nameError ? styles.inputError : null]}>
@@ -209,27 +251,85 @@ export default function SignUpScreen() {
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Role</Text>
             <View style={styles.roleContainer}>
-              {(['owner', 'manager', 'crew'] as const).map((r, index) => (
-                <TouchableOpacity
-                  key={index}
+              <TouchableOpacity
+                style={[
+                  styles.roleButton,
+                  role === 'owner' && styles.roleButtonActive,
+                ]}
+                onPress={() => setRole('owner')}
+                disabled={isLoading}
+              >
+                <IconSymbol
+                  ios_icon_name="crown.fill"
+                  android_material_icon_name="workspace_premium"
+                  size={24}
+                  color={role === 'owner' ? colors.text : colors.textSecondary}
+                />
+                <Text
                   style={[
-                    styles.roleButton,
-                    role === r && styles.roleButtonActive,
+                    styles.roleButtonText,
+                    role === 'owner' && styles.roleButtonTextActive,
                   ]}
-                  onPress={() => setRole(r)}
-                  disabled={isLoading}
                 >
-                  <Text
-                    style={[
-                      styles.roleButtonText,
-                      role === r && styles.roleButtonTextActive,
-                    ]}
-                  >
-                    {r.charAt(0).toUpperCase() + r.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                  Owner
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.roleButton,
+                  role === 'crew' && styles.roleButtonActive,
+                ]}
+                onPress={() => setRole('crew')}
+                disabled={isLoading}
+              >
+                <IconSymbol
+                  ios_icon_name="person.2.fill"
+                  android_material_icon_name="groups"
+                  size={24}
+                  color={role === 'crew' ? colors.text : colors.textSecondary}
+                />
+                <Text
+                  style={[
+                    styles.roleButtonText,
+                    role === 'crew' && styles.roleButtonTextActive,
+                  ]}
+                >
+                  Crew
+                </Text>
+              </TouchableOpacity>
             </View>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Manager Code</Text>
+            <View style={[styles.inputWrapper, managerCodeError ? styles.inputError : null]}>
+              <IconSymbol
+                ios_icon_name="key.fill"
+                android_material_icon_name="vpn_key"
+                size={20}
+                color={managerCodeError ? colors.danger : colors.textSecondary}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter manager code"
+                placeholderTextColor={colors.textMuted}
+                value={managerCode}
+                onChangeText={(text) => {
+                  setManagerCode(text);
+                  setManagerCodeError('');
+                }}
+                autoCapitalize="characters"
+                autoCorrect={false}
+                editable={!isLoading}
+              />
+            </View>
+            {managerCodeError ? <Text style={styles.errorText}>{managerCodeError}</Text> : null}
+            {!isSupabaseEnabled && (
+              <Text style={styles.hintText}>
+                Demo codes: VESSEL2024, YACHT2024, CREW2024, MANAGER2024
+              </Text>
+            )}
           </View>
 
           <View style={styles.inputContainer}>
@@ -323,7 +423,15 @@ export default function SignUpScreen() {
               {isLoading ? (
                 <ActivityIndicator color={colors.text} size="small" />
               ) : (
-                <Text style={styles.signUpButtonText}>Create Account</Text>
+                <React.Fragment>
+                  <Text style={styles.signUpButtonText}>Create Account</Text>
+                  <IconSymbol
+                    ios_icon_name="arrow.right"
+                    android_material_icon_name="arrow_forward"
+                    size={20}
+                    color={colors.text}
+                  />
+                </React.Fragment>
               )}
             </LinearGradient>
           </TouchableOpacity>
@@ -334,6 +442,31 @@ export default function SignUpScreen() {
               <Text style={styles.loginLink}>Sign In</Text>
             </TouchableOpacity>
           </View>
+
+          <View style={styles.dividerContainer}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>OR</Text>
+            <View style={styles.divider} />
+          </View>
+
+          <TouchableOpacity
+            style={styles.managerLoginButton}
+            onPress={() => router.push('/manager-login')}
+          >
+            <IconSymbol
+              ios_icon_name="chart.bar.fill"
+              android_material_icon_name="dashboard"
+              size={20}
+              color={colors.accent}
+            />
+            <Text style={styles.managerLoginText}>Manager Login</Text>
+            <IconSymbol
+              ios_icon_name="arrow.right"
+              android_material_icon_name="arrow_forward"
+              size={16}
+              color={colors.accent}
+            />
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -388,6 +521,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 32,
   },
+  infoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.accent + '15',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: colors.accent + '30',
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '500',
+    color: colors.text,
+    lineHeight: 18,
+  },
   inputContainer: {
     marginBottom: 20,
   },
@@ -426,19 +577,28 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginLeft: 4,
   },
+  hintText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    marginTop: 6,
+    marginLeft: 4,
+    fontStyle: 'italic',
+  },
   roleContainer: {
     flexDirection: 'row',
     gap: 12,
   },
   roleButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 16,
     paddingHorizontal: 16,
     borderRadius: 12,
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',
+    gap: 8,
   },
   roleButtonActive: {
     backgroundColor: colors.accent,
@@ -467,6 +627,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 16,
     paddingHorizontal: 24,
+    gap: 8,
   },
   signUpButtonText: {
     fontSize: 17,
@@ -489,5 +650,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: colors.accent,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 24,
+    gap: 12,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border,
+  },
+  dividerText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    letterSpacing: 0.2,
+  },
+  managerLoginButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    gap: 8,
+  },
+  managerLoginText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.accent,
+    letterSpacing: 0.2,
   },
 });
