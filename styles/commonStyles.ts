@@ -63,6 +63,26 @@ export const colors = {
   gradientEnd: '#1E3A5F',
   gradientAccentStart: '#3B82F6',
   gradientAccentEnd: '#1E40AF',
+  gradientGoldStart: '#D4AF37',
+  gradientGoldEnd: '#B8941F',
+  gradientSuccessStart: '#10B981',
+  gradientSuccessEnd: '#059669',
+  gradientWarningStart: '#F59E0B',
+  gradientWarningEnd: '#D97706',
+  gradientDangerStart: '#EF4444',
+  gradientDangerEnd: '#DC2626',
+};
+
+export const gradients = {
+  primary: [colors.primary, colors.secondary],
+  accent: [colors.gradientAccentStart, colors.gradientAccentEnd],
+  gold: [colors.gradientGoldStart, colors.gradientGoldEnd],
+  success: [colors.gradientSuccessStart, colors.gradientSuccessEnd],
+  warning: [colors.gradientWarningStart, colors.gradientWarningEnd],
+  danger: [colors.gradientDangerStart, colors.gradientDangerEnd],
+  card: [colors.card, colors.cardElevated],
+  cardReverse: [colors.cardElevated, colors.card],
+  subtle: [colors.backgroundAlt, colors.backgroundLight],
 };
 
 export const shadows = {
@@ -110,11 +130,22 @@ export const shadows = {
   },
 };
 
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  xxxl: 32,
+  huge: 48,
+};
+
 export const buttonStyles = StyleSheet.create({
   primaryButton: {
     backgroundColor: colors.primary,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -122,8 +153,8 @@ export const buttonStyles = StyleSheet.create({
   },
   secondaryButton: {
     backgroundColor: colors.secondary,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -131,8 +162,8 @@ export const buttonStyles = StyleSheet.create({
   },
   accentButton: {
     backgroundColor: colors.accent,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -140,8 +171,8 @@ export const buttonStyles = StyleSheet.create({
   },
   goldButton: {
     backgroundColor: colors.gold,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -149,8 +180,8 @@ export const buttonStyles = StyleSheet.create({
   },
   outlineButton: {
     backgroundColor: 'transparent',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: colors.border,
@@ -159,8 +190,8 @@ export const buttonStyles = StyleSheet.create({
   },
   glassButton: {
     backgroundColor: colors.glass,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.glassBorder,
@@ -206,28 +237,28 @@ export const commonStyles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '800',
     color: colors.text,
-    marginBottom: 12,
+    marginBottom: spacing.md,
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 24,
     fontWeight: '700',
     color: colors.text,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
     letterSpacing: -0.3,
   },
   heading: {
     fontSize: 20,
     fontWeight: '700',
     color: colors.text,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
     letterSpacing: -0.2,
   },
   subheading: {
     fontSize: 18,
     fontWeight: '600',
     color: colors.text,
-    marginBottom: 6,
+    marginBottom: spacing.sm,
   },
   text: {
     fontSize: 16,
@@ -258,8 +289,8 @@ export const commonStyles = StyleSheet.create({
   card: {
     backgroundColor: colors.card,
     borderRadius: 16,
-    padding: 20,
-    marginVertical: 8,
+    padding: spacing.xl,
+    marginVertical: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,
     ...shadows.card,
@@ -267,8 +298,8 @@ export const commonStyles = StyleSheet.create({
   cardCompact: {
     backgroundColor: colors.card,
     borderRadius: 12,
-    padding: 16,
-    marginVertical: 6,
+    padding: spacing.lg,
+    marginVertical: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,
     ...shadows.small,
@@ -276,8 +307,8 @@ export const commonStyles = StyleSheet.create({
   cardElevated: {
     backgroundColor: colors.cardElevated,
     borderRadius: 16,
-    padding: 20,
-    marginVertical: 8,
+    padding: spacing.xl,
+    marginVertical: spacing.sm,
     borderWidth: 1,
     borderColor: colors.borderLight,
     ...shadows.large,
@@ -285,8 +316,8 @@ export const commonStyles = StyleSheet.create({
   cardGlass: {
     backgroundColor: colors.glass,
     borderRadius: 16,
-    padding: 20,
-    marginVertical: 8,
+    padding: spacing.xl,
+    marginVertical: spacing.sm,
     borderWidth: 1,
     borderColor: colors.glassBorder,
     ...shadows.medium,
@@ -295,22 +326,22 @@ export const commonStyles = StyleSheet.create({
   // Sections
   section: {
     width: '100%',
-    paddingHorizontal: 20,
-    marginBottom: 24,
+    paddingHorizontal: spacing.xl,
+    marginBottom: spacing.xxl,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   
   // Badges & Pills
   badge: {
     backgroundColor: colors.danger,
     borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
     minWidth: 24,
     alignItems: 'center',
     justifyContent: 'center',
@@ -321,8 +352,8 @@ export const commonStyles = StyleSheet.create({
     fontWeight: '700',
   },
   pill: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
@@ -337,12 +368,12 @@ export const commonStyles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: colors.divider,
-    marginVertical: 16,
+    marginVertical: spacing.lg,
   },
   dividerLight: {
     height: 1,
     backgroundColor: colors.border,
-    marginVertical: 12,
+    marginVertical: spacing.md,
   },
   
   // Icons

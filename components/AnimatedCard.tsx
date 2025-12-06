@@ -8,7 +8,6 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import { colors } from '@/styles/commonStyles';
 
 interface AnimatedCardProps {
   children: React.ReactNode;

@@ -3,7 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { colors } from '@/styles/commonStyles';
+import { colors, gradients, spacing } from '@/styles/commonStyles';
 import { IconSymbol } from './IconSymbol';
 
 interface GradientButtonProps {
@@ -15,6 +15,7 @@ interface GradientButtonProps {
   style?: ViewStyle;
   textStyle?: TextStyle;
   disabled?: boolean;
+  variant?: 'primary' | 'accent' | 'gold' | 'success' | 'warning' | 'danger';
 }
 
 export function GradientButton({
@@ -22,15 +23,36 @@ export function GradientButton({
   onPress,
   icon,
   androidIcon,
-  gradientColors = [colors.gradientAccentStart, colors.gradientAccentEnd],
+  gradientColors,
   style,
   textStyle,
   disabled = false,
+  variant = 'accent',
 }: GradientButtonProps) {
   const handlePress = () => {
     if (!disabled) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       onPress();
+    }
+  };
+
+  const getGradientColors = () => {
+    if (gradientColors) return gradientColors;
+    if (disabled) return [colors.textMuted, colors.textMuted];
+    
+    switch (variant) {
+      case 'primary':
+        return gradients.primary;
+      case 'gold':
+        return gradients.gold;
+      case 'success':
+        return gradients.success;
+      case 'warning':
+        return gradients.warning;
+      case 'danger':
+        return gradients.danger;
+      default:
+        return gradients.accent;
     }
   };
 
@@ -42,7 +64,7 @@ export function GradientButton({
       style={[styles.container, style, disabled && styles.disabled]}
     >
       <LinearGradient
-        colors={disabled ? [colors.textMuted, colors.textMuted] : gradientColors}
+        colors={getGradientColors()}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={styles.gradient}
@@ -75,9 +97,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    gap: 8,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
+    gap: spacing.sm,
   },
   text: {
     color: colors.text,

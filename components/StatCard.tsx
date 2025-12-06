@@ -3,7 +3,7 @@ import React, { memo } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { colors } from '@/styles/commonStyles';
+import { colors, gradients, spacing } from '@/styles/commonStyles';
 import { IconSymbol } from './IconSymbol';
 
 interface StatCardProps {
@@ -31,7 +31,7 @@ export const StatCard = memo(function StatCard({
   trendValue,
   onPress,
   backgroundColor = colors.card,
-  useGradient = false,
+  useGradient = true,
 }: StatCardProps) {
   const handlePress = () => {
     if (onPress) {
@@ -43,19 +43,32 @@ export const StatCard = memo(function StatCard({
   const content = (
     <View style={styles.contentWrapper}>
       <View style={styles.header}>
-        <View style={[styles.iconCircle, { backgroundColor: iconColor + '20' }]}>
+        <LinearGradient
+          colors={[iconColor + '30', iconColor + '10']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.iconCircle}
+        >
           <IconSymbol 
             ios_icon_name={icon} 
             android_material_icon_name={androidIcon} 
             size={24} 
             color={iconColor} 
           />
-        </View>
+        </LinearGradient>
         {trend && trendValue && (
-          <View style={[
-            styles.trendBadge,
-            trend === 'up' ? styles.trendUp : trend === 'down' ? styles.trendDown : styles.trendNeutral
-          ]}>
+          <LinearGradient
+            colors={
+              trend === 'up' 
+                ? [colors.success + '30', colors.success + '10']
+                : trend === 'down' 
+                ? [colors.danger + '30', colors.danger + '10']
+                : [colors.textSecondary + '30', colors.textSecondary + '10']
+            }
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.trendBadge}
+          >
             <IconSymbol 
               ios_icon_name={trend === 'up' ? 'arrow.up' : trend === 'down' ? 'arrow.down' : 'minus'} 
               android_material_icon_name={trend === 'up' ? 'trending_up' : trend === 'down' ? 'trending_down' : 'remove'} 
@@ -66,7 +79,7 @@ export const StatCard = memo(function StatCard({
               styles.trendText,
               trend === 'up' ? styles.trendTextUp : trend === 'down' ? styles.trendTextDown : styles.trendTextNeutral
             ]}>{trendValue}</Text>
-          </View>
+          </LinearGradient>
         )}
       </View>
       <Text style={styles.label}>{label}</Text>
@@ -84,7 +97,7 @@ export const StatCard = memo(function StatCard({
       >
         {useGradient ? (
           <LinearGradient
-            colors={[colors.card, colors.cardElevated]}
+            colors={gradients.card}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.container}
@@ -104,7 +117,7 @@ export const StatCard = memo(function StatCard({
     <View style={styles.wrapper}>
       {useGradient ? (
         <LinearGradient
-          colors={[colors.card, colors.cardElevated]}
+          colors={gradients.card}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.container}
@@ -137,13 +150,13 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   contentWrapper: {
-    padding: 16,
+    padding: spacing.lg,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   iconCircle: {
     width: 48,
@@ -160,19 +173,10 @@ const styles = StyleSheet.create({
   trendBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
     borderRadius: 8,
-    gap: 4,
-  },
-  trendUp: {
-    backgroundColor: colors.success + '20',
-  },
-  trendDown: {
-    backgroundColor: colors.danger + '20',
-  },
-  trendNeutral: {
-    backgroundColor: colors.textSecondary + '20',
+    gap: spacing.xs,
   },
   trendText: {
     fontSize: 11,
@@ -190,14 +194,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     color: colors.textSecondary,
-    marginBottom: 6,
+    marginBottom: spacing.sm,
     fontWeight: '500',
   },
   value: {
     fontSize: 28,
     fontWeight: '800',
     color: colors.text,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
     letterSpacing: -0.5,
   },
   subtext: {
