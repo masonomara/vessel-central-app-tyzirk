@@ -16,6 +16,7 @@ import {
   CompletionRecord,
   Attachment,
   Comment,
+  CalendarEvent,
 } from '@/types';
 
 interface DataContextType {
@@ -27,6 +28,7 @@ interface DataContextType {
   activityLogs: ActivityLog[];
   notifications: Notification[];
   expenses: Expense[];
+  calendarEvents: CalendarEvent[];
   
   getVesselsForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => Vessel[];
   getMaintenanceTasksForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => MaintenanceTask[];
@@ -36,6 +38,7 @@ interface DataContextType {
   getActivityLogsForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => ActivityLog[];
   getNotificationsForUser: (userId: string) => Notification[];
   getExpensesForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => Expense[];
+  getCalendarEventsForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => CalendarEvent[];
   
   updateVessel: (id: string, updates: Partial<Vessel>) => void;
   assignOwnerToVessel: (vesselId: string, ownerId: string, ownerName: string) => void;
@@ -69,6 +72,10 @@ interface DataContextType {
   
   addExpense: (expense: Omit<Expense, 'id'>) => void;
   updateExpense: (id: string, updates: Partial<Expense>) => void;
+  
+  addCalendarEvent: (event: Omit<CalendarEvent, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateCalendarEvent: (id: string, updates: Partial<CalendarEvent>) => void;
+  deleteCalendarEvent: (id: string) => void;
   
   loadData: () => Promise<void>;
   saveData: () => Promise<void>;
@@ -464,6 +471,128 @@ export function DataProvider({ children }: { children: ReactNode }) {
     },
   ]);
 
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([
+    {
+      id: '1',
+      title: 'Engine Service Appointment',
+      description: 'Scheduled engine maintenance and oil change',
+      type: 'maintenance',
+      status: 'scheduled',
+      startDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000),
+      allDay: false,
+      vesselId: '1',
+      vesselName: 'Azure Dream',
+      location: 'Monaco Yacht Club Marina',
+      attendees: ['crew1', 'manager1'],
+      attendeeNames: ['Mike Davis', 'Sarah Johnson'],
+      createdBy: 'manager1',
+      createdByName: 'Sarah Johnson',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      notes: 'Technician arriving at 9 AM',
+      reminders: [
+        { id: '1', minutes: 1440, method: 'notification' },
+        { id: '2', minutes: 60, method: 'notification' },
+      ],
+      relatedTaskId: '1',
+    },
+    {
+      id: '2',
+      title: 'Charter - Mediterranean Cruise',
+      description: 'Week-long charter cruise along the French Riviera',
+      type: 'charter',
+      status: 'scheduled',
+      startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      allDay: true,
+      vesselId: '1',
+      vesselName: 'Azure Dream',
+      location: 'Monaco to Saint-Tropez',
+      attendees: ['crew1', 'crew2'],
+      attendeeNames: ['Mike Davis', 'Sarah Williams'],
+      createdBy: 'manager1',
+      createdByName: 'Sarah Johnson',
+      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(),
+      notes: 'VIP guests, special catering requirements',
+      reminders: [
+        { id: '3', minutes: 10080, method: 'notification' },
+        { id: '4', minutes: 2880, method: 'notification' },
+      ],
+    },
+    {
+      id: '3',
+      title: 'Safety Inspection',
+      description: 'Annual safety equipment inspection',
+      type: 'inspection',
+      status: 'scheduled',
+      startDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000),
+      allDay: false,
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      location: 'Port of Miami',
+      attendees: ['crew3', 'manager2'],
+      attendeeNames: ['Jane Smith', 'Tom Wilson'],
+      createdBy: 'manager2',
+      createdByName: 'Tom Wilson',
+      createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(),
+      notes: 'Inspector from Coast Guard',
+      reminders: [
+        { id: '5', minutes: 1440, method: 'notification' },
+      ],
+      relatedTaskId: '2',
+    },
+    {
+      id: '4',
+      title: 'Crew Change',
+      description: 'New crew member onboarding',
+      type: 'crew_change',
+      status: 'scheduled',
+      startDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+      allDay: true,
+      vesselId: '3',
+      vesselName: 'Sea Breeze',
+      location: 'Caribbean Marina',
+      attendees: ['manager1'],
+      attendeeNames: ['Sarah Johnson'],
+      createdBy: 'manager1',
+      createdByName: 'Sarah Johnson',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      notes: 'New deckhand starting',
+      reminders: [
+        { id: '6', minutes: 1440, method: 'notification' },
+      ],
+    },
+    {
+      id: '5',
+      title: 'Provisioning',
+      description: 'Stock up on supplies for upcoming charter',
+      type: 'provisioning',
+      status: 'scheduled',
+      startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000),
+      allDay: false,
+      vesselId: '1',
+      vesselName: 'Azure Dream',
+      location: 'Monaco Yacht Club',
+      attendees: ['crew1'],
+      attendeeNames: ['Mike Davis'],
+      createdBy: 'crew1',
+      createdByName: 'Mike Davis',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      notes: 'Delivery scheduled for 10 AM',
+      reminders: [
+        { id: '7', minutes: 720, method: 'notification' },
+      ],
+    },
+  ]);
+
   // Use ref to track if data has been loaded
   const hasLoadedData = useRef(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -486,6 +615,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const cachedActivityLogs = await cacheManager.get<ActivityLog[]>(CACHE_KEYS.ACTIVITY_LOGS);
       const cachedNotifications = await cacheManager.get<Notification[]>(CACHE_KEYS.NOTIFICATIONS);
       const cachedExpenses = await cacheManager.get<Expense[]>(CACHE_KEYS.EXPENSES);
+      const cachedCalendarEvents = await cacheManager.get<CalendarEvent[]>(CACHE_KEYS.CALENDAR_EVENTS);
 
       // If cache exists, use it
       if (cachedVessels) {
@@ -559,6 +689,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
         })));
       }
 
+      if (cachedCalendarEvents) {
+        console.log('Using cached calendar events');
+        setCalendarEvents(cachedCalendarEvents.map((event: CalendarEvent) => ({
+          ...event,
+          startDate: new Date(event.startDate),
+          endDate: new Date(event.endDate),
+          createdAt: new Date(event.createdAt),
+          updatedAt: new Date(event.updatedAt),
+        })));
+      }
+
       // If no cache exists, try legacy storage
       if (!cachedVessels && !cachedMaintenanceTasks) {
         console.log('No cache found, trying legacy storage...');
@@ -629,6 +770,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
               date: new Date(exp.date),
             })));
           }
+
+          if (parsed.calendarEvents) {
+            setCalendarEvents(parsed.calendarEvents.map((event: CalendarEvent) => ({
+              ...event,
+              startDate: new Date(event.startDate),
+              endDate: new Date(event.endDate),
+              createdAt: new Date(event.createdAt),
+              updatedAt: new Date(event.updatedAt),
+            })));
+          }
         }
       }
       
@@ -664,6 +815,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           { key: CACHE_KEYS.ACTIVITY_LOGS, data: activityLogs, expiration: CACHE_EXPIRATION.SHORT },
           { key: CACHE_KEYS.NOTIFICATIONS, data: notifications, expiration: CACHE_EXPIRATION.SHORT },
           { key: CACHE_KEYS.EXPENSES, data: expenses, expiration: CACHE_EXPIRATION.MEDIUM },
+          { key: CACHE_KEYS.CALENDAR_EVENTS, data: calendarEvents, expiration: CACHE_EXPIRATION.MEDIUM },
         ]);
         
         // Also save to legacy storage for backward compatibility
@@ -676,6 +828,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           activityLogs,
           notifications,
           expenses,
+          calendarEvents,
         };
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         
@@ -694,7 +847,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Save data whenever it changes (debounced)
   useEffect(() => {
     saveData();
-  }, [saveData]);
+  }, [saveData, calendarEvents]);
 
   const generateId = () => {
     return Date.now().toString() + Math.random().toString(36).substr(2, 9);
@@ -773,6 +926,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const userVessels = getVesselsForUser(userId, userRole);
     const vesselIds = userVessels.map(v => v.id);
     return expenses.filter(e => vesselIds.includes(e.vesselId));
+  };
+
+  const getCalendarEventsForUser = (userId: string, userRole: 'owner' | 'manager' | 'crew'): CalendarEvent[] => {
+    const userVessels = getVesselsForUser(userId, userRole);
+    const vesselIds = userVessels.map(v => v.id);
+    
+    if (userRole === 'crew') {
+      return calendarEvents.filter(e => 
+        vesselIds.includes(e.vesselId) && e.attendees.includes(userId)
+      );
+    }
+    
+    return calendarEvents.filter(e => vesselIds.includes(e.vesselId));
   };
 
   // Maintenance Task functions
@@ -1194,6 +1360,51 @@ export function DataProvider({ children }: { children: ReactNode }) {
     ));
   };
 
+  // Calendar Event functions
+  const addCalendarEvent = (event: Omit<CalendarEvent, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newEvent: CalendarEvent = {
+      ...event,
+      id: generateId(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setCalendarEvents([...calendarEvents, newEvent]);
+    
+    addActivityLog({
+      type: 'system',
+      title: 'Calendar Event Created',
+      description: `${event.title} scheduled for ${event.vesselName}`,
+      userId: event.createdBy,
+      userName: event.createdByName,
+      userRole: 'manager',
+      vesselId: event.vesselId,
+      vesselName: event.vesselName,
+      relatedId: newEvent.id,
+      relatedType: 'calendar',
+    });
+
+    // Notify attendees
+    event.attendees.forEach((attendeeId, index) => {
+      addNotification({
+        type: 'reminder',
+        title: 'New Calendar Event',
+        message: `${event.title} on ${event.startDate.toLocaleDateString()}`,
+        userId: attendeeId,
+        priority: 'medium',
+      });
+    });
+  };
+
+  const updateCalendarEvent = (id: string, updates: Partial<CalendarEvent>) => {
+    setCalendarEvents(calendarEvents.map(event =>
+      event.id === id ? { ...event, ...updates, updatedAt: new Date() } : event
+    ));
+  };
+
+  const deleteCalendarEvent = (id: string) => {
+    setCalendarEvents(calendarEvents.filter(event => event.id !== id));
+  };
+
   // Vessel assignment functions
   const updateVessel = (id: string, updates: Partial<Vessel>) => {
     setVessels(vessels.map(vessel =>
@@ -1319,6 +1530,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         activityLogs,
         notifications,
         expenses,
+        calendarEvents,
         getVesselsForUser,
         getMaintenanceTasksForUser,
         getIssuesForUser,
@@ -1327,6 +1539,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         getActivityLogsForUser,
         getNotificationsForUser,
         getExpensesForUser,
+        getCalendarEventsForUser,
         updateVessel,
         assignOwnerToVessel,
         removeOwnerFromVessel,
@@ -1352,6 +1565,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         clearAllNotifications,
         addExpense,
         updateExpense,
+        addCalendarEvent,
+        updateCalendarEvent,
+        deleteCalendarEvent,
         loadData,
         saveData,
       }}

@@ -11,6 +11,7 @@ export const CACHE_KEYS = {
   ACTIVITY_LOGS: '@cache_activity_logs',
   NOTIFICATIONS: '@cache_notifications',
   EXPENSES: '@cache_expenses',
+  CALENDAR_EVENTS: '@cache_calendar_events',
   USER_PREFERENCES: '@cache_user_preferences',
   CACHE_METADATA: '@cache_metadata',
 };

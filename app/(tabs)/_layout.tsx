@@ -61,6 +61,12 @@ export default function TabLayout() {
           label: 'Dashboard',
         },
         {
+          name: 'calendar',
+          route: '/(tabs)/calendar',
+          icon: 'event',
+          label: 'Calendar',
+        },
+        {
           name: 'maintenance',
           route: '/(tabs)/maintenance',
           icon: 'build',
@@ -86,6 +92,12 @@ export default function TabLayout() {
           route: '/(tabs)/manager',
           icon: 'dashboard',
           label: 'Dashboard',
+        },
+        {
+          name: 'calendar',
+          route: '/(tabs)/calendar',
+          icon: 'event',
+          label: 'Calendar',
         },
         {
           name: 'maintenance',
@@ -119,6 +131,12 @@ export default function TabLayout() {
           route: '/(tabs)/crew',
           icon: 'list',
           label: 'Tasks',
+        },
+        {
+          name: 'calendar',
+          route: '/(tabs)/calendar',
+          icon: 'event',
+          label: 'Calendar',
         },
         {
           name: 'issues',
@@ -166,6 +184,7 @@ export default function TabLayout() {
         <Stack.Screen key="owner" name="owner" />
         <Stack.Screen key="manager" name="manager" />
         <Stack.Screen key="crew" name="crew" />
+        <Stack.Screen key="calendar" name="calendar" />
         <Stack.Screen key="maintenance" name="maintenance" />
         <Stack.Screen key="issues" name="issues" />
         <Stack.Screen key="supplies" name="supplies" />

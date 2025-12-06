@@ -205,3 +205,6 @@ export interface Expense {
 
 // Re-export notification types
 export type { NotificationCategory, NotificationPreferences } from './notifications';
+
+// Re-export calendar types
+export type { CalendarEvent, CalendarEventType, CalendarEventStatus, EventReminder, CalendarFilter } from './calendar';
