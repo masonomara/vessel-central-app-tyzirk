@@ -204,6 +204,7 @@ export default function ManagerDashboard() {
               label="Vessels"
               value={myVessels.length}
               subtext={`${myVessels.filter(v => v.status === 'active').length} active`}
+              onPress={() => router.push('/assign-boats')}
             />
 
             <StatCard
@@ -440,6 +441,19 @@ export default function ManagerDashboard() {
         </View>
 
         <View style={styles.quickActions}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => router.push('/assign-boats')}
+          >
+            <IconSymbol 
+              ios_icon_name="person.2.badge.gearshape.fill" 
+              android_material_icon_name="manage_accounts" 
+              size={24} 
+              color={colors.text} 
+            />
+            <Text style={styles.actionButtonText}>Assign Boats</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={() => router.push('/add-maintenance-task')}

@@ -235,17 +235,23 @@ export default function ManagerDashboard() {
           </View>
 
           <View style={styles.quickActions}>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => router.push('/assign-boats')}
+            >
               <IconSymbol 
-                ios_icon_name="person.badge.plus.fill" 
-                android_material_icon_name="person_add" 
+                ios_icon_name="person.2.badge.gearshape.fill" 
+                android_material_icon_name="manage_accounts" 
                 size={24} 
                 color={colors.text} 
               />
-              <Text style={styles.actionButtonText}>Add Crew</Text>
+              <Text style={styles.actionButtonText}>Assign Boats</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => router.push('/add-maintenance-task')}
+            >
               <IconSymbol 
                 ios_icon_name="calendar.badge.plus" 
                 android_material_icon_name="event_available" 
@@ -255,14 +261,17 @@ export default function ManagerDashboard() {
               <Text style={styles.actionButtonText}>Schedule Task</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => router.push('/analytics')}
+            >
               <IconSymbol 
-                ios_icon_name="doc.text.fill" 
-                android_material_icon_name="description" 
+                ios_icon_name="chart.bar.fill" 
+                android_material_icon_name="analytics" 
                 size={24} 
                 color={colors.text} 
               />
-              <Text style={styles.actionButtonText}>Generate Report</Text>
+              <Text style={styles.actionButtonText}>View Analytics</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

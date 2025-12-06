@@ -37,6 +37,12 @@ interface DataContextType {
   getNotificationsForUser: (userId: string) => Notification[];
   getExpensesForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => Expense[];
   
+  updateVessel: (id: string, updates: Partial<Vessel>) => void;
+  assignOwnerToVessel: (vesselId: string, ownerId: string, ownerName: string) => void;
+  removeOwnerFromVessel: (vesselId: string) => void;
+  assignCrewToVessel: (vesselId: string, crewId: string, crewName: string) => void;
+  removeCrewFromVessel: (vesselId: string, crewId: string) => void;
+  
   addMaintenanceTask: (task: Omit<MaintenanceTask, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateMaintenanceTask: (id: string, updates: Partial<MaintenanceTask>) => Promise<void>;
   deleteMaintenanceTask: (id: string) => void;
@@ -1188,6 +1194,120 @@ export function DataProvider({ children }: { children: ReactNode }) {
     ));
   };
 
+  // Vessel assignment functions
+  const updateVessel = (id: string, updates: Partial<Vessel>) => {
+    setVessels(vessels.map(vessel =>
+      vessel.id === id ? { ...vessel, ...updates } : vessel
+    ));
+  };
+
+  const assignOwnerToVessel = (vesselId: string, ownerId: string, ownerName: string) => {
+    const vessel = vessels.find(v => v.id === vesselId);
+    if (!vessel) {
+      console.log('Vessel not found');
+      return;
+    }
+
+    updateVessel(vesselId, { ownerId });
+    
+    addActivityLog({
+      type: 'system',
+      title: 'Owner Assigned',
+      description: `${ownerName} assigned as owner of ${vessel.name}`,
+      userId: ownerId,
+      userName: ownerName,
+      userRole: 'owner',
+      vesselId: vessel.id,
+      vesselName: vessel.name,
+    });
+  };
+
+  const removeOwnerFromVessel = (vesselId: string) => {
+    const vessel = vessels.find(v => v.id === vesselId);
+    if (!vessel) {
+      console.log('Vessel not found');
+      return;
+    }
+
+    updateVessel(vesselId, { ownerId: '' });
+    
+    addActivityLog({
+      type: 'system',
+      title: 'Owner Removed',
+      description: `Owner removed from ${vessel.name}`,
+      userId: 'system',
+      userName: 'System',
+      userRole: 'manager',
+      vesselId: vessel.id,
+      vesselName: vessel.name,
+    });
+  };
+
+  const assignCrewToVessel = (vesselId: string, crewId: string, crewName: string) => {
+    const vessel = vessels.find(v => v.id === vesselId);
+    if (!vessel) {
+      console.log('Vessel not found');
+      return;
+    }
+
+    const currentCrewIds = vessel.crewIds || [];
+    if (currentCrewIds.includes(crewId)) {
+      console.log('Crew member already assigned to this vessel');
+      return;
+    }
+
+    updateVessel(vesselId, { 
+      crewIds: [...currentCrewIds, crewId],
+      crewCount: currentCrewIds.length + 1,
+    });
+    
+    addActivityLog({
+      type: 'system',
+      title: 'Crew Member Assigned',
+      description: `${crewName} assigned to ${vessel.name}`,
+      userId: crewId,
+      userName: crewName,
+      userRole: 'crew',
+      vesselId: vessel.id,
+      vesselName: vessel.name,
+    });
+
+    addNotification({
+      type: 'alert',
+      title: 'Vessel Assignment',
+      message: `You have been assigned to ${vessel.name}`,
+      userId: crewId,
+      priority: 'medium',
+    });
+  };
+
+  const removeCrewFromVessel = (vesselId: string, crewId: string) => {
+    const vessel = vessels.find(v => v.id === vesselId);
+    if (!vessel) {
+      console.log('Vessel not found');
+      return;
+    }
+
+    const currentCrewIds = vessel.crewIds || [];
+    const updatedCrewIds = currentCrewIds.filter(id => id !== crewId);
+
+    updateVessel(vesselId, { 
+      crewIds: updatedCrewIds,
+      crewCount: updatedCrewIds.length,
+    });
+    
+    addActivityLog({
+      type: 'system',
+      title: 'Crew Member Removed',
+      description: `Crew member removed from ${vessel.name}`,
+      userId: 'system',
+      userName: 'System',
+      userRole: 'manager',
+      vesselId: vessel.id,
+      vesselName: vessel.name,
+    });
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -1207,6 +1327,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
         getActivityLogsForUser,
         getNotificationsForUser,
         getExpensesForUser,
+        updateVessel,
+        assignOwnerToVessel,
+        removeOwnerFromVessel,
+        assignCrewToVessel,
+        removeCrewFromVessel,
         addMaintenanceTask,
         updateMaintenanceTask,
         deleteMaintenanceTask,
