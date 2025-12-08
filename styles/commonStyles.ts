@@ -30,19 +30,19 @@ export const colors = {
   statusInYard: '#F59E0B',      // Amber
   statusOffline: '#6B7280',     // Gray
   
-  // Backgrounds
-  background: '#0F1419',        // Very Dark (almost black)
-  backgroundAlt: '#1A1F26',     // Dark slate
-  backgroundLight: '#252B33',   // Lighter dark
-  card: '#1E2530',              // Card background
-  cardHover: '#252D3A',         // Card hover state
-  cardElevated: '#242B38',      // Elevated card
+  // Backgrounds - DARKER for better text contrast
+  background: '#0A0E14',        // Almost black (darker)
+  backgroundAlt: '#0F1419',     // Very dark slate (darker)
+  backgroundLight: '#1A1F26',   // Dark slate (darker)
+  card: '#151B24',              // Card background (darker)
+  cardHover: '#1A2129',         // Card hover state (darker)
+  cardElevated: '#1D242E',      // Elevated card (darker)
   
-  // Text
-  text: '#F8FAFC',              // Almost white
-  textSecondary: '#94A3B8',     // Light gray
-  textTertiary: '#64748B',      // Medium gray
-  textMuted: '#475569',         // Muted gray
+  // Text - Higher contrast
+  text: '#FFFFFF',              // Pure white for maximum contrast
+  textSecondary: '#A8B5C7',     // Lighter gray for better visibility
+  textTertiary: '#7A8A9E',      // Medium gray
+  textMuted: '#5A6A7E',         // Muted gray
   
   // Borders & Dividers
   border: '#2D3748',            // Subtle border
@@ -55,8 +55,8 @@ export const colors = {
   overlayDark: 'rgba(0, 0, 0, 0.8)',
   
   // Glass effect
-  glass: 'rgba(30, 37, 48, 0.7)',
-  glassBorder: 'rgba(148, 163, 184, 0.1)',
+  glass: 'rgba(21, 27, 36, 0.7)',
+  glassBorder: 'rgba(168, 181, 199, 0.15)',
   
   // Gradients (for use in LinearGradient)
   gradientStart: '#0A2540',
