@@ -5,7 +5,7 @@ import { useRealtime } from '@/hooks/useRealtime';
 import { RealtimeEvent } from '@/utils/realtimeManager';
 import { colors } from '@/styles/commonStyles';
 import { IconSymbol } from './IconSymbol';
-import { formatDistanceToNow } from '@/utils/dateUtils';
+import { formatDate } from '@/utils/dateUtils';
 
 interface RealtimeFeedProps {
   userId?: string;
@@ -153,7 +153,7 @@ export function RealtimeFeed({ userId, limit = 20, showUnreadOnly = false }: Rea
             {description}
           </Text>
           <Text style={styles.eventTime}>
-            {formatDistanceToNow(item.timestamp)}
+            {formatDate(item.timestamp)}
           </Text>
         </View>
       </TouchableOpacity>
