@@ -418,16 +418,18 @@ export default function MaintenanceScreen() {
   );
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: colors.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen
         options={{
           title: "Maintenance",
           headerRight: () => (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+            >
               {(userRole === "manager" || userRole === "owner") && (
-                <TouchableOpacity onPress={() => router.push("/add-maintenance-task")}>
+                <TouchableOpacity
+                  onPress={() => router.push("/add-maintenance-task")}
+                >
                   <IconSymbol
                     ios_icon_name="plus"
                     android_material_icon_name="add"
@@ -570,9 +572,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  taskCardOverdue: {
-
-  },
+  taskCardOverdue: {},
   taskHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
