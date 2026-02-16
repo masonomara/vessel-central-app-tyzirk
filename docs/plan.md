@@ -4,31 +4,190 @@ Goal: Turn the existing prototype into a polished demo. Not production -- a walk
 
 ---
 
-## Phase 1: Kill the iOS Overrides
+## Phase 1: Strip Unnecessary Features
 
-**Problem:** 6 `.ios.tsx` files are simplified prototypes with hardcoded data, dead buttons, and broken logout. Expo Router prioritizes these on iOS, so on any iPhone the user sees the dumbed-down version instead of the real screens.
+Five features exist that serve no purpose in a demo. They add dead code, broken UI, and false complexity. Remove them entirely.
 
-**Fix:** Delete all 6 files.
+### 1.1 Remove Offline Mode
 
+Offline queue and cache layer are not connected to anything. They add phantom infrastructure that never fires.
+
+**Delete files:**
+- `utils/offlineManager.ts` -- offline queue singleton (482 lines)
+- `utils/cacheManager.ts` -- cache layer singleton (344 lines)
+- `components/OfflineQueueStatus.tsx` -- offline status banner (382 lines)
+- `components/CacheStatus.tsx` -- cache status display (192 lines)
+- `app/cache-settings.tsx` -- cache settings screen (403 lines)
+
+**Modify `app/_layout.tsx`:**
+```typescript
+// REMOVE these lines
+import { OfflineQueueStatus } from '@/components/OfflineQueueStatus';
+// ...
+<OfflineQueueStatus />
 ```
-app/(tabs)/(home)/index.ios.tsx
-app/(tabs)/owner.ios.tsx
-app/(tabs)/manager.ios.tsx
-app/(tabs)/crew.ios.tsx
-app/(tabs)/calendar.ios.tsx
-app/(tabs)/profile.ios.tsx
+
+**Modify `contexts/DataContext.tsx`:**
+```typescript
+// REMOVE these imports
+import { cacheManager, CACHE_KEYS, CACHE_EXPIRATION, cacheHelpers } from '@/utils/cacheManager';
+import { offlineManager } from '@/utils/offlineManager';
 ```
 
-The `.tsx` versions are the real, data-driven screens. They will run on all platforms once the `.ios.tsx` files are gone.
+Then strip all offline/cache logic from DataContext:
+- Remove the entire `loadData` function's cache layer (falls back to AsyncStorage reads of seed data -- keep the seed data, remove the caching wrapper)
+- Remove the entire `saveData` function's cache layer (keep basic AsyncStorage persistence if needed, remove cacheManager calls)
+- Remove `cacheHelpers.invalidateCache(...)` calls in `addMaintenanceTask`, `updateMaintenanceTask`, `addIssue`
+- Remove `offlineManager.getNetworkStatus()` checks and `offlineManager.addToOfflineQueue(...)` calls in those same methods
 
-**What this fixes in one move:**
-- Hardcoded vessel data on owner dashboard
-- Dead "Report Issue" / "Request Supplies" / "Upload Photo" buttons on crew
-- Console.log-only approve/reject on manager
-- Missing Settings section on profile
-- Broken logout (setUserRole(null) instead of signOut)
-- Missing auth check on home screen
-- Empty calendar (user.id null in demo mode)
+**Modify `app/(tabs)/profile.tsx`:**
+- Remove "Cache & Storage" settings row and its navigation to `/cache-settings`
+
+### 1.2 Remove Realtime
+
+The realtime system is a local event bus pretending to be live data. It publishes events to itself and displays them back. No external data source.
+
+**Delete files:**
+- `utils/realtimeManager.ts` -- event bus singleton
+- `hooks/useRealtime.ts` -- hook wrapping the event bus
+- `components/RealtimeFeed.tsx` -- feed UI component
+
+**Modify `app/(tabs)/owner.tsx`:**
+```typescript
+// REMOVE these lines
+import RealtimeFeed from "@/components/RealtimeFeed";
+// ...and wherever <RealtimeFeed ... /> is rendered, delete the entire block
+```
+
+**Modify `app/(tabs)/manager.tsx`:**
+```typescript
+// REMOVE these lines
+import { RealtimeFeed } from "@/components/RealtimeFeed";
+// ...and wherever <RealtimeFeed ... /> is rendered, delete the entire block
+```
+
+**Modify `contexts/DataContext.tsx`:**
+```typescript
+// REMOVE this import
+import { realtimeManager } from '@/utils/realtimeManager';
+```
+
+Then remove all `realtimeManager.publishEvent(...)` calls:
+- `addMaintenanceTask` -- `task_assigned` event
+- `completeMaintenanceTask` -- `task_completed` event
+- `updateMaintenanceTask` -- `maintenance_updated` event
+- `addIssue` -- `issue_created` event
+- `approveSupplyRequest` -- `supply_approved` event
+- `denySupplyRequest` -- `supply_denied` event
+
+### 1.3 Remove Notifications
+
+No backend to push notifications. The entire notification system is inert plumbing.
+
+**Delete files:**
+- `utils/notificationService.ts` -- notification scheduling service
+- `utils/notificationPreferences.ts` -- preference management singleton
+- `hooks/useNotifications.ts` -- global notification setup hook
+- `hooks/useNotificationPreferences.ts` -- preferences UI hook
+- `app/notification-settings.tsx` -- notification settings screen
+- `types/notifications.ts` -- notification preference types
+
+**Modify `app/_layout.tsx`:**
+```typescript
+// REMOVE these lines
+import { useNotifications } from '@/hooks/useNotifications';
+// ...inside RootLayoutContent:
+useNotifications();  // DELETE this call
+```
+
+**Modify `app/(tabs)/_layout.tsx`:**
+- Remove the `unreadCount` computation (it's computed but never used anyway)
+
+**Modify `contexts/DataContext.tsx`:**
+- Keep the `notifications` array in state (it's used for display) and `markNotificationAsRead` / `clearAllNotifications` methods
+- Remove `addNotification(...)` calls that fire inside `addIssue`, `addSupplyRequest`, `approveSupplyRequest`, `denySupplyRequest`, `assignCrewToVessel`, `addCalendarEvent` -- these create notifications that nobody reads
+
+**Modify `types/index.ts`:**
+```typescript
+// REMOVE these re-exports
+export type { NotificationCategory, NotificationPreferences } from './notifications';
+```
+
+**Modify `app/(tabs)/profile.tsx`:**
+- Remove "Notifications" settings row and its navigation to `/notification-settings`
+
+### 1.4 Remove Analytics
+
+No real data source. Charts render computed values from mock seed data. Not worth keeping for a demo -- it's a screen that invites scrutiny with no real answers behind it.
+
+**Delete files:**
+- `app/analytics.tsx` -- analytics dashboard
+
+**Modify `app/(tabs)/owner.tsx`:**
+- Remove `handleViewAnalytics` function and the "View Analytics" `GradientButton`
+
+**Modify `app/(tabs)/manager.tsx`:**
+- Remove the "View Analytics" quick action button and its `router.push('/analytics')` call
+
+**Modify `app/(tabs)/maintenance.tsx`:**
+- Remove `handleAnalytics` callback and the analytics icon button in the header
+
+**Modify `package.json`:**
+```json
+// REMOVE this dependency
+"react-native-chart-kit": "^6.12.0"
+```
+
+Then run `npm install` to update the lockfile.
+
+### 1.5 Remove Supabase Integration
+
+Supabase is never wired up. The app already runs entirely on AsyncStorage mock login. The dual-mode auth pattern adds branching complexity for a path that's never taken.
+
+**Delete files:**
+- `utils/supabase.ts` -- Supabase client factory
+
+**Simplify `contexts/AuthContext.tsx`:**
+
+The entire auth context should be rewritten to remove all Supabase code paths. What remains:
+
+```typescript
+// REMOVE these imports
+import { supabase, isSupabaseConfigured } from '@/utils/supabase';
+import { Session, User, AuthError } from '@supabase/supabase-js';
+
+// REMOVE from state
+const [user, setUser] = useState<User | null>(null);
+const [session, setSession] = useState<Session | null>(null);
+const [isSupabaseEnabled] = useState<boolean>(isSupabaseConfigured());
+
+// REMOVE from context type and implementation
+user, session, isSupabaseEnabled
+resetPassword, updatePassword
+enrollMFA, verifyMFA, unenrollMFA, getMFAFactors
+refreshSession
+
+// REMOVE the entire Supabase auth state listener (supabase.auth.onAuthStateChange)
+// REMOVE all Supabase-specific branches in signUp, signIn, signOut
+```
+
+Keep only the AsyncStorage-based auth: `userId`, `userRole`, `userName`, `isLoading`, `signIn` (mock), `signOut` (clear AsyncStorage), and the legacy setters.
+
+**Simplify `app/login.tsx`:**
+- Remove `isSupabaseEnabled` conditional branches
+- Remove the "Demo Mode" badge (everything is demo mode now)
+- Keep the quick-login buttons and mock user flow as the only login path
+
+**Simplify `app/signup.tsx`:**
+- Either delete entirely (no signup in demo mode) or keep as a stub that shows "Coming soon"
+
+**Modify `package.json`:**
+```json
+// REMOVE this dependency
+"@supabase/supabase-js": "^2.84.0"
+```
+
+Then run `npm install` to update the lockfile.
 
 ---
 
@@ -43,7 +202,7 @@ The `.tsx` versions are the real, data-driven screens. They will run on all plat
 Add to the colors object after line 25 (`info`):
 
 ```typescript
-  error: '#EF4444',          // Alias for danger (used by RealtimeFeed, ErrorState)
+  error: '#EF4444',          // Alias for danger (used by ErrorState)
 ```
 
 Add after line 31 (`statusOffline`):
@@ -52,33 +211,9 @@ Add after line 31 (`statusOffline`):
   grey: '#6B7280',           // Neutral gray (used in status defaults)
 ```
 
-**Files affected:** `RealtimeFeed.tsx` (lines 25, 39), `ErrorState.tsx` (line 24), `notification-settings.tsx` (lines 529, 536), `supplies.tsx` (line 33), `issues.tsx` (line 28), `maintenance-detail.tsx` (lines 37, 46-47).
+**Files affected:** `ErrorState.tsx` (line 24), `supplies.tsx` (line 33), `issues.tsx` (line 28), `maintenance-detail.tsx` (lines 37, 46-47).
 
-### 2.2 Fix RealtimeFeed import in owner.tsx
-
-**File:** `app/(tabs)/owner.tsx`, line 19
-
-```typescript
-// BEFORE (crashes -- RealtimeFeed is a named export)
-import RealtimeFeed from "@/components/RealtimeFeed";
-
-// AFTER
-import { RealtimeFeed } from "@/components/RealtimeFeed";
-```
-
-### 2.3 Fix RealtimeFeed prop name in owner.tsx
-
-**File:** `app/(tabs)/owner.tsx`, wherever `<RealtimeFeed>` is rendered
-
-```typescript
-// BEFORE (maxItems is not a prop -- silently ignored, shows 20 items)
-<RealtimeFeed userId={userId} maxItems={5} />
-
-// AFTER
-<RealtimeFeed userId={userId} limit={5} />
-```
-
-### 2.4 Fix calendar-event-detail date crash
+### 2.2 Fix calendar-event-detail date crash
 
 `event.createdAt` is a string from JSON, not a `Date` object. Calling `.toLocaleDateString()` on a string crashes.
 
@@ -92,39 +227,43 @@ import { RealtimeFeed } from "@/components/RealtimeFeed";
 {new Date(event.createdAt).toLocaleDateString()}
 ```
 
-### 2.5 Fix calendar demo mode (user.id null)
+### 2.3 Fix calendar demo mode (user.id null)
 
-The calendar screen uses `useAuth().user` (Supabase User object, null in demo mode) to fetch events. This means the calendar is always empty in a demo.
+The calendar screen uses `useAuth().user` (Supabase User object, null after Supabase removal). Switch to `userId` directly.
 
 **File:** `app/(tabs)/calendar.tsx`
-
-Find where `getCalendarEventsForUser` is called with `user.id`:
 
 ```typescript
 // BEFORE
 const userEvents = getCalendarEventsForUser(user.id, userRole);
 
 // AFTER
-const userEvents = getCalendarEventsForUser(user?.id || userId, userRole);
+const userEvents = getCalendarEventsForUser(userId, userRole);
 ```
 
-Make sure `userId` (the string from `useAuth()`) is destructured alongside `user`.
+Remove the `user` destructure from `useAuth()` if no longer used elsewhere in the file.
 
-### 2.6 Fix supplies.tsx hardcoded approver
+### 2.4 Fix supplies.tsx hardcoded approver
 
 **File:** `app/(tabs)/supplies.tsx`, lines 174-177
 
 ```typescript
 // BEFORE
-const handleApprove = useCallback((id: string) => {
-  approveSupplyRequest(id, 'manager1', 'Sarah Johnson');
-  console.log('Approved request:', id);
-}, [approveSupplyRequest]);
+const handleApprove = useCallback(
+  (id: string) => {
+    approveSupplyRequest(id, "manager1", "Sarah Johnson");
+    console.log("Approved request:", id);
+  },
+  [approveSupplyRequest],
+);
 
 // AFTER
-const handleApprove = useCallback((id: string) => {
-  approveSupplyRequest(id, userId, userName);
-}, [approveSupplyRequest, userId, userName]);
+const handleApprove = useCallback(
+  (id: string) => {
+    approveSupplyRequest(id, userId, userName);
+  },
+  [approveSupplyRequest, userId, userName],
+);
 ```
 
 Add `userId` and `userName` to the destructured `useAuth()` call if not already present.
@@ -215,7 +354,6 @@ export default function IssueDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <IconSymbol name="chevron.left" size={24} color={colors.text} />
@@ -225,7 +363,6 @@ export default function IssueDetailScreen() {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* Title & Badges */}
         <Text style={styles.title}>{issue.title}</Text>
         <View style={styles.badgeRow}>
           <View style={[styles.badge, { backgroundColor: getPriorityColor(issue.priority) + '20' }]}>
@@ -245,42 +382,31 @@ export default function IssueDetailScreen() {
           )}
         </View>
 
-        {/* Description */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Description</Text>
           <Text style={styles.description}>{issue.description}</Text>
         </View>
 
-        {/* Details Card */}
         <View style={styles.card}>
           <DetailRow label="Vessel" value={issue.vesselName} />
           <DetailRow label="Reported By" value={issue.reportedByName} />
           <DetailRow label="Location" value={issue.location || 'Not specified'} />
           <DetailRow label="Created" value={formatDate(new Date(issue.createdAt))} />
-          {issue.assignedToName && (
-            <DetailRow label="Assigned To" value={issue.assignedToName} />
-          )}
-          {issue.resolvedAt && (
-            <DetailRow label="Resolved" value={formatDate(new Date(issue.resolvedAt))} />
-          )}
+          {issue.assignedToName && <DetailRow label="Assigned To" value={issue.assignedToName} />}
+          {issue.resolvedAt && <DetailRow label="Resolved" value={formatDate(new Date(issue.resolvedAt))} />}
         </View>
 
-        {/* Comments */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Comments ({issue.comments.length})</Text>
           {issue.comments.map((comment) => (
             <View key={comment.id} style={styles.commentCard}>
               <View style={styles.commentHeader}>
                 <Text style={styles.commentAuthor}>{comment.userName}</Text>
-                <Text style={styles.commentDate}>
-                  {formatDate(new Date(comment.createdAt))}
-                </Text>
+                <Text style={styles.commentDate}>{formatDate(new Date(comment.createdAt))}</Text>
               </View>
               <Text style={styles.commentText}>{comment.text}</Text>
             </View>
           ))}
-
-          {/* Add Comment */}
           <View style={styles.commentInput}>
             <TextInput
               style={styles.input}
@@ -295,31 +421,22 @@ export default function IssueDetailScreen() {
               onPress={handleAddComment}
               disabled={!commentText.trim()}
             >
-              <IconSymbol name="arrow.up.circle.fill" size={32} color={
-                commentText.trim() ? colors.accent : colors.textMuted
-              } />
+              <IconSymbol name="arrow.up.circle.fill" size={32} color={commentText.trim() ? colors.accent : colors.textMuted} />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Status Actions */}
         {(userRole === 'owner' || userRole === 'manager') && issue.status !== 'completed' && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Actions</Text>
             <View style={styles.actionRow}>
               {issue.status === 'open' && (
-                <TouchableOpacity
-                  style={[styles.actionButton, { backgroundColor: colors.accent }]}
-                  onPress={() => handleStatusChange('in_progress')}
-                >
+                <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.accent }]} onPress={() => handleStatusChange('in_progress')}>
                   <Text style={styles.actionButtonText}>Start Work</Text>
                 </TouchableOpacity>
               )}
               {issue.status === 'in_progress' && (
-                <TouchableOpacity
-                  style={[styles.actionButton, { backgroundColor: colors.success }]}
-                  onPress={() => handleStatusChange('completed')}
-                >
+                <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.success }]} onPress={() => handleStatusChange('completed')}>
                   <Text style={styles.actionButtonText}>Mark Resolved</Text>
                 </TouchableOpacity>
               )}
@@ -342,24 +459,9 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 16,
-    backgroundColor: colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 60, paddingBottom: 16, backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border },
   backButton: { padding: 8 },
-  headerTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
-    textAlign: 'center',
-  },
+  headerTitle: { flex: 1, fontSize: 18, fontWeight: '600', color: colors.text, textAlign: 'center' },
   headerSpacer: { width: 40 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   errorText: { color: colors.textSecondary, fontSize: 16 },
@@ -369,73 +471,23 @@ const styles = StyleSheet.create({
   badge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
   badgeText: { fontSize: 12, fontWeight: '700' },
   section: { marginBottom: 24 },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 12,
-  },
+  sectionTitle: { fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 12 },
   description: { fontSize: 15, color: colors.textSecondary, lineHeight: 22 },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 24,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
-  },
+  card: { backgroundColor: colors.card, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: colors.border, marginBottom: 24 },
+  detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.divider },
   detailLabel: { fontSize: 14, color: colors.textMuted },
   detailValue: { fontSize: 14, color: colors.text, fontWeight: '500' },
-  commentCard: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  commentHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
+  commentCard: { backgroundColor: colors.card, borderRadius: 12, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: colors.border },
+  commentHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
   commentAuthor: { fontSize: 13, fontWeight: '600', color: colors.text },
   commentDate: { fontSize: 12, color: colors.textMuted },
   commentText: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
-  commentInput: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 8,
-    marginTop: 8,
-  },
-  input: {
-    flex: 1,
-    fontSize: 14,
-    color: colors.text,
-    maxHeight: 100,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
+  commentInput: { flexDirection: 'row', alignItems: 'flex-end', backgroundColor: colors.card, borderRadius: 12, borderWidth: 1, borderColor: colors.border, padding: 8, marginTop: 8 },
+  input: { flex: 1, fontSize: 14, color: colors.text, maxHeight: 100, paddingHorizontal: 8, paddingVertical: 4 },
   sendButton: { padding: 4 },
   sendButtonDisabled: { opacity: 0.5 },
   actionRow: { flexDirection: 'row', gap: 12 },
-  actionButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
+  actionButton: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
   actionButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
 });
 ```
@@ -497,13 +549,11 @@ export default function DocumentDetailScreen() {
   const isExpired = doc.expiryDate && isOverdue(new Date(doc.expiryDate));
 
   const handleOpenFile = () => {
-    // In a real app this would open the file. For demo, show a message.
     Alert.alert('Document Preview', `"${doc.fileName}" would open here in a production build.`);
   };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <IconSymbol name="chevron.left" size={24} color={colors.text} />
@@ -513,7 +563,6 @@ export default function DocumentDetailScreen() {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* Document Icon & Title */}
         <View style={styles.docHeader}>
           <View style={[styles.iconCircle, { backgroundColor: colors.accent + '20' }]}>
             <IconSymbol name={getCategoryIcon(doc.category)} size={32} color={colors.accent} />
@@ -521,9 +570,7 @@ export default function DocumentDetailScreen() {
           <Text style={styles.title}>{doc.title}</Text>
           <View style={styles.badgeRow}>
             <View style={[styles.badge, { backgroundColor: colors.accent + '20' }]}>
-              <Text style={[styles.badgeText, { color: colors.accent }]}>
-                {doc.category.toUpperCase()}
-              </Text>
+              <Text style={[styles.badgeText, { color: colors.accent }]}>{doc.category.toUpperCase()}</Text>
             </View>
             {doc.isImportant && (
               <View style={[styles.badge, { backgroundColor: colors.warning + '20' }]}>
@@ -538,7 +585,6 @@ export default function DocumentDetailScreen() {
           </View>
         </View>
 
-        {/* Description */}
         {doc.description && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Description</Text>
@@ -546,7 +592,6 @@ export default function DocumentDetailScreen() {
           </View>
         )}
 
-        {/* File Info Card */}
         <View style={styles.card}>
           <DetailRow label="File Name" value={doc.fileName} />
           <DetailRow label="File Size" value={formatFileSize(doc.fileSize)} />
@@ -555,15 +600,10 @@ export default function DocumentDetailScreen() {
           <DetailRow label="Uploaded By" value={doc.uploadedByName} />
           <DetailRow label="Uploaded" value={formatDate(new Date(doc.uploadedAt))} />
           {doc.expiryDate && (
-            <DetailRow
-              label="Expires"
-              value={formatDate(new Date(doc.expiryDate))}
-              valueColor={isExpired ? colors.danger : colors.text}
-            />
+            <DetailRow label="Expires" value={formatDate(new Date(doc.expiryDate))} valueColor={isExpired ? colors.danger : colors.text} />
           )}
         </View>
 
-        {/* Tags */}
         {doc.tags.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Tags</Text>
@@ -577,7 +617,6 @@ export default function DocumentDetailScreen() {
           </View>
         )}
 
-        {/* Open File Button */}
         <TouchableOpacity style={styles.openButton} onPress={handleOpenFile}>
           <IconSymbol name="doc.text" size={20} color="#FFFFFF" />
           <Text style={styles.openButtonText}>Open Document</Text>
@@ -591,46 +630,22 @@ function DetailRow({ label, value, valueColor }: { label: string; value: string;
   return (
     <View style={styles.detailRow}>
       <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={[styles.detailValue, valueColor ? { color: valueColor } : undefined]} numberOfLines={2}>
-        {value}
-      </Text>
+      <Text style={[styles.detailValue, valueColor ? { color: valueColor } : undefined]} numberOfLines={2}>{value}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 16,
-    backgroundColor: colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 60, paddingBottom: 16, backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border },
   backButton: { padding: 8 },
-  headerTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
-    textAlign: 'center',
-  },
+  headerTitle: { flex: 1, fontSize: 18, fontWeight: '600', color: colors.text, textAlign: 'center' },
   headerSpacer: { width: 40 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   errorText: { color: colors.textSecondary, fontSize: 16 },
   content: { flex: 1, padding: 16 },
   docHeader: { alignItems: 'center', marginBottom: 24 },
-  iconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
+  iconCircle: { width: 72, height: 72, borderRadius: 36, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
   title: { fontSize: 22, fontWeight: '700', color: colors.text, textAlign: 'center', marginBottom: 12 },
   badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   badge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
@@ -638,40 +653,14 @@ const styles = StyleSheet.create({
   section: { marginBottom: 24 },
   sectionTitle: { fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 12 },
   description: { fontSize: 15, color: colors.textSecondary, lineHeight: 22 },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 24,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
-  },
+  card: { backgroundColor: colors.card, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: colors.border, marginBottom: 24 },
+  detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.divider },
   detailLabel: { fontSize: 14, color: colors.textMuted, flex: 1 },
   detailValue: { fontSize: 14, color: colors.text, fontWeight: '500', flex: 1, textAlign: 'right' },
   tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  tag: {
-    backgroundColor: colors.secondary + '40',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
+  tag: { backgroundColor: colors.secondary + '40', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
   tagText: { fontSize: 13, color: colors.textSecondary },
-  openButton: {
-    flexDirection: 'row',
-    backgroundColor: colors.accent,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
+  openButton: { flexDirection: 'row', backgroundColor: colors.accent, paddingVertical: 16, borderRadius: 12, alignItems: 'center', justifyContent: 'center', gap: 8 },
   openButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '600' },
 });
 ```
@@ -739,29 +728,22 @@ export default function SupplyDetailScreen() {
   const handleApprove = () => {
     Alert.alert('Approve Request', `Approve "${request.itemName}"?`, [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Approve',
-        onPress: () => {
+      { text: 'Approve', onPress: () => {
           approveSupplyRequest(request.id, userId, userName);
           Alert.alert('Approved', 'Supply request has been approved.');
           router.back();
-        },
-      },
+      }},
     ]);
   };
 
   const handleDeny = () => {
     Alert.alert('Deny Request', `Deny "${request.itemName}"?`, [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Deny',
-        style: 'destructive',
-        onPress: () => {
+      { text: 'Deny', style: 'destructive', onPress: () => {
           denySupplyRequest(request.id, 'Not approved at this time');
           Alert.alert('Denied', 'Supply request has been denied.');
           router.back();
-        },
-      },
+      }},
     ]);
   };
 
@@ -779,14 +761,10 @@ export default function SupplyDetailScreen() {
         <Text style={styles.title}>{request.itemName}</Text>
         <View style={styles.badgeRow}>
           <View style={[styles.badge, { backgroundColor: getStatusColor(request.status) + '20' }]}>
-            <Text style={[styles.badgeText, { color: getStatusColor(request.status) }]}>
-              {request.status.toUpperCase()}
-            </Text>
+            <Text style={[styles.badgeText, { color: getStatusColor(request.status) }]}>{request.status.toUpperCase()}</Text>
           </View>
           <View style={[styles.badge, { backgroundColor: getPriorityColor(request.priority) + '20' }]}>
-            <Text style={[styles.badgeText, { color: getPriorityColor(request.priority) }]}>
-              {request.priority.toUpperCase()}
-            </Text>
+            <Text style={[styles.badgeText, { color: getPriorityColor(request.priority) }]}>{request.priority.toUpperCase()}</Text>
           </View>
         </View>
 
@@ -798,23 +776,15 @@ export default function SupplyDetailScreen() {
         <View style={styles.card}>
           <DetailRow label="Quantity" value={`${request.quantity} ${request.unit}`} />
           <DetailRow label="Estimated Cost" value={`$${request.estimatedCost.toFixed(2)}`} />
-          {request.actualCost != null && (
-            <DetailRow label="Actual Cost" value={`$${request.actualCost.toFixed(2)}`} />
-          )}
+          {request.actualCost != null && <DetailRow label="Actual Cost" value={`$${request.actualCost.toFixed(2)}`} />}
           <DetailRow label="Vessel" value={request.vesselName} />
           <DetailRow label="Category" value={request.category} />
           <DetailRow label="Requested By" value={request.requestedByName} />
           <DetailRow label="Created" value={formatDate(new Date(request.createdAt))} />
           {request.vendor && <DetailRow label="Vendor" value={request.vendor} />}
-          {request.approvedByName && (
-            <DetailRow label="Approved By" value={request.approvedByName} />
-          )}
-          {request.approvedAt && (
-            <DetailRow label="Approved On" value={formatDate(new Date(request.approvedAt))} />
-          )}
-          {request.deniedReason && (
-            <DetailRow label="Denial Reason" value={request.deniedReason} />
-          )}
+          {request.approvedByName && <DetailRow label="Approved By" value={request.approvedByName} />}
+          {request.approvedAt && <DetailRow label="Approved On" value={formatDate(new Date(request.approvedAt))} />}
+          {request.deniedReason && <DetailRow label="Denial Reason" value={request.deniedReason} />}
         </View>
 
         {request.notes && (
@@ -824,7 +794,6 @@ export default function SupplyDetailScreen() {
           </View>
         )}
 
-        {/* Actions for managers/owners on pending requests */}
         {(userRole === 'owner' || userRole === 'manager') && request.status === 'pending' && (
           <View style={styles.actionRow}>
             <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.success }]} onPress={handleApprove}>
@@ -851,24 +820,9 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 16,
-    backgroundColor: colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 60, paddingBottom: 16, backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border },
   backButton: { padding: 8 },
-  headerTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
-    textAlign: 'center',
-  },
+  headerTitle: { flex: 1, fontSize: 18, fontWeight: '600', color: colors.text, textAlign: 'center' },
   headerSpacer: { width: 40 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   errorText: { color: colors.textSecondary, fontSize: 16 },
@@ -880,30 +834,12 @@ const styles = StyleSheet.create({
   section: { marginBottom: 24 },
   sectionTitle: { fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 12 },
   description: { fontSize: 15, color: colors.textSecondary, lineHeight: 22 },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 24,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
-  },
+  card: { backgroundColor: colors.card, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: colors.border, marginBottom: 24 },
+  detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.divider },
   detailLabel: { fontSize: 14, color: colors.textMuted },
   detailValue: { fontSize: 14, color: colors.text, fontWeight: '500' },
   actionRow: { flexDirection: 'row', gap: 12 },
-  actionButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
+  actionButton: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
   actionButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
 });
 ```
@@ -919,16 +855,14 @@ const styles = StyleSheet.create({
 ```typescript
 // BEFORE
 const handleIssuePress = useCallback((issue: Issue) => {
-  console.log('Issue pressed:', issue.id);
+  console.log("Issue pressed:", issue.id);
 }, []);
 
 // AFTER
 const handleIssuePress = useCallback((issue: Issue) => {
-  router.push({ pathname: '/issue-detail', params: { id: issue.id } });
+  router.push({ pathname: "/issue-detail", params: { id: issue.id } });
 }, []);
 ```
-
-Make sure `router` is available (it's imported as `useRouter` -- use `const router = useRouter()`).
 
 ### 4.2 Documents list -> document detail
 
@@ -937,13 +871,12 @@ Make sure `router` is available (it's imported as `useRouter` -- use `const rout
 ```typescript
 // BEFORE
 const handleDocumentPress = useCallback((doc: Document) => {
-  console.log('Document pressed:', doc.id);
-  // Open document viewer
+  console.log("Document pressed:", doc.id);
 }, []);
 
 // AFTER
 const handleDocumentPress = useCallback((doc: Document) => {
-  router.push({ pathname: '/document-detail', params: { id: doc.id } });
+  router.push({ pathname: "/document-detail", params: { id: doc.id } });
 }, []);
 ```
 
@@ -954,12 +887,12 @@ const handleDocumentPress = useCallback((doc: Document) => {
 ```typescript
 // BEFORE
 const handleRequestPress = useCallback((request: SupplyRequest) => {
-  console.log('Request pressed:', request.id);
+  console.log("Request pressed:", request.id);
 }, []);
 
 // AFTER
 const handleRequestPress = useCallback((request: SupplyRequest) => {
-  router.push({ pathname: '/supply-detail', params: { id: request.id } });
+  router.push({ pathname: "/supply-detail", params: { id: request.id } });
 }, []);
 ```
 
@@ -975,7 +908,7 @@ Find `handleInfoPress` and either wire it to a quick detail or remove the info i
 
 // Option B: Show a quick alert with vessel info
 const handleInfoPress = useCallback((userId: string, userName: string) => {
-  Alert.alert(userName, 'Tap the card to switch to this user\'s dashboard.');
+  Alert.alert(userName, "Tap the card to switch to this user's dashboard.");
 }, []);
 ```
 
@@ -1031,18 +964,6 @@ Add these screens inside the `<Stack>`:
   options={{ headerShown: false }}
 />
 <Stack.Screen
-  name="analytics"
-  options={{ headerShown: false }}
-/>
-<Stack.Screen
-  name="notification-settings"
-  options={{ headerShown: false }}
-/>
-<Stack.Screen
-  name="cache-settings"
-  options={{ headerShown: false }}
-/>
-<Stack.Screen
   name="assign-boats"
   options={{ headerShown: false }}
 />
@@ -1062,38 +983,17 @@ Strip `console.log` calls from user-facing code. Key files:
 - `contexts/AuthContext.tsx` -- multiple debug logs
 - `app/login.tsx` -- login flow logs
 
-### 6.2 Fix analytics hardcoded metric
-
-**File:** `app/analytics.tsx`
-
-The "Average Response Time: 2.3 days" is static. Compute it from issue data:
-
-```typescript
-const avgResponseTime = useMemo(() => {
-  const resolvedIssues = issues.filter(i => i.resolvedAt && i.createdAt);
-  if (resolvedIssues.length === 0) return 'N/A';
-  const totalDays = resolvedIssues.reduce((sum, i) => {
-    const created = new Date(i.createdAt).getTime();
-    const resolved = new Date(i.resolvedAt!).getTime();
-    return sum + (resolved - created) / (1000 * 60 * 60 * 24);
-  }, 0);
-  return (totalDays / resolvedIssues.length).toFixed(1) + ' days';
-}, [issues]);
-```
-
-### 6.3 Fix supplies deny reason
+### 6.2 Fix supplies deny reason
 
 **File:** `app/(tabs)/supplies.tsx`, line 180
 
 ```typescript
 // BEFORE
-denySupplyRequest(id, 'Budget constraints');
+denySupplyRequest(id, "Budget constraints");
 
-// AFTER -- still a hardcoded reason but more generic
-denySupplyRequest(id, 'Request not approved at this time');
+// AFTER
+denySupplyRequest(id, "Request not approved at this time");
 ```
-
-For a demo this is fine. A real app would show a text input.
 
 ---
 
@@ -1102,32 +1002,31 @@ For a demo this is fine. A real app would show a text input.
 After all changes, walk through every screen on both iOS and Android:
 
 ### Login & Auth
+
 - [ ] Cold launch -> redirects to login
 - [ ] Quick-login as Owner -> lands on owner dashboard
 - [ ] Quick-login as Manager -> lands on manager dashboard
 - [ ] Quick-login as Crew -> lands on crew dashboard
-- [ ] Logout from any dashboard -> returns to login (not home)
+- [ ] Logout from any dashboard -> returns to login
 - [ ] Re-login after logout works
 
 ### Owner Dashboard
+
 - [ ] Welcome message shows user name
 - [ ] Fleet overview cards render with vessel data
 - [ ] Stats section shows metrics
-- [ ] RealtimeFeed renders without crash (named import fix)
-- [ ] RealtimeFeed shows max 5 items (limit prop fix)
-- [ ] "View Analytics" button -> analytics screen
 - [ ] "View Documents" button -> documents tab
 - [ ] Back navigation works
 
 ### Manager Dashboard
+
 - [ ] Overview stats render
-- [ ] RealtimeFeed renders without visual issues (colors.error fix)
-- [ ] Approve/Deny on pending supply requests works (visual state change)
+- [ ] Approve/Deny on pending supply requests works
 - [ ] "Assign Boats" -> assign-boats screen
 - [ ] "Schedule Task" -> add-maintenance-task modal
-- [ ] "View Analytics" -> analytics screen
 
 ### Crew Dashboard
+
 - [ ] Assigned tasks list renders
 - [ ] Task checkbox toggles completion
 - [ ] "Report Issue" -> add-issue modal
@@ -1135,6 +1034,7 @@ After all changes, walk through every screen on both iOS and Android:
 - [ ] "Request Supplies" -> add-supply-request modal
 
 ### Issues Tab
+
 - [ ] Issue list renders with status/priority badges
 - [ ] Search filters work
 - [ ] Status filter chips work
@@ -1144,9 +1044,9 @@ After all changes, walk through every screen on both iOS and Android:
 - [ ] Status change works
 - [ ] Back navigation works
 - [ ] "+" button -> add-issue modal
-- [ ] Issue form submits and new issue appears in list
 
 ### Documents Tab
+
 - [ ] Document list renders with category icons
 - [ ] Search and category filters work
 - [ ] Tap document -> document-detail screen
@@ -1156,23 +1056,26 @@ After all changes, walk through every screen on both iOS and Android:
 - [ ] "+" button -> add-document modal
 
 ### Supplies Tab
+
 - [ ] Supply request list renders
 - [ ] Search and status filters work
 - [ ] Tap request -> supply-detail screen
 - [ ] Supply detail shows all fields
-- [ ] Approve/Deny buttons work for managers (on pending items)
+- [ ] Approve/Deny buttons work for managers
 - [ ] Back navigation works
 - [ ] "+" button -> add-supply-request modal
 
 ### Calendar Tab
+
 - [ ] Calendar grid renders with dates
-- [ ] Events appear on correct dates (demo mode fixed)
+- [ ] Events appear on correct dates
 - [ ] Tap event -> calendar-event-detail
-- [ ] Event detail renders without crash (createdAt fix)
+- [ ] Event detail renders without crash
 - [ ] Delete / Complete / Cancel actions work
 - [ ] "+" button -> add-calendar-event modal
 
 ### Maintenance Tab
+
 - [ ] Task list renders
 - [ ] Tap task -> maintenance-detail
 - [ ] Detail screen shows all fields
@@ -1180,19 +1083,12 @@ After all changes, walk through every screen on both iOS and Android:
 - [ ] Back navigation works
 
 ### Profile Tab
+
 - [ ] User info displays correctly
-- [ ] Settings rows appear (Notifications, Cache & Storage)
-- [ ] Notification settings screen loads
-- [ ] Cache settings screen loads
 - [ ] Logout works properly
 
-### Analytics
-- [ ] Stat cards render
-- [ ] Charts render (expense trend, category bars, task pie)
-- [ ] Average response time computed from data (not hardcoded)
-- [ ] Back navigation works
-
 ### Cross-cutting
+
 - [ ] No yellow box warnings in simulator
 - [ ] No red screen crashes
 - [ ] Layouts hold on iPhone SE, iPhone 15 Pro Max, and a midsize Android
@@ -1204,13 +1100,174 @@ After all changes, walk through every screen on both iOS and Android:
 ## Summary: Execution Order
 
 | Phase | Effort | Impact |
-|-------|--------|--------|
-| 1. Delete .ios.tsx files | 5 min | Fixes 6 broken screens in one move |
-| 2. Fix crash bugs | 15 min | Eliminates every known crash |
+| --- | --- | --- |
+| 1. Strip unnecessary features | 45 min | Removes ~3,400 lines of dead code, 14 files deleted |
+| 2. Fix crash bugs | 10 min | Eliminates every known crash |
 | 3. Create detail screens | 30 min | Fills the 3 biggest dead ends |
 | 4. Wire handlers | 10 min | Makes every card tappable |
 | 5. Register routes | 5 min | Proper modal/push animations |
-| 6. Polish | 15 min | Removes debug noise, fixes hardcoded data |
+| 6. Polish | 10 min | Removes debug noise, fixes hardcoded data |
 | 7. Walkthrough | 30 min | Verification |
 
-Total: ~2 hours of focused work to go from "prototype with dead ends" to "polished demo where every tap works."
+### Files Deleted in Phase 1
+
+| Feature | Files | Lines Removed |
+| --- | --- | --- |
+| Offline | `utils/offlineManager.ts`, `utils/cacheManager.ts`, `components/OfflineQueueStatus.tsx`, `components/CacheStatus.tsx`, `app/cache-settings.tsx` | ~1,800 |
+| Realtime | `utils/realtimeManager.ts`, `hooks/useRealtime.ts`, `components/RealtimeFeed.tsx` | ~350 |
+| Notifications | `utils/notificationService.ts`, `utils/notificationPreferences.ts`, `hooks/useNotifications.ts`, `hooks/useNotificationPreferences.ts`, `app/notification-settings.tsx`, `types/notifications.ts` | ~800 |
+| Analytics | `app/analytics.tsx` | ~400 |
+| Supabase | `utils/supabase.ts` | ~60 |
+| **Total** | **14 files** | **~3,400 lines** |
+
+### Dependencies to Remove from package.json
+
+```
+react-native-chart-kit
+@supabase/supabase-js
+```
+
+Total: ~2.5 hours of focused work to go from "prototype with dead infrastructure" to "polished demo where every tap works and nothing is faked."
+
+---
+
+## Todo List
+
+Every task below maps to a specific change described in the phases above. Work top-to-bottom. A task is done when the described change compiles and the app still launches.
+
+### Phase 1: Strip Unnecessary Features
+
+#### 1.1 Remove Offline Mode
+
+- [ ] Delete `utils/offlineManager.ts`
+- [ ] Delete `utils/cacheManager.ts`
+- [ ] Delete `components/OfflineQueueStatus.tsx`
+- [ ] Delete `components/CacheStatus.tsx`
+- [ ] Delete `app/cache-settings.tsx`
+- [ ] Remove `OfflineQueueStatus` import and render from `app/_layout.tsx`
+- [ ] Remove `cacheManager` and `offlineManager` imports from `contexts/DataContext.tsx`
+- [ ] Strip cache layer from `loadData` in DataContext (keep seed data reads, remove caching wrapper)
+- [ ] Strip cache layer from `saveData` in DataContext (keep AsyncStorage persistence, remove cacheManager calls)
+- [ ] Remove all `cacheHelpers.invalidateCache(...)` calls in DataContext
+- [ ] Remove all `offlineManager.getNetworkStatus()` checks and `offlineManager.addToOfflineQueue(...)` calls in DataContext
+- [ ] Remove "Cache & Storage" settings row and `/cache-settings` navigation from `app/(tabs)/profile.tsx`
+
+#### 1.2 Remove Realtime
+
+- [ ] Delete `utils/realtimeManager.ts`
+- [ ] Delete `hooks/useRealtime.ts`
+- [ ] Delete `components/RealtimeFeed.tsx`
+- [ ] Remove `RealtimeFeed` import and rendered component from `app/(tabs)/owner.tsx`
+- [ ] Remove `RealtimeFeed` import and rendered component from `app/(tabs)/manager.tsx`
+- [ ] Remove `realtimeManager` import from `contexts/DataContext.tsx`
+- [ ] Remove `realtimeManager.publishEvent(...)` call from `addMaintenanceTask` in DataContext
+- [ ] Remove `realtimeManager.publishEvent(...)` call from `completeMaintenanceTask` in DataContext
+- [ ] Remove `realtimeManager.publishEvent(...)` call from `updateMaintenanceTask` in DataContext
+- [ ] Remove `realtimeManager.publishEvent(...)` call from `addIssue` in DataContext
+- [ ] Remove `realtimeManager.publishEvent(...)` call from `approveSupplyRequest` in DataContext
+- [ ] Remove `realtimeManager.publishEvent(...)` call from `denySupplyRequest` in DataContext
+
+#### 1.3 Remove Notifications
+
+- [ ] Delete `utils/notificationService.ts`
+- [ ] Delete `utils/notificationPreferences.ts`
+- [ ] Delete `hooks/useNotifications.ts`
+- [ ] Delete `hooks/useNotificationPreferences.ts`
+- [ ] Delete `app/notification-settings.tsx`
+- [ ] Delete `types/notifications.ts`
+- [ ] Remove `useNotifications` import and call from `app/_layout.tsx`
+- [ ] Remove `unreadCount` computation from `app/(tabs)/_layout.tsx`
+- [ ] Remove `addNotification(...)` call from `addIssue` in DataContext
+- [ ] Remove `addNotification(...)` call from `addSupplyRequest` in DataContext
+- [ ] Remove `addNotification(...)` call from `approveSupplyRequest` in DataContext
+- [ ] Remove `addNotification(...)` call from `denySupplyRequest` in DataContext
+- [ ] Remove `addNotification(...)` call from `assignCrewToVessel` in DataContext
+- [ ] Remove `addNotification(...)` call from `addCalendarEvent` in DataContext
+- [ ] Remove `NotificationCategory` and `NotificationPreferences` re-exports from `types/index.ts`
+- [ ] Remove "Notifications" settings row and `/notification-settings` navigation from `app/(tabs)/profile.tsx`
+
+#### 1.4 Remove Analytics
+
+- [ ] Delete `app/analytics.tsx`
+- [ ] Remove `handleViewAnalytics` function and "View Analytics" button from `app/(tabs)/owner.tsx`
+- [ ] Remove "View Analytics" quick action button and `router.push('/analytics')` from `app/(tabs)/manager.tsx`
+- [ ] Remove `handleAnalytics` callback and analytics icon button from `app/(tabs)/maintenance.tsx`
+- [ ] Remove `react-native-chart-kit` from `package.json`
+
+#### 1.5 Remove Supabase Integration
+
+- [ ] Delete `utils/supabase.ts`
+- [ ] Remove `supabase` and `isSupabaseConfigured` imports from `contexts/AuthContext.tsx`
+- [ ] Remove `Session`, `User`, `AuthError` imports from `contexts/AuthContext.tsx`
+- [ ] Remove `user`, `session`, `isSupabaseEnabled` state from AuthContext
+- [ ] Remove `resetPassword`, `updatePassword`, MFA methods, `refreshSession` from AuthContext
+- [ ] Remove Supabase auth state listener (`supabase.auth.onAuthStateChange`) from AuthContext
+- [ ] Remove Supabase-specific branches from `signUp`, `signIn`, `signOut` in AuthContext
+- [ ] Remove `isSupabaseEnabled` conditional branches from `app/login.tsx`
+- [ ] Remove "Demo Mode" badge from `app/login.tsx`
+- [ ] Simplify or stub `app/signup.tsx` (no signup in demo mode)
+- [ ] Remove `@supabase/supabase-js` from `package.json`
+- [ ] Run `npm install` to update lockfile
+
+### Phase 2: Fix Crash-Causing Bugs
+
+- [ ] Add `error: '#EF4444'` color token to `styles/commonStyles.ts` (after `info`)
+- [ ] Add `grey: '#6B7280'` color token to `styles/commonStyles.ts` (after `statusOffline`)
+- [ ] Fix `app/calendar-event-detail.tsx` line 228: wrap `event.createdAt` in `new Date()`
+- [ ] Fix `app/(tabs)/calendar.tsx`: change `user.id` to `userId` from `useAuth()`
+- [ ] Remove `user` destructure from `useAuth()` in calendar.tsx if unused elsewhere
+- [ ] Fix `app/(tabs)/supplies.tsx` hardcoded approver: use `userId`/`userName` from `useAuth()` instead of `'manager1'`/`'Sarah Johnson'`
+
+### Phase 3: Create Missing Detail Screens
+
+- [ ] Create `app/issue-detail.tsx` with full implementation (see Phase 3.1 code)
+- [ ] Create `app/document-detail.tsx` with full implementation (see Phase 3.2 code)
+- [ ] Create `app/supply-detail.tsx` with full implementation (see Phase 3.3 code)
+- [ ] Verify `addIssueComment` exists in DataContext (add if missing)
+- [ ] Verify `updateIssue` exists in DataContext (add if missing)
+- [ ] Verify `formatFileSize` exists in `utils/fileUtils.ts` (add if missing)
+
+### Phase 4: Wire Dead-End Handlers
+
+- [ ] Wire `handleIssuePress` in `app/(tabs)/issues.tsx` to `router.push('/issue-detail')`
+- [ ] Wire `handleDocumentPress` in `app/(tabs)/documents.tsx` to `router.push('/document-detail')`
+- [ ] Wire `handleRequestPress` in `app/(tabs)/supplies.tsx` to `router.push('/supply-detail')`
+- [ ] Fix or remove `handleInfoPress` on home screen info button in `app/(tabs)/(home)/index.tsx`
+- [ ] Add `router` import to issues.tsx, documents.tsx, supplies.tsx if not already present
+
+### Phase 5: Register Missing Routes
+
+- [ ] Add `Stack.Screen` for `add-issue` (modal) in `app/_layout.tsx`
+- [ ] Add `Stack.Screen` for `add-document` (modal) in `app/_layout.tsx`
+- [ ] Add `Stack.Screen` for `add-calendar-event` (modal) in `app/_layout.tsx`
+- [ ] Add `Stack.Screen` for `add-supply-request` (modal) in `app/_layout.tsx`
+- [ ] Add `Stack.Screen` for `add-parts-request` (modal) in `app/_layout.tsx`
+- [ ] Add `Stack.Screen` for `issue-detail` in `app/_layout.tsx`
+- [ ] Add `Stack.Screen` for `document-detail` in `app/_layout.tsx`
+- [ ] Add `Stack.Screen` for `supply-detail` in `app/_layout.tsx`
+- [ ] Add `Stack.Screen` for `maintenance-detail` in `app/_layout.tsx`
+- [ ] Add `Stack.Screen` for `calendar-event-detail` in `app/_layout.tsx`
+- [ ] Add `Stack.Screen` for `assign-boats` in `app/_layout.tsx`
+
+### Phase 6: Small Fixes for Polish
+
+- [ ] Remove `console.log` statements from `app/(tabs)/issues.tsx`
+- [ ] Remove `console.log` statements from `app/(tabs)/documents.tsx`
+- [ ] Remove `console.log` statements from `app/(tabs)/supplies.tsx`
+- [ ] Remove `console.log` statements from `contexts/AuthContext.tsx`
+- [ ] Remove `console.log` statements from `app/login.tsx`
+- [ ] Fix hardcoded deny reason in `app/(tabs)/supplies.tsx` ("Budget constraints" -> "Request not approved at this time")
+
+### Phase 7: Walkthrough Verification
+
+- [ ] Login flow: cold launch redirects to login, quick-login works for all 3 roles, logout returns to login
+- [ ] Owner dashboard: welcome message, fleet cards, stats, "View Documents" button
+- [ ] Manager dashboard: overview stats, approve/deny supplies, "Assign Boats", "Schedule Task"
+- [ ] Crew dashboard: assigned tasks, task completion, "Report Issue", "Request Parts", "Request Supplies"
+- [ ] Issues tab: list renders, search/filters work, tap -> detail, comments, status change, add issue
+- [ ] Documents tab: list renders, search/filters work, tap -> detail, file info, "Open Document" alert, add document
+- [ ] Supplies tab: list renders, search/filters work, tap -> detail, approve/deny, add supply request
+- [ ] Calendar tab: grid renders, events on dates, tap -> detail without crash, add event
+- [ ] Maintenance tab: list renders, tap -> detail, status change, completion
+- [ ] Profile tab: user info displays, logout works
+- [ ] Cross-cutting: no yellow box warnings, no red screen crashes, layouts hold on small/large screens, dark theme consistent, `colors.error` and `colors.grey` resolve
