@@ -158,7 +158,7 @@ export default function SuppliesScreen() {
   const router = useRouter();
   const theme = useTheme();
   const { supplyRequests, approveSupplyRequest, denySupplyRequest } = useData();
-  const { userRole } = useAuth();
+  const { userRole, userId, userName } = useAuth();
   const [filterStatus, setFilterStatus] = useState<SupplyRequestStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -172,9 +172,8 @@ export default function SuppliesScreen() {
   }, [supplyRequests, filterStatus, searchQuery]);
 
   const handleApprove = useCallback((id: string) => {
-    approveSupplyRequest(id, 'manager1', 'Sarah Johnson');
-    console.log('Approved request:', id);
-  }, [approveSupplyRequest]);
+    approveSupplyRequest(id, userId, userName);
+  }, [approveSupplyRequest, userId, userName]);
 
   const handleDeny = useCallback((id: string) => {
     denySupplyRequest(id, 'Budget constraints');

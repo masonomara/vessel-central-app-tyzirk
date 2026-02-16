@@ -1246,12 +1246,13 @@ Every task below maps to a specific change described in the phases above. Work t
 
 ### Phase 2: Fix Crash-Causing Bugs
 
-- [ ] Add `error: '#EF4444'` color token to `styles/commonStyles.ts` (after `info`)
-- [ ] Add `grey: '#6B7280'` color token to `styles/commonStyles.ts` (after `statusOffline`)
-- [ ] Fix `app/calendar-event-detail.tsx` line 228: wrap `event.createdAt` in `new Date()`
-- [ ] Fix `app/(tabs)/calendar.tsx`: change `user.id` to `userId` from `useAuth()`
-- [ ] Remove `user` destructure from `useAuth()` in calendar.tsx if unused elsewhere
-- [ ] Fix `app/(tabs)/supplies.tsx` hardcoded approver: use `userId`/`userName` from `useAuth()` instead of `'manager1'`/`'Sarah Johnson'`
+- [x] Add `error: '#EF4444'` color token to `styles/commonStyles.ts`
+- [x] Add `grey: '#6B7280'` color token to `styles/commonStyles.ts`
+- [x] Fix `app/calendar-event-detail.tsx`: wrap `event.createdAt` in `new Date()`
+- [x] Fix `app/(tabs)/calendar.tsx`: change `user.id` to `userId` from `useAuth()` (done in Phase 1.5)
+- [x] Remove `user` destructure from `useAuth()` in calendar.tsx (done in Phase 1.5)
+- [x] Fix `app/(tabs)/supplies.tsx` hardcoded approver: use `userId`/`userName` from `useAuth()`
+- [x] Typecheck: 111 errors (down from 130), all pre-existing icon name format issues
 
 ### Phase 3: Create Missing Detail Screens
 

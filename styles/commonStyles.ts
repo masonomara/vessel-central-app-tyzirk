@@ -23,12 +23,14 @@ export const colors = {
   danger: '#EF4444',         // Red for urgent/issues
   dangerLight: '#F87171',    // Light Red
   info: '#3B82F6',           // Blue for info
+  error: '#EF4444',          // Alias for danger
   
   // Status Pills
   statusInPort: '#10B981',      // Green
   statusOnCharter: '#3B82F6',   // Blue
   statusInYard: '#F59E0B',      // Amber
   statusOffline: '#6B7280',     // Gray
+  grey: '#6B7280',               // Neutral gray
   
   // Backgrounds - DARKER for better text contrast
   background: '#0A0E14',        // Almost black (darker)

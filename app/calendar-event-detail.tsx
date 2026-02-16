@@ -225,7 +225,7 @@ export default function CalendarEventDetailScreen() {
                 Created by {event.createdByName}
               </Text>
               <Text style={styles.metaText}>
-                {event.createdAt.toLocaleDateString()}
+                {new Date(event.createdAt).toLocaleDateString()}
               </Text>
             </View>
           </View>
