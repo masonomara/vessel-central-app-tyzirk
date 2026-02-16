@@ -12,6 +12,7 @@ import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, commonStyles, shadows } from '@/styles/commonStyles';
 import { useData } from '@/contexts/DataContext';
 import { IconSymbol } from '@/components/IconSymbol';
+import { PressableCard } from '@/components/PressableCard';
 import {
   formatEventDateRange,
   getEventColor,
@@ -140,15 +141,25 @@ export default function CalendarEventDetailScreen() {
             </View>
 
             {/* Vessel */}
-            <View style={styles.detailRow}>
+            <PressableCard
+              variant="ghost"
+              style={styles.detailRow}
+              onPress={() => router.push({ pathname: '/vessel-detail', params: { id: event.vesselId } })}
+            >
               <IconSymbol
                 ios_icon_name="sailboat.fill"
                 android_material_icon_name="directions-boat"
                 size={20}
-                color={colors.textSecondary}
+                color={colors.accent}
               />
-              <Text style={styles.detailText}>{event.vesselName}</Text>
-            </View>
+              <Text style={[styles.detailText, { color: colors.accent }]}>{event.vesselName}</Text>
+              <IconSymbol
+                ios_icon_name="chevron.right"
+                android_material_icon_name="chevron-right"
+                size={16}
+                color={colors.accent}
+              />
+            </PressableCard>
 
             {/* Location */}
             {event.location && (

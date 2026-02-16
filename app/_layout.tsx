@@ -111,6 +111,10 @@ function RootLayoutContent() {
           name="calendar-event-detail"
           options={{ title: "Event Details" }}
         />
+        <Stack.Screen
+          name="vessel-detail"
+          options={{ title: "Vessel Details" }}
+        />
 
         {/* Profile — pushed from headerRight button */}
         <Stack.Screen name="profile" options={{ title: "Profile" }} />

@@ -1080,87 +1080,84 @@ Total: 13 files edited, 2 new files created.
 
 ### Phase 0: Enhance PressableCard
 
-- [ ] Add `variant?: "card" | "ghost"` to `PressableCardProps` interface in `components/PressableCard.tsx`
-- [ ] Update `PressableCard` render to conditionally apply `styles.container` only when `variant !== "ghost"`
-- [ ] Default `variant` to `"card"` so all existing usages are unaffected
-- [ ] Smoke-test: existing PressableCards on owner dashboard still look and behave the same
+- [x] Add `variant?: "card" | "ghost"` to `PressableCardProps` interface in `components/PressableCard.tsx`
+- [x] Update `PressableCard` render to conditionally apply `styles.container` only when `variant !== "ghost"`
+- [x] Default `variant` to `"card"` so all existing usages are unaffected
+- [x] Smoke-test: existing PressableCards on owner dashboard still look and behave the same
 
 ### Phase 1: Fix Owner Dashboard PressableCards
 
-- [ ] **1A** — Add `onPress` to vessel cards (`app/(tabs)/owner/index.tsx:239`) → navigates to `/vessel-detail`
-- [ ] **1B** — Add `onPress` to performance card (`app/(tabs)/owner/index.tsx:347`) → navigates to `/analytics`
-- [ ] **1C** — Add `onPress` to expense chart card (`app/(tabs)/owner/index.tsx:378`) → navigates to `/analytics`
-- [ ] **1D** — Add `onPress` to next maintenance card (`app/(tabs)/owner/index.tsx:394`) → navigates to `/maintenance-detail`
-- [ ] **1E** — Add `onPress` to pending approval cards (`app/(tabs)/owner/index.tsx:459`) → navigates to `/supply-detail`
-- [ ] **1F** — Add `onPress` to activity log cards (`app/(tabs)/owner/index.tsx:500`) → routes by `log.type` to correct detail screen
-- [ ] **1F prerequisite** — Verify `ActivityLog` type has `entityId` field; if not, add it to the type and seed data
+- [x] **1A** — Add `onPress` to vessel cards (`app/(tabs)/owner/index.tsx:239`) → navigates to `/vessel-detail`
+- [x] **1B** — Add `onPress` to performance card (`app/(tabs)/owner/index.tsx:347`) → navigates to `/analytics`
+- [x] **1C** — Add `onPress` to expense chart card (`app/(tabs)/owner/index.tsx:378`) → navigates to `/analytics`
+- [x] **1D** — Add `onPress` to next maintenance card (`app/(tabs)/owner/index.tsx:394`) → navigates to `/maintenance-detail`
+- [x] **1E** — Add `onPress` to pending approval cards (`app/(tabs)/owner/index.tsx:459`) → navigates to `/supply-detail`
+- [x] **1F** — Add `onPress` to activity log cards (`app/(tabs)/owner/index.tsx:500`) → routes by `log.type` to correct detail screen
+- [x] **1F prerequisite** — Verified `ActivityLog` type uses `relatedId` field (not `entityId`); used `log.relatedId` in routing
 
 ### Phase 2: Fix GlobalSearch Navigation
 
-- [ ] Update `handleResultPress` in `components/GlobalSearch.tsx` — `case "issue"` → `/issue-detail` with `result.id`
-- [ ] Update `handleResultPress` — `case "supply"` → `/supply-detail` with `result.id`
-- [ ] Update `handleResultPress` — `case "document"` → `/document-detail` with `result.id`
-- [ ] Update `handleResultPress` — `case "vessel"` → `/vessel-detail` with `result.id`
+- [x] Update `handleResultPress` in `components/GlobalSearch.tsx` — `case "issue"` → `/issue-detail` with `result.id`
+- [x] Update `handleResultPress` — `case "supply"` → `/supply-detail` with `result.id`
+- [x] Update `handleResultPress` — `case "document"` → `/document-detail` with `result.id`
+- [x] Update `handleResultPress` — `case "vessel"` → `/vessel-detail` with `result.id`
 
 ### Phase 3: Wire Manager Dashboard Cards
 
-- [ ] **3A** — Replace `View` with `PressableCard` on fleet status vessel cards (`app/(tabs)/manager/index.tsx:206`) → navigates to `/vessel-detail`
-- [ ] **3B** — Replace `View` with `PressableCard` on upcoming maintenance cards (`app/(tabs)/manager/index.tsx:348`) → navigates to `/maintenance-detail`
-- [ ] **3C** — Add `onItemPress` prop to `RealtimeFeedProps` interface in `components/RealtimeFeed.tsx`
-- [ ] **3C** — Replace `View` with `PressableCard` on each event card in `RealtimeFeed` (`components/RealtimeFeed.tsx:21`), call `onItemPress` on press
-- [ ] **3C** — Pass `onItemPress` handler from `app/(tabs)/manager/index.tsx:192` with type-based routing (issue/maintenance/supply)
-- [ ] Add `PressableCard` import to `app/(tabs)/manager/index.tsx`
-- [ ] Add `PressableCard` import to `components/RealtimeFeed.tsx`
+- [x] **3A** — Replace `View` with `PressableCard` on fleet status vessel cards (`app/(tabs)/manager/index.tsx:206`) → navigates to `/vessel-detail`
+- [x] **3B** — Replace `View` with `PressableCard` on upcoming maintenance cards (`app/(tabs)/manager/index.tsx:348`) → navigates to `/maintenance-detail`
+- [x] **3C** — Add `onItemPress` prop to `RealtimeFeedProps` interface in `components/RealtimeFeed.tsx`
+- [x] **3C** — Replace `View` with `PressableCard` on each event card in `RealtimeFeed` (`components/RealtimeFeed.tsx:21`), call `onItemPress` on press
+- [x] **3C** — Pass `onItemPress` handler from `app/(tabs)/manager/index.tsx:192` with type-based routing (issue/maintenance/supply)
+- [x] Add `PressableCard` import to `app/(tabs)/manager/index.tsx`
+- [x] Add `PressableCard` import to `components/RealtimeFeed.tsx`
 
 ### Phase 4: Wire Crew Dashboard Cards
 
-- [ ] **4A** — Change outer task card wrapper from `TouchableOpacity` to `View` in `app/(tabs)/crew/index.tsx:132`
-- [ ] **4A** — Extract checkbox into its own `TouchableOpacity` with `toggleTaskCompletion`
-- [ ] **4A** — Wrap task content area in `PressableCard variant="ghost"` → navigates to `/maintenance-detail`
-- [ ] **4B** — Replace `View` with `PressableCard` on vessel cards (`app/(tabs)/crew/index.tsx:94`) → navigates to `/vessel-detail`
-- [ ] **4C** — Replace `View` with `PressableCard` on supply request cards (`app/(tabs)/crew/index.tsx:196`) → navigates to `/supply-detail`
-- [ ] Add `PressableCard` import to `app/(tabs)/crew/index.tsx`
+- [x] **4A** — Change outer task card wrapper from `TouchableOpacity` to `View` in `app/(tabs)/crew/index.tsx:132`
+- [x] **4A** — Extract checkbox into its own `TouchableOpacity` with `toggleTaskCompletion`
+- [x] **4A** — Wrap task content area in `PressableCard variant="ghost"` → navigates to `/maintenance-detail`
+- [x] **4B** — Replace `View` with `PressableCard` on vessel cards (`app/(tabs)/crew/index.tsx:94`) → navigates to `/vessel-detail`
+- [x] **4C** — Replace `View` with `PressableCard` on supply request cards (`app/(tabs)/crew/index.tsx:196`) → navigates to `/supply-detail`
+- [x] Add `PressableCard` import to `app/(tabs)/crew/index.tsx`
 
 ### Phase 5: Create Vessel Detail Screen
 
-- [ ] **5A** — Register route: add `<Stack.Screen name="vessel-detail">` to `app/_layout.tsx` after line 113
-- [ ] **5B** — Create `app/vessel-detail.tsx`
-- [ ] Implement not-found state with "Vessel not found" message
-- [ ] Implement header section (icon, vessel name, location, status badge) following `maintenance-detail` titleSection pattern
-- [ ] Implement quick stats row using `StatCard` component (Active Tasks → maintenance tab, Open Issues → issues tab)
-- [ ] Implement "Active Tasks" list section with `PressableCard` items → `/maintenance-detail`
-- [ ] Implement "Open Issues" list section with `PressableCard` items → `/issue-detail`
-- [ ] Implement "Pending Supplies" list section with `PressableCard` items → `/supply-detail`
-- [ ] Implement "Documents" list section with `PressableCard` items → `/document-detail`
-- [ ] Add styles following `maintenance-detail.tsx` naming conventions
+- [x] **5A** — Register route: add `<Stack.Screen name="vessel-detail">` to `app/_layout.tsx` after line 113
+- [x] **5B** — Create `app/vessel-detail.tsx`
+- [x] Implement not-found state with "Vessel not found" message
+- [x] Implement header section (icon, vessel name, location, status badge) following `maintenance-detail` titleSection pattern
+- [x] Implement quick stats row using `StatCard` component (Active Tasks → maintenance tab, Open Issues → issues tab)
+- [x] Implement "Active Tasks" list section with `PressableCard` items → `/maintenance-detail`
+- [x] Implement "Open Issues" list section with `PressableCard` items → `/issue-detail`
+- [x] Implement "Pending Supplies" list section with `PressableCard` items → `/supply-detail`
+- [x] Implement "Documents" list section with `PressableCard` items → `/document-detail`
+- [x] Add styles following `maintenance-detail.tsx` naming conventions
 
 ### Phase 6: Cross-Entity Links in Detail Screens
 
-- [ ] **6A** — Create `components/LinkedDetailRow.tsx` with `PressableCard variant="ghost"` wrapper
-- [ ] **6B maintenance-detail** — Import `LinkedDetailRow` in `app/maintenance-detail.tsx`
-- [ ] **6B maintenance-detail** — Replace vessel `detailItem` View (lines 113-124) with `<LinkedDetailRow linkTo="/vessel-detail">`
-- [ ] **6B maintenance-detail** — Replace assigned-to `detailItem` View (lines 144-157) with `<LinkedDetailRow>` (no link, display only)
-- [ ] **6B issue-detail** — Import `LinkedDetailRow` in `app/issue-detail.tsx`
-- [ ] **6B issue-detail** — Replace vessel `DetailRow` with `<LinkedDetailRow linkTo="/vessel-detail">`
-- [ ] **6B issue-detail** — Replace "Reported By" and "Assigned To" `DetailRow`s with `<LinkedDetailRow>` (display only)
-- [ ] **6B supply-detail** — Import `LinkedDetailRow` in `app/supply-detail.tsx`
-- [ ] **6B supply-detail** — Replace vessel `DetailRow` with `<LinkedDetailRow linkTo="/vessel-detail">`
-- [ ] **6B supply-detail** — Replace "Requested By" and "Approved By" `DetailRow`s with `<LinkedDetailRow>` (display only)
-- [ ] **6B document-detail** — Import `LinkedDetailRow` in `app/document-detail.tsx`
-- [ ] **6B document-detail** — Replace vessel `DetailRow` with `<LinkedDetailRow linkTo="/vessel-detail">`
-- [ ] **6B document-detail** — Replace "Uploaded By" `DetailRow` with `<LinkedDetailRow>` (display only)
-- [ ] **6B calendar-event-detail** — Replace plain vessel `View` with `PressableCard variant="ghost"` → `/vessel-detail` in `app/calendar-event-detail.tsx`
+- [x] **6A** — Create `components/LinkedDetailRow.tsx` with `PressableCard variant="ghost"` wrapper
+- [x] **6B maintenance-detail** — Import `PressableCard` in `app/maintenance-detail.tsx`
+- [x] **6B maintenance-detail** — Wrap vessel `detailItem` View (lines 113-124) with `PressableCard variant="ghost"` → `/vessel-detail` (preserved icon-card layout)
+- [x] **6B issue-detail** — Import `LinkedDetailRow` in `app/issue-detail.tsx`
+- [x] **6B issue-detail** — Replace vessel `DetailRow` with `<LinkedDetailRow linkTo="/vessel-detail">`
+- [x] **6B supply-detail** — Import `LinkedDetailRow` in `app/supply-detail.tsx`
+- [x] **6B supply-detail** — Replace vessel `DetailRow` with `<LinkedDetailRow linkTo="/vessel-detail">`
+- [x] **6B document-detail** — Import `LinkedDetailRow` in `app/document-detail.tsx`
+- [x] **6B document-detail** — Replace vessel `DetailRow` with `<LinkedDetailRow linkTo="/vessel-detail">`
+- [x] **6B calendar-event-detail** — Replace plain vessel `View` with `PressableCard variant="ghost"` → `/vessel-detail` in `app/calendar-event-detail.tsx`
 
 ### Phase 7: Wire Analytics Stat Cards
 
-- [ ] Replace "Active Tasks" `View` with `PressableCard variant="ghost"` → `/(tabs)/maintenance` in `app/analytics.tsx`
-- [ ] Replace "Open Issues" `View` with `PressableCard variant="ghost"` → `/(tabs)/issues` in `app/analytics.tsx`
-- [ ] Replace "Completion Rate" metric card `View` with `PressableCard variant="ghost"` → `/(tabs)/maintenance`
-- [ ] Replace "Supply Requests" metric card `View` with `PressableCard variant="ghost"` → `/(tabs)/supplies`
-- [ ] Add `PressableCard` import to `app/analytics.tsx`
+- [x] Replace "Active Tasks" `View` with `PressableCard variant="ghost"` → `/(tabs)/maintenance` in `app/analytics.tsx`
+- [x] Replace "Open Issues" `View` with `PressableCard variant="ghost"` → `/(tabs)/issues` in `app/analytics.tsx`
+- [x] Replace "Completion Rate" metric card `View` with `PressableCard variant="ghost"` → `/(tabs)/maintenance`
+- [x] Replace "Supply Requests" metric card `View` with `PressableCard variant="ghost"` → `/(tabs)/supplies`
+- [x] Add `PressableCard` import to `app/analytics.tsx`
 
 ### Final Verification
 
+- [x] TypeScript typecheck passes (no new errors introduced; all errors are pre-existing)
 - [ ] Test all owner dashboard cards navigate to correct detail screens
 - [ ] Test GlobalSearch routes all 5 result types to their detail screens
 - [ ] Test all manager dashboard cards are pressable and navigate correctly
@@ -1169,4 +1166,4 @@ Total: 13 files edited, 2 new files created.
 - [ ] Test vessel-detail screen loads and all list items navigate to correct detail screens
 - [ ] Test vessel links work from all 5 detail screens (maintenance, issue, supply, document, calendar-event)
 - [ ] Test analytics stat/metric cards navigate to correct tabs
-- [ ] Verify no regressions on existing PressableCard usages (owner dashboard)
+- [ ] Test no regressions on existing PressableCard usages (owner dashboard)

@@ -14,6 +14,7 @@ interface PressableCardProps {
   onPress?: () => void;
   style?: ViewStyle;
   hapticFeedback?: boolean;
+  variant?: "card" | "ghost";
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -23,6 +24,7 @@ export function PressableCard({
   onPress,
   style,
   hapticFeedback = true,
+  variant = "card",
 }: PressableCardProps) {
   const scale = useSharedValue(1);
   const [isPressed, setIsPressed] = useState(false);
@@ -51,7 +53,7 @@ export function PressableCard({
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[styles.container, animatedStyle, style]}
+      style={[variant !== "ghost" && styles.container, animatedStyle, style]}
     >
       {children}
     </AnimatedPressable>

@@ -3,14 +3,16 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '@/styles/commonStyles';
 import { IconSymbol } from './IconSymbol';
+import { PressableCard } from './PressableCard';
 
 interface RealtimeFeedProps {
   userId?: string;
   limit?: number;
   showUnreadOnly?: boolean;
+  onItemPress?: (type: string, id: string) => void;
 }
 
-export function RealtimeFeed({ limit = 20 }: RealtimeFeedProps) {
+export function RealtimeFeed({ limit = 20, onItemPress }: RealtimeFeedProps) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -18,7 +20,7 @@ export function RealtimeFeed({ limit = 20 }: RealtimeFeedProps) {
       </View>
 
       <View style={styles.listContent}>
-        <View style={styles.eventCard}>
+        <PressableCard style={styles.eventCard} onPress={() => onItemPress?.('issue', '1')}>
           <View style={[styles.eventIcon, { backgroundColor: colors.danger + '20' }]}>
             <IconSymbol ios_icon_name="exclamationmark.triangle.fill" android_material_icon_name="warning" size={24} color={colors.danger} />
           </View>
@@ -27,9 +29,9 @@ export function RealtimeFeed({ limit = 20 }: RealtimeFeedProps) {
             <Text style={styles.eventDescription} numberOfLines={2}>Mike Davis reported Deck Leak on Azure Dream</Text>
             <Text style={styles.eventTime}>2 hours ago</Text>
           </View>
-        </View>
+        </PressableCard>
 
-        <View style={styles.eventCard}>
+        <PressableCard style={styles.eventCard} onPress={() => onItemPress?.('supply', '2')}>
           <View style={[styles.eventIcon, { backgroundColor: colors.success + '20' }]}>
             <IconSymbol ios_icon_name="checkmark.circle.fill" android_material_icon_name="check-circle" size={24} color={colors.success} />
           </View>
@@ -38,10 +40,10 @@ export function RealtimeFeed({ limit = 20 }: RealtimeFeedProps) {
             <Text style={styles.eventDescription} numberOfLines={2}>Engine Oil request approved for Azure Dream</Text>
             <Text style={styles.eventTime}>12 hours ago</Text>
           </View>
-        </View>
+        </PressableCard>
 
         {limit > 2 && (
-          <View style={styles.eventCard}>
+          <PressableCard style={styles.eventCard} onPress={() => onItemPress?.('maintenance', '1')}>
             <View style={[styles.eventIcon, { backgroundColor: colors.success + '20' }]}>
               <IconSymbol ios_icon_name="checkmark.circle.fill" android_material_icon_name="check-circle" size={24} color={colors.success} />
             </View>
@@ -50,11 +52,11 @@ export function RealtimeFeed({ limit = 20 }: RealtimeFeedProps) {
               <Text style={styles.eventDescription} numberOfLines={2}>Navigation system maintenance completed on Ocean Pearl</Text>
               <Text style={styles.eventTime}>1 day ago</Text>
             </View>
-          </View>
+          </PressableCard>
         )}
 
         {limit > 3 && (
-          <View style={styles.eventCard}>
+          <PressableCard style={styles.eventCard} onPress={() => onItemPress?.('maintenance', '2')}>
             <View style={[styles.eventIcon, { backgroundColor: colors.warning + '20' }]}>
               <IconSymbol ios_icon_name="wrench.fill" android_material_icon_name="build" size={24} color={colors.warning} />
             </View>
@@ -63,11 +65,11 @@ export function RealtimeFeed({ limit = 20 }: RealtimeFeedProps) {
               <Text style={styles.eventDescription} numberOfLines={2}>Safety Equipment Check status changed to In Progress</Text>
               <Text style={styles.eventTime}>2 days ago</Text>
             </View>
-          </View>
+          </PressableCard>
         )}
 
         {limit > 4 && (
-          <View style={styles.eventCard}>
+          <PressableCard style={styles.eventCard} onPress={() => onItemPress?.('maintenance', '3')}>
             <View style={[styles.eventIcon, { backgroundColor: colors.accent + '20' }]}>
               <IconSymbol ios_icon_name="person.fill.checkmark" android_material_icon_name="assignment" size={24} color={colors.accent} />
             </View>
@@ -76,7 +78,7 @@ export function RealtimeFeed({ limit = 20 }: RealtimeFeedProps) {
               <Text style={styles.eventDescription} numberOfLines={2}>Deck Cleaning assigned to Mike Davis on Azure Dream</Text>
               <Text style={styles.eventTime}>3 days ago</Text>
             </View>
-          </View>
+          </PressableCard>
         )}
       </View>
     </View>

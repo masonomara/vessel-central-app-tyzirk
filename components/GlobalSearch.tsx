@@ -58,16 +58,16 @@ export default function GlobalSearch({ visible, onClose }: GlobalSearchProps) {
         });
         break;
       case 'issue':
-        router.push('/(tabs)/issues');
+        router.push({ pathname: '/issue-detail', params: { id: result.id } });
         break;
       case 'supply':
-        router.push('/(tabs)/supplies');
+        router.push({ pathname: '/supply-detail', params: { id: result.id } });
         break;
       case 'document':
-        router.push('/(tabs)/documents');
+        router.push({ pathname: '/document-detail', params: { id: result.id } });
         break;
       case 'vessel':
-        router.push('/(tabs)/owner');
+        router.push({ pathname: '/vessel-detail', params: { id: result.id } });
         break;
       default:
         console.log('Unknown result type');

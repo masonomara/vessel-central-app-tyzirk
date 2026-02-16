@@ -1,6 +1,7 @@
 
 import React, { useMemo } from "react";
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { PressableCard } from "@/components/PressableCard";
 import { colors, commonStyles } from "@/styles/commonStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
@@ -91,18 +92,18 @@ export default function CrewDashboard() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>My Vessels</Text>
           {myVessels.map((vessel) => (
-            <View key={vessel.id} style={styles.vesselCard}>
-              <IconSymbol 
-                ios_icon_name="sailboat.fill" 
-                android_material_icon_name="sailing" 
-                size={24} 
-                color={colors.accent} 
+            <PressableCard key={vessel.id} style={styles.vesselCard} onPress={() => router.push({ pathname: '/vessel-detail', params: { id: vessel.id } })}>
+              <IconSymbol
+                ios_icon_name="sailboat.fill"
+                android_material_icon_name="sailing"
+                size={24}
+                color={colors.accent}
               />
               <View style={styles.vesselInfo}>
                 <Text style={styles.vesselName}>{vessel.name}</Text>
                 <Text style={styles.vesselLocation}>{vessel.location}</Text>
               </View>
-            </View>
+            </PressableCard>
           ))}
         </View>
 
@@ -129,30 +130,35 @@ export default function CrewDashboard() {
 
           {myTasks.length > 0 ? (
             myTasks.map((task) => (
-              <TouchableOpacity 
+              <View
                 key={task.id}
                 style={[styles.taskCard, task.status === 'completed' && styles.taskCardCompleted]}
-                onPress={() => toggleTaskCompletion(task.id)}
-                activeOpacity={0.7}
               >
-                <View style={styles.taskCheckbox}>
+                <TouchableOpacity
+                  style={styles.taskCheckbox}
+                  onPress={() => toggleTaskCompletion(task.id)}
+                >
                   {task.status === 'completed' ? (
-                    <IconSymbol 
-                      ios_icon_name="checkmark.circle.fill" 
-                      android_material_icon_name="check-circle" 
-                      size={28} 
-                      color={colors.success} 
+                    <IconSymbol
+                      ios_icon_name="checkmark.circle.fill"
+                      android_material_icon_name="check-circle"
+                      size={28}
+                      color={colors.success}
                     />
                   ) : (
-                    <IconSymbol 
-                      ios_icon_name="circle" 
-                      android_material_icon_name="radio-button-unchecked" 
-                      size={28} 
-                      color={colors.textSecondary} 
+                    <IconSymbol
+                      ios_icon_name="circle"
+                      android_material_icon_name="radio-button-unchecked"
+                      size={28}
+                      color={colors.textSecondary}
                     />
                   )}
-                </View>
-                <View style={styles.taskContent}>
+                </TouchableOpacity>
+                <PressableCard
+                  variant="ghost"
+                  style={styles.taskContent}
+                  onPress={() => router.push({ pathname: '/maintenance-detail', params: { id: task.id } })}
+                >
                   <View style={styles.taskHeader}>
                     <Text style={[styles.taskTitle, task.status === 'completed' && styles.taskTitleCompleted]}>
                       {task.title}
@@ -171,18 +177,18 @@ export default function CrewDashboard() {
                   </Text>
                   <Text style={styles.taskVessel}>{task.vesselName}</Text>
                   <View style={styles.taskFooter}>
-                    <IconSymbol 
-                      ios_icon_name="clock" 
-                      android_material_icon_name="schedule" 
-                      size={16} 
-                      color={colors.textSecondary} 
+                    <IconSymbol
+                      ios_icon_name="clock"
+                      android_material_icon_name="schedule"
+                      size={16}
+                      color={colors.textSecondary}
                     />
                     <Text style={styles.taskTime}>
                       {task.status === 'completed' ? 'Completed' : `Due: ${formatTime(task.dueDate)}`}
                     </Text>
                   </View>
-                </View>
-              </TouchableOpacity>
+                </PressableCard>
+              </View>
             ))
           ) : (
             <Text style={styles.emptyText}>No tasks assigned</Text>
@@ -193,7 +199,7 @@ export default function CrewDashboard() {
           <Text style={styles.sectionTitle}>Supply Requests</Text>
           {mySupplyRequests.length > 0 ? (
             mySupplyRequests.map((request) => (
-              <View key={request.id} style={styles.supplyCard}>
+              <PressableCard key={request.id} style={styles.supplyCard} onPress={() => router.push({ pathname: '/supply-detail', params: { id: request.id } })}>
                 <View style={styles.supplyHeader}>
                   <IconSymbol 
                     ios_icon_name="shippingbox.fill" 
@@ -222,7 +228,7 @@ export default function CrewDashboard() {
                     styles.supplyStatusTextPending
                   ]}>{request.status.toUpperCase()}</Text>
                 </View>
-              </View>
+              </PressableCard>
             ))
           ) : (
             <Text style={styles.emptyText}>No supply requests</Text>

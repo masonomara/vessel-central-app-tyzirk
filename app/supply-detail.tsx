@@ -12,6 +12,7 @@ import { colors } from "@/styles/commonStyles";
 import { useData } from "@/contexts/DataContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { IconSymbol } from "@/components/IconSymbol";
+import { LinkedDetailRow } from "@/components/LinkedDetailRow";
 import { formatDate } from "@/utils/dateUtils";
 import { SupplyRequestStatus, TaskPriority } from "@/types";
 
@@ -158,7 +159,11 @@ export default function SupplyDetailScreen() {
               value={`$${request.actualCost.toFixed(2)}`}
             />
           )}
-          <DetailRow label="Vessel" value={request.vesselName} />
+          <LinkedDetailRow
+            label="Vessel"
+            value={request.vesselName}
+            linkTo={{ pathname: "/vessel-detail", params: { id: request.vesselId } }}
+          />
           <DetailRow label="Category" value={request.category} />
           <DetailRow label="Requested By" value={request.requestedByName} />
           <DetailRow

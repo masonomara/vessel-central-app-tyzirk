@@ -11,6 +11,7 @@ import { useLocalSearchParams, Stack, router } from "expo-router";
 import { colors } from "@/styles/commonStyles";
 import { useData } from "@/contexts/DataContext";
 import { IconSymbol } from "@/components/IconSymbol";
+import { LinkedDetailRow } from "@/components/LinkedDetailRow";
 import { formatDate, isOverdue } from "@/utils/dateUtils";
 import { formatFileSize } from "@/utils/fileUtils";
 
@@ -113,7 +114,11 @@ export default function DocumentDetailScreen() {
           <DetailRow label="File Name" value={doc.fileName} />
           <DetailRow label="File Size" value={formatFileSize(doc.fileSize)} />
           <DetailRow label="File Type" value={doc.fileType.toUpperCase()} />
-          <DetailRow label="Vessel" value={doc.vesselName} />
+          <LinkedDetailRow
+            label="Vessel"
+            value={doc.vesselName}
+            linkTo={{ pathname: "/vessel-detail", params: { id: doc.vesselId } }}
+          />
           <DetailRow label="Uploaded By" value={doc.uploadedByName} />
           <DetailRow
             label="Uploaded"

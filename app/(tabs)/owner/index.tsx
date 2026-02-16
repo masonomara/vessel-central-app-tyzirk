@@ -236,7 +236,7 @@ export default function OwnerDashboard() {
           <Text style={styles.sectionTitle}>Fleet Overview</Text>
           <View style={styles.fleetGrid}>
             {myVessels.map((vessel, index) => (
-              <PressableCard key={vessel.id} style={styles.vesselCard}>
+              <PressableCard key={vessel.id} style={styles.vesselCard} onPress={() => router.push({ pathname: '/vessel-detail', params: { id: vessel.id } })}>
                 <View style={styles.vesselHeader}>
                   <LinearGradient
                     colors={[colors.accent + "30", colors.accent + "10"]}
@@ -344,7 +344,7 @@ export default function OwnerDashboard() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Performance</Text>
 
-          <PressableCard style={styles.performanceCard}>
+          <PressableCard style={styles.performanceCard} onPress={() => router.push('/analytics')}>
             <View style={styles.performanceContent}>
               <View style={styles.performanceLeft}>
                 <ProgressRing
@@ -375,7 +375,7 @@ export default function OwnerDashboard() {
             </View>
           </PressableCard>
 
-          <PressableCard style={styles.expenseChartCard}>
+          <PressableCard style={styles.expenseChartCard} onPress={() => router.push('/analytics')}>
             <View style={styles.expenseChartHeader}>
               <Text style={styles.expenseChartTitle}>Expense Trend</Text>
               <Text style={styles.expenseChartSubtitle}>Last 6 months</Text>
@@ -391,7 +391,7 @@ export default function OwnerDashboard() {
         {upcomingMaintenance && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Next Maintenance</Text>
-            <PressableCard style={styles.maintenanceCard}>
+            <PressableCard style={styles.maintenanceCard} onPress={() => router.push({ pathname: '/maintenance-detail', params: { id: upcomingMaintenance.id } })}>
               <View style={styles.maintenanceHeader}>
                 <LinearGradient
                   colors={[colors.warning + "30", colors.warning + "10"]}
@@ -456,7 +456,7 @@ export default function OwnerDashboard() {
               </View>
             </View>
             {pendingApprovals.slice(0, 2).map((approval, index) => (
-              <PressableCard key={approval.id} style={styles.approvalCard}>
+              <PressableCard key={approval.id} style={styles.approvalCard} onPress={() => router.push({ pathname: '/supply-detail', params: { id: approval.id } })}>
                 <View style={styles.approvalHeader}>
                   <View style={styles.approvalLeft}>
                     <Text style={styles.approvalItem}>{approval.itemName}</Text>
@@ -497,7 +497,20 @@ export default function OwnerDashboard() {
           <Text style={styles.sectionTitle}>Recent Activity</Text>
           {myActivityLogs.length > 0 ? (
             myActivityLogs.map((log, index) => (
-              <PressableCard key={log.id} style={styles.activityCard}>
+              <PressableCard key={log.id} style={styles.activityCard} onPress={() => {
+                switch (log.type) {
+                  case 'maintenance':
+                  case 'task':
+                    router.push({ pathname: '/maintenance-detail', params: { id: log.relatedId } });
+                    break;
+                  case 'issue':
+                    router.push({ pathname: '/issue-detail', params: { id: log.relatedId } });
+                    break;
+                  case 'supply':
+                    router.push({ pathname: '/supply-detail', params: { id: log.relatedId } });
+                    break;
+                }
+              }}>
                 <LinearGradient
                   colors={
                     log.type === "maintenance" || log.type === "task"

@@ -6,6 +6,7 @@ import { colors } from '@/styles/commonStyles';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { IconSymbol } from '@/components/IconSymbol';
+import { PressableCard } from '@/components/PressableCard';
 import { formatDate, formatDueDate, isOverdue } from '@/utils/dateUtils';
 import { TaskStatus, TaskPriority } from '@/types';
 
@@ -110,18 +111,28 @@ export default function MaintenanceDetailScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Details</Text>
           <View style={styles.detailsGrid}>
-            <View style={styles.detailItem}>
-              <IconSymbol 
-                ios_icon_name="sailboat.fill" 
-                android_material_icon_name="sailing" 
-                size={20} 
-                color={colors.accent} 
+            <PressableCard
+              variant="ghost"
+              style={styles.detailItem}
+              onPress={() => router.push({ pathname: '/vessel-detail', params: { id: task.vesselId } })}
+            >
+              <IconSymbol
+                ios_icon_name="sailboat.fill"
+                android_material_icon_name="sailing"
+                size={20}
+                color={colors.accent}
               />
               <View style={styles.detailContent}>
                 <Text style={styles.detailLabel}>Vessel</Text>
-                <Text style={styles.detailValue}>{task.vesselName}</Text>
+                <Text style={[styles.detailValue, { color: colors.accent }]}>{task.vesselName}</Text>
               </View>
-            </View>
+              <IconSymbol
+                ios_icon_name="chevron.right"
+                android_material_icon_name="chevron-right"
+                size={16}
+                color={colors.accent}
+              />
+            </PressableCard>
 
             <View style={styles.detailItem}>
               <IconSymbol 

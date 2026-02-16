@@ -6,6 +6,7 @@ import { colors } from '@/styles/commonStyles';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { IconSymbol } from '@/components/IconSymbol';
+import { PressableCard } from '@/components/PressableCard';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width;
@@ -198,31 +199,39 @@ export default function AnalyticsScreen() {
             <Text style={styles.statValue}>${Math.round(avgMonthlyExpense).toLocaleString()}</Text>
           </View>
 
-          <View style={styles.statCard}>
-            <IconSymbol 
-              ios_icon_name="wrench.and.screwdriver.fill" 
-              android_material_icon_name="build" 
-              size={32} 
-              color={colors.warning} 
+          <PressableCard
+            variant="ghost"
+            style={styles.statCard}
+            onPress={() => router.push('/(tabs)/maintenance')}
+          >
+            <IconSymbol
+              ios_icon_name="wrench.and.screwdriver.fill"
+              android_material_icon_name="build"
+              size={32}
+              color={colors.warning}
             />
             <Text style={styles.statLabel}>Active Tasks</Text>
             <Text style={styles.statValue}>
               {maintenanceTasks.filter(t => t.status !== 'completed').length}
             </Text>
-          </View>
+          </PressableCard>
 
-          <View style={styles.statCard}>
-            <IconSymbol 
-              ios_icon_name="exclamationmark.triangle.fill" 
-              android_material_icon_name="warning" 
-              size={32} 
-              color={colors.danger} 
+          <PressableCard
+            variant="ghost"
+            style={styles.statCard}
+            onPress={() => router.push('/(tabs)/issues')}
+          >
+            <IconSymbol
+              ios_icon_name="exclamationmark.triangle.fill"
+              android_material_icon_name="warning"
+              size={32}
+              color={colors.danger}
             />
             <Text style={styles.statLabel}>Open Issues</Text>
             <Text style={styles.statValue}>
               {issues.filter(i => i.status !== 'completed').length}
             </Text>
-          </View>
+          </PressableCard>
         </View>
 
         <View style={styles.section}>
@@ -293,25 +302,29 @@ export default function AnalyticsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Key Metrics</Text>
           
-          <View style={styles.metricCard}>
+          <PressableCard
+            variant="ghost"
+            style={styles.metricCard}
+            onPress={() => router.push('/(tabs)/maintenance')}
+          >
             <View style={styles.metricHeader}>
-              <IconSymbol 
-                ios_icon_name="checkmark.circle.fill" 
-                android_material_icon_name="check-circle" 
-                size={24} 
-                color={colors.success} 
+              <IconSymbol
+                ios_icon_name="checkmark.circle.fill"
+                android_material_icon_name="check-circle"
+                size={24}
+                color={colors.success}
               />
               <Text style={styles.metricTitle}>Completion Rate</Text>
             </View>
             <Text style={styles.metricValue}>
-              {maintenanceTasks.length > 0 
+              {maintenanceTasks.length > 0
                 ? Math.round((maintenanceTasks.filter(t => t.status === 'completed').length / maintenanceTasks.length) * 100)
                 : 0}%
             </Text>
             <Text style={styles.metricSubtext}>
               {maintenanceTasks.filter(t => t.status === 'completed').length} of {maintenanceTasks.length} tasks completed
             </Text>
-          </View>
+          </PressableCard>
 
           <View style={styles.metricCard}>
             <View style={styles.metricHeader}>
@@ -327,13 +340,17 @@ export default function AnalyticsScreen() {
             <Text style={styles.metricSubtext}>From issue report to resolution</Text>
           </View>
 
-          <View style={styles.metricCard}>
+          <PressableCard
+            variant="ghost"
+            style={styles.metricCard}
+            onPress={() => router.push('/(tabs)/supplies')}
+          >
             <View style={styles.metricHeader}>
-              <IconSymbol 
-                ios_icon_name="shippingbox.fill" 
-                android_material_icon_name="inventory-2" 
-                size={24} 
-                color={colors.accent} 
+              <IconSymbol
+                ios_icon_name="shippingbox.fill"
+                android_material_icon_name="inventory-2"
+                size={24}
+                color={colors.accent}
               />
               <Text style={styles.metricTitle}>Supply Requests</Text>
             </View>
@@ -341,7 +358,7 @@ export default function AnalyticsScreen() {
             <Text style={styles.metricSubtext}>
               {supplyRequests.filter(r => r.status === 'pending').length} pending approval
             </Text>
-          </View>
+          </PressableCard>
         </View>
       </ScrollView>
     </View>

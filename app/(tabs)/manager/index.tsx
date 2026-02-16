@@ -1,6 +1,7 @@
 
 import React, { useMemo, useState } from "react";
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { PressableCard } from "@/components/PressableCard";
 import { colors, commonStyles } from "@/styles/commonStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
@@ -189,7 +190,19 @@ export default function ManagerDashboard() {
         </View>
 
         <View style={styles.section}>
-          <RealtimeFeed userId={userId} limit={5} />
+          <RealtimeFeed userId={userId} limit={5} onItemPress={(type, id) => {
+            switch (type) {
+              case 'issue':
+                router.push({ pathname: '/issue-detail', params: { id } });
+                break;
+              case 'maintenance':
+                router.push({ pathname: '/maintenance-detail', params: { id } });
+                break;
+              case 'supply':
+                router.push({ pathname: '/supply-detail', params: { id } });
+                break;
+            }
+          }} />
         </View>
 
         <View style={styles.section}>
@@ -203,7 +216,7 @@ export default function ManagerDashboard() {
               : 0;
             
             return (
-              <View key={vessel.id} style={styles.vesselCard}>
+              <PressableCard key={vessel.id} style={styles.vesselCard} onPress={() => router.push({ pathname: '/vessel-detail', params: { id: vessel.id } })}>
                 <View style={styles.vesselHeader}>
                   <View style={styles.vesselLeft}>
                     <View style={[styles.iconCircle, { backgroundColor: colors.accent + '20' }]}>
@@ -264,7 +277,7 @@ export default function ManagerDashboard() {
                     <Text style={styles.statText}>{vesselIssues.length} Issues</Text>
                   </View>
                 </View>
-              </View>
+              </PressableCard>
             );
           })}
         </View>
@@ -345,7 +358,7 @@ export default function ManagerDashboard() {
           <Text style={styles.sectionTitle}>Upcoming Maintenance</Text>
           {upcomingMaintenance.length > 0 ? (
             upcomingMaintenance.map((item, index) => (
-              <View key={item.id} style={styles.maintenanceCard}>
+              <PressableCard key={item.id} style={styles.maintenanceCard} onPress={() => router.push({ pathname: '/maintenance-detail', params: { id: item.id } })}>
                 <View style={styles.maintenanceHeader}>
                   <View style={[
                     styles.iconCircle,
@@ -382,7 +395,7 @@ export default function ManagerDashboard() {
                   </View>
                   <Text style={styles.dueDate}>Due in {getDaysUntil(item.dueDate)} days</Text>
                 </View>
-              </View>
+              </PressableCard>
             ))
           ) : (
             <Text style={styles.emptyText}>No upcoming maintenance</Text>
