@@ -491,8 +491,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   issueCardUrgent: {
-    borderLeftWidth: 4,
-    borderLeftColor: colors.danger,
+
   },
   issueHeader: {
     flexDirection: "row",

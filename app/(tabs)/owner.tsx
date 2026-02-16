@@ -785,8 +785,7 @@ const styles = StyleSheet.create({
   },
   maintenanceCard: {
     padding: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.warning,
+
   },
   maintenanceHeader: {
     flexDirection: "row",
@@ -856,8 +855,7 @@ const styles = StyleSheet.create({
   approvalCard: {
     padding: 16,
     marginBottom: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.warning,
+
   },
   approvalHeader: {
     flexDirection: "row",

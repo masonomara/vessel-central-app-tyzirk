@@ -446,12 +446,10 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   documentCardImportant: {
-    borderLeftWidth: 4,
-    borderLeftColor: colors.gold,
+
   },
   documentCardExpired: {
-    borderLeftWidth: 4,
-    borderLeftColor: colors.danger,
+
   },
   documentHeader: {
     flexDirection: "row",

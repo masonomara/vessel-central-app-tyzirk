@@ -635,8 +635,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: colors.border,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.warning,
+
   },
   approvalHeader: {
     flexDirection: 'row',

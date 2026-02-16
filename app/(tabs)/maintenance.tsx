@@ -599,8 +599,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   taskCardOverdue: {
-    borderLeftWidth: 4,
-    borderLeftColor: colors.danger,
+
   },
   taskHeader: {
     flexDirection: "row",
