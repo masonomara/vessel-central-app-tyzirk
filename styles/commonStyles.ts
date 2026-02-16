@@ -32,10 +32,9 @@ export const colors = {
   grey: "#6B7280", // Neutral gray
 
   // Backgrounds - DARKER for better text contrast
-  background: "#FAF9F5", // Almost black (darker)
-  backgroundAlt: "#F5F4ED", // Very dark slate (darker)
-  backgroundLight: "#E8E6DC", // Dark slate (darker)
-  card: "#ffffff", // Card background (darker)
+  background: "#F5F4ED", // Almost black (darker)
+  backgroundAlt: "#E8E6DC", // Very dark slate (darker)
+  card: "#FAF9F5", // Card background (darker)
   cardHover: "#1A2129", // Card hover state (darker)
   cardElevated: "#1D242E", // Elevated card (darker)
 
