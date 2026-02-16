@@ -28,7 +28,7 @@ const VALID_MANAGER_CODES = [
 
 export default function SignUpScreen() {
   const router = useRouter();
-  const { signUp, isSupabaseEnabled } = useAuth();
+  const _auth = useAuth();
   
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -109,36 +109,11 @@ export default function SignUpScreen() {
       return;
     }
     
-    if (!isSupabaseEnabled) {
-      Alert.alert(
-        'Demo Mode',
-        'Sign up is not available in demo mode. Please enable Supabase to register new users.\n\nTo enable Supabase:\n1. Press the Supabase button\n2. Connect to your Supabase project\n3. Try signing up again',
-        [{ text: 'OK' }]
-      );
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    const { error } = await signUp(email, password, { name, role });
-    
-    setIsLoading(false);
-    
-    if (error) {
-      console.error('Sign up error:', error);
-      Alert.alert(
-        'Sign Up Failed',
-        error.message || 'Unable to create account. Please try again.',
-        [{ text: 'OK' }]
-      );
-    } else {
-      console.log('Sign up successful');
-      Alert.alert(
-        'Success!',
-        'Account created successfully! Please check your email to verify your account before logging in.',
-        [{ text: 'OK', onPress: () => router.replace('/login') }]
-      );
-    }
+    Alert.alert(
+      'Demo Mode',
+      'Sign up is not available in the demo. Use the quick login options on the login screen to try different roles.',
+      [{ text: 'OK', onPress: () => router.back() }]
+    );
   };
 
   const handleBackToLogin = () => {
@@ -325,11 +300,9 @@ export default function SignUpScreen() {
               />
             </View>
             {managerCodeError ? <Text style={styles.errorText}>{managerCodeError}</Text> : null}
-            {!isSupabaseEnabled && (
-              <Text style={styles.hintText}>
-                Demo codes: VESSEL2024, YACHT2024, CREW2024, MANAGER2024
-              </Text>
-            )}
+            <Text style={styles.hintText}>
+              Demo codes: VESSEL2024, YACHT2024, CREW2024, MANAGER2024
+            </Text>
           </View>
 
           <View style={styles.inputContainer}>

@@ -20,7 +20,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
-  const { resetPassword, isSupabaseEnabled } = useAuth();
+  const _auth = useAuth();
   
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -46,36 +46,11 @@ export default function ForgotPasswordScreen() {
       return;
     }
     
-    if (!isSupabaseEnabled) {
-      Alert.alert(
-        'Demo Mode',
-        'Password reset is not available in demo mode. Please use the quick login options on the login screen.',
-        [{ text: 'OK', onPress: () => router.back() }]
-      );
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    const { error } = await resetPassword(email);
-    
-    setIsLoading(false);
-    
-    if (error) {
-      console.error('Password reset error:', error);
-      Alert.alert(
-        'Reset Failed',
-        error.message || 'Unable to send reset email. Please try again.',
-        [{ text: 'OK' }]
-      );
-    } else {
-      console.log('Password reset email sent');
-      Alert.alert(
-        'Check Your Email',
-        'We&apos;ve sent you a password reset link. Please check your email and follow the instructions.',
-        [{ text: 'OK', onPress: () => router.back() }]
-      );
-    }
+    Alert.alert(
+      'Demo Mode',
+      'Password reset is not available in the demo. Use the quick login options on the login screen.',
+      [{ text: 'OK', onPress: () => router.back() }]
+    );
   };
 
   const handleBackToLogin = () => {

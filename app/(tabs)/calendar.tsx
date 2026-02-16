@@ -29,7 +29,7 @@ import { CalendarEvent } from '@/types/calendar';
 
 export default function CalendarScreen() {
   const router = useRouter();
-  const { user, userRole } = useAuth();
+  const { userId, userRole } = useAuth();
   const { calendarEvents, getCalendarEventsForUser } = useData();
   
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -41,9 +41,9 @@ export default function CalendarScreen() {
 
   // Get events for the current user
   const userEvents = useMemo(() => {
-    if (!user || !userRole) return [];
-    return getCalendarEventsForUser(user.id, userRole);
-  }, [user, userRole, calendarEvents, getCalendarEventsForUser]);
+    if (!userId || !userRole) return [];
+    return getCalendarEventsForUser(userId, userRole);
+  }, [userId, userRole, calendarEvents, getCalendarEventsForUser]);
 
   // Get events for the selected date
   const selectedDateEvents = useMemo(() => {

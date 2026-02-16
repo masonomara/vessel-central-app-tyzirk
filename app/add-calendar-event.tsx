@@ -23,7 +23,7 @@ import { EVENT_TYPE_LABELS, getEventColor } from '@/utils/calendarUtils';
 export default function AddCalendarEventScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { user, userRole } = useAuth();
+  const { userId, userName, userRole } = useAuth();
   const { vessels, getVesselsForUser, addCalendarEvent } = useData();
 
   const initialDate = params.date ? new Date(params.date as string) : new Date();
@@ -43,9 +43,9 @@ export default function AddCalendarEventScreen() {
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
   const userVessels = useMemo(() => {
-    if (!user || !userRole) return [];
-    return getVesselsForUser(user.id, userRole);
-  }, [user, userRole, vessels, getVesselsForUser]);
+    if (!userId || !userRole) return [];
+    return getVesselsForUser(userId, userRole);
+  }, [userId, userRole, vessels, getVesselsForUser]);
 
   const eventTypes: CalendarEventType[] = [
     'maintenance',
@@ -90,10 +90,10 @@ export default function AddCalendarEventScreen() {
       vesselId: selectedVesselId,
       vesselName: selectedVessel.name,
       location: location.trim(),
-      attendees: [user?.id || ''],
-      attendeeNames: [user?.name || ''],
-      createdBy: user?.id || '',
-      createdByName: user?.name || '',
+      attendees: [userId],
+      attendeeNames: [userName],
+      createdBy: userId,
+      createdByName: userName,
       notes: notes.trim(),
       reminders: [
         { id: Date.now().toString(), minutes: 1440, method: 'notification' },

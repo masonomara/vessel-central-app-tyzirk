@@ -1224,28 +1224,25 @@ Every task below maps to a specific change described in the phases above. Work t
 - [x] Keep "Notifications" settings row in profile.tsx (demo screen worth showing)
 - [x] Keep notifications seed data and display methods in DataContext
 
-#### 1.4 Remove Analytics
+#### 1.4 Keep Analytics (revised)
 
-- [ ] Delete `app/analytics.tsx`
-- [ ] Remove `handleViewAnalytics` function and "View Analytics" button from `app/(tabs)/owner.tsx`
-- [ ] Remove "View Analytics" quick action button and `router.push('/analytics')` from `app/(tabs)/manager.tsx`
-- [ ] Remove `handleAnalytics` callback and analytics icon button from `app/(tabs)/maintenance.tsx`
-- [ ] Remove `react-native-chart-kit` from `package.json`
+- [x] Keep `app/analytics.tsx` as-is — demo-impressive screen driven by seed data, no backend
+- [x] Console.log cleanup and colors.grey fix covered by Phase 2 and Phase 6
 
-#### 1.5 Remove Supabase Integration
+#### 1.5 Remove Supabase Integration (revised)
 
-- [ ] Delete `utils/supabase.ts`
-- [ ] Remove `supabase` and `isSupabaseConfigured` imports from `contexts/AuthContext.tsx`
-- [ ] Remove `Session`, `User`, `AuthError` imports from `contexts/AuthContext.tsx`
-- [ ] Remove `user`, `session`, `isSupabaseEnabled` state from AuthContext
-- [ ] Remove `resetPassword`, `updatePassword`, MFA methods, `refreshSession` from AuthContext
-- [ ] Remove Supabase auth state listener (`supabase.auth.onAuthStateChange`) from AuthContext
-- [ ] Remove Supabase-specific branches from `signUp`, `signIn`, `signOut` in AuthContext
-- [ ] Remove `isSupabaseEnabled` conditional branches from `app/login.tsx`
-- [ ] Remove "Demo Mode" badge from `app/login.tsx`
-- [ ] Simplify or stub `app/signup.tsx` (no signup in demo mode)
-- [ ] Remove `@supabase/supabase-js` from `package.json`
-- [ ] Run `npm install` to update lockfile
+- [x] Delete `utils/supabase.ts`
+- [x] Rewrite `contexts/AuthContext.tsx` — pure AsyncStorage auth, no Supabase types, no `any`
+- [x] Remove `isSupabaseEnabled` branches and demo badge from `app/login.tsx`, make quick login always visible
+- [x] Stub `app/signup.tsx` — always shows demo mode alert
+- [x] Stub `app/forgot-password.tsx` — always shows demo mode alert
+- [x] Remove `isSupabaseEnabled` branches and demo badge from `app/manager-login.tsx`, make quick login always visible
+- [x] Remove `user` (Supabase User object) from `app/(tabs)/profile.tsx`, use `userName` fallback
+- [x] Fix `app/(tabs)/calendar.tsx` — replace `user.id` with `userId` from useAuth
+- [x] Fix `app/add-calendar-event.tsx` — replace `user` with `userId`/`userName` from useAuth
+- [x] Remove `@supabase/supabase-js`, `react-native-url-polyfill`, `expo-notifications` from `package.json`
+- [x] Run `npm install` to update lockfile
+- [x] Typecheck: 130 errors (down from 133), zero Supabase-related, all pre-existing
 
 ### Phase 2: Fix Crash-Causing Bugs
 

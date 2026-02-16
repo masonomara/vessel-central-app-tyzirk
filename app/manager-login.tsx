@@ -36,7 +36,7 @@ const MOCK_MANAGERS: MockManager[] = [
 
 export default function ManagerLoginScreen() {
   const router = useRouter();
-  const { signIn, isSupabaseEnabled, setUserRole, setUserName, setUserId } = useAuth();
+  const { setUserRole, setUserName, setUserId } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -95,44 +95,23 @@ export default function ManagerLoginScreen() {
     }
     
     setIsLoading(true);
-    
-    if (isSupabaseEnabled) {
-      // Use Supabase authentication
-      const { error } = await signIn(email, password);
-      
-      setIsLoading(false);
-      
-      if (error) {
-        console.error('Supabase manager login error:', error);
+
+    setTimeout(async () => {
+      const manager = MOCK_MANAGERS.find(
+        m => m.email.toLowerCase() === email.toLowerCase() && m.password === password
+      );
+
+      if (manager) {
+        await handleMockLogin(manager);
+      } else {
+        setIsLoading(false);
         Alert.alert(
           'Login Failed',
-          error.message || 'Invalid email or password. Please try again.',
+          'Invalid manager credentials. Please try again.',
           [{ text: 'OK' }]
         );
-      } else {
-        console.log('Supabase manager login successful');
-        router.replace('/(tabs)/(home)');
       }
-    } else {
-      // Use mock authentication for demo
-      setTimeout(async () => {
-        const manager = MOCK_MANAGERS.find(
-          m => m.email.toLowerCase() === email.toLowerCase() && m.password === password
-        );
-        
-        if (manager) {
-          await handleMockLogin(manager);
-        } else {
-          console.log('Mock manager login failed: Invalid credentials');
-          setIsLoading(false);
-          Alert.alert(
-            'Login Failed',
-            'Invalid manager credentials. Please try again.',
-            [{ text: 'OK' }]
-          );
-        }
-      }, 1000);
-    }
+    }, 1000);
   };
 
   const handleBackToLogin = () => {
@@ -184,20 +163,13 @@ export default function ManagerLoginScreen() {
             </View>
             <Text style={styles.logoText}>Manager Portal</Text>
             <Text style={styles.logoSubtext}>Administrative Access</Text>
-            {!isSupabaseEnabled && (
-              <View style={styles.demoModeBadge}>
-                <Text style={styles.demoModeText}>Demo Mode</Text>
-              </View>
-            )}
           </View>
         </LinearGradient>
 
         <View style={styles.formContainer}>
           <Text style={styles.welcomeText}>Manager Login</Text>
           <Text style={styles.welcomeSubtext}>
-            {isSupabaseEnabled 
-              ? 'Sign in with your manager credentials' 
-              : 'Access the management dashboard'}
+            Access the management dashboard
           </Text>
 
           <View style={styles.inputContainer}>
@@ -293,52 +265,48 @@ export default function ManagerLoginScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
-          {!isSupabaseEnabled && (
-            <React.Fragment>
-              <View style={styles.dividerContainer}>
-                <View style={styles.divider} />
-                <Text style={styles.dividerText}>Quick Login (Demo)</Text>
-                <View style={styles.divider} />
-              </View>
+          <View style={styles.dividerContainer}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>Quick Login</Text>
+            <View style={styles.divider} />
+          </View>
 
-              <TouchableOpacity
-                style={styles.quickLoginButton}
-                onPress={handleQuickLogin}
-                disabled={isLoading}
-              >
-                <View style={styles.quickLoginIcon}>
-                  <IconSymbol
-                    ios_icon_name="chart.bar.fill"
-                    android_material_icon_name="dashboard"
-                    size={32}
-                    color={colors.accent}
-                  />
-                </View>
-                <View style={styles.quickLoginContent}>
-                  <Text style={styles.quickLoginTitle}>Sarah Johnson</Text>
-                  <Text style={styles.quickLoginSubtitle}>Manager • sarah@vesselco.com</Text>
-                </View>
-                <IconSymbol
-                  ios_icon_name="arrow.right"
-                  android_material_icon_name="arrow_forward"
-                  size={20}
-                  color={colors.textSecondary}
-                />
-              </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.quickLoginButton}
+            onPress={handleQuickLogin}
+            disabled={isLoading}
+          >
+            <View style={styles.quickLoginIcon}>
+              <IconSymbol
+                ios_icon_name="chart.bar.fill"
+                android_material_icon_name="dashboard"
+                size={32}
+                color={colors.accent}
+              />
+            </View>
+            <View style={styles.quickLoginContent}>
+              <Text style={styles.quickLoginTitle}>Sarah Johnson</Text>
+              <Text style={styles.quickLoginSubtitle}>Manager • sarah@vesselco.com</Text>
+            </View>
+            <IconSymbol
+              ios_icon_name="arrow.right"
+              android_material_icon_name="arrow_forward"
+              size={20}
+              color={colors.textSecondary}
+            />
+          </TouchableOpacity>
 
-              <View style={styles.demoInfo}>
-                <IconSymbol
-                  ios_icon_name="info.circle.fill"
-                  android_material_icon_name="info"
-                  size={16}
-                  color={colors.textSecondary}
-                />
-                <Text style={styles.demoInfoText}>
-                  Demo credentials: sarah@vesselco.com / manager123
-                </Text>
-              </View>
-            </React.Fragment>
-          )}
+          <View style={styles.demoInfo}>
+            <IconSymbol
+              ios_icon_name="info.circle.fill"
+              android_material_icon_name="info"
+              size={16}
+              color={colors.textSecondary}
+            />
+            <Text style={styles.demoInfoText}>
+              Credentials: sarah@vesselco.com / manager123
+            </Text>
+          </View>
 
           <View style={styles.securityNote}>
             <IconSymbol
@@ -417,20 +385,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginTop: 4,
     letterSpacing: 0.5,
-  },
-  demoModeBadge: {
-    marginTop: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: colors.warning + '30',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.warning,
-  },
-  demoModeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.warning,
   },
   formContainer: {
     paddingHorizontal: 24,

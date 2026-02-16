@@ -753,8 +753,6 @@ const styles = StyleSheet.create({
   },
   vesselCard: {
     flex: 1,
-    minWidth: "47%",
-    padding: 16,
   },
   vesselHeader: {
     flexDirection: "row",

@@ -11,7 +11,7 @@ import { colors, buttonStyles } from "@/styles/commonStyles";
 
 export default function ProfileScreen() {
   const theme = useTheme();
-  const { signOut, user, userName, userRole } = useAuth();
+  const { signOut, userName, userRole } = useAuth();
   const router = useRouter();
 
   const handleLogout = () => {
@@ -70,10 +70,10 @@ export default function ProfileScreen() {
         ]} glassEffectStyle="regular">
           <IconSymbol ios_icon_name="person.circle.fill" android_material_icon_name="person" size={80} color={theme.colors.primary} />
           <Text style={[styles.name, { color: theme.colors.text }]}>
-            {userName || user?.email?.split('@')[0] || "User"}
+            {userName || "User"}
           </Text>
           <Text style={[styles.email, { color: theme.dark ? '#98989D' : '#666' }]}>
-            {user?.email || "user@example.com"}
+            {"user@example.com"}
           </Text>
           {userRole && (
             <View style={[styles.rolePill, { backgroundColor: colors.accent }]}>

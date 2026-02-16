@@ -39,7 +39,7 @@ const MOCK_USERS: MockUser[] = [
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { signIn, isSupabaseEnabled, setUserRole, setUserName, setUserId } = useAuth();
+  const { setUserRole, setUserName, setUserId } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -98,44 +98,23 @@ export default function LoginScreen() {
     }
     
     setIsLoading(true);
-    
-    if (isSupabaseEnabled) {
-      // Use Supabase authentication
-      const { error } = await signIn(email, password);
-      
-      setIsLoading(false);
-      
-      if (error) {
-        console.error('Supabase login error:', error);
+
+    setTimeout(async () => {
+      const user = MOCK_USERS.find(
+        u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+      );
+
+      if (user) {
+        await handleMockLogin(user);
+      } else {
+        setIsLoading(false);
         Alert.alert(
           'Login Failed',
-          error.message || 'Invalid email or password. Please try again.',
+          'Invalid email or password. Please try again.',
           [{ text: 'OK' }]
         );
-      } else {
-        console.log('Supabase login successful');
-        router.replace('/(tabs)/(home)');
       }
-    } else {
-      // Use mock authentication for demo
-      setTimeout(async () => {
-        const user = MOCK_USERS.find(
-          u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-        );
-        
-        if (user) {
-          await handleMockLogin(user);
-        } else {
-          console.log('Mock login failed: Invalid credentials');
-          setIsLoading(false);
-          Alert.alert(
-            'Login Failed',
-            'Invalid email or password. Please try again.',
-            [{ text: 'OK' }]
-          );
-        }
-      }, 1000);
-    }
+    }, 1000);
   };
 
   const handleForgotPassword = () => {
@@ -183,20 +162,13 @@ export default function LoginScreen() {
             />
             <Text style={styles.logoText}>Vessel & Co.</Text>
             <Text style={styles.logoSubtext}>Yacht Management Platform</Text>
-            {!isSupabaseEnabled && (
-              <View style={styles.demoModeBadge}>
-                <Text style={styles.demoModeText}>Demo Mode</Text>
-              </View>
-            )}
           </View>
         </LinearGradient>
 
         <View style={styles.formContainer}>
           <Text style={styles.welcomeText}>Welcome Back</Text>
           <Text style={styles.welcomeSubtext}>
-            {isSupabaseEnabled 
-              ? 'Sign in with your Supabase account' 
-              : 'Sign in to access your dashboard'}
+            Sign in to access your dashboard
           </Text>
 
           <View style={styles.inputContainer}>
@@ -296,77 +268,73 @@ export default function LoginScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
-          {!isSupabaseEnabled && (
-            <React.Fragment>
-              <View style={styles.dividerContainer}>
-                <View style={styles.divider} />
-                <Text style={styles.dividerText}>Quick Login (Demo)</Text>
-                <View style={styles.divider} />
-              </View>
+          <View style={styles.dividerContainer}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>Quick Login</Text>
+            <View style={styles.divider} />
+          </View>
 
-              <View style={styles.quickLoginContainer}>
-                <TouchableOpacity
-                  style={styles.quickLoginButton}
-                  onPress={() => handleQuickLogin('owner')}
-                  disabled={isLoading}
-                >
-                  <View style={[styles.quickLoginIcon, { backgroundColor: colors.gold + '20' }]}>
-                    <IconSymbol
-                      ios_icon_name="crown.fill"
-                      android_material_icon_name="workspace_premium"
-                      size={24}
-                      color={colors.gold}
-                    />
-                  </View>
-                  <Text style={styles.quickLoginText}>Owner</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.quickLoginButton}
-                  onPress={() => handleQuickLogin('manager')}
-                  disabled={isLoading}
-                >
-                  <View style={[styles.quickLoginIcon, { backgroundColor: colors.accent + '20' }]}>
-                    <IconSymbol
-                      ios_icon_name="chart.bar.fill"
-                      android_material_icon_name="dashboard"
-                      size={24}
-                      color={colors.accent}
-                    />
-                  </View>
-                  <Text style={styles.quickLoginText}>Manager</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.quickLoginButton}
-                  onPress={() => handleQuickLogin('crew')}
-                  disabled={isLoading}
-                >
-                  <View style={[styles.quickLoginIcon, { backgroundColor: colors.success + '20' }]}>
-                    <IconSymbol
-                      ios_icon_name="person.2.fill"
-                      android_material_icon_name="groups"
-                      size={24}
-                      color={colors.success}
-                    />
-                  </View>
-                  <Text style={styles.quickLoginText}>Crew</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.demoInfo}>
+          <View style={styles.quickLoginContainer}>
+            <TouchableOpacity
+              style={styles.quickLoginButton}
+              onPress={() => handleQuickLogin('owner')}
+              disabled={isLoading}
+            >
+              <View style={[styles.quickLoginIcon, { backgroundColor: colors.gold + '20' }]}>
                 <IconSymbol
-                  ios_icon_name="info.circle.fill"
-                  android_material_icon_name="info"
-                  size={16}
-                  color={colors.textSecondary}
+                  ios_icon_name="crown.fill"
+                  android_material_icon_name="workspace_premium"
+                  size={24}
+                  color={colors.gold}
                 />
-                <Text style={styles.demoInfoText}>
-                  Tap a role above to instantly log in as that user
-                </Text>
               </View>
-            </React.Fragment>
-          )}
+              <Text style={styles.quickLoginText}>Owner</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickLoginButton}
+              onPress={() => handleQuickLogin('manager')}
+              disabled={isLoading}
+            >
+              <View style={[styles.quickLoginIcon, { backgroundColor: colors.accent + '20' }]}>
+                <IconSymbol
+                  ios_icon_name="chart.bar.fill"
+                  android_material_icon_name="dashboard"
+                  size={24}
+                  color={colors.accent}
+                />
+              </View>
+              <Text style={styles.quickLoginText}>Manager</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickLoginButton}
+              onPress={() => handleQuickLogin('crew')}
+              disabled={isLoading}
+            >
+              <View style={[styles.quickLoginIcon, { backgroundColor: colors.success + '20' }]}>
+                <IconSymbol
+                  ios_icon_name="person.2.fill"
+                  android_material_icon_name="groups"
+                  size={24}
+                  color={colors.success}
+                />
+              </View>
+              <Text style={styles.quickLoginText}>Crew</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.demoInfo}>
+            <IconSymbol
+              ios_icon_name="info.circle.fill"
+              android_material_icon_name="info"
+              size={16}
+              color={colors.textSecondary}
+            />
+            <Text style={styles.demoInfoText}>
+              Tap a role above to instantly log in as that user
+            </Text>
+          </View>
 
           <View style={styles.signupContainer}>
             <Text style={styles.signupText}>Don&apos;t have an account? </Text>
@@ -437,20 +405,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginTop: 4,
     letterSpacing: 0.5,
-  },
-  demoModeBadge: {
-    marginTop: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: colors.warning + '30',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.warning,
-  },
-  demoModeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.warning,
   },
   formContainer: {
     paddingHorizontal: 24,
