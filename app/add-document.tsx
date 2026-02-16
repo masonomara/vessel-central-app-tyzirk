@@ -425,7 +425,7 @@ export default function AddDocumentScreen() {
             <View style={styles.importantToggleLeft}>
               <IconSymbol
                 ios_icon_name={isImportant ? 'star.fill' : 'star'}
-                android_material_icon_name={isImportant ? 'star' : 'star_border'}
+                android_material_icon_name={isImportant ? 'star' : 'star-border'}
                 size={24}
                 color={isImportant ? colors.gold : colors.textSecondary}
               />

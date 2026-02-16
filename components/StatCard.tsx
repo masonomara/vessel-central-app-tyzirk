@@ -76,9 +76,9 @@ export const StatCard = memo(function StatCard({
               }
               android_material_icon_name={
                 trend === "up"
-                  ? "trending_up"
+                  ? "trending-up"
                   : trend === "down"
-                    ? "trending_down"
+                    ? "trending-down"
                     : "remove"
               }
               size={12}

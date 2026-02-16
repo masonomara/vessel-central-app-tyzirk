@@ -223,7 +223,7 @@ export default function ManagerLoginScreen() {
               >
                 <IconSymbol
                   ios_icon_name={showPassword ? 'eye.slash.fill' : 'eye.fill'}
-                  android_material_icon_name={showPassword ? 'visibility_off' : 'visibility'}
+                  android_material_icon_name={showPassword ? 'visibility-off' : 'visibility'}
                   size={20}
                   color={colors.textSecondary}
                 />

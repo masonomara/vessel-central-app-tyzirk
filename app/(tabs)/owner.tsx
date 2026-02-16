@@ -197,7 +197,9 @@ export default function OwnerDashboard() {
         options={{
           title: "Dashboard",
           headerRight: () => (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+            >
               <TouchableOpacity
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -227,7 +229,7 @@ export default function OwnerDashboard() {
           <View style={styles.roleTag}>
             <IconSymbol
               ios_icon_name="crown.fill"
-              android_material_icon_name="workspace-premium"
+              android_material_icon_name="workspace_premium"
               size={16}
               color={colors.gold}
             />
@@ -748,7 +750,6 @@ const styles = StyleSheet.create({
   },
   maintenanceCard: {
     padding: 16,
-
   },
   maintenanceHeader: {
     flexDirection: "row",
@@ -818,7 +819,6 @@ const styles = StyleSheet.create({
   approvalCard: {
     padding: 16,
     marginBottom: 12,
-
   },
   approvalHeader: {
     flexDirection: "row",

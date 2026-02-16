@@ -62,13 +62,13 @@ export default function DocumentsScreen() {
       case "registration":
         return "badge";
       case "safety":
-        return "health_and_safety";
+        return "health-and-safety";
       case "warranty":
         return "verified";
       case "invoice":
         return "receipt";
       case "receipt":
-        return "receipt_long";
+        return "receipt-long";
       default:
         return "description";
     }
