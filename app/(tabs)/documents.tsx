@@ -259,7 +259,7 @@ export default function DocumentsScreen() {
                   <View style={styles.metaItem}>
                     <IconSymbol
                       ios_icon_name="doc.text"
-                      android_material_icon_name="insert_drive_file"
+                      android_material_icon_name="insert-drive-file"
                       size={16}
                       color={colors.textSecondary}
                     />
@@ -339,7 +339,7 @@ export default function DocumentsScreen() {
                 <Text style={styles.loadMoreText}>Load More</Text>
                 <IconSymbol
                   ios_icon_name="chevron.down"
-                  android_material_icon_name="expand_more"
+                  android_material_icon_name="expand-more"
                   size={20}
                   color={colors.accent}
                 />

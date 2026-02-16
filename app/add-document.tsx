@@ -222,7 +222,7 @@ export default function AddDocumentScreen() {
           <TouchableOpacity style={styles.documentPickerButton} onPress={handlePickDocument}>
             <IconSymbol
               ios_icon_name="doc.fill"
-              android_material_icon_name="insert_drive_file"
+              android_material_icon_name="insert-drive-file"
               size={32}
               color={selectedDocument ? colors.success : colors.accent}
             />
@@ -238,7 +238,7 @@ export default function AddDocumentScreen() {
             </View>
             <IconSymbol
               ios_icon_name="chevron.right"
-              android_material_icon_name="chevron_right"
+              android_material_icon_name="chevron-right"
               size={24}
               color={colors.textSecondary}
             />
@@ -409,7 +409,7 @@ export default function AddDocumentScreen() {
             >
               <IconSymbol
                 ios_icon_name="plus.circle.fill"
-                android_material_icon_name="add_circle"
+                android_material_icon_name="add-circle"
                 size={24}
                 color={customTag.trim() ? colors.accent : colors.textSecondary}
               />

@@ -298,7 +298,7 @@ export default function ManagerDashboard() {
                     >
                       <IconSymbol 
                         ios_icon_name="checkmark.circle.fill" 
-                        android_material_icon_name="check_circle" 
+                        android_material_icon_name="check-circle" 
                         size={20} 
                         color={colors.success} 
                       />
@@ -329,7 +329,7 @@ export default function ManagerDashboard() {
                   </Text>
                   <IconSymbol 
                     ios_icon_name="chevron.right" 
-                    android_material_icon_name="chevron_right" 
+                    android_material_icon_name="chevron-right" 
                     size={20} 
                     color={colors.accent} 
                   />
@@ -396,7 +396,7 @@ export default function ManagerDashboard() {
           >
             <IconSymbol 
               ios_icon_name="person.2.badge.gearshape.fill" 
-              android_material_icon_name="manage_accounts" 
+              android_material_icon_name="manage-accounts" 
               size={24} 
               color={colors.text} 
             />
@@ -409,7 +409,7 @@ export default function ManagerDashboard() {
           >
             <IconSymbol 
               ios_icon_name="calendar.badge.plus" 
-              android_material_icon_name="event_available" 
+              android_material_icon_name="event-available" 
               size={24} 
               color={colors.text} 
             />

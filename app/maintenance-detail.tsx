@@ -177,7 +177,7 @@ export default function MaintenanceDetailScreen() {
               <View style={styles.detailItem}>
                 <IconSymbol 
                   ios_icon_name="dollarsign.circle" 
-                  android_material_icon_name="attach_money" 
+                  android_material_icon_name="attach-money" 
                   size={20} 
                   color={colors.success} 
                 />
@@ -220,7 +220,7 @@ export default function MaintenanceDetailScreen() {
                 <View style={styles.historyHeader}>
                   <IconSymbol 
                     ios_icon_name="checkmark.circle.fill" 
-                    android_material_icon_name="check_circle" 
+                    android_material_icon_name="check-circle" 
                     size={24} 
                     color={colors.success} 
                   />
@@ -288,7 +288,7 @@ export default function MaintenanceDetailScreen() {
             <TouchableOpacity style={styles.completeButton} onPress={handleComplete}>
               <IconSymbol 
                 ios_icon_name="checkmark.circle.fill" 
-                android_material_icon_name="check_circle" 
+                android_material_icon_name="check-circle" 
                 size={24} 
                 color={colors.text} 
               />

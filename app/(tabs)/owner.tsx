@@ -227,7 +227,7 @@ export default function OwnerDashboard() {
           <View style={styles.roleTag}>
             <IconSymbol
               ios_icon_name="crown.fill"
-              android_material_icon_name="workspace_premium"
+              android_material_icon_name="workspace-premium"
               size={16}
               color={colors.gold}
             />

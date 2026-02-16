@@ -256,7 +256,7 @@ export default function AssignBoatsScreen() {
                     >
                       <IconSymbol
                         ios_icon_name="plus.circle.fill"
-                        android_material_icon_name="add_circle"
+                        android_material_icon_name="add-circle"
                         size={20}
                         color={colors.accent}
                       />
@@ -296,7 +296,7 @@ export default function AssignBoatsScreen() {
                     >
                       <IconSymbol
                         ios_icon_name="plus.circle.fill"
-                        android_material_icon_name="add_circle"
+                        android_material_icon_name="add-circle"
                         size={20}
                         color={colors.accent}
                       />
@@ -389,7 +389,7 @@ export default function AssignBoatsScreen() {
                     {userId === user.id && (
                       <IconSymbol
                         ios_icon_name="checkmark.circle.fill"
-                        android_material_icon_name="check_circle"
+                        android_material_icon_name="check-circle"
                         size={24}
                         color={colors.success}
                       />

@@ -141,7 +141,7 @@ export default function ManagerLoginScreen() {
           <TouchableOpacity style={styles.backButton} onPress={handleBackToLogin}>
             <IconSymbol
               ios_icon_name="chevron.left"
-              android_material_icon_name="arrow_back"
+              android_material_icon_name="arrow-back"
               size={24}
               color={colors.text}
             />
@@ -251,7 +251,7 @@ export default function ManagerLoginScreen() {
                   <Text style={styles.loginButtonText}>Sign In as Manager</Text>
                   <IconSymbol
                     ios_icon_name="arrow.right"
-                    android_material_icon_name="arrow_forward"
+                    android_material_icon_name="arrow-forward"
                     size={20}
                     color={colors.text}
                   />
@@ -285,7 +285,7 @@ export default function ManagerLoginScreen() {
             </View>
             <IconSymbol
               ios_icon_name="arrow.right"
-              android_material_icon_name="arrow_forward"
+              android_material_icon_name="arrow-forward"
               size={20}
               color={colors.textSecondary}
             />

@@ -137,7 +137,7 @@ export default function SignUpScreen() {
           <TouchableOpacity style={styles.backButton} onPress={handleBackToLogin}>
             <IconSymbol
               ios_icon_name="chevron.left"
-              android_material_icon_name="arrow_back"
+              android_material_icon_name="arrow-back"
               size={24}
               color={colors.text}
             />
@@ -146,7 +146,7 @@ export default function SignUpScreen() {
           <View style={styles.logoContainer}>
             <IconSymbol
               ios_icon_name="person.badge.plus.fill"
-              android_material_icon_name="person_add"
+              android_material_icon_name="person-add"
               size={64}
               color={colors.gold}
             />
@@ -234,7 +234,7 @@ export default function SignUpScreen() {
               >
                 <IconSymbol
                   ios_icon_name="crown.fill"
-                  android_material_icon_name="workspace_premium"
+                  android_material_icon_name="workspace-premium"
                   size={24}
                   color={role === 'owner' ? colors.text : colors.textSecondary}
                 />
@@ -279,7 +279,7 @@ export default function SignUpScreen() {
             <View style={[styles.inputWrapper, managerCodeError ? styles.inputError : null]}>
               <IconSymbol
                 ios_icon_name="key.fill"
-                android_material_icon_name="vpn_key"
+                android_material_icon_name="vpn-key"
                 size={20}
                 color={managerCodeError ? colors.danger : colors.textSecondary}
               />
@@ -398,7 +398,7 @@ export default function SignUpScreen() {
                   <Text style={styles.signUpButtonText}>Create Account</Text>
                   <IconSymbol
                     ios_icon_name="arrow.right"
-                    android_material_icon_name="arrow_forward"
+                    android_material_icon_name="arrow-forward"
                     size={20}
                     color={colors.text}
                   />
@@ -433,7 +433,7 @@ export default function SignUpScreen() {
             <Text style={styles.managerLoginText}>Manager Login</Text>
             <IconSymbol
               ios_icon_name="arrow.right"
-              android_material_icon_name="arrow_forward"
+              android_material_icon_name="arrow-forward"
               size={16}
               color={colors.accent}
             />

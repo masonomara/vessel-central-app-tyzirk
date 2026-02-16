@@ -139,14 +139,14 @@ export default function CrewDashboard() {
                   {task.status === 'completed' ? (
                     <IconSymbol 
                       ios_icon_name="checkmark.circle.fill" 
-                      android_material_icon_name="check_circle" 
+                      android_material_icon_name="check-circle" 
                       size={28} 
                       color={colors.success} 
                     />
                   ) : (
                     <IconSymbol 
                       ios_icon_name="circle" 
-                      android_material_icon_name="radio_button_unchecked" 
+                      android_material_icon_name="radio-button-unchecked" 
                       size={28} 
                       color={colors.textSecondary} 
                     />
@@ -197,7 +197,7 @@ export default function CrewDashboard() {
                 <View style={styles.supplyHeader}>
                   <IconSymbol 
                     ios_icon_name="shippingbox.fill" 
-                    android_material_icon_name="inventory_2" 
+                    android_material_icon_name="inventory-2" 
                     size={24} 
                     color={colors.accent} 
                   />
@@ -236,7 +236,7 @@ export default function CrewDashboard() {
           >
             <IconSymbol 
               ios_icon_name="exclamationmark.triangle.fill" 
-              android_material_icon_name="report_problem" 
+              android_material_icon_name="report-problem" 
               size={24} 
               color={colors.text} 
             />
@@ -262,7 +262,7 @@ export default function CrewDashboard() {
           >
             <IconSymbol 
               ios_icon_name="plus.circle.fill" 
-              android_material_icon_name="add_circle" 
+              android_material_icon_name="add-circle" 
               size={24} 
               color={colors.text} 
             />

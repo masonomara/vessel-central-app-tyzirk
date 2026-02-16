@@ -68,7 +68,7 @@ const IssueItem = React.memo(
           <View style={styles.issueTitleRow}>
             <IconSymbol
               ios_icon_name="exclamationmark.triangle.fill"
-              android_material_icon_name="report_problem"
+              android_material_icon_name="report-problem"
               size={24}
               color={getPriorityColor(issue.priority)}
             />
@@ -108,7 +108,7 @@ const IssueItem = React.memo(
           <View style={styles.metaItem}>
             <IconSymbol
               ios_icon_name="location.fill"
-              android_material_icon_name="location_on"
+              android_material_icon_name="location-on"
               size={16}
               color={colors.textSecondary}
             />
@@ -144,7 +144,7 @@ const IssueItem = React.memo(
           <View style={styles.attachmentsIndicator}>
             <IconSymbol
               ios_icon_name="paperclip"
-              android_material_icon_name="attach_file"
+              android_material_icon_name="attach-file"
               size={16}
               color={colors.accent}
             />
@@ -324,7 +324,7 @@ export default function IssuesScreen() {
           <Text style={styles.loadMoreText}>Load More</Text>
           <IconSymbol
             ios_icon_name="chevron.down"
-            android_material_icon_name="expand_more"
+            android_material_icon_name="expand-more"
             size={20}
             color={colors.danger}
           />
@@ -347,7 +347,7 @@ export default function IssuesScreen() {
       <View style={styles.emptyState}>
         <IconSymbol
           ios_icon_name="checkmark.circle"
-          android_material_icon_name="check_circle"
+          android_material_icon_name="check-circle"
           size={64}
           color={colors.success}
         />

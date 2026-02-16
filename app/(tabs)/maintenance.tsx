@@ -316,7 +316,7 @@ export default function MaintenanceScreen() {
           >
             <IconSymbol
               ios_icon_name="line.3.horizontal.decrease.circle"
-              android_material_icon_name="filter_list"
+              android_material_icon_name="filter-list"
               size={24}
               color={
                 activeFilterCount > 0 ? colors.accent : colors.textSecondary
@@ -376,7 +376,7 @@ export default function MaintenanceScreen() {
           <Text style={styles.loadMoreText}>Load More</Text>
           <IconSymbol
             ios_icon_name="chevron.down"
-            android_material_icon_name="expand_more"
+            android_material_icon_name="expand-more"
             size={20}
             color={colors.accent}
           />

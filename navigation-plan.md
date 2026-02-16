@@ -810,14 +810,15 @@ Work on Phase 2 and 3 together since they're tightly coupled. Phase 4 can be don
 
 ### Phase 6 — Dependency Cleanup
 
-- [ ] Delete `components/FloatingTabBar.tsx` (if not already done in Phase 2)
-- [ ] Grep codebase for any remaining imports of `FloatingTabBar` — remove them
-- [ ] Grep codebase for any remaining imports of `TabBarItem` type — remove them
-- [ ] Check if `expo-blur` is imported anywhere other than FloatingTabBar — if not, run `npx expo install --fix` or remove from `package.json`
-- [ ] Verify `react-native-reanimated` is still used elsewhere (it likely is) — keep it
+- [x] Delete `components/FloatingTabBar.tsx` (already done in Phase 2)
+- [x] Grep codebase for any remaining imports of `FloatingTabBar` — none found in code (only docs)
+- [x] Grep codebase for any remaining imports of `TabBarItem` type — none found in code (only plan doc)
+- [x] Check if `expo-blur` is imported anywhere other than FloatingTabBar — not used, removed from dependencies
+- [x] Verify `react-native-reanimated` is still used elsewhere — yes, in `components/PressableCard.tsx` — kept
 
 ### Phase 7 — Testing
 
+- [x] Run TypeScript typecheck — 109 pre-existing errors, 0 new errors from navigation overhaul
 - [ ] Test owner login → lands on owner Dashboard tab with correct 4 tabs visible
 - [ ] Test manager login → lands on manager Dashboard tab with correct 5 tabs visible
 - [ ] Test crew login → lands on crew Tasks tab with correct 4 tabs visible

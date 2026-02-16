@@ -215,7 +215,7 @@ export default function CalendarScreen() {
             <View style={styles.eventDetailRow}>
               <IconSymbol
                 ios_icon_name="sailboat.fill"
-                android_material_icon_name="directions_boat"
+                android_material_icon_name="directions-boat"
                 size={14}
                 color={colors.textSecondary}
               />
@@ -226,7 +226,7 @@ export default function CalendarScreen() {
               <View style={styles.eventDetailRow}>
                 <IconSymbol
                   ios_icon_name="location.fill"
-                  android_material_icon_name="location_on"
+                  android_material_icon_name="location-on"
                   size={14}
                   color={colors.textSecondary}
                 />
@@ -274,7 +274,7 @@ export default function CalendarScreen() {
             >
               <IconSymbol
                 ios_icon_name="chevron.left"
-                android_material_icon_name="chevron_left"
+                android_material_icon_name="chevron-left"
                 size={24}
                 color={colors.text}
               />
@@ -292,7 +292,7 @@ export default function CalendarScreen() {
             >
               <IconSymbol
                 ios_icon_name="chevron.right"
-                android_material_icon_name="chevron_right"
+                android_material_icon_name="chevron-right"
                 size={24}
                 color={colors.text}
               />

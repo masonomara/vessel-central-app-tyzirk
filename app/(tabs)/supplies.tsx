@@ -69,7 +69,7 @@ const SupplyRequestItem = React.memo(
           <View style={styles.requestTitleRow}>
             <IconSymbol
               ios_icon_name="shippingbox.fill"
-              android_material_icon_name="inventory_2"
+              android_material_icon_name="inventory-2"
               size={24}
               color={colors.accent}
             />
@@ -142,7 +142,7 @@ const SupplyRequestItem = React.memo(
               >
                 <IconSymbol
                   ios_icon_name="checkmark.circle.fill"
-                  android_material_icon_name="check_circle"
+                  android_material_icon_name="check-circle"
                   size={20}
                   color={colors.success}
                 />
@@ -294,7 +294,7 @@ export default function SuppliesScreen() {
       <View style={styles.emptyState}>
         <IconSymbol
           ios_icon_name="shippingbox"
-          android_material_icon_name="inventory_2"
+          android_material_icon_name="inventory-2"
           size={64}
           color={colors.textSecondary}
         />

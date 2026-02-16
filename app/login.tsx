@@ -254,7 +254,7 @@ export default function LoginScreen() {
                   <Text style={styles.loginButtonText}>Sign In</Text>
                   <IconSymbol
                     ios_icon_name="arrow.right"
-                    android_material_icon_name="arrow_forward"
+                    android_material_icon_name="arrow-forward"
                     size={20}
                     color={colors.text}
                   />
@@ -278,7 +278,7 @@ export default function LoginScreen() {
               <View style={[styles.quickLoginIcon, { backgroundColor: colors.gold + '20' }]}>
                 <IconSymbol
                   ios_icon_name="crown.fill"
-                  android_material_icon_name="workspace_premium"
+                  android_material_icon_name="workspace-premium"
                   size={24}
                   color={colors.gold}
                 />
@@ -357,7 +357,7 @@ export default function LoginScreen() {
             <Text style={styles.managerLoginText}>Manager Login</Text>
             <IconSymbol
               ios_icon_name="arrow.right"
-              android_material_icon_name="arrow_forward"
+              android_material_icon_name="arrow-forward"
               size={16}
               color={colors.accent}
             />

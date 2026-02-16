@@ -475,7 +475,7 @@ export default function AddPartsRequestScreen() {
             <TouchableOpacity style={styles.attachButton} onPress={handlePickImage}>
               <IconSymbol
                 ios_icon_name="photo.fill"
-                android_material_icon_name="photo_library"
+                android_material_icon_name="photo-library"
                 size={24}
                 color={colors.text}
               />

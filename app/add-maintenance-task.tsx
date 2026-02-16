@@ -207,7 +207,7 @@ export default function AddMaintenanceTaskScreen() {
             </Text>
             <IconSymbol
               ios_icon_name="chevron.down"
-              android_material_icon_name="expand_more"
+              android_material_icon_name="expand-more"
               size={20}
               color={colors.textSecondary}
             />
@@ -252,7 +252,7 @@ export default function AddMaintenanceTaskScreen() {
             </View>
             <IconSymbol
               ios_icon_name="chevron.down"
-              android_material_icon_name="expand_more"
+              android_material_icon_name="expand-more"
               size={20}
               color={colors.textSecondary}
             />
@@ -311,7 +311,7 @@ export default function AddMaintenanceTaskScreen() {
             </View>
             <IconSymbol
               ios_icon_name="chevron.down"
-              android_material_icon_name="expand_more"
+              android_material_icon_name="expand-more"
               size={20}
               color={colors.textSecondary}
             />
@@ -358,7 +358,7 @@ export default function AddMaintenanceTaskScreen() {
                 <Text style={styles.pickerText}>{frequency.toUpperCase()}</Text>
                 <IconSymbol
                   ios_icon_name="chevron.down"
-                  android_material_icon_name="expand_more"
+                  android_material_icon_name="expand-more"
                   size={20}
                   color={colors.textSecondary}
                 />

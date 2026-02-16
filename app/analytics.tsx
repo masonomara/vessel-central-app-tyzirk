@@ -190,7 +190,7 @@ export default function AnalyticsScreen() {
           <View style={styles.statCard}>
             <IconSymbol 
               ios_icon_name="chart.line.uptrend.xyaxis" 
-              android_material_icon_name="trending_up" 
+              android_material_icon_name="trending-up" 
               size={32} 
               color={colors.accent} 
             />
@@ -297,7 +297,7 @@ export default function AnalyticsScreen() {
             <View style={styles.metricHeader}>
               <IconSymbol 
                 ios_icon_name="checkmark.circle.fill" 
-                android_material_icon_name="check_circle" 
+                android_material_icon_name="check-circle" 
                 size={24} 
                 color={colors.success} 
               />
@@ -331,7 +331,7 @@ export default function AnalyticsScreen() {
             <View style={styles.metricHeader}>
               <IconSymbol 
                 ios_icon_name="shippingbox.fill" 
-                android_material_icon_name="inventory_2" 
+                android_material_icon_name="inventory-2" 
                 size={24} 
                 color={colors.accent} 
               />

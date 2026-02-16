@@ -470,7 +470,7 @@ export default function AddIssueScreen() {
             >
               <IconSymbol
                 ios_icon_name="camera.fill"
-                android_material_icon_name="photo_camera"
+                android_material_icon_name="photo-camera"
                 size={24}
                 color={isOptimizing ? colors.textSecondary : colors.accent}
               />
@@ -489,7 +489,7 @@ export default function AddIssueScreen() {
             >
               <IconSymbol
                 ios_icon_name="photo.fill"
-                android_material_icon_name="photo_library"
+                android_material_icon_name="photo-library"
                 size={24}
                 color={isOptimizing ? colors.textSecondary : colors.accent}
               />
@@ -512,7 +512,7 @@ export default function AddIssueScreen() {
                     <View style={styles.videoPlaceholder}>
                       <IconSymbol
                         ios_icon_name="play.circle.fill"
-                        android_material_icon_name="play_circle"
+                        android_material_icon_name="play-circle"
                         size={32}
                         color={colors.text}
                       />
