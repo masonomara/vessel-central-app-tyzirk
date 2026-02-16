@@ -98,7 +98,7 @@ export default function CrewDashboard() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginBottom: 16,
   },
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     fontSize: 32,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.accent,
     marginBottom: 4,
   },
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   badgeText: {
     color: colors.text,
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   taskCard: {
     flexDirection: 'row',
@@ -511,7 +511,7 @@ const styles = StyleSheet.create({
   },
   priorityText: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   supplyCard: {

@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   deleteButton: {
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   eventTitle: {
     flex: 1,
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginRight: 12,
   },
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   detailRow: {

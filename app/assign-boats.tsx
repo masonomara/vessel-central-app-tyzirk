@@ -176,7 +176,7 @@ export default function AssignBoatsScreen() {
           headerTintColor: colors.text,
         }}
       />
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.searchContainer}>
           <IconSymbol
             ios_icon_name="magnifyingglass"
@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginBottom: 8,
   },
@@ -511,7 +511,7 @@ const styles = StyleSheet.create({
   },
   vesselName: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginBottom: 4,
   },
@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   statusTextActive: {
     color: colors.success,
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   vesselPreview: {
@@ -657,7 +657,7 @@ const styles = StyleSheet.create({
   },
   userAvatarText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.accent,
   },
   userItemName: {

@@ -113,7 +113,7 @@ export default function DocumentsScreen() {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      style={[styles.container, { backgroundColor: colors.background }]}
     >
       <View style={styles.header}>
         <Text style={styles.title}>Documents</Text>

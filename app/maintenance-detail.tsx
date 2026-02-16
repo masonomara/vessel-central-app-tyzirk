@@ -22,7 +22,7 @@ export default function MaintenanceDetailScreen() {
 
   if (!task) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <Text style={styles.errorText}>Task not found</Text>
       </View>
     );
@@ -84,7 +84,7 @@ export default function MaintenanceDetailScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <IconSymbol 
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   scrollContent: {
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginBottom: 12,
   },
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
   },
   priorityText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   statusBadge: {
     paddingHorizontal: 12,
@@ -367,14 +367,14 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginBottom: 12,
   },

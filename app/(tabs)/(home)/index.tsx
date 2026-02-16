@@ -375,7 +375,7 @@ export default function HomeScreen() {
         style={[
           styles.container,
           {
-            backgroundColor: theme.colors.background,
+            backgroundColor: colors.background,
             justifyContent: "center",
             alignItems: "center",
           },
@@ -396,7 +396,7 @@ export default function HomeScreen() {
 
   return (
     <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      style={[styles.container, { backgroundColor: colors.background }]}
     >
       {/* Header with gradient */}
       <LinearGradient

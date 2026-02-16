@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   },
   resetButtonText: {
     fontSize: 17,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     letterSpacing: 0.3,
   },
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   },
   loginLink: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.accent,
   },
 });

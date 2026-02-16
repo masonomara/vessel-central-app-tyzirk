@@ -173,7 +173,7 @@ export default function AnalyticsScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <IconSymbol 
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   scrollContent: {
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   section: {
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginBottom: 16,
   },
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
   },
   metricValue: {
     fontSize: 32,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginBottom: 4,
   },

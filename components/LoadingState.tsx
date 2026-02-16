@@ -1,14 +1,16 @@
-
-import React from 'react';
-import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
-import { colors } from '@/styles/commonStyles';
+import React from "react";
+import { View, ActivityIndicator, Text, StyleSheet } from "react-native";
+import { colors } from "@/styles/commonStyles";
 
 interface LoadingStateProps {
   message?: string;
-  size?: 'small' | 'large';
+  size?: "small" | "large";
 }
 
-export default function LoadingState({ message = 'Loading...', size = 'large' }: LoadingStateProps) {
+export default function LoadingState({
+  message = "Loading...",
+  size = "large",
+}: LoadingStateProps) {
   return (
     <View style={styles.container}>
       <ActivityIndicator size={size} color={colors.primary} />
@@ -20,8 +22,8 @@ export default function LoadingState({ message = 'Loading...', size = 'large' }:
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: colors.background,
     padding: 20,
   },
@@ -29,6 +31,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     color: colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   clearText: {
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
   },
   resultBadgeText: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.accent,
   },
   emptyState: {
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginTop: 16,
     marginBottom: 8,

@@ -7,7 +7,7 @@ export default function Modal() {
   const theme = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.title, { color: theme.colors.text }]}>Standard Modal</Text>
       <Text style={[styles.text, { color: theme.colors.text }]}>This is a modal presentation.</Text>
 

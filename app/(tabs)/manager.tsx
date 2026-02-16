@@ -139,7 +139,7 @@ export default function ManagerDashboard() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <GlobalSearch visible={showSearch} onClose={() => setShowSearch(false)} />
       
       <ScrollView 
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginBottom: 16,
   },
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
   badgeText: {
     color: colors.text,
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   vesselCard: {
     backgroundColor: colors.card,
@@ -588,7 +588,7 @@ const styles = StyleSheet.create({
   },
   vesselName: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginBottom: 4,
   },
@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   statusTextActive: {
     color: colors.success,
@@ -657,7 +657,7 @@ const styles = StyleSheet.create({
   },
   approvalAmount: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   approvalTitle: {
@@ -775,7 +775,7 @@ const styles = StyleSheet.create({
   },
   priorityText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   dueDate: {

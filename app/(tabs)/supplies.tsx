@@ -311,7 +311,7 @@ export default function SuppliesScreen() {
 
   return (
     <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      style={[styles.container, { backgroundColor: colors.background }]}
     >
       <View style={styles.header}>
         <Text style={styles.title}>Supplies</Text>

@@ -363,7 +363,7 @@ export default function IssuesScreen() {
 
   return (
     <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      style={[styles.container, { backgroundColor: colors.background }]}
     >
       <View style={styles.header}>
         <Text style={styles.title}>Issues</Text>

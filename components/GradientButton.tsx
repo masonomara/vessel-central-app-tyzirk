@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   text: {
     color: colors.text,
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: 0.5,
   },
   disabled: {

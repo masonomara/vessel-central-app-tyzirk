@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
   },
   monthText: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   todayButton: {
@@ -485,11 +485,11 @@ const styles = StyleSheet.create({
   },
   todayText: {
     color: colors.accent,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   selectedDayText: {
     color: colors.text,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   eventIndicatorContainer: {
     flexDirection: 'row',
@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
   },
   eventsSectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   eventsCount: {

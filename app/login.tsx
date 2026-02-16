@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginBottom: 8,
     letterSpacing: -0.3,
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     fontSize: 17,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     letterSpacing: 0.3,
   },
@@ -563,7 +563,7 @@ const styles = StyleSheet.create({
   },
   signupLink: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.accent,
   },
   managerLoginButton: {
