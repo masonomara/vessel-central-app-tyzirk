@@ -130,37 +130,6 @@ export default function ProfileScreen() {
               color={theme.dark ? '#98989D' : '#666'}
             />
           </TouchableOpacity>
-
-          <View style={[styles.settingDivider, { backgroundColor: theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]} />
-
-          <TouchableOpacity
-            style={styles.settingItem}
-            onPress={() => router.push('/cache-settings')}
-            activeOpacity={0.7}
-          >
-            <View style={styles.settingItemLeft}>
-              <IconSymbol
-                ios_icon_name="internaldrive.fill"
-                android_material_icon_name="storage"
-                size={24}
-                color={colors.primary}
-              />
-              <View style={styles.settingItemText}>
-                <Text style={[styles.settingItemTitle, { color: theme.colors.text }]}>
-                  Cache & Storage
-                </Text>
-                <Text style={[styles.settingItemDescription, { color: theme.dark ? '#98989D' : '#666' }]}>
-                  Manage app data and cache
-                </Text>
-              </View>
-            </View>
-            <IconSymbol
-              ios_icon_name="chevron.right"
-              android_material_icon_name="chevron-right"
-              size={20}
-              color={theme.dark ? '#98989D' : '#666'}
-            />
-          </TouchableOpacity>
         </GlassView>
 
         <TouchableOpacity 
@@ -268,10 +237,6 @@ const styles = StyleSheet.create({
   },
   settingItemDescription: {
     fontSize: 13,
-  },
-  settingDivider: {
-    height: 1,
-    marginHorizontal: 16,
   },
   logoutButton: {
     flexDirection: 'row',

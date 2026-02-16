@@ -1,54 +1,51 @@
-
-import { Stack } from 'expo-router';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { DataProvider } from '@/contexts/DataContext';
-import { useNotifications } from '@/hooks/useNotifications';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { OfflineQueueStatus } from '@/components/OfflineQueueStatus';
-import { View, StyleSheet } from 'react-native';
+import { Stack } from "expo-router";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { DataProvider } from "@/contexts/DataContext";
+import { useNotifications } from "@/hooks/useNotifications";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { View, StyleSheet } from "react-native";
 
 function RootLayoutContent() {
   useNotifications();
 
   return (
     <View style={styles.container}>
-      <OfflineQueueStatus />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="login" />
         <Stack.Screen name="signup" />
         <Stack.Screen name="forgot-password" />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen 
-          name="modal" 
+        <Stack.Screen
+          name="modal"
           options={{
-            presentation: 'modal',
+            presentation: "modal",
             headerShown: true,
-            title: 'Modal',
+            title: "Modal",
           }}
         />
-        <Stack.Screen 
-          name="formsheet" 
+        <Stack.Screen
+          name="formsheet"
           options={{
-            presentation: 'formSheet',
+            presentation: "formSheet",
             headerShown: true,
-            title: 'Form Sheet',
+            title: "Form Sheet",
           }}
         />
-        <Stack.Screen 
-          name="transparent-modal" 
+        <Stack.Screen
+          name="transparent-modal"
           options={{
-            presentation: 'transparentModal',
-            animation: 'fade',
+            presentation: "transparentModal",
+            animation: "fade",
             headerShown: false,
           }}
         />
-        <Stack.Screen 
-          name="add-maintenance-task" 
+        <Stack.Screen
+          name="add-maintenance-task"
           options={{
-            presentation: 'modal',
+            presentation: "modal",
             headerShown: false,
-            animation: 'slide_from_bottom',
+            animation: "slide_from_bottom",
           }}
         />
       </Stack>

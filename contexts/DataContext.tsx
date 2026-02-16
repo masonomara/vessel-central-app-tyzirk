@@ -1,8 +1,6 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { cacheManager, CACHE_KEYS, CACHE_EXPIRATION, cacheHelpers } from '@/utils/cacheManager';
-import { offlineManager } from '@/utils/offlineManager';
 import { realtimeManager } from '@/utils/realtimeManager';
 import {
   MaintenanceTask,
@@ -599,226 +597,105 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const loadData = useCallback(async () => {
     if (hasLoadedData.current) {
-      console.log('Data already loaded, skipping...');
       return;
     }
-    
+
     try {
-      console.log('Loading data from cache...');
-      
-      // Try to load from new cache system first
-      const cachedVessels = await cacheManager.get<Vessel[]>(CACHE_KEYS.VESSELS);
-      const cachedMaintenanceTasks = await cacheManager.get<MaintenanceTask[]>(CACHE_KEYS.MAINTENANCE_TASKS);
-      const cachedIssues = await cacheManager.get<Issue[]>(CACHE_KEYS.ISSUES);
-      const cachedSupplyRequests = await cacheManager.get<SupplyRequest[]>(CACHE_KEYS.SUPPLY_REQUESTS);
-      const cachedDocuments = await cacheManager.get<Document[]>(CACHE_KEYS.DOCUMENTS);
-      const cachedActivityLogs = await cacheManager.get<ActivityLog[]>(CACHE_KEYS.ACTIVITY_LOGS);
-      const cachedNotifications = await cacheManager.get<Notification[]>(CACHE_KEYS.NOTIFICATIONS);
-      const cachedExpenses = await cacheManager.get<Expense[]>(CACHE_KEYS.EXPENSES);
-      const cachedCalendarEvents = await cacheManager.get<CalendarEvent[]>(CACHE_KEYS.CALENDAR_EVENTS);
+      const data = await AsyncStorage.getItem(STORAGE_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
 
-      // If cache exists, use it
-      if (cachedVessels) {
-        console.log('Using cached vessels');
-        setVessels(cachedVessels);
-      }
-      
-      if (cachedMaintenanceTasks) {
-        console.log('Using cached maintenance tasks');
-        setMaintenanceTasks(cachedMaintenanceTasks.map((task: MaintenanceTask) => ({
-          ...task,
-          dueDate: new Date(task.dueDate),
-          createdAt: new Date(task.createdAt),
-          updatedAt: new Date(task.updatedAt),
-          completedDate: task.completedDate ? new Date(task.completedDate) : undefined,
-          nextDueDate: task.nextDueDate ? new Date(task.nextDueDate) : undefined,
-        })));
-      }
-      
-      if (cachedIssues) {
-        console.log('Using cached issues');
-        setIssues(cachedIssues.map((issue: Issue) => ({
-          ...issue,
-          createdAt: new Date(issue.createdAt),
-          updatedAt: new Date(issue.updatedAt),
-          resolvedAt: issue.resolvedAt ? new Date(issue.resolvedAt) : undefined,
-        })));
-      }
-      
-      if (cachedSupplyRequests) {
-        console.log('Using cached supply requests');
-        setSupplyRequests(cachedSupplyRequests.map((req: SupplyRequest) => ({
-          ...req,
-          createdAt: new Date(req.createdAt),
-          updatedAt: new Date(req.updatedAt),
-          approvedAt: req.approvedAt ? new Date(req.approvedAt) : undefined,
-          receivedAt: req.receivedAt ? new Date(req.receivedAt) : undefined,
-        })));
-      }
-      
-      if (cachedDocuments) {
-        console.log('Using cached documents');
-        setDocuments(cachedDocuments.map((doc: Document) => ({
-          ...doc,
-          uploadedAt: new Date(doc.uploadedAt),
-          expiryDate: doc.expiryDate ? new Date(doc.expiryDate) : undefined,
-        })));
-      }
-      
-      if (cachedActivityLogs) {
-        console.log('Using cached activity logs');
-        setActivityLogs(cachedActivityLogs.map((log: ActivityLog) => ({
-          ...log,
-          timestamp: new Date(log.timestamp),
-        })));
-      }
-      
-      if (cachedNotifications) {
-        console.log('Using cached notifications');
-        setNotifications(cachedNotifications.map((notif: Notification) => ({
-          ...notif,
-          createdAt: new Date(notif.createdAt),
-        })));
-      }
-      
-      if (cachedExpenses) {
-        console.log('Using cached expenses');
-        setExpenses(cachedExpenses.map((exp: Expense) => ({
-          ...exp,
-          date: new Date(exp.date),
-        })));
-      }
+        if (parsed.vessels) {
+          setVessels(parsed.vessels);
+        }
 
-      if (cachedCalendarEvents) {
-        console.log('Using cached calendar events');
-        setCalendarEvents(cachedCalendarEvents.map((event: CalendarEvent) => ({
-          ...event,
-          startDate: new Date(event.startDate),
-          endDate: new Date(event.endDate),
-          createdAt: new Date(event.createdAt),
-          updatedAt: new Date(event.updatedAt),
-        })));
-      }
+        if (parsed.maintenanceTasks) {
+          setMaintenanceTasks(parsed.maintenanceTasks.map((task: MaintenanceTask) => ({
+            ...task,
+            dueDate: new Date(task.dueDate),
+            createdAt: new Date(task.createdAt),
+            updatedAt: new Date(task.updatedAt),
+            completedDate: task.completedDate ? new Date(task.completedDate) : undefined,
+            nextDueDate: task.nextDueDate ? new Date(task.nextDueDate) : undefined,
+          })));
+        }
 
-      // If no cache exists, try legacy storage
-      if (!cachedVessels && !cachedMaintenanceTasks) {
-        console.log('No cache found, trying legacy storage...');
-        const data = await AsyncStorage.getItem(STORAGE_KEY);
-        if (data) {
-          const parsed = JSON.parse(data);
-          console.log('Data loaded from legacy storage');
-          
-          if (parsed.vessels) {
-            setVessels(parsed.vessels);
-          }
-          
-          if (parsed.maintenanceTasks) {
-            setMaintenanceTasks(parsed.maintenanceTasks.map((task: MaintenanceTask) => ({
-              ...task,
-              dueDate: new Date(task.dueDate),
-              createdAt: new Date(task.createdAt),
-              updatedAt: new Date(task.updatedAt),
-              completedDate: task.completedDate ? new Date(task.completedDate) : undefined,
-              nextDueDate: task.nextDueDate ? new Date(task.nextDueDate) : undefined,
-            })));
-          }
-          
-          if (parsed.issues) {
-            setIssues(parsed.issues.map((issue: Issue) => ({
-              ...issue,
-              createdAt: new Date(issue.createdAt),
-              updatedAt: new Date(issue.updatedAt),
-              resolvedAt: issue.resolvedAt ? new Date(issue.resolvedAt) : undefined,
-            })));
-          }
-          
-          if (parsed.supplyRequests) {
-            setSupplyRequests(parsed.supplyRequests.map((req: SupplyRequest) => ({
-              ...req,
-              createdAt: new Date(req.createdAt),
-              updatedAt: new Date(req.updatedAt),
-              approvedAt: req.approvedAt ? new Date(req.approvedAt) : undefined,
-              receivedAt: req.receivedAt ? new Date(req.receivedAt) : undefined,
-            })));
-          }
-          
-          if (parsed.documents) {
-            setDocuments(parsed.documents.map((doc: Document) => ({
-              ...doc,
-              uploadedAt: new Date(doc.uploadedAt),
-              expiryDate: doc.expiryDate ? new Date(doc.expiryDate) : undefined,
-            })));
-          }
-          
-          if (parsed.activityLogs) {
-            setActivityLogs(parsed.activityLogs.map((log: ActivityLog) => ({
-              ...log,
-              timestamp: new Date(log.timestamp),
-            })));
-          }
-          
-          if (parsed.notifications) {
-            setNotifications(parsed.notifications.map((notif: Notification) => ({
-              ...notif,
-              createdAt: new Date(notif.createdAt),
-            })));
-          }
-          
-          if (parsed.expenses) {
-            setExpenses(parsed.expenses.map((exp: Expense) => ({
-              ...exp,
-              date: new Date(exp.date),
-            })));
-          }
+        if (parsed.issues) {
+          setIssues(parsed.issues.map((issue: Issue) => ({
+            ...issue,
+            createdAt: new Date(issue.createdAt),
+            updatedAt: new Date(issue.updatedAt),
+            resolvedAt: issue.resolvedAt ? new Date(issue.resolvedAt) : undefined,
+          })));
+        }
 
-          if (parsed.calendarEvents) {
-            setCalendarEvents(parsed.calendarEvents.map((event: CalendarEvent) => ({
-              ...event,
-              startDate: new Date(event.startDate),
-              endDate: new Date(event.endDate),
-              createdAt: new Date(event.createdAt),
-              updatedAt: new Date(event.updatedAt),
-            })));
-          }
+        if (parsed.supplyRequests) {
+          setSupplyRequests(parsed.supplyRequests.map((req: SupplyRequest) => ({
+            ...req,
+            createdAt: new Date(req.createdAt),
+            updatedAt: new Date(req.updatedAt),
+            approvedAt: req.approvedAt ? new Date(req.approvedAt) : undefined,
+            receivedAt: req.receivedAt ? new Date(req.receivedAt) : undefined,
+          })));
+        }
+
+        if (parsed.documents) {
+          setDocuments(parsed.documents.map((doc: Document) => ({
+            ...doc,
+            uploadedAt: new Date(doc.uploadedAt),
+            expiryDate: doc.expiryDate ? new Date(doc.expiryDate) : undefined,
+          })));
+        }
+
+        if (parsed.activityLogs) {
+          setActivityLogs(parsed.activityLogs.map((log: ActivityLog) => ({
+            ...log,
+            timestamp: new Date(log.timestamp),
+          })));
+        }
+
+        if (parsed.notifications) {
+          setNotifications(parsed.notifications.map((notif: Notification) => ({
+            ...notif,
+            createdAt: new Date(notif.createdAt),
+          })));
+        }
+
+        if (parsed.expenses) {
+          setExpenses(parsed.expenses.map((exp: Expense) => ({
+            ...exp,
+            date: new Date(exp.date),
+          })));
+        }
+
+        if (parsed.calendarEvents) {
+          setCalendarEvents(parsed.calendarEvents.map((event: CalendarEvent) => ({
+            ...event,
+            startDate: new Date(event.startDate),
+            endDate: new Date(event.endDate),
+            createdAt: new Date(event.createdAt),
+            updatedAt: new Date(event.updatedAt),
+          })));
         }
       }
-      
+
       hasLoadedData.current = true;
-      console.log('Data loading completed');
     } catch (error) {
       console.error('Error loading data:', error);
     }
   }, []);
 
   const saveData = useCallback(async () => {
-    // Only save if data has been loaded
     if (!hasLoadedData.current) {
       return;
     }
 
-    // Debounce saves to prevent excessive writes
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
-    
+
     saveTimeoutRef.current = setTimeout(async () => {
       try {
-        console.log('Saving data to cache...');
-        
-        // Save to new cache system with appropriate expiration times
-        await cacheManager.setMultiple([
-          { key: CACHE_KEYS.VESSELS, data: vessels, expiration: CACHE_EXPIRATION.LONG },
-          { key: CACHE_KEYS.MAINTENANCE_TASKS, data: maintenanceTasks, expiration: CACHE_EXPIRATION.MEDIUM },
-          { key: CACHE_KEYS.ISSUES, data: issues, expiration: CACHE_EXPIRATION.MEDIUM },
-          { key: CACHE_KEYS.SUPPLY_REQUESTS, data: supplyRequests, expiration: CACHE_EXPIRATION.MEDIUM },
-          { key: CACHE_KEYS.DOCUMENTS, data: documents, expiration: CACHE_EXPIRATION.LONG },
-          { key: CACHE_KEYS.ACTIVITY_LOGS, data: activityLogs, expiration: CACHE_EXPIRATION.SHORT },
-          { key: CACHE_KEYS.NOTIFICATIONS, data: notifications, expiration: CACHE_EXPIRATION.SHORT },
-          { key: CACHE_KEYS.EXPENSES, data: expenses, expiration: CACHE_EXPIRATION.MEDIUM },
-          { key: CACHE_KEYS.CALENDAR_EVENTS, data: calendarEvents, expiration: CACHE_EXPIRATION.MEDIUM },
-        ]);
-        
-        // Also save to legacy storage for backward compatibility
         const data = {
           vessels,
           maintenanceTasks,
@@ -831,13 +708,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
           calendarEvents,
         };
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        
-        console.log('Data saved successfully');
       } catch (error) {
         console.error('Error saving data:', error);
       }
-    }, 1000); // Save after 1 second of inactivity
-  }, [vessels, maintenanceTasks, issues, supplyRequests, documents, activityLogs, notifications, expenses]);
+    }, 1000);
+  }, [vessels, maintenanceTasks, issues, supplyRequests, documents, activityLogs, notifications, expenses, calendarEvents]);
 
   // Load data from storage on mount only
   useEffect(() => {
@@ -950,20 +825,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date(),
     };
     setMaintenanceTasks([...maintenanceTasks, newTask]);
-    
-    // Invalidate cache
-    await cacheHelpers.invalidateCache('MAINTENANCE_TASKS');
-    
-    // Add to offline queue if offline
-    if (!(await offlineManager.getNetworkStatus())) {
-      await offlineManager.addToOfflineQueue({
-        type: 'create',
-        entity: 'maintenance',
-        data: newTask,
-      });
-    }
-    
-    // Publish realtime event
+
     await realtimeManager.publishEvent('task_assigned', {
       title: task.title,
       vesselName: task.vesselName,
@@ -989,20 +851,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setMaintenanceTasks(maintenanceTasks.map(task =>
       task.id === id ? { ...task, ...updates, updatedAt: new Date() } : task
     ));
-    
-    // Invalidate cache
-    await cacheHelpers.invalidateCache('MAINTENANCE_TASKS');
-    
-    // Add to offline queue if offline
-    if (!(await offlineManager.getNetworkStatus())) {
-      await offlineManager.addToOfflineQueue({
-        type: 'update',
-        entity: 'maintenance',
-        data: { id, updates },
-      });
-    }
-    
-    // Publish realtime event
+
     if (task && updates.status === 'completed') {
       await realtimeManager.publishEvent('task_completed', {
         title: task.title,
@@ -1092,20 +941,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date(),
     };
     setIssues([...issues, newIssue]);
-    
-    // Invalidate cache
-    await cacheHelpers.invalidateCache('ISSUES');
-    
-    // Add to offline queue if offline
-    if (!(await offlineManager.getNetworkStatus())) {
-      await offlineManager.addToOfflineQueue({
-        type: 'create',
-        entity: 'issue',
-        data: newIssue,
-      });
-    }
-    
-    // Publish realtime event
+
     const vessel = vessels.find(v => v.id === issue.vesselId);
     if (vessel) {
       await realtimeManager.publishEvent('issue_created', {

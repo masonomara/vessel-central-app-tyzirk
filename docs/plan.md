@@ -1176,18 +1176,20 @@ Every task below maps to a specific change described in the phases above. Work t
 
 #### 1.1 Remove Offline Mode
 
-- [ ] Delete `utils/offlineManager.ts`
-- [ ] Delete `utils/cacheManager.ts`
-- [ ] Delete `components/OfflineQueueStatus.tsx`
-- [ ] Delete `components/CacheStatus.tsx`
-- [ ] Delete `app/cache-settings.tsx`
-- [ ] Remove `OfflineQueueStatus` import and render from `app/_layout.tsx`
-- [ ] Remove `cacheManager` and `offlineManager` imports from `contexts/DataContext.tsx`
-- [ ] Strip cache layer from `loadData` in DataContext (keep seed data reads, remove caching wrapper)
-- [ ] Strip cache layer from `saveData` in DataContext (keep AsyncStorage persistence, remove cacheManager calls)
-- [ ] Remove all `cacheHelpers.invalidateCache(...)` calls in DataContext
-- [ ] Remove all `offlineManager.getNetworkStatus()` checks and `offlineManager.addToOfflineQueue(...)` calls in DataContext
-- [ ] Remove "Cache & Storage" settings row and `/cache-settings` navigation from `app/(tabs)/profile.tsx`
+- [x] Delete `utils/offlineManager.ts`
+- [x] Delete `utils/cacheManager.ts`
+- [x] Delete `components/OfflineQueueStatus.tsx`
+- [x] Delete `components/CacheStatus.tsx`
+- [x] Delete `app/cache-settings.tsx`
+- [x] Delete `hooks/useCache.ts` (also depended on cacheManager)
+- [x] Remove `OfflineQueueStatus` import and render from `app/_layout.tsx`
+- [x] Remove `cacheManager` and `offlineManager` imports from `contexts/DataContext.tsx`
+- [x] Strip cache layer from `loadData` in DataContext (keep seed data reads, remove caching wrapper)
+- [x] Strip cache layer from `saveData` in DataContext (keep AsyncStorage persistence, remove cacheManager calls)
+- [x] Remove all `cacheHelpers.invalidateCache(...)` calls in DataContext
+- [x] Remove all `offlineManager.getNetworkStatus()` checks and `offlineManager.addToOfflineQueue(...)` calls in DataContext
+- [x] Remove "Cache & Storage" settings row and `/cache-settings` navigation from `app/(tabs)/profile.tsx`
+- [x] Remove `CacheStatus` import and render from `app/(tabs)/maintenance.tsx`
 
 #### 1.2 Remove Realtime
 
