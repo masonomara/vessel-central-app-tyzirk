@@ -1,9 +1,15 @@
-
 import React, { useMemo, useState } from "react";
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import { useTheme } from "@react-navigation/native";
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
+import { LinearGradient } from "expo-linear-gradient";
+import * as Haptics from "expo-haptics";
 import { colors, commonStyles } from "@/styles/commonStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
@@ -23,55 +29,53 @@ export default function OwnerDashboard() {
   const theme = useTheme();
   const { userName, userId, userRole, signOut } = useAuth();
   const [showSearch, setShowSearch] = useState(false);
-  const { 
-    getVesselsForUser, 
-    getMaintenanceTasksForUser, 
+  const {
+    getVesselsForUser,
+    getMaintenanceTasksForUser,
     getExpensesForUser,
     getActivityLogsForUser,
     getSupplyRequestsForUser,
-    getIssuesForUser
+    getIssuesForUser,
   } = useData();
 
   const handleLogout = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    Alert.alert(
-      "Log Out",
-      "Are you sure you want to log out?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "Log Out",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              console.log("=== LOGOUT INITIATED FROM OWNER DASHBOARD ===");
-              
-              const { error } = await signOut();
-              
-              if (error) {
-                console.error("Logout error:", error);
-                Alert.alert("Error", "Failed to log out. Please try again.");
-                return;
-              }
-              
-              console.log("Logout successful, navigating to login...");
-              
-              setTimeout(() => {
-                console.log("Navigating to login screen...");
-                router.replace("/login");
-              }, 100);
-              
-            } catch (err) {
-              console.error("Logout exception:", err);
-              Alert.alert("Error", "An unexpected error occurred. Please try again.");
+    Alert.alert("Log Out", "Are you sure you want to log out?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            console.log("=== LOGOUT INITIATED FROM OWNER DASHBOARD ===");
+
+            const { error } = await signOut();
+
+            if (error) {
+              console.error("Logout error:", error);
+              Alert.alert("Error", "Failed to log out. Please try again.");
+              return;
             }
+
+            console.log("Logout successful, navigating to login...");
+
+            setTimeout(() => {
+              console.log("Navigating to login screen...");
+              router.replace("/login");
+            }, 100);
+          } catch (err) {
+            console.error("Logout exception:", err);
+            Alert.alert(
+              "Error",
+              "An unexpected error occurred. Please try again.",
+            );
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const myVessels = useMemo(() => {
@@ -117,27 +121,31 @@ export default function OwnerDashboard() {
   }, [userId, userRole, getIssuesForUser]);
 
   const pendingApprovals = useMemo(() => {
-    return mySupplyRequests.filter(req => req.status === 'pending');
+    return mySupplyRequests.filter((req) => req.status === "pending");
   }, [mySupplyRequests]);
 
   const totalMonthlyExpenses = useMemo(() => {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
     return myExpenses
-      .filter(exp => {
+      .filter((exp) => {
         const expDate = new Date(exp.date);
-        return expDate.getMonth() === currentMonth && expDate.getFullYear() === currentYear;
+        return (
+          expDate.getMonth() === currentMonth &&
+          expDate.getFullYear() === currentYear
+        );
       })
       .reduce((sum, exp) => sum + exp.amount, 0);
   }, [myExpenses]);
 
   const lastMonthExpenses = useMemo(() => {
     const lastMonth = new Date().getMonth() - 1;
-    const year = lastMonth < 0 ? new Date().getFullYear() - 1 : new Date().getFullYear();
+    const year =
+      lastMonth < 0 ? new Date().getFullYear() - 1 : new Date().getFullYear();
     const month = lastMonth < 0 ? 11 : lastMonth;
-    
+
     return myExpenses
-      .filter(exp => {
+      .filter((exp) => {
         const expDate = new Date(exp.date);
         return expDate.getMonth() === month && expDate.getFullYear() === year;
       })
@@ -146,49 +154,62 @@ export default function OwnerDashboard() {
 
   const expenseTrend = useMemo(() => {
     if (lastMonthExpenses === 0) {
-      return { direction: 'neutral' as const, value: '0%' };
+      return { direction: "neutral" as const, value: "0%" };
     }
-    const change = ((totalMonthlyExpenses - lastMonthExpenses) / lastMonthExpenses) * 100;
+    const change =
+      ((totalMonthlyExpenses - lastMonthExpenses) / lastMonthExpenses) * 100;
     return {
-      direction: change > 0 ? 'up' as const : change < 0 ? 'down' as const : 'neutral' as const,
-      value: `${Math.abs(Math.round(change))}%`
+      direction:
+        change > 0
+          ? ("up" as const)
+          : change < 0
+            ? ("down" as const)
+            : ("neutral" as const),
+      value: `${Math.abs(Math.round(change))}%`,
     };
   }, [totalMonthlyExpenses, lastMonthExpenses]);
 
   const last6MonthsExpenses = useMemo(() => {
     const data: number[] = [];
     const now = new Date();
-    
+
     for (let i = 5; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthExpenses = myExpenses
-        .filter(exp => {
+        .filter((exp) => {
           const expDate = new Date(exp.date);
-          return expDate.getMonth() === date.getMonth() && expDate.getFullYear() === date.getFullYear();
+          return (
+            expDate.getMonth() === date.getMonth() &&
+            expDate.getFullYear() === date.getFullYear()
+          );
         })
         .reduce((sum, exp) => sum + exp.amount, 0);
       data.push(monthExpenses);
     }
-    
+
     return data;
   }, [myExpenses]);
 
   const upcomingMaintenance = useMemo(() => {
     return myMaintenanceTasks
-      .filter(task => task.status !== 'completed')
-      .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
+      .filter((task) => task.status !== "completed")
+      .sort(
+        (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(),
+      )[0];
   }, [myMaintenanceTasks]);
 
   const completionRate = useMemo(() => {
     if (myMaintenanceTasks.length === 0) {
       return 0;
     }
-    const completed = myMaintenanceTasks.filter(t => t.status === 'completed').length;
+    const completed = myMaintenanceTasks.filter(
+      (t) => t.status === "completed",
+    ).length;
     return (completed / myMaintenanceTasks.length) * 100;
   }, [myMaintenanceTasks]);
 
   const openIssuesCount = useMemo(() => {
-    return myIssues.filter(i => i.status !== 'completed').length;
+    return myIssues.filter((i) => i.status !== "completed").length;
   }, [myIssues]);
 
   const getDaysUntil = (date: Date) => {
@@ -200,27 +221,29 @@ export default function OwnerDashboard() {
 
   const handleViewReports = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    console.log('View reports pressed');
-    router.push('/(tabs)/documents');
+    console.log("View reports pressed");
+    router.push("/(tabs)/documents");
   };
 
   const handleApproveRequests = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    console.log('Approve requests pressed');
-    router.push('/(tabs)/supplies');
+    console.log("Approve requests pressed");
+    router.push("/(tabs)/supplies");
   };
 
   const handleViewAnalytics = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    console.log('View analytics pressed');
-    router.push('/analytics');
+    console.log("View analytics pressed");
+    router.push("/analytics");
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <GlobalSearch visible={showSearch} onClose={() => setShowSearch(false)} />
-      
-      <ScrollView 
+
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -232,51 +255,54 @@ export default function OwnerDashboard() {
                 <Text style={commonStyles.title}>{userName}</Text>
               </View>
               <View style={styles.headerActions}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     setShowSearch(true);
-                  }} 
+                  }}
                   style={styles.iconButton}
                 >
                   <LinearGradient
                     colors={[colors.card, colors.cardElevated]}
                     style={styles.iconButtonGradient}
                   >
-                    <IconSymbol 
-                      ios_icon_name="magnifyingglass" 
-                      android_material_icon_name="search" 
-                      size={20} 
-                      color={colors.text} 
+                    <IconSymbol
+                      ios_icon_name="magnifyingglass"
+                      android_material_icon_name="search"
+                      size={20}
+                      color={colors.text}
                     />
                   </LinearGradient>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handleLogout} style={styles.iconButton}>
+                <TouchableOpacity
+                  onPress={handleViewAnalytics}
+                  style={styles.iconButton}
+                >
                   <LinearGradient
                     colors={[colors.card, colors.cardElevated]}
                     style={styles.iconButtonGradient}
                   >
-                    <IconSymbol 
-                      ios_icon_name="rectangle.portrait.and.arrow.right" 
-                      android_material_icon_name="logout" 
-                      size={20} 
-                      color={colors.text} 
+                    <IconSymbol
+                      ios_icon_name="chart.bar.fill"
+                      android_material_icon_name="analytics"
+                      size={20}
+                      color={colors.text}
                     />
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
             </View>
             <LinearGradient
-              colors={[colors.gold + '30', colors.gold + '10']}
+              colors={[colors.gold + "30", colors.gold + "10"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.roleTag}
             >
-              <IconSymbol 
-                ios_icon_name="crown.fill" 
-                android_material_icon_name="workspace_premium" 
-                size={16} 
-                color={colors.gold} 
+              <IconSymbol
+                ios_icon_name="crown.fill"
+                android_material_icon_name="workspace_premium"
+                size={16}
+                color={colors.gold}
               />
               <Text style={styles.roleText}>Owner</Text>
             </LinearGradient>
@@ -291,38 +317,50 @@ export default function OwnerDashboard() {
                 <PressableCard key={vessel.id} style={styles.vesselCard}>
                   <View style={styles.vesselHeader}>
                     <LinearGradient
-                      colors={[colors.accent + '30', colors.accent + '10']}
+                      colors={[colors.accent + "30", colors.accent + "10"]}
                       style={styles.vesselIconCircle}
                     >
-                      <IconSymbol 
-                        ios_icon_name="sailboat.fill" 
-                        android_material_icon_name="sailing" 
-                        size={28} 
-                        color={colors.accent} 
+                      <IconSymbol
+                        ios_icon_name="sailboat.fill"
+                        android_material_icon_name="sailing"
+                        size={28}
+                        color={colors.accent}
                       />
                     </LinearGradient>
-                    <View style={[
-                      styles.statusDot, 
-                      vessel.status === 'active' ? styles.statusDotActive : styles.statusDotMaintenance
-                    ]} />
+                    <View
+                      style={[
+                        styles.statusDot,
+                        vessel.status === "active"
+                          ? styles.statusDotActive
+                          : styles.statusDotMaintenance,
+                      ]}
+                    />
                   </View>
                   <Text style={styles.vesselName}>{vessel.name}</Text>
                   <Text style={styles.vesselLocation}>{vessel.location}</Text>
                   <View style={styles.vesselFooter}>
                     <View style={styles.vesselStat}>
-                      <IconSymbol 
-                        ios_icon_name="person.2.fill" 
-                        android_material_icon_name="groups" 
-                        size={14} 
-                        color={colors.textSecondary} 
+                      <IconSymbol
+                        ios_icon_name="person.2.fill"
+                        android_material_icon_name="groups"
+                        size={14}
+                        color={colors.textSecondary}
                       />
-                      <Text style={styles.vesselStatText}>{vessel.crewCount}</Text>
+                      <Text style={styles.vesselStatText}>
+                        {vessel.crewCount}
+                      </Text>
                     </View>
-                    <View style={[
-                      styles.statusBadge, 
-                      vessel.status === 'active' ? styles.statusActive : styles.statusMaintenance
-                    ]}>
-                      <Text style={styles.statusText}>{vessel.status.toUpperCase()}</Text>
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        vessel.status === "active"
+                          ? styles.statusActive
+                          : styles.statusMaintenance,
+                      ]}
+                    >
+                      <Text style={styles.statusText}>
+                        {vessel.status.toUpperCase()}
+                      </Text>
                     </View>
                   </View>
                 </PressableCard>
@@ -334,7 +372,7 @@ export default function OwnerDashboard() {
         <AnimatedCard delay={200}>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Key Metrics</Text>
-            
+
             <View style={styles.statsGrid}>
               <StatCard
                 icon="dollarsign.circle.fill"
@@ -354,9 +392,12 @@ export default function OwnerDashboard() {
                 androidIcon="build"
                 iconColor={colors.warning}
                 label="Active Tasks"
-                value={myMaintenanceTasks.filter(t => t.status !== 'completed').length}
+                value={
+                  myMaintenanceTasks.filter((t) => t.status !== "completed")
+                    .length
+                }
                 subtext={`${myMaintenanceTasks.length} total`}
-                onPress={() => router.push('/(tabs)/maintenance')}
+                onPress={() => router.push("/(tabs)/maintenance")}
                 useGradient={true}
               />
 
@@ -366,8 +407,8 @@ export default function OwnerDashboard() {
                 iconColor={colors.danger}
                 label="Open Issues"
                 value={openIssuesCount}
-                subtext={openIssuesCount > 0 ? 'Needs attention' : 'All clear'}
-                onPress={() => router.push('/(tabs)/issues')}
+                subtext={openIssuesCount > 0 ? "Needs attention" : "All clear"}
+                onPress={() => router.push("/(tabs)/issues")}
                 useGradient={true}
               />
 
@@ -388,7 +429,7 @@ export default function OwnerDashboard() {
         <AnimatedCard delay={300}>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Performance</Text>
-            
+
             <GlassCard style={styles.performanceCard}>
               <View style={styles.performanceContent}>
                 <View style={styles.performanceLeft}>
@@ -403,10 +444,18 @@ export default function OwnerDashboard() {
                 <View style={styles.performanceRight}>
                   <Text style={styles.performanceTitle}>Task Completion</Text>
                   <Text style={styles.performanceValue}>
-                    {myMaintenanceTasks.filter(t => t.status === 'completed').length} of {myMaintenanceTasks.length}
+                    {
+                      myMaintenanceTasks.filter((t) => t.status === "completed")
+                        .length
+                    }{" "}
+                    of {myMaintenanceTasks.length}
                   </Text>
                   <Text style={styles.performanceSubtext}>
-                    {myMaintenanceTasks.filter(t => t.status !== 'completed').length} tasks remaining
+                    {
+                      myMaintenanceTasks.filter((t) => t.status !== "completed")
+                        .length
+                    }{" "}
+                    tasks remaining
                   </Text>
                 </View>
               </View>
@@ -423,7 +472,11 @@ export default function OwnerDashboard() {
                   <Text style={styles.expenseChartTitle}>Expense Trend</Text>
                   <Text style={styles.expenseChartSubtitle}>Last 6 months</Text>
                 </View>
-                <MiniChart data={last6MonthsExpenses} color={colors.success} height={80} />
+                <MiniChart
+                  data={last6MonthsExpenses}
+                  color={colors.success}
+                  height={80}
+                />
               </LinearGradient>
             </View>
           </View>
@@ -436,28 +489,32 @@ export default function OwnerDashboard() {
               <PressableCard style={styles.maintenanceCard}>
                 <View style={styles.maintenanceHeader}>
                   <LinearGradient
-                    colors={[colors.warning + '30', colors.warning + '10']}
+                    colors={[colors.warning + "30", colors.warning + "10"]}
                     style={styles.iconCircle}
                   >
-                    <IconSymbol 
-                      ios_icon_name="wrench.and.screwdriver.fill" 
-                      android_material_icon_name="build" 
-                      size={24} 
-                      color={colors.warning} 
+                    <IconSymbol
+                      ios_icon_name="wrench.and.screwdriver.fill"
+                      android_material_icon_name="build"
+                      size={24}
+                      color={colors.warning}
                     />
                   </LinearGradient>
                   <View style={styles.maintenanceInfo}>
-                    <Text style={styles.maintenanceTitle}>{upcomingMaintenance.title}</Text>
-                    <Text style={styles.maintenanceVessel}>{upcomingMaintenance.vesselName}</Text>
+                    <Text style={styles.maintenanceTitle}>
+                      {upcomingMaintenance.title}
+                    </Text>
+                    <Text style={styles.maintenanceVessel}>
+                      {upcomingMaintenance.vesselName}
+                    </Text>
                   </View>
                 </View>
                 <View style={styles.maintenanceFooter}>
                   <View style={styles.maintenanceDue}>
-                    <IconSymbol 
-                      ios_icon_name="clock.fill" 
-                      android_material_icon_name="schedule" 
-                      size={16} 
-                      color={colors.textSecondary} 
+                    <IconSymbol
+                      ios_icon_name="clock.fill"
+                      android_material_icon_name="schedule"
+                      size={16}
+                      color={colors.textSecondary}
                     />
                     <Text style={styles.maintenanceDueText}>
                       Due in {getDaysUntil(upcomingMaintenance.dueDate)} days
@@ -465,17 +522,20 @@ export default function OwnerDashboard() {
                   </View>
                   <LinearGradient
                     colors={
-                      upcomingMaintenance.priority === 'high' || upcomingMaintenance.priority === 'urgent' 
-                        ? [colors.danger + '40', colors.danger + '20']
-                        : upcomingMaintenance.priority === 'medium' 
-                        ? [colors.warning + '40', colors.warning + '20']
-                        : [colors.success + '40', colors.success + '20']
+                      upcomingMaintenance.priority === "high" ||
+                      upcomingMaintenance.priority === "urgent"
+                        ? [colors.danger + "40", colors.danger + "20"]
+                        : upcomingMaintenance.priority === "medium"
+                          ? [colors.warning + "40", colors.warning + "20"]
+                          : [colors.success + "40", colors.success + "20"]
                     }
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.priorityBadge}
                   >
-                    <Text style={styles.priorityText}>{upcomingMaintenance.priority.toUpperCase()}</Text>
+                    <Text style={styles.priorityText}>
+                      {upcomingMaintenance.priority.toUpperCase()}
+                    </Text>
                   </LinearGradient>
                 </View>
               </PressableCard>
@@ -492,24 +552,34 @@ export default function OwnerDashboard() {
                   colors={[colors.warning, colors.warningLight]}
                   style={styles.badge}
                 >
-                  <Text style={styles.badgeText}>{pendingApprovals.length}</Text>
+                  <Text style={styles.badgeText}>
+                    {pendingApprovals.length}
+                  </Text>
                 </LinearGradient>
               </View>
               {pendingApprovals.slice(0, 2).map((approval, index) => (
                 <PressableCard key={approval.id} style={styles.approvalCard}>
                   <View style={styles.approvalHeader}>
                     <View style={styles.approvalLeft}>
-                      <Text style={styles.approvalItem}>{approval.itemName}</Text>
-                      <Text style={styles.approvalVessel}>{approval.vesselName}</Text>
+                      <Text style={styles.approvalItem}>
+                        {approval.itemName}
+                      </Text>
+                      <Text style={styles.approvalVessel}>
+                        {approval.vesselName}
+                      </Text>
                     </View>
-                    <Text style={styles.approvalAmount}>${approval.estimatedCost}</Text>
+                    <Text style={styles.approvalAmount}>
+                      ${approval.estimatedCost}
+                    </Text>
                   </View>
                   <View style={styles.approvalFooter}>
                     <LinearGradient
-                      colors={[colors.accent + '30', colors.accent + '10']}
+                      colors={[colors.accent + "30", colors.accent + "10"]}
                       style={styles.approvalCategory}
                     >
-                      <Text style={styles.approvalCategoryText}>{approval.category}</Text>
+                      <Text style={styles.approvalCategoryText}>
+                        {approval.category}
+                      </Text>
                     </LinearGradient>
                     <Text style={styles.approvalQuantity}>
                       {approval.quantity} {approval.unit}
@@ -542,36 +612,44 @@ export default function OwnerDashboard() {
                 <PressableCard key={log.id} style={styles.activityCard}>
                   <LinearGradient
                     colors={
-                      log.type === 'maintenance' || log.type === 'task' 
-                        ? [colors.success + '30', colors.success + '10']
-                        : log.type === 'issue' 
-                        ? [colors.danger + '30', colors.danger + '10']
-                        : [colors.accent + '30', colors.accent + '10']
+                      log.type === "maintenance" || log.type === "task"
+                        ? [colors.success + "30", colors.success + "10"]
+                        : log.type === "issue"
+                          ? [colors.danger + "30", colors.danger + "10"]
+                          : [colors.accent + "30", colors.accent + "10"]
                     }
                     style={styles.activityIcon}
                   >
-                    <IconSymbol 
+                    <IconSymbol
                       ios_icon_name={
-                        log.type === 'maintenance' || log.type === 'task' ? 'checkmark.circle.fill' :
-                        log.type === 'issue' ? 'exclamationmark.triangle.fill' :
-                        'info.circle.fill'
+                        log.type === "maintenance" || log.type === "task"
+                          ? "checkmark.circle.fill"
+                          : log.type === "issue"
+                            ? "exclamationmark.triangle.fill"
+                            : "info.circle.fill"
                       }
                       android_material_icon_name={
-                        log.type === 'maintenance' || log.type === 'task' ? 'check_circle' :
-                        log.type === 'issue' ? 'warning' :
-                        'info'
+                        log.type === "maintenance" || log.type === "task"
+                          ? "check_circle"
+                          : log.type === "issue"
+                            ? "warning"
+                            : "info"
                       }
-                      size={20} 
+                      size={20}
                       color={
-                        log.type === 'maintenance' || log.type === 'task' ? colors.success :
-                        log.type === 'issue' ? colors.danger :
-                        colors.accent
+                        log.type === "maintenance" || log.type === "task"
+                          ? colors.success
+                          : log.type === "issue"
+                            ? colors.danger
+                            : colors.accent
                       }
                     />
                   </LinearGradient>
                   <View style={styles.activityContent}>
                     <Text style={styles.activityTitle}>{log.title}</Text>
-                    <Text style={styles.activityDescription}>{log.description}</Text>
+                    <Text style={styles.activityDescription}>
+                      {log.description}
+                    </Text>
                     <Text style={styles.activityTime}>
                       {new Date(log.timestamp).toLocaleString()}
                     </Text>
@@ -581,26 +659,6 @@ export default function OwnerDashboard() {
             ) : (
               <Text style={styles.emptyText}>No recent activity</Text>
             )}
-          </View>
-        </AnimatedCard>
-
-        <AnimatedCard delay={800}>
-          <View style={styles.actionsSection}>
-            <GradientButton
-              title="View Analytics"
-              onPress={handleViewAnalytics}
-              icon="chart.bar.fill"
-              androidIcon="analytics"
-              gradientColors={[colors.gradientAccentStart, colors.gradientAccentEnd]}
-            />
-
-            <GradientButton
-              title="View Documents"
-              onPress={handleViewReports}
-              icon="doc.text.fill"
-              androidIcon="description"
-              gradientColors={[colors.primary, colors.secondary]}
-            />
           </View>
         </AnimatedCard>
       </ScrollView>
@@ -621,25 +679,25 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: 16,
   },
   greeting: {
     fontSize: 16,
     color: colors.textSecondary,
     marginBottom: 4,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   headerActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   iconButton: {
     borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#000',
+    overflow: "hidden",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -647,19 +705,19 @@ const styles = StyleSheet.create({
   },
   iconButtonGradient: {
     padding: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   roleTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 24,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     gap: 8,
     borderWidth: 1,
-    borderColor: colors.gold + '30',
+    borderColor: colors.gold + "30",
     shadowColor: colors.gold,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
@@ -669,47 +727,47 @@ const styles = StyleSheet.create({
   roleText: {
     color: colors.gold,
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 0.5,
   },
   section: {
     marginBottom: 24,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
     gap: 12,
   },
   sectionTitle: {
     fontSize: 22,
-    fontWeight: '800',
+    fontWeight: "800",
     color: colors.text,
     marginBottom: 16,
     letterSpacing: -0.3,
   },
   fleetGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
   },
   vesselCard: {
     flex: 1,
-    minWidth: '47%',
+    minWidth: "47%",
     padding: 16,
   },
   vesselHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
   vesselIconCircle: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     shadowColor: colors.accent,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
@@ -720,7 +778,7 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.3,
     shadowRadius: 2,
@@ -734,7 +792,7 @@ const styles = StyleSheet.create({
   },
   vesselName: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.text,
     marginBottom: 4,
     letterSpacing: -0.2,
@@ -745,19 +803,19 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   vesselFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   vesselStat: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   vesselStatText: {
     fontSize: 13,
     color: colors.textSecondary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   statusBadge: {
     paddingHorizontal: 10,
@@ -765,45 +823,45 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   statusActive: {
-    backgroundColor: colors.success + '30',
+    backgroundColor: colors.success + "30",
   },
   statusMaintenance: {
-    backgroundColor: colors.warning + '30',
+    backgroundColor: colors.warning + "30",
   },
   statusText: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.text,
     letterSpacing: 0.5,
   },
   statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
   },
   performanceCard: {
     marginBottom: 12,
   },
   performanceContent: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   performanceLeft: {
     marginRight: 20,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   performanceRight: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   performanceTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 6,
   },
   performanceValue: {
     fontSize: 24,
-    fontWeight: '800',
+    fontWeight: "800",
     color: colors.text,
     marginBottom: 4,
     letterSpacing: -0.5,
@@ -814,8 +872,8 @@ const styles = StyleSheet.create({
   },
   expenseChartCard: {
     borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
+    overflow: "hidden",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -829,7 +887,7 @@ const styles = StyleSheet.create({
   },
   expenseChartTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 2,
   },
@@ -843,8 +901,8 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.warning,
   },
   maintenanceHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
     gap: 12,
   },
@@ -852,15 +910,15 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   maintenanceInfo: {
     flex: 1,
   },
   maintenanceTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 2,
   },
@@ -869,13 +927,13 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   maintenanceFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   maintenanceDue: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   maintenanceDueText: {
@@ -889,7 +947,7 @@ const styles = StyleSheet.create({
   },
   priorityText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.text,
     letterSpacing: 0.5,
   },
@@ -898,8 +956,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     minWidth: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     shadowColor: colors.warning,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
@@ -909,7 +967,7 @@ const styles = StyleSheet.create({
   badgeText: {
     color: colors.text,
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   approvalCard: {
     padding: 16,
@@ -918,9 +976,9 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.warning,
   },
   approvalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: 12,
   },
   approvalLeft: {
@@ -929,7 +987,7 @@ const styles = StyleSheet.create({
   },
   approvalItem: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 2,
   },
@@ -939,14 +997,14 @@ const styles = StyleSheet.create({
   },
   approvalAmount: {
     fontSize: 20,
-    fontWeight: '800',
+    fontWeight: "800",
     color: colors.text,
     letterSpacing: -0.5,
   },
   approvalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   approvalCategory: {
     paddingHorizontal: 12,
@@ -955,7 +1013,7 @@ const styles = StyleSheet.create({
   },
   approvalCategoryText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.accent,
   },
   approvalQuantity: {
@@ -966,7 +1024,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   activityCard: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 16,
     marginBottom: 12,
   },
@@ -974,8 +1032,8 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 12,
   },
   activityContent: {
@@ -983,7 +1041,7 @@ const styles = StyleSheet.create({
   },
   activityTitle: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 4,
   },
@@ -1000,7 +1058,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     color: colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     padding: 20,
   },
   actionsSection: {
