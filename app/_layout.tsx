@@ -1,13 +1,10 @@
 import { Stack } from "expo-router";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
-import { useNotifications } from "@/hooks/useNotifications";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { View, StyleSheet } from "react-native";
 
 function RootLayoutContent() {
-  useNotifications();
-
   return (
     <View style={styles.container}>
       <Stack screenOptions={{ headerShown: false }}>

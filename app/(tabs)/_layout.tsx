@@ -3,11 +3,9 @@ import React, { useEffect, useCallback, useRef } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import FloatingTabBar, { TabBarItem } from '@/components/FloatingTabBar';
 import { useAuth } from '@/contexts/AuthContext';
-import { useData } from '@/contexts/DataContext';
 
 export default function TabLayout() {
   const { userRole } = useAuth();
-  const { notifications } = useData();
   const router = useRouter();
   const segments = useSegments();
   const hasRedirected = useRef(false);
@@ -38,8 +36,6 @@ export default function TabLayout() {
   useEffect(() => {
     hasRedirected.current = false;
   }, [userRole]);
-
-  const unreadCount = notifications.filter(n => !n.read).length;
 
   // Define the tabs configuration based on role
   const getTabsForRole = (): TabBarItem[] => {

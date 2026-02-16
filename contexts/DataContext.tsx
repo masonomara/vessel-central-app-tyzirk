@@ -922,8 +922,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
     setIssues([...issues, newIssue]);
 
-    const vessel = vessels.find(v => v.id === issue.vesselId);
-
     addActivityLog({
       type: 'issue',
       title: 'Issue Reported',
@@ -936,16 +934,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       relatedId: newIssue.id,
       relatedType: 'issue',
     });
-    
-    if (vessel) {
-      addNotification({
-        type: 'issue',
-        title: 'New Issue Reported',
-        message: `${issue.title} on ${issue.vesselName}`,
-        userId: vessel.managerId,
-        priority: issue.priority === 'high' || issue.priority === 'urgent' ? 'high' : 'medium',
-      });
-    }
   };
 
   const updateIssue = (id: string, updates: Partial<Issue>) => {
@@ -995,16 +983,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       relatedType: 'supply',
     });
     
-    const vessel = vessels.find(v => v.id === request.vesselId);
-    if (vessel) {
-      addNotification({
-        type: 'supply',
-        title: 'New Supply Request',
-        message: `${request.itemName} requested for ${request.vesselName}`,
-        userId: vessel.managerId,
-        priority: request.priority === 'high' || request.priority === 'urgent' ? 'high' : 'medium',
-      });
-    }
   };
 
   const updateSupplyRequest = (id: string, updates: Partial<SupplyRequest>) => {
@@ -1035,14 +1013,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
         relatedId: id,
         relatedType: 'supply',
       });
-
-      addNotification({
-        type: 'approval',
-        title: 'Supply Request Approved',
-        message: `Your request for ${request.itemName} has been approved`,
-        userId: request.requestedBy,
-        priority: 'medium',
-      });
     }
   };
 
@@ -1051,17 +1021,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       status: 'denied',
       deniedReason: reason,
     });
-
-    const request = supplyRequests.find(r => r.id === id);
-    if (request) {
-      addNotification({
-        type: 'approval',
-        title: 'Supply Request Denied',
-        message: `Your request for ${request.itemName} was denied: ${reason}`,
-        userId: request.requestedBy,
-        priority: 'medium',
-      });
-    }
   };
 
   // Document functions
@@ -1179,16 +1138,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       relatedType: 'calendar',
     });
 
-    // Notify attendees
-    event.attendees.forEach((attendeeId, index) => {
-      addNotification({
-        type: 'reminder',
-        title: 'New Calendar Event',
-        message: `${event.title} on ${event.startDate.toLocaleDateString()}`,
-        userId: attendeeId,
-        priority: 'medium',
-      });
-    });
   };
 
   const updateCalendarEvent = (id: string, updates: Partial<CalendarEvent>) => {
@@ -1277,14 +1226,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       userRole: 'crew',
       vesselId: vessel.id,
       vesselName: vessel.name,
-    });
-
-    addNotification({
-      type: 'alert',
-      title: 'Vessel Assignment',
-      message: `You have been assigned to ${vessel.name}`,
-      userId: crewId,
-      priority: 'medium',
     });
   };
 

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,12 +10,53 @@ import {
   Alert,
   Platform,
 } from 'react-native';
-import { Stack, router } from 'expo-router';
-import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
-import { NotificationCategory } from '@/types/notifications';
+import { Stack } from 'expo-router';
 import { colors } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+
+type NotificationCategory =
+  | 'maintenance'
+  | 'issues'
+  | 'supplies'
+  | 'documents'
+  | 'tasks'
+  | 'approvals'
+  | 'system';
+
+interface CategoryPreferences {
+  enabled: boolean;
+  pushEnabled: boolean;
+  inAppEnabled: boolean;
+  sound: boolean;
+  vibration: boolean;
+}
+
+interface NotificationPreferences {
+  enabled: boolean;
+  categories: Record<NotificationCategory, CategoryPreferences>;
+  quietHours: {
+    enabled: boolean;
+    startTime: string;
+    endTime: string;
+  };
+  frequency: 'realtime' | 'hourly' | 'daily';
+}
+
+const DEFAULT_PREFERENCES: NotificationPreferences = {
+  enabled: true,
+  categories: {
+    maintenance: { enabled: true, pushEnabled: true, inAppEnabled: true, sound: true, vibration: true },
+    issues: { enabled: true, pushEnabled: true, inAppEnabled: true, sound: true, vibration: true },
+    supplies: { enabled: true, pushEnabled: true, inAppEnabled: true, sound: true, vibration: false },
+    documents: { enabled: true, pushEnabled: false, inAppEnabled: true, sound: false, vibration: false },
+    tasks: { enabled: true, pushEnabled: true, inAppEnabled: true, sound: true, vibration: true },
+    approvals: { enabled: true, pushEnabled: true, inAppEnabled: true, sound: true, vibration: true },
+    system: { enabled: true, pushEnabled: false, inAppEnabled: true, sound: false, vibration: false },
+  },
+  quietHours: { enabled: false, startTime: '22:00', endTime: '08:00' },
+  frequency: 'realtime',
+};
 
 const CATEGORY_INFO: Record<NotificationCategory, { title: string; description: string; icon: string }> = {
   maintenance: {
@@ -55,21 +96,63 @@ const CATEGORY_INFO: Record<NotificationCategory, { title: string; description: 
   },
 };
 
-export default function NotificationSettingsScreen() {
-  const {
-    preferences,
-    loading,
-    toggleCategory,
-    togglePushForCategory,
-    toggleInAppForCategory,
-    setQuietHours,
-    setFrequency,
-    updatePreferences,
-    resetToDefaults,
-  } = useNotificationPreferences();
+const CATEGORIES = Object.keys(CATEGORY_INFO) as NotificationCategory[];
 
+export default function NotificationSettingsScreen() {
+  const [preferences, setPreferences] = useState<NotificationPreferences>(DEFAULT_PREFERENCES);
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+
+  const updatePreferences = useCallback((updates: Partial<NotificationPreferences>) => {
+    setPreferences(prev => ({ ...prev, ...updates }));
+  }, []);
+
+  const toggleCategory = useCallback((category: NotificationCategory, enabled: boolean) => {
+    setPreferences(prev => ({
+      ...prev,
+      categories: {
+        ...prev.categories,
+        [category]: { ...prev.categories[category], enabled },
+      },
+    }));
+  }, []);
+
+  const togglePushForCategory = useCallback((category: NotificationCategory, enabled: boolean) => {
+    setPreferences(prev => ({
+      ...prev,
+      categories: {
+        ...prev.categories,
+        [category]: { ...prev.categories[category], pushEnabled: enabled },
+      },
+    }));
+  }, []);
+
+  const toggleInAppForCategory = useCallback((category: NotificationCategory, enabled: boolean) => {
+    setPreferences(prev => ({
+      ...prev,
+      categories: {
+        ...prev.categories,
+        [category]: { ...prev.categories[category], inAppEnabled: enabled },
+      },
+    }));
+  }, []);
+
+  const updateCategoryField = useCallback((category: NotificationCategory, field: keyof CategoryPreferences, value: boolean) => {
+    setPreferences(prev => ({
+      ...prev,
+      categories: {
+        ...prev.categories,
+        [category]: { ...prev.categories[category], [field]: value },
+      },
+    }));
+  }, []);
+
+  const setQuietHoursEnabled = useCallback((enabled: boolean) => {
+    setPreferences(prev => ({
+      ...prev,
+      quietHours: { ...prev.quietHours, enabled },
+    }));
+  }, []);
 
   const parseTime = (timeStr: string): Date => {
     const [hours, minutes] = timeStr.split(':').map(Number);
@@ -82,17 +165,23 @@ export default function NotificationSettingsScreen() {
     return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
   };
 
-  const handleStartTimeChange = (event: any, selectedDate?: Date) => {
+  const handleStartTimeChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
     setShowStartTimePicker(Platform.OS === 'ios');
     if (selectedDate) {
-      setQuietHours(preferences.quietHours.enabled, formatTime(selectedDate), preferences.quietHours.endTime);
+      setPreferences(prev => ({
+        ...prev,
+        quietHours: { ...prev.quietHours, startTime: formatTime(selectedDate) },
+      }));
     }
   };
 
-  const handleEndTimeChange = (event: any, selectedDate?: Date) => {
+  const handleEndTimeChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
     setShowEndTimePicker(Platform.OS === 'ios');
     if (selectedDate) {
-      setQuietHours(preferences.quietHours.enabled, preferences.quietHours.startTime, formatTime(selectedDate));
+      setPreferences(prev => ({
+        ...prev,
+        quietHours: { ...prev.quietHours, endTime: formatTime(selectedDate) },
+      }));
     }
   };
 
@@ -105,28 +194,11 @@ export default function NotificationSettingsScreen() {
         {
           text: 'Reset',
           style: 'destructive',
-          onPress: resetToDefaults,
+          onPress: () => setPreferences(DEFAULT_PREFERENCES),
         },
       ]
     );
   };
-
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <Stack.Screen
-          options={{
-            title: 'Notification Settings',
-            headerStyle: { backgroundColor: colors.background },
-            headerTintColor: colors.text,
-          }}
-        />
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading preferences...</Text>
-        </View>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
@@ -137,9 +209,8 @@ export default function NotificationSettingsScreen() {
           headerTintColor: colors.text,
         }}
       />
-      
+
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* Master Toggle */}
         <View style={styles.section}>
           <View style={styles.masterToggle}>
             <View style={styles.masterToggleContent}>
@@ -165,7 +236,6 @@ export default function NotificationSettingsScreen() {
           </View>
         </View>
 
-        {/* Notification Frequency */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Notification Frequency</Text>
           <View style={styles.frequencyContainer}>
@@ -176,7 +246,7 @@ export default function NotificationSettingsScreen() {
                   styles.frequencyButton,
                   preferences.frequency === freq && styles.frequencyButtonActive,
                 ]}
-                onPress={() => setFrequency(freq)}
+                onPress={() => updatePreferences({ frequency: freq })}
               >
                 <Text
                   style={[
@@ -191,7 +261,6 @@ export default function NotificationSettingsScreen() {
           </View>
         </View>
 
-        {/* Quiet Hours */}
         <View style={styles.section}>
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
@@ -202,7 +271,7 @@ export default function NotificationSettingsScreen() {
             </View>
             <Switch
               value={preferences.quietHours.enabled}
-              onValueChange={(value) => setQuietHours(value)}
+              onValueChange={setQuietHoursEnabled}
               trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor={colors.card}
             />
@@ -249,14 +318,13 @@ export default function NotificationSettingsScreen() {
           )}
         </View>
 
-        {/* Category Settings */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Notification Categories</Text>
           <Text style={styles.sectionDescription}>
             Customize notifications for each category
           </Text>
 
-          {(Object.keys(CATEGORY_INFO) as NotificationCategory[]).map((category) => {
+          {CATEGORIES.map((category) => {
             const info = CATEGORY_INFO[category];
             const categoryPrefs = preferences.categories[category];
 
@@ -309,14 +377,7 @@ export default function NotificationSettingsScreen() {
                       <Text style={styles.categoryOptionText}>Sound</Text>
                       <Switch
                         value={categoryPrefs.sound}
-                        onValueChange={(value) =>
-                          updatePreferences({
-                            categories: {
-                              ...preferences.categories,
-                              [category]: { ...categoryPrefs, sound: value },
-                            },
-                          })
-                        }
+                        onValueChange={(value) => updateCategoryField(category, 'sound', value)}
                         trackColor={{ false: colors.border, true: colors.primary }}
                         thumbColor={colors.card}
                       />
@@ -326,14 +387,7 @@ export default function NotificationSettingsScreen() {
                       <Text style={styles.categoryOptionText}>Vibration</Text>
                       <Switch
                         value={categoryPrefs.vibration}
-                        onValueChange={(value) =>
-                          updatePreferences({
-                            categories: {
-                              ...preferences.categories,
-                              [category]: { ...categoryPrefs, vibration: value },
-                            },
-                          })
-                        }
+                        onValueChange={(value) => updateCategoryField(category, 'vibration', value)}
                         trackColor={{ false: colors.border, true: colors.primary }}
                         thumbColor={colors.card}
                       />
@@ -345,7 +399,6 @@ export default function NotificationSettingsScreen() {
           })}
         </View>
 
-        {/* Reset Button */}
         <TouchableOpacity style={styles.resetButton} onPress={handleResetToDefaults}>
           <Text style={styles.resetButtonText}>Reset to Defaults</Text>
         </TouchableOpacity>
@@ -360,15 +413,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: colors.textSecondary,
-    fontSize: 16,
   },
   scrollView: {
     flex: 1,
@@ -526,14 +570,14 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   resetButton: {
-    backgroundColor: colors.error + '20',
+    backgroundColor: colors.danger + '20',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
     marginTop: 8,
   },
   resetButtonText: {
-    color: colors.error,
+    color: colors.danger,
     fontSize: 16,
     fontWeight: '600',
   },

@@ -1206,22 +1206,23 @@ Every task below maps to a specific change described in the phases above. Work t
 
 #### 1.3 Remove Notifications
 
-- [ ] Delete `utils/notificationService.ts`
-- [ ] Delete `utils/notificationPreferences.ts`
-- [ ] Delete `hooks/useNotifications.ts`
-- [ ] Delete `hooks/useNotificationPreferences.ts`
-- [ ] Delete `app/notification-settings.tsx`
-- [ ] Delete `types/notifications.ts`
-- [ ] Remove `useNotifications` import and call from `app/_layout.tsx`
-- [ ] Remove `unreadCount` computation from `app/(tabs)/_layout.tsx`
-- [ ] Remove `addNotification(...)` call from `addIssue` in DataContext
-- [ ] Remove `addNotification(...)` call from `addSupplyRequest` in DataContext
-- [ ] Remove `addNotification(...)` call from `approveSupplyRequest` in DataContext
-- [ ] Remove `addNotification(...)` call from `denySupplyRequest` in DataContext
-- [ ] Remove `addNotification(...)` call from `assignCrewToVessel` in DataContext
-- [ ] Remove `addNotification(...)` call from `addCalendarEvent` in DataContext
-- [ ] Remove `NotificationCategory` and `NotificationPreferences` re-exports from `types/index.ts`
-- [ ] Remove "Notifications" settings row and `/notification-settings` navigation from `app/(tabs)/profile.tsx`
+- [x] Delete `utils/notificationService.ts`
+- [x] Delete `utils/notificationPreferences.ts`
+- [x] Delete `hooks/useNotifications.ts`
+- [x] Delete `hooks/useNotificationPreferences.ts`
+- [x] Delete `types/notifications.ts`
+- [x] Rewrite `app/notification-settings.tsx` with local useState (same UI, no plumbing)
+- [x] Remove `useNotifications` import and call from `app/_layout.tsx`
+- [x] Remove `unreadCount` computation and `useData` import from `app/(tabs)/_layout.tsx`
+- [x] Remove `addNotification(...)` call from `addIssue` in DataContext
+- [x] Remove `addNotification(...)` call from `addSupplyRequest` in DataContext
+- [x] Remove `addNotification(...)` call from `approveSupplyRequest` in DataContext
+- [x] Remove `addNotification(...)` call from `denySupplyRequest` in DataContext
+- [x] Remove `addNotification(...)` call from `assignCrewToVessel` in DataContext
+- [x] Remove `addNotification(...)` call from `addCalendarEvent` in DataContext
+- [x] Remove `NotificationCategory` and `NotificationPreferences` re-exports from `types/index.ts`
+- [x] Keep "Notifications" settings row in profile.tsx (demo screen worth showing)
+- [x] Keep notifications seed data and display methods in DataContext
 
 #### 1.4 Remove Analytics
 
