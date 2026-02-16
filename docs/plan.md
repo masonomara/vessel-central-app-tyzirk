@@ -13,6 +13,7 @@ Five features exist that serve no purpose in a demo. They add dead code, broken 
 Offline queue and cache layer are not connected to anything. They add phantom infrastructure that never fires.
 
 **Delete files:**
+
 - `utils/offlineManager.ts` -- offline queue singleton (482 lines)
 - `utils/cacheManager.ts` -- cache layer singleton (344 lines)
 - `components/OfflineQueueStatus.tsx` -- offline status banner (382 lines)
@@ -20,6 +21,7 @@ Offline queue and cache layer are not connected to anything. They add phantom in
 - `app/cache-settings.tsx` -- cache settings screen (403 lines)
 
 **Modify `app/_layout.tsx`:**
+
 ```typescript
 // REMOVE these lines
 import { OfflineQueueStatus } from '@/components/OfflineQueueStatus';
@@ -28,19 +30,27 @@ import { OfflineQueueStatus } from '@/components/OfflineQueueStatus';
 ```
 
 **Modify `contexts/DataContext.tsx`:**
+
 ```typescript
 // REMOVE these imports
-import { cacheManager, CACHE_KEYS, CACHE_EXPIRATION, cacheHelpers } from '@/utils/cacheManager';
-import { offlineManager } from '@/utils/offlineManager';
+import {
+  cacheManager,
+  CACHE_KEYS,
+  CACHE_EXPIRATION,
+  cacheHelpers,
+} from "@/utils/cacheManager";
+import { offlineManager } from "@/utils/offlineManager";
 ```
 
 Then strip all offline/cache logic from DataContext:
+
 - Remove the entire `loadData` function's cache layer (falls back to AsyncStorage reads of seed data -- keep the seed data, remove the caching wrapper)
 - Remove the entire `saveData` function's cache layer (keep basic AsyncStorage persistence if needed, remove cacheManager calls)
 - Remove `cacheHelpers.invalidateCache(...)` calls in `addMaintenanceTask`, `updateMaintenanceTask`, `addIssue`
 - Remove `offlineManager.getNetworkStatus()` checks and `offlineManager.addToOfflineQueue(...)` calls in those same methods
 
 **Modify `app/(tabs)/profile.tsx`:**
+
 - Remove "Cache & Storage" settings row and its navigation to `/cache-settings`
 
 ### 1.2 Remove Realtime
@@ -48,11 +58,13 @@ Then strip all offline/cache logic from DataContext:
 The realtime system is a local event bus pretending to be live data. It publishes events to itself and displays them back. No external data source.
 
 **Delete files:**
+
 - `utils/realtimeManager.ts` -- event bus singleton
 - `hooks/useRealtime.ts` -- hook wrapping the event bus
 - `components/RealtimeFeed.tsx` -- feed UI component
 
 **Modify `app/(tabs)/owner.tsx`:**
+
 ```typescript
 // REMOVE these lines
 import RealtimeFeed from "@/components/RealtimeFeed";
@@ -60,6 +72,7 @@ import RealtimeFeed from "@/components/RealtimeFeed";
 ```
 
 **Modify `app/(tabs)/manager.tsx`:**
+
 ```typescript
 // REMOVE these lines
 import { RealtimeFeed } from "@/components/RealtimeFeed";
@@ -67,12 +80,14 @@ import { RealtimeFeed } from "@/components/RealtimeFeed";
 ```
 
 **Modify `contexts/DataContext.tsx`:**
+
 ```typescript
 // REMOVE this import
-import { realtimeManager } from '@/utils/realtimeManager';
+import { realtimeManager } from "@/utils/realtimeManager";
 ```
 
 Then remove all `realtimeManager.publishEvent(...)` calls:
+
 - `addMaintenanceTask` -- `task_assigned` event
 - `completeMaintenanceTask` -- `task_completed` event
 - `updateMaintenanceTask` -- `maintenance_updated` event
@@ -85,6 +100,7 @@ Then remove all `realtimeManager.publishEvent(...)` calls:
 No backend to push notifications. The entire notification system is inert plumbing.
 
 **Delete files:**
+
 - `utils/notificationService.ts` -- notification scheduling service
 - `utils/notificationPreferences.ts` -- preference management singleton
 - `hooks/useNotifications.ts` -- global notification setup hook
@@ -93,27 +109,35 @@ No backend to push notifications. The entire notification system is inert plumbi
 - `types/notifications.ts` -- notification preference types
 
 **Modify `app/_layout.tsx`:**
+
 ```typescript
 // REMOVE these lines
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotifications } from "@/hooks/useNotifications";
 // ...inside RootLayoutContent:
-useNotifications();  // DELETE this call
+useNotifications(); // DELETE this call
 ```
 
 **Modify `app/(tabs)/_layout.tsx`:**
+
 - Remove the `unreadCount` computation (it's computed but never used anyway)
 
 **Modify `contexts/DataContext.tsx`:**
+
 - Keep the `notifications` array in state (it's used for display) and `markNotificationAsRead` / `clearAllNotifications` methods
 - Remove `addNotification(...)` calls that fire inside `addIssue`, `addSupplyRequest`, `approveSupplyRequest`, `denySupplyRequest`, `assignCrewToVessel`, `addCalendarEvent` -- these create notifications that nobody reads
 
 **Modify `types/index.ts`:**
+
 ```typescript
 // REMOVE these re-exports
-export type { NotificationCategory, NotificationPreferences } from './notifications';
+export type {
+  NotificationCategory,
+  NotificationPreferences,
+} from "./notifications";
 ```
 
 **Modify `app/(tabs)/profile.tsx`:**
+
 - Remove "Notifications" settings row and its navigation to `/notification-settings`
 
 ### 1.4 Remove Analytics
@@ -121,18 +145,23 @@ export type { NotificationCategory, NotificationPreferences } from './notificati
 No real data source. Charts render computed values from mock seed data. Not worth keeping for a demo -- it's a screen that invites scrutiny with no real answers behind it.
 
 **Delete files:**
+
 - `app/analytics.tsx` -- analytics dashboard
 
 **Modify `app/(tabs)/owner.tsx`:**
+
 - Remove `handleViewAnalytics` function and the "View Analytics" `GradientButton`
 
 **Modify `app/(tabs)/manager.tsx`:**
+
 - Remove the "View Analytics" quick action button and its `router.push('/analytics')` call
 
 **Modify `app/(tabs)/maintenance.tsx`:**
+
 - Remove `handleAnalytics` callback and the analytics icon button in the header
 
 **Modify `package.json`:**
+
 ```json
 // REMOVE this dependency
 "react-native-chart-kit": "^6.12.0"
@@ -145,6 +174,7 @@ Then run `npm install` to update the lockfile.
 Supabase is never wired up. The app already runs entirely on AsyncStorage mock login. The dual-mode auth pattern adds branching complexity for a path that's never taken.
 
 **Delete files:**
+
 - `utils/supabase.ts` -- Supabase client factory
 
 **Simplify `contexts/AuthContext.tsx`:**
@@ -153,8 +183,8 @@ The entire auth context should be rewritten to remove all Supabase code paths. W
 
 ```typescript
 // REMOVE these imports
-import { supabase, isSupabaseConfigured } from '@/utils/supabase';
-import { Session, User, AuthError } from '@supabase/supabase-js';
+import { supabase, isSupabaseConfigured } from "@/utils/supabase";
+import { Session, User, AuthError } from "@supabase/supabase-js";
 
 // REMOVE from state
 const [user, setUser] = useState<User | null>(null);
@@ -162,10 +192,10 @@ const [session, setSession] = useState<Session | null>(null);
 const [isSupabaseEnabled] = useState<boolean>(isSupabaseConfigured());
 
 // REMOVE from context type and implementation
-user, session, isSupabaseEnabled
-resetPassword, updatePassword
-enrollMFA, verifyMFA, unenrollMFA, getMFAFactors
-refreshSession
+(user, session, isSupabaseEnabled);
+(resetPassword, updatePassword);
+(enrollMFA, verifyMFA, unenrollMFA, getMFAFactors);
+refreshSession;
 
 // REMOVE the entire Supabase auth state listener (supabase.auth.onAuthStateChange)
 // REMOVE all Supabase-specific branches in signUp, signIn, signOut
@@ -174,14 +204,17 @@ refreshSession
 Keep only the AsyncStorage-based auth: `userId`, `userRole`, `userName`, `isLoading`, `signIn` (mock), `signOut` (clear AsyncStorage), and the legacy setters.
 
 **Simplify `app/login.tsx`:**
+
 - Remove `isSupabaseEnabled` conditional branches
 - Remove the "Demo Mode" badge (everything is demo mode now)
 - Keep the quick-login buttons and mock user flow as the only login path
 
 **Simplify `app/signup.tsx`:**
+
 - Either delete entirely (no signup in demo mode) or keep as a stub that shows "Coming soon"
 
 **Modify `package.json`:**
+
 ```json
 // REMOVE this dependency
 "@supabase/supabase-js": "^2.84.0"
@@ -221,10 +254,14 @@ Add after line 31 (`statusOffline`):
 
 ```typescript
 // BEFORE
-{event.createdAt.toLocaleDateString()}
+{
+  event.createdAt.toLocaleDateString();
+}
 
 // AFTER
-{new Date(event.createdAt).toLocaleDateString()}
+{
+  new Date(event.createdAt).toLocaleDateString();
+}
 ```
 
 ### 2.3 Fix calendar demo mode (user.id null)
@@ -1099,26 +1136,26 @@ After all changes, walk through every screen on both iOS and Android:
 
 ## Summary: Execution Order
 
-| Phase | Effort | Impact |
-| --- | --- | --- |
+| Phase                         | Effort | Impact                                              |
+| ----------------------------- | ------ | --------------------------------------------------- |
 | 1. Strip unnecessary features | 45 min | Removes ~3,400 lines of dead code, 14 files deleted |
-| 2. Fix crash bugs | 10 min | Eliminates every known crash |
-| 3. Create detail screens | 30 min | Fills the 3 biggest dead ends |
-| 4. Wire handlers | 10 min | Makes every card tappable |
-| 5. Register routes | 5 min | Proper modal/push animations |
-| 6. Polish | 10 min | Removes debug noise, fixes hardcoded data |
-| 7. Walkthrough | 30 min | Verification |
+| 2. Fix crash bugs             | 10 min | Eliminates every known crash                        |
+| 3. Create detail screens      | 30 min | Fills the 3 biggest dead ends                       |
+| 4. Wire handlers              | 10 min | Makes every card tappable                           |
+| 5. Register routes            | 5 min  | Proper modal/push animations                        |
+| 6. Polish                     | 10 min | Removes debug noise, fixes hardcoded data           |
+| 7. Walkthrough                | 30 min | Verification                                        |
 
 ### Files Deleted in Phase 1
 
-| Feature | Files | Lines Removed |
-| --- | --- | --- |
-| Offline | `utils/offlineManager.ts`, `utils/cacheManager.ts`, `components/OfflineQueueStatus.tsx`, `components/CacheStatus.tsx`, `app/cache-settings.tsx` | ~1,800 |
-| Realtime | `utils/realtimeManager.ts`, `hooks/useRealtime.ts`, `components/RealtimeFeed.tsx` | ~350 |
-| Notifications | `utils/notificationService.ts`, `utils/notificationPreferences.ts`, `hooks/useNotifications.ts`, `hooks/useNotificationPreferences.ts`, `app/notification-settings.tsx`, `types/notifications.ts` | ~800 |
-| Analytics | `app/analytics.tsx` | ~400 |
-| Supabase | `utils/supabase.ts` | ~60 |
-| **Total** | **14 files** | **~3,400 lines** |
+| Feature       | Files                                                                                                                                                                                             | Lines Removed    |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| Offline       | `utils/offlineManager.ts`, `utils/cacheManager.ts`, `components/OfflineQueueStatus.tsx`, `components/CacheStatus.tsx`, `app/cache-settings.tsx`                                                   | ~1,800           |
+| Realtime      | `utils/realtimeManager.ts`, `hooks/useRealtime.ts`, `components/RealtimeFeed.tsx`                                                                                                                 | ~350             |
+| Notifications | `utils/notificationService.ts`, `utils/notificationPreferences.ts`, `hooks/useNotifications.ts`, `hooks/useNotificationPreferences.ts`, `app/notification-settings.tsx`, `types/notifications.ts` | ~800             |
+| Analytics     | `app/analytics.tsx`                                                                                                                                                                               | ~400             |
+| Supabase      | `utils/supabase.ts`                                                                                                                                                                               | ~60              |
+| **Total**     | **14 files**                                                                                                                                                                                      | **~3,400 lines** |
 
 ### Dependencies to Remove from package.json
 
