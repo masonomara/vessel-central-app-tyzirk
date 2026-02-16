@@ -17,12 +17,11 @@ import { IconSymbol } from "@/components/IconSymbol";
 import { StatCard } from "@/components/StatCard";
 import { ProgressRing } from "@/components/ProgressRing";
 import { MiniChart } from "@/components/MiniChart";
-import { AnimatedCard } from "@/components/AnimatedCard";
 import { GlassCard } from "@/components/GlassCard";
 import { PressableCard } from "@/components/PressableCard";
 import { GradientButton } from "@/components/GradientButton";
 import GlobalSearch from "@/components/GlobalSearch";
-import { RealtimeFeed } from "@/components/RealtimeFeed";
+
 import { router } from "expo-router";
 
 export default function OwnerDashboard() {
@@ -237,8 +236,7 @@ export default function OwnerDashboard() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <AnimatedCard delay={0}>
-          <View style={styles.header}>
+        <View style={styles.header}>
             <View style={styles.headerTop}>
               <View>
                 <Text style={styles.greeting}>Welcome back,</Text>
@@ -297,10 +295,8 @@ export default function OwnerDashboard() {
               <Text style={styles.roleText}>Owner</Text>
             </LinearGradient>
           </View>
-        </AnimatedCard>
 
-        <AnimatedCard delay={100}>
-          <View style={styles.section}>
+        <View style={styles.section}>
             <Text style={styles.sectionTitle}>Fleet Overview</Text>
             <View style={styles.fleetGrid}>
               {myVessels.map((vessel, index) => (
@@ -357,10 +353,8 @@ export default function OwnerDashboard() {
               ))}
             </View>
           </View>
-        </AnimatedCard>
 
-        <AnimatedCard delay={200}>
-          <View style={styles.section}>
+        <View style={styles.section}>
             <Text style={styles.sectionTitle}>Key Metrics</Text>
 
             <View style={styles.statsGrid}>
@@ -414,10 +408,8 @@ export default function OwnerDashboard() {
               />
             </View>
           </View>
-        </AnimatedCard>
 
-        <AnimatedCard delay={300}>
-          <View style={styles.section}>
+        <View style={styles.section}>
             <Text style={styles.sectionTitle}>Performance</Text>
 
             <GlassCard style={styles.performanceCard}>
@@ -470,10 +462,8 @@ export default function OwnerDashboard() {
               </LinearGradient>
             </View>
           </View>
-        </AnimatedCard>
 
         {upcomingMaintenance && (
-          <AnimatedCard delay={400}>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Next Maintenance</Text>
               <PressableCard style={styles.maintenanceCard}>
@@ -530,11 +520,9 @@ export default function OwnerDashboard() {
                 </View>
               </PressableCard>
             </View>
-          </AnimatedCard>
         )}
 
         {pendingApprovals.length > 0 && (
-          <AnimatedCard delay={500}>
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Pending Approvals</Text>
@@ -585,17 +573,9 @@ export default function OwnerDashboard() {
                 style={styles.viewAllButton}
               />
             </View>
-          </AnimatedCard>
         )}
 
-        <AnimatedCard delay={600}>
-          <View style={styles.section}>
-            <RealtimeFeed userId={userId} limit={5} />
-          </View>
-        </AnimatedCard>
-
-        <AnimatedCard delay={700}>
-          <View style={styles.section}>
+        <View style={styles.section}>
             <Text style={styles.sectionTitle}>Recent Activity</Text>
             {myActivityLogs.length > 0 ? (
               myActivityLogs.map((log, index) => (
@@ -650,7 +630,6 @@ export default function OwnerDashboard() {
               <Text style={styles.emptyText}>No recent activity</Text>
             )}
           </View>
-        </AnimatedCard>
       </ScrollView>
     </View>
   );
