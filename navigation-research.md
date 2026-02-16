@@ -1,399 +1,469 @@
-# Navigation Research
+# Navigation Research: Pressable Elements, Links & Screen Interconnections
 
-Complete reference for how users move through the Vessel Central app: bottom tab bar, navigation headers, screen transitions, and routing architecture.
+## Table of Contents
 
----
-
-## Framework
-
-- **Expo Router v6** (file-based routing on top of React Navigation v7)
-- Deep link scheme: `natively://`
-- Typed routes enabled (`experiments.typedRoutes: true` in app.json)
-- No Redux or external state manager for navigation — Expo Router owns the nav state, React Context handles auth/data
-
----
-
-## Root Stack (`app/_layout.tsx`)
-
-The entire app is a single **Stack navigator** with `headerShown: false` on all screens. Three context providers wrap everything: `ErrorBoundary` > `AuthProvider` > `DataProvider`.
-
-### Registered Screens
-
-| Screen Name | Presentation | Animation | Header |
-|---|---|---|---|
-| `index` | default (push) | default | hidden |
-| `login` | default | default | hidden |
-| `signup` | default | default | hidden |
-| `forgot-password` | default | default | hidden |
-| `(tabs)` | default | default | hidden |
-| `modal` | `modal` | default | **shown** (title: "Modal") |
-| `formsheet` | `formSheet` | default | **shown** (title: "Form Sheet") |
-| `transparent-modal` | `transparentModal` | `fade` | hidden |
-| `add-maintenance-task` | `modal` | `slide_from_bottom` | hidden |
-| `add-issue` | `modal` | `slide_from_bottom` | hidden |
-| `add-document` | `modal` | `slide_from_bottom` | hidden |
-| `add-calendar-event` | `modal` | `slide_from_bottom` | hidden |
-| `add-supply-request` | `modal` | `slide_from_bottom` | hidden |
-| `add-parts-request` | `modal` | `slide_from_bottom` | hidden |
-| `issue-detail` | default (push) | default | hidden |
-| `document-detail` | default (push) | default | hidden |
-| `supply-detail` | default (push) | default | hidden |
-| `maintenance-detail` | default (push) | default | hidden |
-| `calendar-event-detail` | default (push) | default | hidden |
-| `assign-boats` | default (push) | default | hidden |
-| `manager-login` | default (push) | default | hidden |
-| `notification-settings` | default (push) | default | hidden |
-| `analytics` | default (push) | default | hidden |
-
-Key takeaway: The root stack hides headers globally. Every screen that needs a header builds its own custom one, except `modal`, `formsheet`, `notification-settings`, and `assign-boats` which use the native React Navigation header.
+1. [Pressable Component Inventory](#1-pressable-component-inventory)
+2. [Screen-by-Screen Pressable Audit](#2-screen-by-screen-pressable-audit)
+3. [Navigation Map](#3-navigation-map)
+4. [Missing Navigation Links (Items That Should Navigate But Don't)](#4-missing-navigation-links)
+5. [Incomplete Navigation in GlobalSearch](#5-incomplete-navigation-in-globalsearch)
+6. [Dead-End Screens (No Outbound Navigation)](#6-dead-end-screens)
+7. [Summary of All Issues](#7-summary-of-all-issues)
 
 ---
 
-## Auth Flow
+## 1. Pressable Component Inventory
 
-1. App launches at `app/index.tsx` — shows a centered `ActivityIndicator`
-2. Checks `AsyncStorage` for `authToken`
-3. If token exists: `router.replace('/(tabs)/(home)')`
-4. If no token: `router.replace('/login')`
-5. Login screen has mock user database with quick-select role buttons (owner/manager/crew)
-6. On login: stores `authToken`, `userId`, `userRole`, `userName` in AsyncStorage, then `router.replace('/(tabs)/(home)')`
-7. Logout (available on profile, manager dashboard, crew dashboard): `signOut()` then `router.replace('/login')` with a 100ms setTimeout
+### Reusable Pressable Components
 
----
-
-## Tab Layout (`app/(tabs)/_layout.tsx`)
-
-**This is NOT a native Tab navigator.** It's a **Stack navigator** with a custom `FloatingTabBar` component rendered on top. All "tab" screens are Stack.Screen entries with `animation: "none"` so switching tabs has no transition.
-
-### Stack Screens Registered
-
-```
-(home), owner, manager, crew, calendar, maintenance, issues, supplies, documents, profile
-```
-
-All have `headerShown: false` and `animation: "none"`.
-
-### Role-Based Auto-Redirect
-
-On mount, if the user lands on `(home)`, they are redirected via `router.replace()` to their role-specific dashboard:
-
-- `owner` → `/(tabs)/owner`
-- `manager` → `/(tabs)/manager`
-- `crew` → `/(tabs)/crew`
-
-Uses a `useRef(hasRedirected)` flag to prevent redirect loops. Flag resets when `userRole` changes.
-
-### Tab Configuration Per Role
-
-**Owner (5 tabs):**
-
-| Tab | Route | Icon | Label |
-|---|---|---|---|
-| owner | `/(tabs)/owner` | `dashboard` | Dashboard |
-| calendar | `/(tabs)/calendar` | `event` | Calendar |
-| maintenance | `/(tabs)/maintenance` | `build` | Maintenance |
-| documents | `/(tabs)/documents` | `description` | Documents |
-| profile | `/(tabs)/profile` | `person` | Profile |
-
-**Manager (6 tabs):**
-
-| Tab | Route | Icon | Label |
-|---|---|---|---|
-| manager | `/(tabs)/manager` | `dashboard` | Dashboard |
-| calendar | `/(tabs)/calendar` | `event` | Calendar |
-| maintenance | `/(tabs)/maintenance` | `build` | Maintenance |
-| issues | `/(tabs)/issues` | `report_problem` | Issues |
-| supplies | `/(tabs)/supplies` | `inventory_2` | Supplies |
-| profile | `/(tabs)/profile` | `person` | Profile |
-
-**Crew (5 tabs):**
-
-| Tab | Route | Icon | Label |
-|---|---|---|---|
-| crew | `/(tabs)/crew` | `list` | Tasks |
-| calendar | `/(tabs)/calendar` | `event` | Calendar |
-| issues | `/(tabs)/issues` | `report_problem` | Issues |
-| supplies | `/(tabs)/supplies` | `inventory_2` | Supplies |
-| profile | `/(tabs)/profile` | `person` | Profile |
-
-**Fallback (no role set, 2 tabs):**
-
-`(home)` + `profile`
-
-### Tab Differences By Role
-
-- **Owner** gets Documents and Maintenance but not Issues or Supplies tabs
-- **Manager** gets all operational tabs (6 total — most tabs of any role)
-- **Crew** gets Issues and Supplies but not Maintenance or Documents tabs
-- **Calendar** and **Profile** appear for all roles
-- Each role has a different "home" dashboard: `owner`, `manager`, or `crew`
+| Component             | File                                 | Navigates?                  | Notes                                                                                                                                           |
+| --------------------- | ------------------------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PressableCard`       | `components/PressableCard.tsx`       | Only if `onPress` is passed | Generic animated card with scale animation + haptic feedback. Many usages pass **no** `onPress`, making the card feel pressable but go nowhere. |
+| `StatCard`            | `components/StatCard.tsx`            | Only if `onPress` is passed | Wraps content in `TouchableOpacity` when `onPress` exists; otherwise renders a plain `View`.                                                    |
+| `GradientButton`      | `components/GradientButton.tsx`      | Depends on caller           | Always has `onPress` (required prop). Always navigates or triggers an action.                                                                   |
+| `ProfileHeaderButton` | `components/ProfileHeaderButton.tsx` | **Yes**                     | Always navigates to `/profile`.                                                                                                                 |
+| `GlobalSearch`        | `components/GlobalSearch.tsx`        | **Partially**               | Search result items are pressable and navigate, but some routes are incomplete (see Section 5).                                                 |
+| `RealtimeFeed`        | `components/RealtimeFeed.tsx`        | **No**                      | Activity feed items are plain `View`s. Not pressable at all despite looking like tappable cards.                                                |
+| `FilterModal`         | `components/FilterModal.tsx`         | **No** (filter chips only)  | Chips toggle filters; modal close button. No outbound navigation.                                                                               |
 
 ---
 
-## FloatingTabBar Component (`components/FloatingTabBar.tsx`)
+## 2. Screen-by-Screen Pressable Audit
 
-### Visual Design
+### Auth Screens
 
-- **Position**: Absolute bottom, centered horizontally, z-index 1000
-- **Container**: `SafeAreaView` (bottom edge) → `View` → `BlurView`
-- **Default width**: `screenWidth / 2.5`
-- **Height**: 60px fixed
-- **Border radius**: 35px
-- **Bottom margin**: 20px
-- **Border**: 1.2px solid white (`rgba(255, 255, 255, 1)`)
+#### `login.tsx`
 
-### Platform Styling
+| Element                   | Type               | Target                                    | Works? |
+| ------------------------- | ------------------ | ----------------------------------------- | ------ |
+| Sign In button            | `TouchableOpacity` | Validates & navigates to `/(tabs)/{role}` | Yes    |
+| Forgot Password?          | `TouchableOpacity` | `/forgot-password`                        | Yes    |
+| Sign Up link              | `TouchableOpacity` | `/signup`                                 | Yes    |
+| Quick Login (Owner)       | `TouchableOpacity` | `/(tabs)/owner`                           | Yes    |
+| Quick Login (Manager)     | `TouchableOpacity` | `/(tabs)/manager`                         | Yes    |
+| Quick Login (Crew)        | `TouchableOpacity` | `/(tabs)/crew`                            | Yes    |
+| Manager Login button      | `TouchableOpacity` | `/manager-login`                          | Yes    |
+| Show/hide password toggle | `TouchableOpacity` | N/A (toggles state)                       | Yes    |
 
-| Platform | Background | Blur |
-|---|---|---|
-| iOS | `rgba(28, 28, 30, 0.8)` dark / `rgba(255, 255, 255, 0.6)` light | BlurView intensity 80 |
-| Android | `rgba(28, 28, 30, 0.95)` dark / `rgba(255, 255, 255, 0.6)` light | None (solid) |
-| Web | Same as Android | CSS `backdrop-filter: blur(10px)` |
+#### `signup.tsx`
 
-### Active Tab Indicator
+| Element           | Type               | Target                      | Works? |
+| ----------------- | ------------------ | --------------------------- | ------ |
+| Back / Login link | `TouchableOpacity` | `router.back()` or `/login` | Yes    |
+| Submit button     | `TouchableOpacity` | Demo mode - alerts          | Yes    |
 
-- Animated pill that slides between tabs using `react-native-reanimated`
-- Spring animation config: `damping: 20, stiffness: 120, mass: 1`
-- Indicator is positioned with `top: 4, left: 2, bottom: 4, borderRadius: 27`
-- Width is calculated dynamically: `((100 / tabs.length) - 1)%`
-- Color: `rgba(255, 255, 255, 0.08)` in dark mode, `rgba(0, 0, 0, 0.04)` in light mode
+#### `forgot-password.tsx`
 
-### Active Tab Detection Algorithm
-
-Scoring system to determine which tab is active based on `usePathname()`:
-
-1. **Exact route match** → 100 points
-2. **Pathname starts with tab route** → 80 points (for nested routes)
-3. **Pathname contains tab name** → 60 points
-4. **Partial route match after `/(tabs)/`** → 40 points
-5. Default to first tab if no match
-
-### Tab Item Rendering
-
-Each tab is a `TouchableOpacity` with `activeOpacity: 0.7` containing:
-- `IconSymbol` (24px) — active: `theme.colors.primary`, inactive: `#98989D` (dark) / `#000000` (light)
-- `Text` label (9px, fontWeight 500) — active: `theme.colors.primary` + fontWeight 600, inactive: `#98989D` (dark) / `#8E8E93` (light)
-- Gap between icon and label: 2px, plus 2px marginTop on label
-
-### Navigation Action
-
-Tab press calls `router.push(tab.route)`. This is a push, not a replace — so tapping the same tab does nothing special (no scroll-to-top or reset behavior).
+| Element      | Type               | Target                           | Works? |
+| ------------ | ------------------ | -------------------------------- | ------ |
+| Back link    | `TouchableOpacity` | `router.back()`                  | Yes    |
+| Reset button | `TouchableOpacity` | Demo alert, then `router.back()` | Yes    |
 
 ---
 
-## Screen Headers
+### Owner Dashboard (`(tabs)/owner/index.tsx`)
 
-The app uses **three distinct header patterns**:
-
-### Pattern 1: Custom In-Page Header (Detail Screens)
-
-Used by: `maintenance-detail`, `issue-detail`, `supply-detail`, `document-detail`, `calendar-event-detail`, `analytics`
-
-```
-[< back]     Title Text     [empty spacer]
-```
-
-Structure:
-- Container: `flexDirection: 'row'`, `alignItems: 'center'`, `justifyContent: 'space-between'`
-- Padding: `horizontal: 20`, `top: platform-specific (60 iOS / 48 Android)`, `bottom: 16`
-- Back button: `TouchableOpacity` with `padding: 8`, calls `router.back()`
-- Back icon: `chevron.left` (iOS) / `arrow_back` (Android), 24px, `colors.text`
-- Title: `fontSize: 18`, `fontWeight: '600'`, `color: colors.text`, `flex: 1`, `textAlign: 'center'`
-- Right spacer: `View` with `width: 40` (to balance the back button)
-
-### Pattern 2: Custom Modal Header (Add/Create Screens)
-
-Used by: `add-maintenance-task`
-
-```
-Cancel     Title Text     Create
-```
-
-Structure:
-- Container: `flexDirection: 'row'`, `justifyContent: 'space-between'`, `alignItems: 'center'`
-- Padding: `horizontal: 20`, `top: 60 (iOS) / 48 (Android)`, `bottom: 16`
-- Border bottom: `1px` `colors.border`
-- Cancel button: `fontSize: 16`, `color: colors.textSecondary`
-- Title: `fontSize: 18`, `fontWeight: '600'`, `color: colors.text`
-- Create/Save button: `fontSize: 16`, `fontWeight: '600'`, `color: colors.accent`
-
-### Pattern 2b: Custom Modal Header (Other Add Screens)
-
-Used by: `add-issue`, `add-document`, `add-supply-request`, `add-parts-request`, `add-calendar-event`
-
-```
-[< back]     Title Text     [empty spacer]
-```
-
-Same as Pattern 1 (detail screen header). These modals slide up from the bottom but use a back-arrow header rather than Cancel/Save text buttons.
-
-### Pattern 3: Native React Navigation Header
-
-Used by: `notification-settings`, `assign-boats`
-
-These screens use `<Stack.Screen options={{ ... }}>` inline to configure the native header:
-- `notification-settings`: `title: 'Notification Settings'`, `headerStyle: { backgroundColor: colors.background }`, `headerTintColor: colors.text`
-- `assign-boats`: `title: 'Assign Boats'`, `headerStyle: { backgroundColor: theme.colors.card }`, `headerTintColor: colors.text`
-
-### Pattern 4: In-Page Section Header (Tab Screens)
-
-Used by: `maintenance`, `issues`, `supplies`, `documents`, `calendar`
-
-```
-Title Text                    [action buttons]
-```
-
-Structure:
-- Container: `flexDirection: 'row'`, `justifyContent: 'space-between'`, `alignItems: 'center'`
-- Padding: `horizontal: 20`, `top: platform-specific`, `bottom: 16`
-- Title: `fontSize: 28-32`, `fontWeight: '700'-'800'`, `color: colors.text`
-- Right side: Action buttons (add, search, analytics icons depending on screen)
-- No back button — these are top-level tab screens
-
-### Pattern 5: Dashboard Header (Role Dashboards)
-
-Used by: `owner`, `manager`, `crew`
-
-```
-Welcome back,
-User Name                     [search] [notifications]
-```
-
-Structure:
-- Two-line greeting ("Welcome back," + user name)
-- Right side: icon buttons for search and notifications (owner has both, varies by role)
-- No back button
-
-### Profile Screen
-
-Uses `SafeAreaView` with `edges={["top"]}` instead of a custom header. Renders a `GlassView` profile card at the top with the user's avatar, name, and role. Logout button is at the bottom of the scroll content.
+| Element                                | Type               | Target                     | Has onPress?     | Issue?                                                                                                                                            |
+| -------------------------------------- | ------------------ | -------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Search icon (header)                   | `TouchableOpacity` | Opens `GlobalSearch` modal | Yes              | --                                                                                                                                                |
+| `ProfileHeaderButton` (header)         | `TouchableOpacity` | `/profile`                 | Yes              | --                                                                                                                                                |
+| **Vessel cards** (fleet grid)          | `PressableCard`    | **None**                   | **No `onPress`** | **BUG: Vessel cards animate on press but navigate nowhere. Should navigate to a vessel detail screen or the maintenance tab filtered by vessel.** |
+| StatCard "Monthly Expenses"            | `StatCard`         | `/analytics`               | Yes              | --                                                                                                                                                |
+| StatCard "Active Tasks"                | `StatCard`         | `/(tabs)/maintenance`      | Yes              | --                                                                                                                                                |
+| StatCard "Open Issues"                 | `StatCard`         | `/(tabs)/issues`           | Yes              | --                                                                                                                                                |
+| StatCard "Pending Approvals"           | `StatCard`         | `/(tabs)/supplies`         | Yes              | --                                                                                                                                                |
+| **Performance card** (completion ring) | `PressableCard`    | **None**                   | **No `onPress`** | **BUG: Animates on press but navigates nowhere. Should link to `/analytics` or `/(tabs)/maintenance`.**                                           |
+| **Expense Trend chart card**           | `PressableCard`    | **None**                   | **No `onPress`** | **BUG: Animates on press but navigates nowhere. Should link to `/analytics`.**                                                                    |
+| **Next Maintenance card**              | `PressableCard`    | **None**                   | **No `onPress`** | **BUG: Animates on press but navigates nowhere. Should link to `/maintenance-detail?id={taskId}`.**                                               |
+| **Pending Approval cards**             | `PressableCard`    | **None**                   | **No `onPress`** | **BUG: Animates on press but navigates nowhere. Should link to `/supply-detail?id={approvalId}`.**                                                |
+| "Review All Requests" button           | `GradientButton`   | `/(tabs)/supplies`         | Yes              | --                                                                                                                                                |
+| **Activity log cards**                 | `PressableCard`    | **None**                   | **No `onPress`** | **BUG: Animates on press but navigates nowhere. Should link to the relevant detail screen based on `log.type`.**                                  |
 
 ---
 
-## Screen Transition Animations
+### Manager Dashboard (`(tabs)/manager/index.tsx`)
 
-| Transition Type | Animation | Used By |
-|---|---|---|
-| Tab switch | `none` | All tab screens |
-| Detail push | default (platform slide) | All `-detail` screens, analytics |
-| Modal slide-up | `slide_from_bottom` | All `add-*` screens |
-| Transparent modal | `fade` | `transparent-modal` |
-| Form sheet | platform default | `formsheet` |
-| Auth redirect | `replace` (no animation) | index → login/tabs |
-
----
-
-## Global Search (`components/GlobalSearch.tsx`)
-
-- Rendered as a `Modal` overlay, controlled by `visible` prop
-- Available on owner and manager dashboards via a search icon button
-- Searches across: maintenance tasks, issues, supply requests, documents, vessels
-- Uses `searchManager` utility for search logic and history persistence
-
-### Navigation From Search Results
-
-| Result Type | Navigation Target |
-|---|---|
-| maintenance | `/maintenance-detail` with `{ id }` param |
-| issue | `/(tabs)/issues` (tab, no specific item) |
-| supply | `/(tabs)/supplies` (tab, no specific item) |
-| document | `/(tabs)/documents` (tab, no specific item) |
-| vessel | `/(tabs)/owner` (tab, no specific item) |
-
-Only maintenance results deep-link to a detail screen. All others navigate to the list tab.
+| Element                            | Type               | Target                       | Has onPress?      | Issue?                                                                                                    |
+| ---------------------------------- | ------------------ | ---------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------- |
+| Search icon (header)               | `TouchableOpacity` | Opens `GlobalSearch`         | Yes               | --                                                                                                        |
+| `ProfileHeaderButton` (header)     | `TouchableOpacity` | `/profile`                   | Yes               | --                                                                                                        |
+| StatCard "Vessels"                 | `StatCard`         | `/assign-boats`              | Yes               | --                                                                                                        |
+| StatCard "Urgent Tasks"            | `StatCard`         | `/(tabs)/maintenance`        | Yes               | --                                                                                                        |
+| StatCard "Open Issues"             | `StatCard`         | `/(tabs)/issues`             | Yes               | --                                                                                                        |
+| StatCard "Pending Approvals"       | `StatCard`         | `/(tabs)/supplies`           | Yes               | --                                                                                                        |
+| **Fleet Status vessel cards**      | Plain `View`       | **None**                     | **Not pressable** | **MISSING: Vessel cards are not tappable. Should navigate to vessel detail or filtered maintenance.**     |
+| **RealtimeFeed activity items**    | Plain `View`       | **None**                     | **Not pressable** | **MISSING: Feed items look like cards but are not tappable. Should navigate to relevant detail screens.** |
+| Approve button (on approval cards) | `TouchableOpacity` | Calls `approveSupplyRequest` | Yes               | Action only, no nav                                                                                       |
+| Reject button (on approval cards)  | `TouchableOpacity` | Calls `denySupplyRequest`    | Yes               | Action only, no nav                                                                                       |
+| "View All Requests" button         | `TouchableOpacity` | `/(tabs)/supplies`           | Yes               | --                                                                                                        |
+| **Upcoming Maintenance cards**     | Plain `View`       | **None**                     | **Not pressable** | **MISSING: Maintenance preview cards should navigate to `/maintenance-detail?id={taskId}`.**              |
+| Quick Action: "Assign Boats"       | `TouchableOpacity` | `/assign-boats`              | Yes               | --                                                                                                        |
+| Quick Action: "Schedule Task"      | `TouchableOpacity` | `/add-maintenance-task`      | Yes               | --                                                                                                        |
+| Quick Action: "View Analytics"     | `TouchableOpacity` | `/analytics`                 | Yes               | --                                                                                                        |
 
 ---
 
-## Navigation Patterns Used in Code
+### Crew Dashboard (`(tabs)/crew/index.tsx`)
 
-### Push to detail screen with params
-```ts
-router.push({ pathname: '/maintenance-detail', params: { id: taskId } });
-router.push({ pathname: '/document-detail', params: { id: doc.id } });
-router.push({ pathname: '/calendar-event-detail', params: { eventId: event.id } });
+| Element                            | Type               | Target                  | Has onPress?      | Issue?                                                                                                                       |
+| ---------------------------------- | ------------------ | ----------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `ProfileHeaderButton` (header)     | `TouchableOpacity` | `/profile`              | Yes               | --                                                                                                                           |
+| **Vessel cards**                   | Plain `View`       | **None**                | **Not pressable** | **MISSING: Should be tappable.**                                                                                             |
+| **Stat cards** (Pending/Completed) | Plain `View`       | **None**                | **Not pressable** | Acceptable as summary cards, but could link to filtered lists.                                                               |
+| Task cards                         | `TouchableOpacity` | Toggles task completion | Yes               | **ISSUE: Only toggles completion. No way to navigate to `/maintenance-detail?id={taskId}` - crew cannot view task details.** |
+| **Supply request cards**           | Plain `View`       | **None**                | **Not pressable** | **MISSING: Should navigate to `/supply-detail?id={requestId}`.**                                                             |
+| Quick Action: "Report Issue"       | `TouchableOpacity` | `/add-issue`            | Yes               | --                                                                                                                           |
+| Quick Action: "Request Parts"      | `TouchableOpacity` | `/add-parts-request`    | Yes               | --                                                                                                                           |
+| Quick Action: "Request Supplies"   | `TouchableOpacity` | `/add-supply-request`   | Yes               | --                                                                                                                           |
+
+---
+
+### Calendar Screen (`(tabs)/calendar/index.tsx`)
+
+| Element                        | Type               | Target                                | Has onPress? | Issue? |
+| ------------------------------ | ------------------ | ------------------------------------- | ------------ | ------ |
+| Add event icon (header)        | `TouchableOpacity` | `/add-calendar-event`                 | Yes          | --     |
+| `ProfileHeaderButton` (header) | `TouchableOpacity` | `/profile`                            | Yes          | --     |
+| Previous/Next month arrows     | `TouchableOpacity` | Changes month (state)                 | Yes          | --     |
+| Today button                   | `TouchableOpacity` | Resets to today (state)               | Yes          | --     |
+| Calendar day cells             | `TouchableOpacity` | Selects date (state)                  | Yes          | --     |
+| Event items                    | `TouchableOpacity` | `/calendar-event-detail?eventId={id}` | Yes          | --     |
+| "Add Event" (empty state)      | `TouchableOpacity` | `/add-calendar-event`                 | Yes          | --     |
+
+**Fully wired.** No missing navigation.
+
+---
+
+### Maintenance Screen (`(tabs)/maintenance/index.tsx`)
+
+| Element                           | Type               | Target                               | Has onPress? |
+| --------------------------------- | ------------------ | ------------------------------------ | ------------ |
+| Add task icon (header)            | `TouchableOpacity` | `/add-maintenance-task`              | Yes          |
+| `ProfileHeaderButton` (header)    | `TouchableOpacity` | `/profile`                           | Yes          |
+| Filter button                     | `TouchableOpacity` | Opens `FilterModal`                  | Yes          |
+| Task cards                        | `TouchableOpacity` | `/maintenance-detail?id={taskId}`    | Yes          |
+| "Load More" / "Create First Task" | `TouchableOpacity` | Pagination / `/add-maintenance-task` | Yes          |
+
+**Fully wired.** No missing navigation.
+
+---
+
+### Issues Screen (`(tabs)/issues/index.tsx`)
+
+| Element                        | Type               | Target                       | Has onPress? |
+| ------------------------------ | ------------------ | ---------------------------- | ------------ |
+| Add issue icon (header)        | `TouchableOpacity` | `/add-issue`                 | Yes          |
+| `ProfileHeaderButton` (header) | `TouchableOpacity` | `/profile`                   | Yes          |
+| Filter chips                   | `TouchableOpacity` | Toggles filter (state)       | Yes          |
+| Issue cards                    | `TouchableOpacity` | `/issue-detail?id={issueId}` | Yes          |
+| "Load More"                    | `TouchableOpacity` | Pagination                   | Yes          |
+
+**Fully wired.** No missing navigation.
+
+---
+
+### Supplies Screen (`(tabs)/supplies/index.tsx`)
+
+| Element                             | Type               | Target                          | Has onPress? |
+| ----------------------------------- | ------------------ | ------------------------------- | ------------ |
+| Add supply icon (header, crew only) | `TouchableOpacity` | `/add-supply-request`           | Yes          |
+| `ProfileHeaderButton` (header)      | `TouchableOpacity` | `/profile`                      | Yes          |
+| Filter chips                        | `TouchableOpacity` | Toggles filter (state)          | Yes          |
+| Supply request cards                | `TouchableOpacity` | `/supply-detail?id={requestId}` | Yes          |
+| Approve/Deny buttons (manager)      | `TouchableOpacity` | Action only                     | Yes          |
+
+**Fully wired.** No missing navigation.
+
+---
+
+### Documents Screen (`(tabs)/documents/index.tsx`)
+
+| Element                        | Type               | Target                        | Has onPress? |
+| ------------------------------ | ------------------ | ----------------------------- | ------------ |
+| Add document icon (header)     | `TouchableOpacity` | `/add-document`               | Yes          |
+| `ProfileHeaderButton` (header) | `TouchableOpacity` | `/profile`                    | Yes          |
+| Filter chips                   | `TouchableOpacity` | Toggles filter (state)        | Yes          |
+| Document cards                 | `TouchableOpacity` | `/document-detail?id={docId}` | Yes          |
+| "Load More"                    | `TouchableOpacity` | Pagination                    | Yes          |
+
+**Fully wired.** No missing navigation.
+
+---
+
+### Detail Screens
+
+#### `maintenance-detail.tsx`
+
+| Element                  | Type               | Target                                     |
+| ------------------------ | ------------------ | ------------------------------------------ |
+| Status change buttons    | `TouchableOpacity` | Updates status (action)                    |
+| Complete button          | `TouchableOpacity` | Completes task, then `router.back()`       |
+| **Vessel name**          | Plain `Text`       | **MISSING: Should link to vessel detail**  |
+| **Assigned person name** | Plain `Text`       | **MISSING: Should link to person profile** |
+
+#### `issue-detail.tsx`
+
+| Element                     | Type               | Target                                     |
+| --------------------------- | ------------------ | ------------------------------------------ |
+| Send comment button         | `TouchableOpacity` | Adds comment (action)                      |
+| Start Work / Mark Resolved  | `TouchableOpacity` | Updates status (action)                    |
+| **Vessel name**             | Plain `Text`       | **MISSING: Should link to vessel detail**  |
+| **Reporter/Assignee names** | Plain `Text`       | **MISSING: Should link to person profile** |
+
+#### `supply-detail.tsx`
+
+| Element                      | Type               | Target                                     |
+| ---------------------------- | ------------------ | ------------------------------------------ |
+| Approve / Deny buttons       | `TouchableOpacity` | Action, then `router.back()`               |
+| **Vessel name**              | Plain `Text`       | **MISSING: Should link to vessel detail**  |
+| **Requester/Approver names** | Plain `Text`       | **MISSING: Should link to person profile** |
+
+#### `document-detail.tsx`
+
+| Element                | Type               | Target                                    |
+| ---------------------- | ------------------ | ----------------------------------------- |
+| "Open Document" button | `TouchableOpacity` | Shows alert (placeholder)                 |
+| **Vessel name**        | Plain `Text`       | **MISSING: Should link to vessel detail** |
+
+#### `calendar-event-detail.tsx`
+
+| Element                      | Type               | Target                                      |
+| ---------------------------- | ------------------ | ------------------------------------------- |
+| Delete button (header)       | `TouchableOpacity` | Deletes event, then `router.back()`         |
+| Mark Complete / Cancel Event | `TouchableOpacity` | Updates status (action)                     |
+| **Vessel name**              | Plain `Text`       | **MISSING: Should link to vessel detail**   |
+| **Attendee names**           | Plain `Text`       | **MISSING: Should link to person profiles** |
+
+---
+
+### Profile Screen (`profile.tsx`)
+
+| Element               | Type               | Target                          |
+| --------------------- | ------------------ | ------------------------------- |
+| Notifications setting | `TouchableOpacity` | `/notification-settings`        |
+| Log Out button        | `TouchableOpacity` | Logs out, navigates to `/login` |
+
+---
+
+### Analytics Screen (`analytics.tsx`)
+
+**No pressable navigation elements.** Read-only dashboard with charts and metric cards. None of the stat cards or metric cards are tappable.
+
+**MISSING:** Stat cards should link to their source screens (Active Tasks -> maintenance, Open Issues -> issues, Supply Requests -> supplies).
+
+---
+
+## 3. Navigation Map
+
+### Complete Screen Interconnection Graph
+
+```
+LOGIN FLOW:
+  login ──> forgot-password
+  login ──> signup
+  login ──> manager-login
+  login ──> (tabs)/owner    (via auth)
+  login ──> (tabs)/manager  (via auth)
+  login ──> (tabs)/crew     (via auth)
+  signup ──> login (back)
+  forgot-password ──> login (back)
+
+OWNER DASHBOARD:
+  (tabs)/owner ──> GlobalSearch (modal)
+  (tabs)/owner ──> /profile
+  (tabs)/owner ──> /analytics          (via StatCard "Monthly Expenses")
+  (tabs)/owner ──> (tabs)/maintenance  (via StatCard "Active Tasks")
+  (tabs)/owner ──> (tabs)/issues       (via StatCard "Open Issues")
+  (tabs)/owner ──> (tabs)/supplies     (via StatCard + "Review All Requests")
+  (tabs)/owner ──X  vessel cards (NO DESTINATION)
+  (tabs)/owner ──X  performance card (NO DESTINATION)
+  (tabs)/owner ──X  expense chart card (NO DESTINATION)
+  (tabs)/owner ──X  next maintenance card (NO DESTINATION)
+  (tabs)/owner ──X  approval cards (NO DESTINATION)
+  (tabs)/owner ──X  activity log cards (NO DESTINATION)
+
+MANAGER DASHBOARD:
+  (tabs)/manager ──> GlobalSearch (modal)
+  (tabs)/manager ──> /profile
+  (tabs)/manager ──> /assign-boats      (via StatCard "Vessels" + Quick Action)
+  (tabs)/manager ──> (tabs)/maintenance (via StatCard "Urgent Tasks")
+  (tabs)/manager ──> (tabs)/issues      (via StatCard "Open Issues")
+  (tabs)/manager ──> (tabs)/supplies    (via StatCard + "View All Requests")
+  (tabs)/manager ──> /add-maintenance-task (via Quick Action)
+  (tabs)/manager ──> /analytics          (via Quick Action)
+  (tabs)/manager ──X  fleet status cards (NOT PRESSABLE)
+  (tabs)/manager ──X  activity feed items (NOT PRESSABLE)
+  (tabs)/manager ──X  upcoming maintenance cards (NOT PRESSABLE)
+
+CREW DASHBOARD:
+  (tabs)/crew ──> /profile
+  (tabs)/crew ──> /add-issue          (via Quick Action)
+  (tabs)/crew ──> /add-parts-request  (via Quick Action)
+  (tabs)/crew ──> /add-supply-request (via Quick Action)
+  (tabs)/crew ──X  vessel cards (NOT PRESSABLE)
+  (tabs)/crew ──X  task cards (TOGGLE ONLY, no detail nav)
+  (tabs)/crew ──X  supply request cards (NOT PRESSABLE)
+
+CALENDAR:
+  (tabs)/calendar ──> /profile
+  (tabs)/calendar ──> /add-calendar-event
+  (tabs)/calendar ──> /calendar-event-detail?eventId={id}
+
+LIST SCREENS (all fully wired):
+  (tabs)/maintenance ──> /maintenance-detail?id={id}
+  (tabs)/maintenance ──> /add-maintenance-task
+  (tabs)/maintenance ──> /profile
+  (tabs)/issues ──> /issue-detail?id={id}
+  (tabs)/issues ──> /add-issue
+  (tabs)/issues ──> /profile
+  (tabs)/supplies ──> /supply-detail?id={id}
+  (tabs)/supplies ──> /add-supply-request
+  (tabs)/supplies ──> /profile
+  (tabs)/documents ──> /document-detail?id={id}
+  (tabs)/documents ──> /add-document
+  (tabs)/documents ──> /profile
+
+DETAIL SCREENS (all dead-ends for cross-entity nav):
+  maintenance-detail ──> router.back() (on complete)
+  issue-detail ──> (no outbound nav)
+  supply-detail ──> router.back() (on approve/deny)
+  document-detail ──> (no outbound nav)
+  calendar-event-detail ──> router.back() (on delete)
+
+PROFILE:
+  /profile ──> /notification-settings
+  /profile ──> /login (via logout)
+
+GLOBAL SEARCH:
+  GlobalSearch ──> /maintenance-detail?id={id}  (maintenance type)
+  GlobalSearch ──> (tabs)/issues                 (issue type - list, NOT detail)
+  GlobalSearch ──> (tabs)/supplies               (supply type - list, NOT detail)
+  GlobalSearch ──> (tabs)/documents              (document type - list, NOT detail)
+  GlobalSearch ──> (tabs)/owner                  (vessel type - dashboard, NOT detail)
 ```
 
-Note: maintenance/issue/supply detail screens use `id` as the param key. Calendar uses `eventId`.
+---
 
-### Push to modal (add screens)
-```ts
-router.push('/add-maintenance-task');
-router.push('/add-issue');
-router.push('/add-calendar-event');
-```
+## 4. Missing Navigation Links
 
-### Replace (auth flows, tab redirect)
-```ts
-router.replace('/login');
-router.replace('/(tabs)/(home)');
-router.replace('/(tabs)/owner');
-```
+### Critical: PressableCards with No `onPress`
 
-### Back
-```ts
-router.back();  // Used by all detail screens and modals
-```
+These use `PressableCard` which has a press animation (scale + haptics) -- users will tap them expecting navigation, but nothing happens.
 
-### Tab navigation
-```ts
-router.push('/(tabs)/maintenance');
-router.push('/(tabs)/issues');
-```
+| Screen          | Element                            | Line | Suggested Destination                                                                           |
+| --------------- | ---------------------------------- | ---- | ----------------------------------------------------------------------------------------------- |
+| Owner Dashboard | Vessel cards (fleet grid)          | ~239 | Vessel detail (new screen) or `/(tabs)/maintenance` filtered by vessel                          |
+| Owner Dashboard | Performance card (completion ring) | ~347 | `/analytics` or `/(tabs)/maintenance`                                                           |
+| Owner Dashboard | Expense Trend chart card           | ~378 | `/analytics`                                                                                    |
+| Owner Dashboard | Next Maintenance card              | ~394 | `/maintenance-detail?id={upcomingMaintenance.id}`                                               |
+| Owner Dashboard | Pending Approval cards             | ~459 | `/supply-detail?id={approval.id}`                                                               |
+| Owner Dashboard | Activity log cards                 | ~500 | Route based on `log.type`: maintenance -> `/maintenance-detail`, issue -> `/issue-detail`, etc. |
 
-The FloatingTabBar also uses `router.push(tab.route)` for tab switches.
+### Critical: Items That Look Tappable But Aren't Wrapped in Pressables
+
+| Screen            | Element                     | Suggested Destination                 |
+| ----------------- | --------------------------- | ------------------------------------- |
+| Manager Dashboard | Fleet Status vessel cards   | Vessel detail or filtered maintenance |
+| Manager Dashboard | RealtimeFeed activity items | Detail screen based on activity type  |
+| Manager Dashboard | Upcoming Maintenance cards  | `/maintenance-detail?id={item.id}`    |
+| Crew Dashboard    | Vessel cards                | Vessel detail or filtered tasks       |
+| Crew Dashboard    | Supply request cards        | `/supply-detail?id={request.id}`      |
+
+### Missing: Crew Task Navigation
+
+| Screen         | Element    | Current Behavior       | Suggested Behavior                                                                                                                                       |
+| -------------- | ---------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Crew Dashboard | Task cards | Toggle completion only | Should also navigate to `/maintenance-detail?id={task.id}` (e.g. a detail chevron or separate tap area). Currently crew cannot view task details at all. |
+
+### Missing: Cross-Entity Links in Detail Screens
+
+Every detail screen displays vessel names, person names, etc. as plain text. These should be tappable.
+
+| Detail Screen         | Field                            | Suggested Action                                          |
+| --------------------- | -------------------------------- | --------------------------------------------------------- |
+| maintenance-detail    | Vessel name                      | Navigate to vessel detail or filter maintenance by vessel |
+| maintenance-detail    | Assigned person name             | Navigate to person profile (new screen)                   |
+| issue-detail          | Vessel name                      | Navigate to vessel detail                                 |
+| issue-detail          | Reported by / Assigned to names  | Navigate to person profile                                |
+| supply-detail         | Vessel name                      | Navigate to vessel detail                                 |
+| supply-detail         | Requested by / Approved by names | Navigate to person profile                                |
+| document-detail       | Vessel name                      | Navigate to vessel detail                                 |
+| document-detail       | Uploaded by name                 | Navigate to person profile                                |
+| calendar-event-detail | Vessel name                      | Navigate to vessel detail                                 |
+| calendar-event-detail | Attendee names                   | Navigate to person profiles                               |
+
+### Missing: Analytics Outbound Links
+
+| Screen    | Element                       | Suggested Destination |
+| --------- | ----------------------------- | --------------------- |
+| Analytics | Stat card "Active Tasks"      | `/(tabs)/maintenance` |
+| Analytics | Stat card "Open Issues"       | `/(tabs)/issues`      |
+| Analytics | Metric card "Supply Requests" | `/(tabs)/supplies`    |
+| Analytics | Metric card "Completion Rate" | `/(tabs)/maintenance` |
 
 ---
 
-## Home Screen Nesting (`app/(tabs)/(home)/`)
+## 5. Incomplete Navigation in GlobalSearch
 
-Nested stack inside the tabs. Has its own `_layout.tsx` with a single screen:
-- `headerShown: Platform.OS === 'ios'` — iOS shows a native header with title "Home", Android/Web hides it
-- The home `index.tsx` is a vessel fleet overview with filters, search, and vessel cards
-- Users rarely stay here — the role redirect moves them to their dashboard immediately
+`GlobalSearch` (`components/GlobalSearch.tsx` lines 50-74) handles search result navigation inconsistently:
 
----
+| Result Type   | Current Behavior                       | Expected Behavior                                                             |
+| ------------- | -------------------------------------- | ----------------------------------------------------------------------------- |
+| `maintenance` | `/maintenance-detail?id={id}`          | **Correct**                                                                   |
+| `issue`       | `/(tabs)/issues` (list, not detail)    | **Should go to** `/issue-detail?id={id}`                                      |
+| `supply`      | `/(tabs)/supplies` (list, not detail)  | **Should go to** `/supply-detail?id={id}`                                     |
+| `document`    | `/(tabs)/documents` (list, not detail) | **Should go to** `/document-detail?id={id}`                                   |
+| `vessel`      | `/(tabs)/owner`                        | **Should go to** vessel detail (doesn't exist) or at minimum filter by vessel |
 
-## Content Padding for Tab Bar
-
-Tab screens must account for the floating tab bar at the bottom. This is done through `contentContainerStyle` with extra bottom padding:
-- Most screens use `paddingBottom: 120` on `ScrollView`/`FlatList` content containers
-- Profile screen uses `Platform.OS !== 'ios' && styles.contentContainerWithTabBar` conditional
-
----
-
-## Screen Access by Role
-
-| Screen | Owner | Manager | Crew |
-|---|---|---|---|
-| Owner Dashboard | tab | - | - |
-| Manager Dashboard | - | tab | - |
-| Crew Dashboard | - | - | tab |
-| Calendar | tab | tab | tab |
-| Maintenance | tab | tab | - |
-| Issues | - | tab | tab |
-| Supplies | - | tab | tab |
-| Documents | tab | - | - |
-| Profile | tab | tab | tab |
-| All detail screens | push | push | push |
-| All add screens | modal | modal | modal |
-| Analytics | push | push | - |
-| Assign Boats | push | - | - |
-| Notification Settings | push | push | push |
+Only maintenance results navigate to the actual detail screen. All other types dump the user on the list with no context about what they searched for.
 
 ---
 
-## Known Quirks / Design Decisions
+## 6. Dead-End Screens
 
-1. **Tab bar uses Stack, not Tabs**: The `(tabs)` layout is actually a Stack navigator. Tab switching is `router.push()` with `animation: "none"`. This means there's no native tab state, no tab history, and no scroll-to-top-on-re-tap behavior.
+Screens with no outbound navigation links (users must use back button or tab bar):
 
-2. **All add-form modals except `add-maintenance-task` use a back-arrow header** instead of Cancel/Save. `add-maintenance-task` is the only one with text-button Cancel/Create in the header.
+| Screen                      | Notes                                                       |
+| --------------------------- | ----------------------------------------------------------- |
+| `analytics.tsx`             | Read-only charts. No tappable cards linking to source data. |
+| `notification-settings.tsx` | Settings toggles only. Expected behavior.                   |
+| `assign-boats.tsx`          | Assignment actions only. Could link to vessel details.      |
+| `maintenance-detail.tsx`    | Actions only (status, complete). No cross-links.            |
+| `issue-detail.tsx`          | Actions only (status, comment). No cross-links.             |
+| `supply-detail.tsx`         | Actions only (approve/deny). No cross-links.                |
+| `document-detail.tsx`       | Open file placeholder only. No cross-links.                 |
+| `calendar-event-detail.tsx` | Actions only (complete, cancel, delete). No cross-links.    |
 
-3. **Search results partially navigate**: Only maintenance search results go to a detail screen. Issue, supply, document, and vessel results navigate to the list tab without selecting the specific item.
+---
 
-4. **Two screens use the native React Navigation header** (`notification-settings`, `assign-boats`) via inline `<Stack.Screen options>`. Every other screen either has no header or builds a custom one.
+## 7. Summary of All Issues
 
-5. **Home screen exists but is skipped**: `(home)/index.tsx` is rendered momentarily then immediately replaced by the role-specific dashboard. The home layout even has a platform-conditional native header that most users never see.
+### High Priority -- Broken UX (users tap and nothing happens)
 
-6. **Tab bar width is fixed at `screenWidth / 2.5`**: This doesn't dynamically account for the number of tabs. Manager role has 6 tabs crammed into the same width as owner/crew with 5 tabs.
+1. **Owner Dashboard: 6 PressableCard instances with no `onPress`** -- Cards animate on press (scale down + haptic feedback), creating an expectation of navigation, then do nothing.
+   - Vessel cards (~line 239)
+   - Performance card (~line 347)
+   - Expense chart card (~line 378)
+   - Next Maintenance card (~line 394)
+   - Pending Approval cards (~line 459)
+   - Activity log cards (~line 500)
 
-7. **Detail screen param key inconsistency**: Most detail screens use `id` as the search param. Calendar event detail uses `eventId`.
+2. **Crew Dashboard: Task cards only toggle, never show details** -- Crew members have no way to view full task details (description, notes, history, due date context). The only interaction is a completion toggle.
+
+### Medium Priority -- Missing expected navigation
+
+3. **Manager Dashboard: 3 card types are not pressable at all** -- Fleet Status vessel cards, RealtimeFeed items, and Upcoming Maintenance cards are plain `View`s with no touch handling despite looking like interactive cards.
+
+4. **Crew Dashboard: Vessel cards and Supply request cards are not pressable** -- Plain `View`s that users would expect to tap.
+
+5. **GlobalSearch navigates to list screens instead of detail screens** for issues, supplies, documents, and vessels -- defeats the purpose of search.
+
+### Low Priority -- Polish / cross-linking
+
+6. **Detail screens have no cross-entity links** -- Vessel names, person names shown as plain text across all 5 detail screens. Making these tappable would create a richer navigation web.
+
+7. **Analytics screen has no outbound links** -- Stat/metric cards could link to their corresponding tab screens.
+
+8. **Missing screen: Vessel Detail** -- Multiple places would benefit from a dedicated vessel detail screen (fleet cards on all dashboards, vessel names in detail screens, vessel search results). No `/vessel-detail` route exists.
+
+9. **Missing screen: Crew/Person Profile** -- Person names appear throughout detail screens (assigned to, reported by, approved by, attendees) but there's no way to view a person's profile or their work.

@@ -176,11 +176,6 @@ export default function OwnerDashboard() {
     return days;
   };
 
-  const handleViewReports = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/(tabs)/documents");
-  };
-
   const handleApproveRequests = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push("/(tabs)/supplies");
