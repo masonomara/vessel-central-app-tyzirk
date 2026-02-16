@@ -16,7 +16,7 @@ import { GlassCard } from "@/components/GlassCard";
 import { PressableCard } from "@/components/PressableCard";
 import { GradientButton } from "@/components/GradientButton";
 import GlobalSearch from "@/components/GlobalSearch";
-import RealtimeFeed from "@/components/RealtimeFeed";
+import { RealtimeFeed } from "@/components/RealtimeFeed";
 import { router } from "expo-router";
 
 export default function OwnerDashboard() {
@@ -530,7 +530,7 @@ export default function OwnerDashboard() {
 
         <AnimatedCard delay={600}>
           <View style={styles.section}>
-            <RealtimeFeed userId={userId} maxItems={5} />
+            <RealtimeFeed userId={userId} limit={5} />
           </View>
         </AnimatedCard>
 
