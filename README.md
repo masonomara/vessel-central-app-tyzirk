@@ -206,7 +206,7 @@ const { data, error } = await supabase.from("vessels").select("*");
 3. Run `npm run lint` before committing
 4. Submit PR with clear description
 
-For active development context and current work, see [CONTEXT.md](./CONTEXT.md) (if available).
+For active development context and current work, see [CONTEXT.md](./docs/CONTEXT.md) (if available).
 
 ## Troubleshooting
 
