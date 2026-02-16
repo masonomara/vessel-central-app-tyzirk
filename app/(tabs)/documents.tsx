@@ -112,7 +112,7 @@ export default function DocumentsScreen() {
   );
 
   return (
-    <View
+    <ScrollView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <View style={styles.header}>
@@ -187,7 +187,7 @@ export default function DocumentsScreen() {
         ))}
       </ScrollView>
 
-      <ScrollView
+      <View
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -353,8 +353,8 @@ export default function DocumentsScreen() {
             )}
           </>
         )}
-      </ScrollView>
-    </View>
+      </View>
+    </ScrollView>
   );
 }
 

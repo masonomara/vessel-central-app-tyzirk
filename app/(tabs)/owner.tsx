@@ -17,7 +17,6 @@ import { IconSymbol } from "@/components/IconSymbol";
 import { StatCard } from "@/components/StatCard";
 import { ProgressRing } from "@/components/ProgressRing";
 import { MiniChart } from "@/components/MiniChart";
-import { GlassCard } from "@/components/GlassCard";
 import { PressableCard } from "@/components/PressableCard";
 import { GradientButton } from "@/components/GradientButton";
 import GlobalSearch from "@/components/GlobalSearch";
@@ -36,39 +35,6 @@ export default function OwnerDashboard() {
     getSupplyRequestsForUser,
     getIssuesForUser,
   } = useData();
-
-  const handleLogout = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    Alert.alert("Log Out", "Are you sure you want to log out?", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Log Out",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            const { error } = await signOut();
-
-            if (error) {
-              Alert.alert("Error", "Failed to log out. Please try again.");
-              return;
-            }
-
-            setTimeout(() => {
-              router.replace("/login");
-            }, 100);
-          } catch {
-            Alert.alert(
-              "Error",
-              "An unexpected error occurred. Please try again.",
-            );
-          }
-        },
-      },
-    ]);
-  };
 
   const myVessels = useMemo(() => {
     if (!userId || !userRole) {
@@ -228,7 +194,7 @@ export default function OwnerDashboard() {
 
   return (
     <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      style={[styles.container, { backgroundColor: colors.background }]}
     >
       <GlobalSearch visible={showSearch} onClose={() => setShowSearch(false)} />
 
@@ -237,399 +203,380 @@ export default function OwnerDashboard() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-            <View style={styles.headerTop}>
-              <View>
-                <Text style={styles.greeting}>Welcome back,</Text>
-                <Text style={commonStyles.title}>{userName}</Text>
-              </View>
-              <View style={styles.headerActions}>
-                <TouchableOpacity
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setShowSearch(true);
-                  }}
-                  style={styles.iconButton}
-                >
-                  <LinearGradient
-                    colors={[colors.card, colors.cardElevated]}
-                    style={styles.iconButtonGradient}
-                  >
-                    <IconSymbol
-                      ios_icon_name="magnifyingglass"
-                      android_material_icon_name="search"
-                      size={20}
-                      color={colors.text}
-                    />
-                  </LinearGradient>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={handleViewAnalytics}
-                  style={styles.iconButton}
-                >
-                  <LinearGradient
-                    colors={[colors.card, colors.cardElevated]}
-                    style={styles.iconButtonGradient}
-                  >
-                    <IconSymbol
-                      ios_icon_name="chart.bar.fill"
-                      android_material_icon_name="analytics"
-                      size={20}
-                      color={colors.text}
-                    />
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
+          <View style={styles.headerTop}>
+            <View>
+              <Text style={styles.greeting}>Welcome back,</Text>
+              <Text style={commonStyles.title}>{userName}</Text>
             </View>
-            <LinearGradient
-              colors={[colors.gold + "30", colors.gold + "10"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.roleTag}
-            >
-              <IconSymbol
-                ios_icon_name="crown.fill"
-                android_material_icon_name="workspace_premium"
-                size={16}
-                color={colors.gold}
-              />
-              <Text style={styles.roleText}>Owner</Text>
-            </LinearGradient>
-          </View>
-
-        <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Fleet Overview</Text>
-            <View style={styles.fleetGrid}>
-              {myVessels.map((vessel, index) => (
-                <PressableCard key={vessel.id} style={styles.vesselCard}>
-                  <View style={styles.vesselHeader}>
-                    <LinearGradient
-                      colors={[colors.accent + "30", colors.accent + "10"]}
-                      style={styles.vesselIconCircle}
-                    >
-                      <IconSymbol
-                        ios_icon_name="sailboat.fill"
-                        android_material_icon_name="sailing"
-                        size={28}
-                        color={colors.accent}
-                      />
-                    </LinearGradient>
-                    <View
-                      style={[
-                        styles.statusDot,
-                        vessel.status === "active"
-                          ? styles.statusDotActive
-                          : styles.statusDotMaintenance,
-                      ]}
-                    />
-                  </View>
-                  <Text style={styles.vesselName}>{vessel.name}</Text>
-                  <Text style={styles.vesselLocation}>{vessel.location}</Text>
-                  <View style={styles.vesselFooter}>
-                    <View style={styles.vesselStat}>
-                      <IconSymbol
-                        ios_icon_name="person.2.fill"
-                        android_material_icon_name="groups"
-                        size={14}
-                        color={colors.textSecondary}
-                      />
-                      <Text style={styles.vesselStatText}>
-                        {vessel.crewCount}
-                      </Text>
-                    </View>
-                    <View
-                      style={[
-                        styles.statusBadge,
-                        vessel.status === "active"
-                          ? styles.statusActive
-                          : styles.statusMaintenance,
-                      ]}
-                    >
-                      <Text style={styles.statusText}>
-                        {vessel.status.toUpperCase()}
-                      </Text>
-                    </View>
-                  </View>
-                </PressableCard>
-              ))}
-            </View>
-          </View>
-
-        <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Key Metrics</Text>
-
-            <View style={styles.statsGrid}>
-              <StatCard
-                icon="dollarsign.circle.fill"
-                androidIcon="payments"
-                iconColor={colors.success}
-                label="Monthly Expenses"
-                value={`$${totalMonthlyExpenses.toLocaleString()}`}
-                subtext="Current month"
-                trend={expenseTrend.direction}
-                trendValue={expenseTrend.value}
-                onPress={handleViewAnalytics}
-                useGradient={true}
-              />
-
-              <StatCard
-                icon="wrench.and.screwdriver.fill"
-                androidIcon="build"
-                iconColor={colors.warning}
-                label="Active Tasks"
-                value={
-                  myMaintenanceTasks.filter((t) => t.status !== "completed")
-                    .length
-                }
-                subtext={`${myMaintenanceTasks.length} total`}
-                onPress={() => router.push("/(tabs)/maintenance")}
-                useGradient={true}
-              />
-
-              <StatCard
-                icon="exclamationmark.triangle.fill"
-                androidIcon="warning"
-                iconColor={colors.danger}
-                label="Open Issues"
-                value={openIssuesCount}
-                subtext={openIssuesCount > 0 ? "Needs attention" : "All clear"}
-                onPress={() => router.push("/(tabs)/issues")}
-                useGradient={true}
-              />
-
-              <StatCard
-                icon="shippingbox.fill"
-                androidIcon="inventory_2"
-                iconColor={colors.accent}
-                label="Pending Approvals"
-                value={pendingApprovals.length}
-                subtext="Supply requests"
-                onPress={handleApproveRequests}
-                useGradient={true}
-              />
-            </View>
-          </View>
-
-        <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Performance</Text>
-
-            <GlassCard style={styles.performanceCard}>
-              <View style={styles.performanceContent}>
-                <View style={styles.performanceLeft}>
-                  <ProgressRing
-                    progress={completionRate}
-                    size={100}
-                    strokeWidth={10}
-                    color={colors.success}
-                    label="Complete"
+            <View style={styles.headerActions}>
+              <TouchableOpacity
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setShowSearch(true);
+                }}
+                style={styles.iconButton}
+              >
+                <View style={styles.iconButtonGradient}>
+                  <IconSymbol
+                    ios_icon_name="magnifyingglass"
+                    android_material_icon_name="search"
+                    size={20}
+                    color={colors.text}
                   />
                 </View>
-                <View style={styles.performanceRight}>
-                  <Text style={styles.performanceTitle}>Task Completion</Text>
-                  <Text style={styles.performanceValue}>
-                    {
-                      myMaintenanceTasks.filter((t) => t.status === "completed")
-                        .length
-                    }{" "}
-                    of {myMaintenanceTasks.length}
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleViewAnalytics}
+                style={styles.iconButton}
+              >
+                <View style={styles.iconButtonGradient}>
+                  <IconSymbol
+                    ios_icon_name="chart.bar.fill"
+                    android_material_icon_name="analytics"
+                    size={20}
+                    color={colors.text}
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={styles.roleTag}>
+            <IconSymbol
+              ios_icon_name="crown.fill"
+              android_material_icon_name="workspace_premium"
+              size={16}
+              color={colors.gold}
+            />
+            <Text style={styles.roleText}>Owner</Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Fleet Overview</Text>
+          <View style={styles.fleetGrid}>
+            {myVessels.map((vessel, index) => (
+              <PressableCard key={vessel.id} style={styles.vesselCard}>
+                <View style={styles.vesselHeader}>
+                  <LinearGradient
+                    colors={[colors.accent + "30", colors.accent + "10"]}
+                    style={styles.vesselIconCircle}
+                  >
+                    <IconSymbol
+                      ios_icon_name="sailboat.fill"
+                      android_material_icon_name="sailing"
+                      size={28}
+                      color={colors.accent}
+                    />
+                  </LinearGradient>
+                  <View
+                    style={[
+                      styles.statusDot,
+                      vessel.status === "active"
+                        ? styles.statusDotActive
+                        : styles.statusDotMaintenance,
+                    ]}
+                  />
+                </View>
+                <Text style={styles.vesselName}>{vessel.name}</Text>
+                <Text style={styles.vesselLocation}>{vessel.location}</Text>
+                <View style={styles.vesselFooter}>
+                  <View style={styles.vesselStat}>
+                    <IconSymbol
+                      ios_icon_name="person.2.fill"
+                      android_material_icon_name="groups"
+                      size={14}
+                      color={colors.textSecondary}
+                    />
+                    <Text style={styles.vesselStatText}>
+                      {vessel.crewCount}
+                    </Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      vessel.status === "active"
+                        ? styles.statusActive
+                        : styles.statusMaintenance,
+                    ]}
+                  >
+                    <Text style={styles.statusText}>
+                      {vessel.status.toUpperCase()}
+                    </Text>
+                  </View>
+                </View>
+              </PressableCard>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Key Metrics</Text>
+
+          <View style={styles.statsGrid}>
+            <StatCard
+              icon="dollarsign.circle.fill"
+              androidIcon="payments"
+              iconColor={colors.success}
+              label="Monthly Expenses"
+              value={`$${totalMonthlyExpenses.toLocaleString()}`}
+              subtext="Current month"
+              trend={expenseTrend.direction}
+              trendValue={expenseTrend.value}
+              onPress={handleViewAnalytics}
+            />
+
+            <StatCard
+              icon="wrench.and.screwdriver.fill"
+              androidIcon="build"
+              iconColor={colors.warning}
+              label="Active Tasks"
+              value={
+                myMaintenanceTasks.filter((t) => t.status !== "completed")
+                  .length
+              }
+              subtext={`${myMaintenanceTasks.length} total`}
+              onPress={() => router.push("/(tabs)/maintenance")}
+            />
+
+            <StatCard
+              icon="exclamationmark.triangle.fill"
+              androidIcon="warning"
+              iconColor={colors.danger}
+              label="Open Issues"
+              value={openIssuesCount}
+              subtext={openIssuesCount > 0 ? "Needs attention" : "All clear"}
+              onPress={() => router.push("/(tabs)/issues")}
+            />
+
+            <StatCard
+              icon="shippingbox.fill"
+              androidIcon="inventory_2"
+              iconColor={colors.accent}
+              label="Pending Approvals"
+              value={pendingApprovals.length}
+              subtext="Supply requests"
+              onPress={handleApproveRequests}
+            />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Performance</Text>
+
+          <PressableCard style={styles.performanceCard}>
+            <View style={styles.performanceContent}>
+              <View style={styles.performanceLeft}>
+                <ProgressRing
+                  progress={completionRate}
+                  size={100}
+                  strokeWidth={10}
+                  color={colors.success}
+                  label="Complete"
+                />
+              </View>
+              <View style={styles.performanceRight}>
+                <Text style={styles.performanceTitle}>Task Completion</Text>
+                <Text style={styles.performanceValue}>
+                  {
+                    myMaintenanceTasks.filter((t) => t.status === "completed")
+                      .length
+                  }{" "}
+                  of {myMaintenanceTasks.length}
+                </Text>
+                <Text style={styles.performanceSubtext}>
+                  {
+                    myMaintenanceTasks.filter((t) => t.status !== "completed")
+                      .length
+                  }{" "}
+                  tasks remaining
+                </Text>
+              </View>
+            </View>
+          </PressableCard>
+
+          <View style={styles.expenseChartCard}>
+            <LinearGradient
+              colors={[colors.card, colors.cardElevated]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.expenseChartGradient}
+            >
+              <View style={styles.expenseChartHeader}>
+                <Text style={styles.expenseChartTitle}>Expense Trend</Text>
+                <Text style={styles.expenseChartSubtitle}>Last 6 months</Text>
+              </View>
+              <MiniChart
+                data={last6MonthsExpenses}
+                color={colors.success}
+                height={80}
+              />
+            </LinearGradient>
+          </View>
+        </View>
+
+        {upcomingMaintenance && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Next Maintenance</Text>
+            <PressableCard style={styles.maintenanceCard}>
+              <View style={styles.maintenanceHeader}>
+                <LinearGradient
+                  colors={[colors.warning + "30", colors.warning + "10"]}
+                  style={styles.iconCircle}
+                >
+                  <IconSymbol
+                    ios_icon_name="wrench.and.screwdriver.fill"
+                    android_material_icon_name="build"
+                    size={24}
+                    color={colors.warning}
+                  />
+                </LinearGradient>
+                <View style={styles.maintenanceInfo}>
+                  <Text style={styles.maintenanceTitle}>
+                    {upcomingMaintenance.title}
                   </Text>
-                  <Text style={styles.performanceSubtext}>
-                    {
-                      myMaintenanceTasks.filter((t) => t.status !== "completed")
-                        .length
-                    }{" "}
-                    tasks remaining
+                  <Text style={styles.maintenanceVessel}>
+                    {upcomingMaintenance.vesselName}
                   </Text>
                 </View>
               </View>
-            </GlassCard>
-
-            <View style={styles.expenseChartCard}>
-              <LinearGradient
-                colors={[colors.card, colors.cardElevated]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.expenseChartGradient}
-              >
-                <View style={styles.expenseChartHeader}>
-                  <Text style={styles.expenseChartTitle}>Expense Trend</Text>
-                  <Text style={styles.expenseChartSubtitle}>Last 6 months</Text>
+              <View style={styles.maintenanceFooter}>
+                <View style={styles.maintenanceDue}>
+                  <IconSymbol
+                    ios_icon_name="clock.fill"
+                    android_material_icon_name="schedule"
+                    size={16}
+                    color={colors.textSecondary}
+                  />
+                  <Text style={styles.maintenanceDueText}>
+                    Due in {getDaysUntil(upcomingMaintenance.dueDate)} days
+                  </Text>
                 </View>
-                <MiniChart
-                  data={last6MonthsExpenses}
-                  color={colors.success}
-                  height={80}
-                />
-              </LinearGradient>
-            </View>
-          </View>
-
-        {upcomingMaintenance && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Next Maintenance</Text>
-              <PressableCard style={styles.maintenanceCard}>
-                <View style={styles.maintenanceHeader}>
-                  <LinearGradient
-                    colors={[colors.warning + "30", colors.warning + "10"]}
-                    style={styles.iconCircle}
-                  >
-                    <IconSymbol
-                      ios_icon_name="wrench.and.screwdriver.fill"
-                      android_material_icon_name="build"
-                      size={24}
-                      color={colors.warning}
-                    />
-                  </LinearGradient>
-                  <View style={styles.maintenanceInfo}>
-                    <Text style={styles.maintenanceTitle}>
-                      {upcomingMaintenance.title}
-                    </Text>
-                    <Text style={styles.maintenanceVessel}>
-                      {upcomingMaintenance.vesselName}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.maintenanceFooter}>
-                  <View style={styles.maintenanceDue}>
-                    <IconSymbol
-                      ios_icon_name="clock.fill"
-                      android_material_icon_name="schedule"
-                      size={16}
-                      color={colors.textSecondary}
-                    />
-                    <Text style={styles.maintenanceDueText}>
-                      Due in {getDaysUntil(upcomingMaintenance.dueDate)} days
-                    </Text>
-                  </View>
-                  <LinearGradient
-                    colors={
-                      upcomingMaintenance.priority === "high" ||
-                      upcomingMaintenance.priority === "urgent"
-                        ? [colors.danger + "40", colors.danger + "20"]
-                        : upcomingMaintenance.priority === "medium"
-                          ? [colors.warning + "40", colors.warning + "20"]
-                          : [colors.success + "40", colors.success + "20"]
-                    }
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.priorityBadge}
-                  >
-                    <Text style={styles.priorityText}>
-                      {upcomingMaintenance.priority.toUpperCase()}
-                    </Text>
-                  </LinearGradient>
-                </View>
-              </PressableCard>
-            </View>
-        )}
-
-        {pendingApprovals.length > 0 && (
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Pending Approvals</Text>
                 <LinearGradient
-                  colors={[colors.warning, colors.warningLight]}
-                  style={styles.badge}
+                  colors={
+                    upcomingMaintenance.priority === "high" ||
+                    upcomingMaintenance.priority === "urgent"
+                      ? [colors.danger + "40", colors.danger + "20"]
+                      : upcomingMaintenance.priority === "medium"
+                        ? [colors.warning + "40", colors.warning + "20"]
+                        : [colors.success + "40", colors.success + "20"]
+                  }
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.priorityBadge}
                 >
-                  <Text style={styles.badgeText}>
-                    {pendingApprovals.length}
+                  <Text style={styles.priorityText}>
+                    {upcomingMaintenance.priority.toUpperCase()}
                   </Text>
                 </LinearGradient>
               </View>
-              {pendingApprovals.slice(0, 2).map((approval, index) => (
-                <PressableCard key={approval.id} style={styles.approvalCard}>
-                  <View style={styles.approvalHeader}>
-                    <View style={styles.approvalLeft}>
-                      <Text style={styles.approvalItem}>
-                        {approval.itemName}
-                      </Text>
-                      <Text style={styles.approvalVessel}>
-                        {approval.vesselName}
-                      </Text>
-                    </View>
-                    <Text style={styles.approvalAmount}>
-                      ${approval.estimatedCost}
-                    </Text>
-                  </View>
-                  <View style={styles.approvalFooter}>
-                    <LinearGradient
-                      colors={[colors.accent + "30", colors.accent + "10"]}
-                      style={styles.approvalCategory}
-                    >
-                      <Text style={styles.approvalCategoryText}>
-                        {approval.category}
-                      </Text>
-                    </LinearGradient>
-                    <Text style={styles.approvalQuantity}>
-                      {approval.quantity} {approval.unit}
-                    </Text>
-                  </View>
-                </PressableCard>
-              ))}
-              <GradientButton
-                title="Review All Requests"
-                onPress={handleApproveRequests}
-                icon="checkmark.circle.fill"
-                androidIcon="check_circle"
-                style={styles.viewAllButton}
-              />
+            </PressableCard>
+          </View>
+        )}
+
+        {pendingApprovals.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Pending Approvals</Text>
+              <LinearGradient
+                colors={[colors.warning, colors.warningLight]}
+                style={styles.badge}
+              >
+                <Text style={styles.badgeText}>{pendingApprovals.length}</Text>
+              </LinearGradient>
             </View>
+            {pendingApprovals.slice(0, 2).map((approval, index) => (
+              <PressableCard key={approval.id} style={styles.approvalCard}>
+                <View style={styles.approvalHeader}>
+                  <View style={styles.approvalLeft}>
+                    <Text style={styles.approvalItem}>{approval.itemName}</Text>
+                    <Text style={styles.approvalVessel}>
+                      {approval.vesselName}
+                    </Text>
+                  </View>
+                  <Text style={styles.approvalAmount}>
+                    ${approval.estimatedCost}
+                  </Text>
+                </View>
+                <View style={styles.approvalFooter}>
+                  <LinearGradient
+                    colors={[colors.accent + "30", colors.accent + "10"]}
+                    style={styles.approvalCategory}
+                  >
+                    <Text style={styles.approvalCategoryText}>
+                      {approval.category}
+                    </Text>
+                  </LinearGradient>
+                  <Text style={styles.approvalQuantity}>
+                    {approval.quantity} {approval.unit}
+                  </Text>
+                </View>
+              </PressableCard>
+            ))}
+            <GradientButton
+              title="Review All Requests"
+              onPress={handleApproveRequests}
+              icon="checkmark.circle.fill"
+              androidIcon="check_circle"
+              style={styles.viewAllButton}
+            />
+          </View>
         )}
 
         <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Recent Activity</Text>
-            {myActivityLogs.length > 0 ? (
-              myActivityLogs.map((log, index) => (
-                <PressableCard key={log.id} style={styles.activityCard}>
-                  <LinearGradient
-                    colors={
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          {myActivityLogs.length > 0 ? (
+            myActivityLogs.map((log, index) => (
+              <PressableCard key={log.id} style={styles.activityCard}>
+                <LinearGradient
+                  colors={
+                    log.type === "maintenance" || log.type === "task"
+                      ? [colors.success + "30", colors.success + "10"]
+                      : log.type === "issue"
+                        ? [colors.danger + "30", colors.danger + "10"]
+                        : [colors.accent + "30", colors.accent + "10"]
+                  }
+                  style={styles.activityIcon}
+                >
+                  <IconSymbol
+                    ios_icon_name={
                       log.type === "maintenance" || log.type === "task"
-                        ? [colors.success + "30", colors.success + "10"]
+                        ? "checkmark.circle.fill"
                         : log.type === "issue"
-                          ? [colors.danger + "30", colors.danger + "10"]
-                          : [colors.accent + "30", colors.accent + "10"]
+                          ? "exclamationmark.triangle.fill"
+                          : "info.circle.fill"
                     }
-                    style={styles.activityIcon}
-                  >
-                    <IconSymbol
-                      ios_icon_name={
-                        log.type === "maintenance" || log.type === "task"
-                          ? "checkmark.circle.fill"
-                          : log.type === "issue"
-                            ? "exclamationmark.triangle.fill"
-                            : "info.circle.fill"
-                      }
-                      android_material_icon_name={
-                        log.type === "maintenance" || log.type === "task"
-                          ? "check_circle"
-                          : log.type === "issue"
-                            ? "warning"
-                            : "info"
-                      }
-                      size={20}
-                      color={
-                        log.type === "maintenance" || log.type === "task"
-                          ? colors.success
-                          : log.type === "issue"
-                            ? colors.danger
-                            : colors.accent
-                      }
-                    />
-                  </LinearGradient>
-                  <View style={styles.activityContent}>
-                    <Text style={styles.activityTitle}>{log.title}</Text>
-                    <Text style={styles.activityDescription}>
-                      {log.description}
-                    </Text>
-                    <Text style={styles.activityTime}>
-                      {new Date(log.timestamp).toLocaleString()}
-                    </Text>
-                  </View>
-                </PressableCard>
-              ))
-            ) : (
-              <Text style={styles.emptyText}>No recent activity</Text>
-            )}
-          </View>
+                    android_material_icon_name={
+                      log.type === "maintenance" || log.type === "task"
+                        ? "check_circle"
+                        : log.type === "issue"
+                          ? "warning"
+                          : "info"
+                    }
+                    size={20}
+                    color={
+                      log.type === "maintenance" || log.type === "task"
+                        ? colors.success
+                        : log.type === "issue"
+                          ? colors.danger
+                          : colors.accent
+                    }
+                  />
+                </LinearGradient>
+                <View style={styles.activityContent}>
+                  <Text style={styles.activityTitle}>{log.title}</Text>
+                  <Text style={styles.activityDescription}>
+                    {log.description}
+                  </Text>
+                  <Text style={styles.activityTime}>
+                    {new Date(log.timestamp).toLocaleString()}
+                  </Text>
+                </View>
+              </PressableCard>
+            ))
+          ) : (
+            <Text style={styles.emptyText}>No recent activity</Text>
+          )}
+        </View>
       </ScrollView>
     </View>
   );
@@ -666,11 +613,9 @@ const styles = StyleSheet.create({
   iconButton: {
     borderRadius: 12,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+
     elevation: 3,
+    backgroundColor: colors.card,
   },
   iconButtonGradient: {
     padding: 12,
@@ -687,10 +632,7 @@ const styles = StyleSheet.create({
     gap: 8,
     borderWidth: 1,
     borderColor: colors.gold + "30",
-    shadowColor: colors.gold,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+
     elevation: 4,
   },
   roleText: {
@@ -735,20 +677,14 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: colors.accent,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+
     elevation: 4,
   },
   statusDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
+
     elevation: 2,
   },
   statusDotActive: {
@@ -840,10 +776,7 @@ const styles = StyleSheet.create({
   expenseChartCard: {
     borderRadius: 16,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+
     elevation: 5,
   },
   expenseChartGradient: {
@@ -925,10 +858,6 @@ const styles = StyleSheet.create({
     minWidth: 28,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: colors.warning,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
     elevation: 3,
   },
   badgeText: {

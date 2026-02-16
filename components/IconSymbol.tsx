@@ -1,6 +1,5 @@
 // This file is a fallback for using MaterialIcons on Android and web.
 
-import React from "react";
 import { SymbolWeight } from "expo-symbols";
 import {
   OpaqueColorValue,
