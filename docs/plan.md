@@ -1193,18 +1193,16 @@ Every task below maps to a specific change described in the phases above. Work t
 
 #### 1.2 Remove Realtime
 
-- [ ] Delete `utils/realtimeManager.ts`
-- [ ] Delete `hooks/useRealtime.ts`
-- [ ] Delete `components/RealtimeFeed.tsx`
-- [ ] Remove `RealtimeFeed` import and rendered component from `app/(tabs)/owner.tsx`
-- [ ] Remove `RealtimeFeed` import and rendered component from `app/(tabs)/manager.tsx`
-- [ ] Remove `realtimeManager` import from `contexts/DataContext.tsx`
-- [ ] Remove `realtimeManager.publishEvent(...)` call from `addMaintenanceTask` in DataContext
-- [ ] Remove `realtimeManager.publishEvent(...)` call from `completeMaintenanceTask` in DataContext
-- [ ] Remove `realtimeManager.publishEvent(...)` call from `updateMaintenanceTask` in DataContext
-- [ ] Remove `realtimeManager.publishEvent(...)` call from `addIssue` in DataContext
-- [ ] Remove `realtimeManager.publishEvent(...)` call from `approveSupplyRequest` in DataContext
-- [ ] Remove `realtimeManager.publishEvent(...)` call from `denySupplyRequest` in DataContext
+- [x] Delete `utils/realtimeManager.ts`
+- [x] Delete `hooks/useRealtime.ts`
+- [x] Rewrite `components/RealtimeFeed.tsx` with static mock activity data (kept UI, stripped plumbing)
+- [x] Keep `<RealtimeFeed />` renders in `owner.tsx` and `manager.tsx` as-is (work with static data now)
+- [x] Remove `realtimeManager` import from `contexts/DataContext.tsx`
+- [x] Remove `realtimeManager.publishEvent(...)` call from `addMaintenanceTask` in DataContext
+- [x] Remove `realtimeManager.publishEvent(...)` call from `updateMaintenanceTask` in DataContext
+- [x] Remove `realtimeManager.publishEvent(...)` call from `addIssue` in DataContext
+- [x] Remove `realtimeManager.publishEvent(...)` call from `approveSupplyRequest` in DataContext
+- [x] Remove `realtimeManager.publishEvent(...)` call from `denySupplyRequest` in DataContext
 
 #### 1.3 Remove Notifications
 

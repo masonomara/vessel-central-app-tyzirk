@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { realtimeManager } from '@/utils/realtimeManager';
 import {
   MaintenanceTask,
   Issue,
@@ -826,11 +825,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
     setMaintenanceTasks([...maintenanceTasks, newTask]);
 
-    await realtimeManager.publishEvent('task_assigned', {
-      title: task.title,
-      vesselName: task.vesselName,
-    }, task.assignedTo, task.vesselId);
-    
     addActivityLog({
       type: 'maintenance',
       title: 'Maintenance Task Created',
@@ -846,23 +840,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   const updateMaintenanceTask = async (id: string, updates: Partial<MaintenanceTask>) => {
-    const task = maintenanceTasks.find(t => t.id === id);
-    
     setMaintenanceTasks(maintenanceTasks.map(task =>
       task.id === id ? { ...task, ...updates, updatedAt: new Date() } : task
     ));
-
-    if (task && updates.status === 'completed') {
-      await realtimeManager.publishEvent('task_completed', {
-        title: task.title,
-        vesselName: task.vesselName,
-      }, task.assignedTo, task.vesselId);
-    } else if (task) {
-      await realtimeManager.publishEvent('maintenance_updated', {
-        title: task.title,
-        vesselName: task.vesselName,
-      }, task.assignedTo, task.vesselId);
-    }
   };
 
   const deleteMaintenanceTask = (id: string) => {
@@ -943,14 +923,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setIssues([...issues, newIssue]);
 
     const vessel = vessels.find(v => v.id === issue.vesselId);
-    if (vessel) {
-      await realtimeManager.publishEvent('issue_created', {
-        title: issue.title,
-        vesselName: issue.vesselName,
-        priority: issue.priority,
-      }, vessel.managerId, issue.vesselId);
-    }
-    
+
     addActivityLog({
       type: 'issue',
       title: 'Issue Reported',
@@ -1050,12 +1023,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
     
     const request = supplyRequests.find(r => r.id === id);
     if (request) {
-      // Publish realtime event
-      await realtimeManager.publishEvent('supply_approved', {
-        itemName: request.itemName,
-        vesselName: request.vesselName,
-      }, request.requestedBy, request.vesselId);
-      
       addActivityLog({
         type: 'approval',
         title: 'Supply Request Approved',
@@ -1068,7 +1035,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         relatedId: id,
         relatedType: 'supply',
       });
-      
+
       addNotification({
         type: 'approval',
         title: 'Supply Request Approved',
@@ -1084,16 +1051,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       status: 'denied',
       deniedReason: reason,
     });
-    
+
     const request = supplyRequests.find(r => r.id === id);
     if (request) {
-      // Publish realtime event
-      await realtimeManager.publishEvent('supply_denied', {
-        itemName: request.itemName,
-        vesselName: request.vesselName,
-        reason,
-      }, request.requestedBy, request.vesselId);
-      
       addNotification({
         type: 'approval',
         title: 'Supply Request Denied',
