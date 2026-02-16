@@ -63,7 +63,7 @@ export default function ManagerLoginScreen() {
     await AsyncStorage.setItem('userName', manager.name);
     
     setIsLoading(false);
-    router.replace('/(tabs)/(home)');
+    router.replace('/(tabs)/manager');
   };
 
   const handleLogin = async () => {

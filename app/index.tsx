@@ -20,12 +20,15 @@ export default function Index() {
     const checkAuthAndRedirect = async () => {
       try {
         const authToken = await AsyncStorage.getItem('authToken');
-
-        if (authToken) {
-          router.replace('/(tabs)/(home)');
-        } else {
+        if (!authToken) {
           router.replace('/login');
+          return;
         }
+        const userRole = await AsyncStorage.getItem('userRole');
+        if (userRole === 'owner') router.replace('/(tabs)/owner');
+        else if (userRole === 'manager') router.replace('/(tabs)/manager');
+        else if (userRole === 'crew') router.replace('/(tabs)/crew');
+        else router.replace('/login');
       } catch {
         router.replace('/login');
       }

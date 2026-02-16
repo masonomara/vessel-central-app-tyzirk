@@ -66,7 +66,7 @@ export default function LoginScreen() {
     await AsyncStorage.setItem('userName', user.name);
     
     setIsLoading(false);
-    router.replace('/(tabs)/(home)');
+    router.replace(`/(tabs)/${user.role}`);
   };
 
   const handleLogin = async () => {
