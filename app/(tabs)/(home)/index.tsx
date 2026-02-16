@@ -14,6 +14,7 @@ import {
   TextInput,
   Animated,
   Platform,
+  Alert,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { useRouter } from "expo-router";
@@ -354,8 +355,7 @@ export default function HomeScreen() {
   );
 
   const handleInfoPress = useCallback((card: UserCardData) => {
-    console.log("Info pressed for:", card.name);
-    // TODO: Show quick details modal
+    Alert.alert(card.name, `Tap the card to switch to this user's dashboard.`);
   }, []);
 
   const handleLogout = useCallback(async () => {

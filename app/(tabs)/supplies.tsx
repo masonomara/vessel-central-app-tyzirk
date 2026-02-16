@@ -1,275 +1,329 @@
+import React, { useState, useMemo, useCallback } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  TextInput,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { useTheme } from "@react-navigation/native";
+import { colors } from "@/styles/commonStyles";
+import { useData } from "@/contexts/DataContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { IconSymbol } from "@/components/IconSymbol";
+import { SupplyRequest, SupplyRequestStatus } from "@/types";
+import { formatDate } from "@/utils/dateUtils";
 
-import React, { useState, useMemo, useCallback } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, TextInput } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useTheme } from '@react-navigation/native';
-import { colors } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { SupplyRequest, SupplyRequestStatus } from '@/types';
-import { formatDate } from '@/utils/dateUtils';
+const SupplyRequestItem = React.memo(
+  ({
+    request,
+    onPress,
+    onApprove,
+    onDeny,
+    userRole,
+  }: {
+    request: SupplyRequest;
+    onPress: (request: SupplyRequest) => void;
+    onApprove: (id: string) => void;
+    onDeny: (id: string) => void;
+    userRole: string | null;
+  }) => {
+    const getStatusColor = (status: SupplyRequestStatus) => {
+      switch (status) {
+        case "approved":
+          return colors.success;
+        case "ordered":
+          return colors.accent;
+        case "received":
+          return colors.success;
+        case "denied":
+          return colors.danger;
+        case "pending":
+          return colors.warning;
+        default:
+          return colors.grey;
+      }
+    };
 
-const SupplyRequestItem = React.memo(({ 
-  request, 
-  onPress,
-  onApprove,
-  onDeny,
-  userRole
-}: { 
-  request: SupplyRequest; 
-  onPress: (request: SupplyRequest) => void;
-  onApprove: (id: string) => void;
-  onDeny: (id: string) => void;
-  userRole: string | null;
-}) => {
-  const getStatusColor = (status: SupplyRequestStatus) => {
-    switch (status) {
-      case 'approved': return colors.success;
-      case 'ordered': return colors.accent;
-      case 'received': return colors.success;
-      case 'denied': return colors.danger;
-      case 'pending': return colors.warning;
-      default: return colors.grey;
-    }
-  };
+    const handlePress = useCallback(() => {
+      onPress(request);
+    }, [request, onPress]);
 
-  const handlePress = useCallback(() => {
-    onPress(request);
-  }, [request, onPress]);
+    const handleApprove = useCallback(() => {
+      onApprove(request.id);
+    }, [request.id, onApprove]);
 
-  const handleApprove = useCallback(() => {
-    onApprove(request.id);
-  }, [request.id, onApprove]);
+    const handleDeny = useCallback(() => {
+      onDeny(request.id);
+    }, [request.id, onDeny]);
 
-  const handleDeny = useCallback(() => {
-    onDeny(request.id);
-  }, [request.id, onDeny]);
-
-  return (
-    <TouchableOpacity
-      style={styles.requestCard}
-      onPress={handlePress}
-      activeOpacity={0.7}
-    >
-      <View style={styles.requestHeader}>
-        <View style={styles.requestTitleRow}>
-          <IconSymbol 
-            ios_icon_name="shippingbox.fill" 
-            android_material_icon_name="inventory_2" 
-            size={24} 
-            color={colors.accent} 
-          />
-          <Text style={styles.requestTitle}>{request.itemName}</Text>
-        </View>
-        <View style={[
-          styles.statusBadge,
-          { backgroundColor: getStatusColor(request.status) + '30' },
-        ]}>
-          <Text style={[
-            styles.statusText,
-            { color: getStatusColor(request.status) },
-          ]}>
-            {request.status.toUpperCase()}
-          </Text>
-        </View>
-      </View>
-
-      <Text style={styles.requestDescription} numberOfLines={2}>
-        {request.description}
-      </Text>
-
-      <View style={styles.requestDetails}>
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Quantity:</Text>
-          <Text style={styles.detailValue}>{request.quantity} {request.unit}</Text>
-        </View>
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Est. Cost:</Text>
-          <Text style={styles.detailValue}>${request.estimatedCost.toLocaleString()}</Text>
-        </View>
-      </View>
-
-      <View style={styles.requestMeta}>
-        <View style={styles.metaItem}>
-          <IconSymbol 
-            ios_icon_name="sailboat.fill" 
-            android_material_icon_name="sailing" 
-            size={16} 
-            color={colors.textSecondary} 
-          />
-          <Text style={styles.metaText}>{request.vesselName}</Text>
-        </View>
-        <View style={styles.metaItem}>
-          <IconSymbol 
-            ios_icon_name="person.fill" 
-            android_material_icon_name="person" 
-            size={16} 
-            color={colors.textSecondary} 
-          />
-          <Text style={styles.metaText}>{request.requestedByName}</Text>
-        </View>
-      </View>
-
-      <View style={styles.requestFooter}>
-        <Text style={styles.timeText}>{formatDate(request.createdAt)}</Text>
-        {userRole === 'manager' && request.status === 'pending' && (
-          <View style={styles.actionButtons}>
-            <TouchableOpacity 
-              style={styles.approveButton}
-              onPress={handleApprove}
+    return (
+      <TouchableOpacity
+        style={styles.requestCard}
+        onPress={handlePress}
+        activeOpacity={0.7}
+      >
+        <View style={styles.requestHeader}>
+          <View style={styles.requestTitleRow}>
+            <IconSymbol
+              ios_icon_name="shippingbox.fill"
+              android_material_icon_name="inventory_2"
+              size={24}
+              color={colors.accent}
+            />
+            <Text style={styles.requestTitle}>{request.itemName}</Text>
+          </View>
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: getStatusColor(request.status) + "30" },
+            ]}
+          >
+            <Text
+              style={[
+                styles.statusText,
+                { color: getStatusColor(request.status) },
+              ]}
             >
-              <IconSymbol 
-                ios_icon_name="checkmark.circle.fill" 
-                android_material_icon_name="check_circle" 
-                size={20} 
-                color={colors.success} 
-              />
-              <Text style={styles.approveButtonText}>Approve</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.denyButton}
-              onPress={handleDeny}
-            >
-              <IconSymbol 
-                ios_icon_name="xmark.circle.fill" 
-                android_material_icon_name="cancel" 
-                size={20} 
-                color={colors.danger} 
-              />
-              <Text style={styles.denyButtonText}>Deny</Text>
-            </TouchableOpacity>
+              {request.status.toUpperCase()}
+            </Text>
+          </View>
+        </View>
+
+        <Text style={styles.requestDescription} numberOfLines={2}>
+          {request.description}
+        </Text>
+
+        <View style={styles.requestDetails}>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Quantity:</Text>
+            <Text style={styles.detailValue}>
+              {request.quantity} {request.unit}
+            </Text>
+          </View>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Est. Cost:</Text>
+            <Text style={styles.detailValue}>
+              ${request.estimatedCost.toLocaleString()}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.requestMeta}>
+          <View style={styles.metaItem}>
+            <IconSymbol
+              ios_icon_name="sailboat.fill"
+              android_material_icon_name="sailing"
+              size={16}
+              color={colors.textSecondary}
+            />
+            <Text style={styles.metaText}>{request.vesselName}</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <IconSymbol
+              ios_icon_name="person.fill"
+              android_material_icon_name="person"
+              size={16}
+              color={colors.textSecondary}
+            />
+            <Text style={styles.metaText}>{request.requestedByName}</Text>
+          </View>
+        </View>
+
+        <View style={styles.requestFooter}>
+          <Text style={styles.timeText}>{formatDate(request.createdAt)}</Text>
+          {userRole === "manager" && request.status === "pending" && (
+            <View style={styles.actionButtons}>
+              <TouchableOpacity
+                style={styles.approveButton}
+                onPress={handleApprove}
+              >
+                <IconSymbol
+                  ios_icon_name="checkmark.circle.fill"
+                  android_material_icon_name="check_circle"
+                  size={20}
+                  color={colors.success}
+                />
+                <Text style={styles.approveButtonText}>Approve</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.denyButton} onPress={handleDeny}>
+                <IconSymbol
+                  ios_icon_name="xmark.circle.fill"
+                  android_material_icon_name="cancel"
+                  size={20}
+                  color={colors.danger}
+                />
+                <Text style={styles.denyButtonText}>Deny</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
+        {request.approvedByName && (
+          <View style={styles.approvalInfo}>
+            <Text style={styles.approvalText}>
+              Approved by {request.approvedByName}
+            </Text>
           </View>
         )}
-      </View>
-
-      {request.approvedByName && (
-        <View style={styles.approvalInfo}>
-          <Text style={styles.approvalText}>
-            Approved by {request.approvedByName}
-          </Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
-});
+      </TouchableOpacity>
+    );
+  },
+);
 
 export default function SuppliesScreen() {
   const router = useRouter();
   const theme = useTheme();
   const { supplyRequests, approveSupplyRequest, denySupplyRequest } = useData();
   const { userRole, userId, userName } = useAuth();
-  const [filterStatus, setFilterStatus] = useState<SupplyRequestStatus | 'all'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<SupplyRequestStatus | "all">(
+    "all",
+  );
+  const [searchQuery, setSearchQuery] = useState("");
 
   const filteredRequests = useMemo(() => {
-    return supplyRequests.filter(request => {
-      const matchesStatus = filterStatus === 'all' || request.status === filterStatus;
-      const matchesSearch = request.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           request.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return supplyRequests.filter((request) => {
+      const matchesStatus =
+        filterStatus === "all" || request.status === filterStatus;
+      const matchesSearch =
+        request.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesStatus && matchesSearch;
     });
   }, [supplyRequests, filterStatus, searchQuery]);
 
-  const handleApprove = useCallback((id: string) => {
-    approveSupplyRequest(id, userId, userName);
-  }, [approveSupplyRequest, userId, userName]);
+  const handleApprove = useCallback(
+    (id: string) => {
+      approveSupplyRequest(id, userId, userName);
+    },
+    [approveSupplyRequest, userId, userName],
+  );
 
-  const handleDeny = useCallback((id: string) => {
-    denySupplyRequest(id, 'Budget constraints');
-    console.log('Denied request:', id);
-  }, [denySupplyRequest]);
+  const handleDeny = useCallback(
+    (id: string) => {
+      denySupplyRequest(id, "Budget constraints");
+      console.log("Denied request:", id);
+    },
+    [denySupplyRequest],
+  );
 
-  const handleRequestPress = useCallback((request: SupplyRequest) => {
-    console.log('Request pressed:', request.id);
-  }, []);
+  const handleRequestPress = useCallback(
+    (request: SupplyRequest) => {
+      router.push({ pathname: "/supply-detail", params: { id: request.id } });
+    },
+    [router],
+  );
 
   const handleAddRequest = useCallback(() => {
-    console.log('Add request pressed');
-    router.push('/add-supply-request');
+    console.log("Add request pressed");
+    router.push("/add-supply-request");
   }, []);
 
-  const renderItem = useCallback(({ item }: { item: SupplyRequest }) => (
-    <SupplyRequestItem 
-      request={item} 
-      onPress={handleRequestPress}
-      onApprove={handleApprove}
-      onDeny={handleDeny}
-      userRole={userRole}
-    />
-  ), [handleRequestPress, handleApprove, handleDeny, userRole]);
+  const renderItem = useCallback(
+    ({ item }: { item: SupplyRequest }) => (
+      <SupplyRequestItem
+        request={item}
+        onPress={handleRequestPress}
+        onApprove={handleApprove}
+        onDeny={handleDeny}
+        userRole={userRole}
+      />
+    ),
+    [handleRequestPress, handleApprove, handleDeny, userRole],
+  );
 
   const keyExtractor = useCallback((item: SupplyRequest) => item.id, []);
 
-  const ListHeaderComponent = useCallback(() => (
-    <>
-      <View style={styles.searchContainer}>
-        <IconSymbol 
-          ios_icon_name="magnifyingglass" 
-          android_material_icon_name="search" 
-          size={20} 
-          color={colors.textSecondary} 
-        />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search supplies..."
-          placeholderTextColor={colors.textSecondary}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
+  const ListHeaderComponent = useCallback(
+    () => (
+      <>
+        <View style={styles.searchContainer}>
+          <IconSymbol
+            ios_icon_name="magnifyingglass"
+            android_material_icon_name="search"
+            size={20}
+            color={colors.textSecondary}
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search supplies..."
+            placeholderTextColor={colors.textSecondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
 
-      <View style={styles.filterContainer}>
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={['all', 'pending', 'approved', 'denied', 'ordered', 'received']}
-          renderItem={({ item: status }) => (
-            <TouchableOpacity
-              style={[
-                styles.filterChip,
-                filterStatus === status && styles.filterChipActive,
-              ]}
-              onPress={() => setFilterStatus(status as SupplyRequestStatus | 'all')}
-            >
-              <Text style={[
-                styles.filterChipText,
-                filterStatus === status && styles.filterChipTextActive,
-              ]}>
-                {status.toUpperCase()}
-              </Text>
-            </TouchableOpacity>
-          )}
-          keyExtractor={(item) => item}
-          contentContainerStyle={styles.filterContent}
-        />
-      </View>
-    </>
-  ), [searchQuery, filterStatus]);
+        <View style={styles.filterContainer}>
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={[
+              "all",
+              "pending",
+              "approved",
+              "denied",
+              "ordered",
+              "received",
+            ]}
+            renderItem={({ item: status }) => (
+              <TouchableOpacity
+                style={[
+                  styles.filterChip,
+                  filterStatus === status && styles.filterChipActive,
+                ]}
+                onPress={() =>
+                  setFilterStatus(status as SupplyRequestStatus | "all")
+                }
+              >
+                <Text
+                  style={[
+                    styles.filterChipText,
+                    filterStatus === status && styles.filterChipTextActive,
+                  ]}
+                >
+                  {status.toUpperCase()}
+                </Text>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item) => item}
+            contentContainerStyle={styles.filterContent}
+          />
+        </View>
+      </>
+    ),
+    [searchQuery, filterStatus],
+  );
 
-  const ListEmptyComponent = useCallback(() => (
-    <View style={styles.emptyState}>
-      <IconSymbol 
-        ios_icon_name="shippingbox" 
-        android_material_icon_name="inventory_2" 
-        size={64} 
-        color={colors.textSecondary} 
-      />
-      <Text style={styles.emptyStateText}>No supply requests found</Text>
-    </View>
-  ), []);
+  const ListEmptyComponent = useCallback(
+    () => (
+      <View style={styles.emptyState}>
+        <IconSymbol
+          ios_icon_name="shippingbox"
+          android_material_icon_name="inventory_2"
+          size={64}
+          color={colors.textSecondary}
+        />
+        <Text style={styles.emptyStateText}>No supply requests found</Text>
+      </View>
+    ),
+    [],
+  );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>Supplies</Text>
-        {userRole === 'crew' && (
+        {userRole === "crew" && (
           <TouchableOpacity style={styles.addButton} onPress={handleAddRequest}>
-            <IconSymbol 
-              ios_icon_name="plus.circle.fill" 
-              android_material_icon_name="add_circle" 
-              size={32} 
-              color={colors.accent} 
+            <IconSymbol
+              ios_icon_name="plus.circle.fill"
+              android_material_icon_name="add_circle"
+              size={32}
+              color={colors.accent}
             />
           </TouchableOpacity>
         )}
@@ -298,24 +352,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 16,
   },
   title: {
     fontSize: 32,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.text,
   },
   addButton: {
     padding: 4,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: colors.card,
     borderRadius: 12,
     paddingHorizontal: 16,
@@ -353,7 +407,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.textSecondary,
   },
   filterChipTextActive: {
@@ -364,8 +418,8 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 60,
   },
   emptyStateText: {
@@ -382,20 +436,20 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   requestHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: 8,
   },
   requestTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     flex: 1,
   },
   requestTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.text,
     flex: 1,
   },
@@ -406,7 +460,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   requestDescription: {
     fontSize: 14,
@@ -415,7 +469,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   requestDetails: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 24,
     marginBottom: 12,
     paddingVertical: 12,
@@ -424,8 +478,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   detailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   detailLabel: {
@@ -434,17 +488,17 @@ const styles = StyleSheet.create({
   },
   detailValue: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   requestMeta: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 16,
     marginBottom: 12,
   },
   metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   metaText: {
@@ -452,44 +506,44 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   requestFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   timeText: {
     fontSize: 12,
     color: colors.grey,
   },
   actionButtons: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   approveButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
-    backgroundColor: colors.success + '30',
+    backgroundColor: colors.success + "30",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
   },
   approveButtonText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.success,
   },
   denyButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
-    backgroundColor: colors.danger + '30',
+    backgroundColor: colors.danger + "30",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
   },
   denyButtonText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.danger,
   },
   approvalInfo: {
@@ -501,6 +555,6 @@ const styles = StyleSheet.create({
   approvalText: {
     fontSize: 12,
     color: colors.success,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
 });

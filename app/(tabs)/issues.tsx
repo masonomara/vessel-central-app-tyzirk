@@ -1,171 +1,196 @@
-
-import React, { useState, useMemo, useCallback } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useTheme } from '@react-navigation/native';
-import { colors } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { Issue, TaskStatus, TaskPriority } from '@/types';
-import { formatDate } from '@/utils/dateUtils';
+import React, { useState, useMemo, useCallback } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { useTheme } from "@react-navigation/native";
+import { colors } from "@/styles/commonStyles";
+import { useData } from "@/contexts/DataContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { IconSymbol } from "@/components/IconSymbol";
+import { Issue, TaskStatus, TaskPriority } from "@/types";
+import { formatDate } from "@/utils/dateUtils";
 
 const ITEMS_PER_PAGE = 10;
 
-const IssueItem = React.memo(({ 
-  issue, 
-  onPress 
-}: { 
-  issue: Issue; 
-  onPress: (issue: Issue) => void;
-}) => {
-  const getPriorityColor = (priority: TaskPriority) => {
-    switch (priority) {
-      case 'urgent': return colors.danger;
-      case 'high': return colors.warning;
-      case 'medium': return colors.accent;
-      case 'low': return colors.success;
-      default: return colors.grey;
-    }
-  };
+const IssueItem = React.memo(
+  ({ issue, onPress }: { issue: Issue; onPress: (issue: Issue) => void }) => {
+    const getPriorityColor = (priority: TaskPriority) => {
+      switch (priority) {
+        case "urgent":
+          return colors.danger;
+        case "high":
+          return colors.warning;
+        case "medium":
+          return colors.accent;
+        case "low":
+          return colors.success;
+        default:
+          return colors.grey;
+      }
+    };
 
-  const getStatusColor = (status: TaskStatus) => {
-    switch (status) {
-      case 'completed': return colors.success;
-      case 'in_progress': return colors.accent;
-      case 'waiting_on_parts': return colors.warning;
-      case 'open': return colors.grey;
-      default: return colors.grey;
-    }
-  };
+    const getStatusColor = (status: TaskStatus) => {
+      switch (status) {
+        case "completed":
+          return colors.success;
+        case "in_progress":
+          return colors.accent;
+        case "waiting_on_parts":
+          return colors.warning;
+        case "open":
+          return colors.grey;
+        default:
+          return colors.grey;
+      }
+    };
 
-  const handlePress = useCallback(() => {
-    onPress(issue);
-  }, [issue, onPress]);
+    const handlePress = useCallback(() => {
+      onPress(issue);
+    }, [issue, onPress]);
 
-  return (
-    <TouchableOpacity
-      style={[
-        styles.issueCard,
-        issue.priority === 'urgent' && styles.issueCardUrgent,
-      ]}
-      onPress={handlePress}
-      activeOpacity={0.7}
-    >
-      <View style={styles.issueHeader}>
-        <View style={styles.issueTitleRow}>
-          <IconSymbol 
-            ios_icon_name="exclamationmark.triangle.fill" 
-            android_material_icon_name="report_problem" 
-            size={24} 
-            color={getPriorityColor(issue.priority)} 
-          />
-          <Text style={styles.issueTitle}>{issue.title}</Text>
+    return (
+      <TouchableOpacity
+        style={[
+          styles.issueCard,
+          issue.priority === "urgent" && styles.issueCardUrgent,
+        ]}
+        onPress={handlePress}
+        activeOpacity={0.7}
+      >
+        <View style={styles.issueHeader}>
+          <View style={styles.issueTitleRow}>
+            <IconSymbol
+              ios_icon_name="exclamationmark.triangle.fill"
+              android_material_icon_name="report_problem"
+              size={24}
+              color={getPriorityColor(issue.priority)}
+            />
+            <Text style={styles.issueTitle}>{issue.title}</Text>
+          </View>
+          <View
+            style={[
+              styles.priorityBadge,
+              { backgroundColor: getPriorityColor(issue.priority) + "30" },
+            ]}
+          >
+            <Text
+              style={[
+                styles.priorityText,
+                { color: getPriorityColor(issue.priority) },
+              ]}
+            >
+              {issue.priority.toUpperCase()}
+            </Text>
+          </View>
         </View>
-        <View style={[
-          styles.priorityBadge,
-          { backgroundColor: getPriorityColor(issue.priority) + '30' },
-        ]}>
-          <Text style={[
-            styles.priorityText,
-            { color: getPriorityColor(issue.priority) },
-          ]}>
-            {issue.priority.toUpperCase()}
-          </Text>
-        </View>
-      </View>
 
-      <Text style={styles.issueDescription} numberOfLines={2}>
-        {issue.description}
-      </Text>
+        <Text style={styles.issueDescription} numberOfLines={2}>
+          {issue.description}
+        </Text>
 
-      <View style={styles.issueMeta}>
-        <View style={styles.metaItem}>
-          <IconSymbol 
-            ios_icon_name="sailboat.fill" 
-            android_material_icon_name="sailing" 
-            size={16} 
-            color={colors.textSecondary} 
-          />
-          <Text style={styles.metaText}>{issue.vesselName}</Text>
+        <View style={styles.issueMeta}>
+          <View style={styles.metaItem}>
+            <IconSymbol
+              ios_icon_name="sailboat.fill"
+              android_material_icon_name="sailing"
+              size={16}
+              color={colors.textSecondary}
+            />
+            <Text style={styles.metaText}>{issue.vesselName}</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <IconSymbol
+              ios_icon_name="location.fill"
+              android_material_icon_name="location_on"
+              size={16}
+              color={colors.textSecondary}
+            />
+            <Text style={styles.metaText}>{issue.location}</Text>
+          </View>
         </View>
-        <View style={styles.metaItem}>
-          <IconSymbol 
-            ios_icon_name="location.fill" 
-            android_material_icon_name="location_on" 
-            size={16} 
-            color={colors.textSecondary} 
-          />
-          <Text style={styles.metaText}>{issue.location}</Text>
-        </View>
-      </View>
 
-      <View style={styles.issueFooter}>
-        <View style={[
-          styles.statusBadge,
-          { backgroundColor: getStatusColor(issue.status) + '30' },
-        ]}>
-          <Text style={[
-            styles.statusText,
-            { color: getStatusColor(issue.status) },
-          ]}>
-            {issue.status.replace('_', ' ').toUpperCase()}
-          </Text>
+        <View style={styles.issueFooter}>
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: getStatusColor(issue.status) + "30" },
+            ]}
+          >
+            <Text
+              style={[
+                styles.statusText,
+                { color: getStatusColor(issue.status) },
+              ]}
+            >
+              {issue.status.replace("_", " ").toUpperCase()}
+            </Text>
+          </View>
+          <View style={styles.reportedBy}>
+            <Text style={styles.reportedByText}>
+              Reported by {issue.reportedByName}
+            </Text>
+            <Text style={styles.timeText}>{formatDate(issue.createdAt)}</Text>
+          </View>
         </View>
-        <View style={styles.reportedBy}>
-          <Text style={styles.reportedByText}>
-            Reported by {issue.reportedByName}
-          </Text>
-          <Text style={styles.timeText}>{formatDate(issue.createdAt)}</Text>
-        </View>
-      </View>
 
-      {issue.attachments.length > 0 && (
-        <View style={styles.attachmentsIndicator}>
-          <IconSymbol 
-            ios_icon_name="paperclip" 
-            android_material_icon_name="attach_file" 
-            size={16} 
-            color={colors.accent} 
-          />
-          <Text style={styles.attachmentsText}>
-            {issue.attachments.length} attachment{issue.attachments.length > 1 ? 's' : ''}
-          </Text>
-        </View>
-      )}
+        {issue.attachments.length > 0 && (
+          <View style={styles.attachmentsIndicator}>
+            <IconSymbol
+              ios_icon_name="paperclip"
+              android_material_icon_name="attach_file"
+              size={16}
+              color={colors.accent}
+            />
+            <Text style={styles.attachmentsText}>
+              {issue.attachments.length} attachment
+              {issue.attachments.length > 1 ? "s" : ""}
+            </Text>
+          </View>
+        )}
 
-      {issue.comments.length > 0 && (
-        <View style={styles.commentsIndicator}>
-          <IconSymbol 
-            ios_icon_name="bubble.left.fill" 
-            android_material_icon_name="comment" 
-            size={16} 
-            color={colors.accent} 
-          />
-          <Text style={styles.commentsText}>
-            {issue.comments.length} comment{issue.comments.length > 1 ? 's' : ''}
-          </Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
-});
+        {issue.comments.length > 0 && (
+          <View style={styles.commentsIndicator}>
+            <IconSymbol
+              ios_icon_name="bubble.left.fill"
+              android_material_icon_name="comment"
+              size={16}
+              color={colors.accent}
+            />
+            <Text style={styles.commentsText}>
+              {issue.comments.length} comment
+              {issue.comments.length > 1 ? "s" : ""}
+            </Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  },
+);
 
 export default function IssuesScreen() {
   const router = useRouter();
   const theme = useTheme();
   const { issues } = useData();
   const { userRole } = useAuth();
-  const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<TaskStatus | "all">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const filteredIssues = useMemo(() => {
-    return issues.filter(issue => {
-      const matchesStatus = filterStatus === 'all' || issue.status === filterStatus;
-      const matchesSearch = issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           issue.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return issues.filter((issue) => {
+      const matchesStatus =
+        filterStatus === "all" || issue.status === filterStatus;
+      const matchesSearch =
+        issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        issue.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesStatus && matchesSearch;
     });
   }, [issues, filterStatus, searchQuery]);
@@ -178,23 +203,26 @@ export default function IssuesScreen() {
     return paginatedIssues.length < filteredIssues.length;
   }, [paginatedIssues.length, filteredIssues.length]);
 
-  const handleIssuePress = useCallback((issue: Issue) => {
-    console.log('Issue pressed:', issue.id);
-  }, []);
+  const handleIssuePress = useCallback(
+    (issue: Issue) => {
+      router.push({ pathname: "/issue-detail", params: { id: issue.id } });
+    },
+    [router],
+  );
 
   const handleAddIssue = useCallback(() => {
-    console.log('Add issue pressed');
-    router.push('/add-issue');
+    console.log("Add issue pressed");
+    router.push("/add-issue");
   }, []);
 
   const handleLoadMore = useCallback(() => {
     if (!isLoadingMore && hasMore) {
-      console.log('Loading more issues...');
+      console.log("Loading more issues...");
       setIsLoadingMore(true);
-      
+
       // Simulate loading delay for smooth UX
       setTimeout(() => {
-        setCurrentPage(prev => prev + 1);
+        setCurrentPage((prev) => prev + 1);
         setIsLoadingMore(false);
       }, 300);
     }
@@ -205,62 +233,76 @@ export default function IssuesScreen() {
     setCurrentPage(1); // Reset to first page when search changes
   }, []);
 
-  const handleFilterChange = useCallback((status: TaskStatus | 'all') => {
+  const handleFilterChange = useCallback((status: TaskStatus | "all") => {
     setFilterStatus(status);
     setCurrentPage(1); // Reset to first page when filter changes
   }, []);
 
-  const renderItem = useCallback(({ item }: { item: Issue }) => (
-    <IssueItem issue={item} onPress={handleIssuePress} />
-  ), [handleIssuePress]);
+  const renderItem = useCallback(
+    ({ item }: { item: Issue }) => (
+      <IssueItem issue={item} onPress={handleIssuePress} />
+    ),
+    [handleIssuePress],
+  );
 
   const keyExtractor = useCallback((item: Issue) => item.id, []);
 
-  const ListHeaderComponent = useCallback(() => (
-    <>
-      <View style={styles.searchContainer}>
-        <IconSymbol 
-          ios_icon_name="magnifyingglass" 
-          android_material_icon_name="search" 
-          size={20} 
-          color={colors.textSecondary} 
-        />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search issues..."
-          placeholderTextColor={colors.textSecondary}
-          value={searchQuery}
-          onChangeText={handleSearchChange}
-        />
-      </View>
+  const ListHeaderComponent = useCallback(
+    () => (
+      <>
+        <View style={styles.searchContainer}>
+          <IconSymbol
+            ios_icon_name="magnifyingglass"
+            android_material_icon_name="search"
+            size={20}
+            color={colors.textSecondary}
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search issues..."
+            placeholderTextColor={colors.textSecondary}
+            value={searchQuery}
+            onChangeText={handleSearchChange}
+          />
+        </View>
 
-      <View style={styles.filterContainer}>
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={['all', 'open', 'in_progress', 'waiting_on_parts', 'completed']}
-          renderItem={({ item: status }) => (
-            <TouchableOpacity
-              style={[
-                styles.filterChip,
-                filterStatus === status && styles.filterChipActive,
-              ]}
-              onPress={() => handleFilterChange(status as TaskStatus | 'all')}
-            >
-              <Text style={[
-                styles.filterChipText,
-                filterStatus === status && styles.filterChipTextActive,
-              ]}>
-                {status.replace('_', ' ').toUpperCase()}
-              </Text>
-            </TouchableOpacity>
-          )}
-          keyExtractor={(item) => item}
-          contentContainerStyle={styles.filterContent}
-        />
-      </View>
-    </>
-  ), [searchQuery, filterStatus, handleSearchChange, handleFilterChange]);
+        <View style={styles.filterContainer}>
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={[
+              "all",
+              "open",
+              "in_progress",
+              "waiting_on_parts",
+              "completed",
+            ]}
+            renderItem={({ item: status }) => (
+              <TouchableOpacity
+                style={[
+                  styles.filterChip,
+                  filterStatus === status && styles.filterChipActive,
+                ]}
+                onPress={() => handleFilterChange(status as TaskStatus | "all")}
+              >
+                <Text
+                  style={[
+                    styles.filterChipText,
+                    filterStatus === status && styles.filterChipTextActive,
+                  ]}
+                >
+                  {status.replace("_", " ").toUpperCase()}
+                </Text>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item) => item}
+            contentContainerStyle={styles.filterContent}
+          />
+        </View>
+      </>
+    ),
+    [searchQuery, filterStatus, handleSearchChange, handleFilterChange],
+  );
 
   const ListFooterComponent = useCallback(() => {
     if (paginatedIssues.length === 0) {
@@ -278,13 +320,16 @@ export default function IssuesScreen() {
 
     if (hasMore) {
       return (
-        <TouchableOpacity style={styles.loadMoreButton} onPress={handleLoadMore}>
+        <TouchableOpacity
+          style={styles.loadMoreButton}
+          onPress={handleLoadMore}
+        >
           <Text style={styles.loadMoreText}>Load More</Text>
-          <IconSymbol 
-            ios_icon_name="chevron.down" 
-            android_material_icon_name="expand_more" 
-            size={20} 
-            color={colors.danger} 
+          <IconSymbol
+            ios_icon_name="chevron.down"
+            android_material_icon_name="expand_more"
+            size={20}
+            color={colors.danger}
           />
         </TouchableOpacity>
       );
@@ -293,35 +338,43 @@ export default function IssuesScreen() {
     return (
       <View style={styles.endOfList}>
         <Text style={styles.endOfListText}>
-          Showing all {paginatedIssues.length} issue{paginatedIssues.length !== 1 ? 's' : ''}
+          Showing all {paginatedIssues.length} issue
+          {paginatedIssues.length !== 1 ? "s" : ""}
         </Text>
       </View>
     );
   }, [paginatedIssues.length, isLoadingMore, hasMore, handleLoadMore]);
 
-  const ListEmptyComponent = useCallback(() => (
-    <View style={styles.emptyState}>
-      <IconSymbol 
-        ios_icon_name="checkmark.circle" 
-        android_material_icon_name="check_circle" 
-        size={64} 
-        color={colors.success} 
-      />
-      <Text style={styles.emptyStateText}>No issues found</Text>
-      <Text style={styles.emptyStateSubtext}>All systems running smoothly!</Text>
-    </View>
-  ), []);
+  const ListEmptyComponent = useCallback(
+    () => (
+      <View style={styles.emptyState}>
+        <IconSymbol
+          ios_icon_name="checkmark.circle"
+          android_material_icon_name="check_circle"
+          size={64}
+          color={colors.success}
+        />
+        <Text style={styles.emptyStateText}>No issues found</Text>
+        <Text style={styles.emptyStateSubtext}>
+          All systems running smoothly!
+        </Text>
+      </View>
+    ),
+    [],
+  );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>Issues</Text>
         <TouchableOpacity style={styles.addButton} onPress={handleAddIssue}>
-          <IconSymbol 
-            ios_icon_name="plus.circle.fill" 
-            android_material_icon_name="add_circle" 
-            size={32} 
-            color={colors.danger} 
+          <IconSymbol
+            ios_icon_name="plus.circle.fill"
+            android_material_icon_name="add_circle"
+            size={32}
+            color={colors.danger}
           />
         </TouchableOpacity>
       </View>
@@ -350,24 +403,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 16,
   },
   title: {
     fontSize: 32,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.text,
   },
   addButton: {
     padding: 4,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: colors.card,
     borderRadius: 12,
     paddingHorizontal: 16,
@@ -405,7 +458,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.textSecondary,
   },
   filterChipTextActive: {
@@ -416,13 +469,13 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 60,
   },
   emptyStateText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginTop: 16,
   },
@@ -444,20 +497,20 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.danger,
   },
   issueHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: 8,
   },
   issueTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     flex: 1,
   },
   issueTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.text,
     flex: 1,
   },
@@ -468,7 +521,7 @@ const styles = StyleSheet.create({
   },
   priorityText: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   issueDescription: {
     fontSize: 14,
@@ -477,13 +530,13 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   issueMeta: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 16,
     marginBottom: 12,
   },
   metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   metaText: {
@@ -491,9 +544,9 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   issueFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   statusBadge: {
@@ -503,10 +556,10 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   reportedBy: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
   },
   reportedByText: {
     fontSize: 12,
@@ -518,8 +571,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   attachmentsIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
     marginTop: 8,
     paddingTop: 8,
@@ -529,23 +582,23 @@ const styles = StyleSheet.create({
   attachmentsText: {
     fontSize: 12,
     color: colors.accent,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   commentsIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
     marginTop: 4,
   },
   commentsText: {
     fontSize: 12,
     color: colors.accent,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   loadMoreButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: colors.card,
     borderRadius: 12,
     paddingVertical: 16,
@@ -557,13 +610,13 @@ const styles = StyleSheet.create({
   },
   loadMoreText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.danger,
   },
   loadingMore: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 20,
     gap: 12,
   },
@@ -572,12 +625,12 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   endOfList: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 20,
   },
   endOfListText: {
     fontSize: 14,
     color: colors.textSecondary,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
 });

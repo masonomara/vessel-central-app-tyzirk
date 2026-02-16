@@ -45,6 +45,64 @@ function RootLayoutContent() {
             animation: "slide_from_bottom",
           }}
         />
+        <Stack.Screen
+          name="add-issue"
+          options={{
+            presentation: "modal",
+            headerShown: false,
+            animation: "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen
+          name="add-document"
+          options={{
+            presentation: "modal",
+            headerShown: false,
+            animation: "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen
+          name="add-calendar-event"
+          options={{
+            presentation: "modal",
+            headerShown: false,
+            animation: "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen
+          name="add-supply-request"
+          options={{
+            presentation: "modal",
+            headerShown: false,
+            animation: "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen
+          name="add-parts-request"
+          options={{
+            presentation: "modal",
+            headerShown: false,
+            animation: "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen name="issue-detail" options={{ headerShown: false }} />
+        <Stack.Screen name="document-detail" options={{ headerShown: false }} />
+        <Stack.Screen name="supply-detail" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="maintenance-detail"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="calendar-event-detail"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="assign-boats" options={{ headerShown: false }} />
+        <Stack.Screen name="manager-login" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="notification-settings"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="analytics" options={{ headerShown: false }} />
       </Stack>
     </View>
   );

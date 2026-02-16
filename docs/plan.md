@@ -1256,34 +1256,36 @@ Every task below maps to a specific change described in the phases above. Work t
 
 ### Phase 3: Create Missing Detail Screens
 
-- [ ] Create `app/issue-detail.tsx` with full implementation (see Phase 3.1 code)
-- [ ] Create `app/document-detail.tsx` with full implementation (see Phase 3.2 code)
-- [ ] Create `app/supply-detail.tsx` with full implementation (see Phase 3.3 code)
-- [ ] Verify `addIssueComment` exists in DataContext (add if missing)
-- [ ] Verify `updateIssue` exists in DataContext (add if missing)
-- [ ] Verify `formatFileSize` exists in `utils/fileUtils.ts` (add if missing)
+- [x] Create `app/issue-detail.tsx` with full implementation
+- [x] Create `app/document-detail.tsx` with full implementation
+- [x] Create `app/supply-detail.tsx` with full implementation
+- [x] Verified `addIssueComment` and `updateIssue` exist in DataContext
+- [x] Verified `formatFileSize` exists in `utils/fileUtils.ts`
+- [x] Typecheck: 111 errors (unchanged), zero in new files
 
 ### Phase 4: Wire Dead-End Handlers
 
-- [ ] Wire `handleIssuePress` in `app/(tabs)/issues.tsx` to `router.push('/issue-detail')`
-- [ ] Wire `handleDocumentPress` in `app/(tabs)/documents.tsx` to `router.push('/document-detail')`
-- [ ] Wire `handleRequestPress` in `app/(tabs)/supplies.tsx` to `router.push('/supply-detail')`
-- [ ] Fix or remove `handleInfoPress` on home screen info button in `app/(tabs)/(home)/index.tsx`
-- [ ] Add `router` import to issues.tsx, documents.tsx, supplies.tsx if not already present
+- [x] Wire `handleIssuePress` in `app/(tabs)/issues.tsx` to `router.push('/issue-detail')`
+- [x] Wire `handleDocumentPress` in `app/(tabs)/documents.tsx` to `router.push('/document-detail')`
+- [x] Wire `handleRequestPress` in `app/(tabs)/supplies.tsx` to `router.push('/supply-detail')`
+- [x] Wire `handleInfoPress` in home screen to show Alert with user info
+- [x] Fix `handleInfoPress` on home screen to show Alert (already done above)
+- [x] Verified `router` already imported in issues.tsx, documents.tsx, supplies.tsx
 
 ### Phase 5: Register Missing Routes
 
-- [ ] Add `Stack.Screen` for `add-issue` (modal) in `app/_layout.tsx`
-- [ ] Add `Stack.Screen` for `add-document` (modal) in `app/_layout.tsx`
-- [ ] Add `Stack.Screen` for `add-calendar-event` (modal) in `app/_layout.tsx`
-- [ ] Add `Stack.Screen` for `add-supply-request` (modal) in `app/_layout.tsx`
-- [ ] Add `Stack.Screen` for `add-parts-request` (modal) in `app/_layout.tsx`
-- [ ] Add `Stack.Screen` for `issue-detail` in `app/_layout.tsx`
-- [ ] Add `Stack.Screen` for `document-detail` in `app/_layout.tsx`
-- [ ] Add `Stack.Screen` for `supply-detail` in `app/_layout.tsx`
-- [ ] Add `Stack.Screen` for `maintenance-detail` in `app/_layout.tsx`
-- [ ] Add `Stack.Screen` for `calendar-event-detail` in `app/_layout.tsx`
-- [ ] Add `Stack.Screen` for `assign-boats` in `app/_layout.tsx`
+- [x] Add `Stack.Screen` for `add-issue` (modal) in `app/_layout.tsx`
+- [x] Add `Stack.Screen` for `add-document` (modal) in `app/_layout.tsx`
+- [x] Add `Stack.Screen` for `add-calendar-event` (modal) in `app/_layout.tsx`
+- [x] Add `Stack.Screen` for `add-supply-request` (modal) in `app/_layout.tsx`
+- [x] Add `Stack.Screen` for `add-parts-request` (modal) in `app/_layout.tsx`
+- [x] Add `Stack.Screen` for `issue-detail` in `app/_layout.tsx`
+- [x] Add `Stack.Screen` for `document-detail` in `app/_layout.tsx`
+- [x] Add `Stack.Screen` for `supply-detail` in `app/_layout.tsx`
+- [x] Add `Stack.Screen` for `maintenance-detail` in `app/_layout.tsx`
+- [x] Add `Stack.Screen` for `calendar-event-detail` in `app/_layout.tsx`
+- [x] Add `Stack.Screen` for `assign-boats` in `app/_layout.tsx`
+- [x] Also registered: `manager-login`, `notification-settings`, `analytics`
 
 ### Phase 6: Small Fixes for Polish
 
