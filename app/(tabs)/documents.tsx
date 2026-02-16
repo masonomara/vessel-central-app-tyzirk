@@ -8,8 +8,8 @@ import {
   TextInput,
   ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useTheme } from "@react-navigation/native";
+import { Stack, useRouter } from "expo-router";
+import { ProfileHeaderButton } from "@/components/ProfileHeaderButton";
 import { colors } from "@/styles/commonStyles";
 import { useData } from "@/contexts/DataContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,7 +22,6 @@ const ITEMS_PER_PAGE = 10;
 
 export default function DocumentsScreen() {
   const router = useRouter();
-  const theme = useTheme();
   const { documents } = useData();
   const { userRole } = useAuth();
   const [filterCategory, setFilterCategory] = useState<
@@ -115,22 +114,26 @@ export default function DocumentsScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>Documents</Text>
-        {(userRole === "manager" || userRole === "owner") && (
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={handleAddDocument}
-          >
-            <IconSymbol
-              ios_icon_name="plus.circle.fill"
-              android_material_icon_name="add_circle"
-              size={32}
-              color={colors.accent}
-            />
-          </TouchableOpacity>
-        )}
-      </View>
+      <Stack.Screen
+        options={{
+          title: "Documents",
+          headerRight: () => (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+              {(userRole === "manager" || userRole === "owner") && (
+                <TouchableOpacity onPress={() => router.push("/add-document")}>
+                  <IconSymbol
+                    ios_icon_name="plus"
+                    android_material_icon_name="add"
+                    size={24}
+                    color={colors.accent}
+                  />
+                </TouchableOpacity>
+              )}
+              <ProfileHeaderButton />
+            </View>
+          ),
+        }}
+      />
 
       <View style={styles.searchContainer}>
         <IconSymbol
@@ -362,22 +365,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 16,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: colors.text,
-  },
-  addButton: {
-    padding: 4,
-  },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -425,7 +412,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 120,
+    paddingBottom: 20,
   },
   emptyState: {
     alignItems: "center",

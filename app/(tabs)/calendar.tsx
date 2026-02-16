@@ -6,10 +6,9 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Platform,
-  Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
+import { ProfileHeaderButton } from '@/components/ProfileHeaderButton';
 import { colors, commonStyles, shadows } from '@/styles/commonStyles';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
@@ -244,29 +243,30 @@ export default function CalendarScreen() {
 
   return (
     <View style={commonStyles.container}>
+      <Stack.Screen
+        options={{
+          title: "Calendar",
+          headerRight: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+              <TouchableOpacity onPress={handleAddEvent}>
+                <IconSymbol
+                  ios_icon_name="plus"
+                  android_material_icon_name="add"
+                  size={24}
+                  color={colors.accent}
+                />
+              </TouchableOpacity>
+              <ProfileHeaderButton />
+            </View>
+          ),
+        }}
+      />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
         <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <Text style={styles.headerTitle}>Calendar</Text>
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={handleAddEvent}
-            >
-              <IconSymbol
-                ios_icon_name="plus"
-                android_material_icon_name="add"
-                size={24}
-                color={colors.text}
-              />
-            </TouchableOpacity>
-          </View>
-          
-          {/* Month Navigation */}
           <View style={styles.monthNavigation}>
             <TouchableOpacity
               style={styles.navButton}
@@ -362,8 +362,6 @@ export default function CalendarScreen() {
           )}
         </View>
 
-        {/* Bottom Padding for Tab Bar */}
-        <View style={{ height: 100 }} />
       </ScrollView>
     </View>
   );
@@ -374,33 +372,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: Platform.OS === 'android' ? 48 : 0,
+    paddingBottom: 20,
   },
   header: {
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: colors.text,
-    letterSpacing: -0.5,
-  },
-  addButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shadows.medium,
   },
   monthNavigation: {
     flexDirection: 'row',

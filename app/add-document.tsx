@@ -10,8 +10,7 @@ import {
   Alert,
   Platform,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useTheme } from '@react-navigation/native';
+import { Stack, useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import { colors } from '@/styles/commonStyles';
 import { useData } from '@/contexts/DataContext';
@@ -45,7 +44,6 @@ const COMMON_TAGS = [
 
 export default function AddDocumentScreen() {
   const router = useRouter();
-  const theme = useTheme();
   const { addDocument, vessels, getVesselsForUser } = useData();
   const { userId, userName, userRole } = useAuth();
 
@@ -199,18 +197,21 @@ export default function AddDocumentScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <IconSymbol
-            ios_icon_name="chevron.left"
-            android_material_icon_name="arrow_back"
-            size={24}
-            color={colors.text}
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Upload Document</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <Stack.Screen
+        options={{
+          title: 'Upload Document',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
+              <Text style={[styles.saveText, isSubmitting && { opacity: 0.5 }]}>Upload</Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -464,26 +465,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 48 : 60,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+  cancelText: {
+    fontSize: 16,
+    color: colors.textSecondary,
   },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
+  saveText: {
+    fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
-  },
-  headerSpacer: {
-    width: 40,
+    color: colors.accent,
   },
   scrollContent: {
     paddingHorizontal: 20,

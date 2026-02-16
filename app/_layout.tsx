@@ -3,31 +3,36 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { View, StyleSheet } from "react-native";
+import { colors } from "@/styles/commonStyles";
 
 function RootLayoutContent() {
   return (
     <View style={styles.container}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="login" />
-        <Stack.Screen name="signup" />
-        <Stack.Screen name="forgot-password" />
-        <Stack.Screen name="(tabs)" />
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: colors.background },
+          headerTintColor: colors.text,
+          headerTitleStyle: { fontWeight: "600" },
+          headerBackButtonDisplayMode: "minimal",
+        }}
+      >
+        {/* Auth screens — no header */}
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="signup" options={{ headerShown: false }} />
+        <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
+
+        {/* Tabs — header handled by NativeTabs */}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+        {/* Demo modals */}
         <Stack.Screen
           name="modal"
-          options={{
-            presentation: "modal",
-            headerShown: true,
-            title: "Modal",
-          }}
+          options={{ presentation: "modal", title: "Modal" }}
         />
         <Stack.Screen
           name="formsheet"
-          options={{
-            presentation: "formSheet",
-            headerShown: true,
-            title: "Form Sheet",
-          }}
+          options={{ presentation: "formSheet", title: "Form Sheet" }}
         />
         <Stack.Screen
           name="transparent-modal"
@@ -37,72 +42,87 @@ function RootLayoutContent() {
             headerShown: false,
           }}
         />
+
+        {/* Add-form modals */}
         <Stack.Screen
           name="add-maintenance-task"
           options={{
             presentation: "modal",
-            headerShown: false,
             animation: "slide_from_bottom",
+            title: "New Maintenance Task",
           }}
         />
         <Stack.Screen
           name="add-issue"
           options={{
             presentation: "modal",
-            headerShown: false,
             animation: "slide_from_bottom",
+            title: "Report Issue",
           }}
         />
         <Stack.Screen
           name="add-document"
           options={{
             presentation: "modal",
-            headerShown: false,
             animation: "slide_from_bottom",
+            title: "Upload Document",
           }}
         />
         <Stack.Screen
           name="add-calendar-event"
           options={{
             presentation: "modal",
-            headerShown: false,
             animation: "slide_from_bottom",
+            title: "New Event",
           }}
         />
         <Stack.Screen
           name="add-supply-request"
           options={{
             presentation: "modal",
-            headerShown: false,
             animation: "slide_from_bottom",
+            title: "Request Supplies",
           }}
         />
         <Stack.Screen
           name="add-parts-request"
           options={{
             presentation: "modal",
-            headerShown: false,
             animation: "slide_from_bottom",
+            title: "Request Parts",
           }}
         />
-        <Stack.Screen name="issue-detail" options={{ headerShown: false }} />
-        <Stack.Screen name="document-detail" options={{ headerShown: false }} />
-        <Stack.Screen name="supply-detail" options={{ headerShown: false }} />
+
+        {/* Detail screens */}
         <Stack.Screen
           name="maintenance-detail"
-          options={{ headerShown: false }}
+          options={{ title: "Task Details" }}
         />
         <Stack.Screen
-          name="calendar-event-detail"
-          options={{ headerShown: false }}
+          name="issue-detail"
+          options={{ title: "Issue Details" }}
         />
-        <Stack.Screen name="assign-boats" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="supply-detail"
+          options={{ title: "Supply Request" }}
+        />
+        <Stack.Screen name="document-detail" options={{ title: "Document" }} />
+        <Stack.Screen
+          name="calendar-event-detail"
+          options={{ title: "Event Details" }}
+        />
+
+        {/* Profile — pushed from headerRight button */}
+        <Stack.Screen name="profile" options={{ title: "Profile" }} />
+
+        {/* Utility screens */}
+        <Stack.Screen name="assign-boats" options={{ title: "Assign Boats" }} />
         <Stack.Screen name="manager-login" options={{ headerShown: false }} />
         <Stack.Screen
           name="notification-settings"
-          options={{ headerShown: false }}
+          options={{ title: "Notification Settings" }}
         />
-        <Stack.Screen name="analytics" options={{ headerShown: false }} />
+        <Stack.Screen name="analytics" options={{ title: "Analytics" }} />
       </Stack>
     </View>
   );

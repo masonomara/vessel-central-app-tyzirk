@@ -1,8 +1,7 @@
 
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { router } from 'expo-router';
-import { useTheme } from '@react-navigation/native';
+import { StyleSheet, View, Text, ScrollView, Dimensions } from 'react-native';
+import { Stack, router } from 'expo-router';
 import { colors } from '@/styles/commonStyles';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,7 +11,6 @@ import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 const screenWidth = Dimensions.get('window').width;
 
 export default function AnalyticsScreen() {
-  const theme = useTheme();
   const { userId, userRole } = useAuth();
   const { 
     getExpensesForUser, 
@@ -174,18 +172,7 @@ export default function AnalyticsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <IconSymbol 
-            ios_icon_name="chevron.left" 
-            android_material_icon_name="arrow_back" 
-            size={24} 
-            color={colors.text} 
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Analytics</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <Stack.Screen options={{ title: 'Analytics' }} />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.statsGrid}>
@@ -364,22 +351,6 @@ export default function AnalyticsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 16,
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
   },
   scrollContent: {
     paddingHorizontal: 20,

@@ -12,8 +12,7 @@ import {
   KeyboardAvoidingView,
   Switch,
 } from 'react-native';
-import { router } from 'expo-router';
-import { useTheme } from '@react-navigation/native';
+import { Stack, router } from 'expo-router';
 import { colors } from '@/styles/commonStyles';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,7 +21,6 @@ import { TaskPriority, MaintenanceFrequency } from '@/types';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function AddMaintenanceTaskScreen() {
-  const theme = useTheme();
   const { vessels, addMaintenanceTask } = useData();
   const { userId, userName, userRole } = useAuth();
 
@@ -45,8 +43,6 @@ export default function AddMaintenanceTaskScreen() {
   const [showVesselPicker, setShowVesselPicker] = useState(false);
   const [showPriorityPicker, setShowPriorityPicker] = useState(false);
   const [showFrequencyPicker, setShowFrequencyPicker] = useState(false);
-
-  const backgroundColor = theme.dark ? 'rgb(28, 28, 30)' : theme.colors.background;
 
   const priorities: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
   const frequencies: MaintenanceFrequency[] = ['daily', 'weekly', 'monthly', 'quarterly', 'yearly'];
@@ -147,19 +143,25 @@ export default function AddMaintenanceTaskScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor }]}
+      style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
-          <Text style={styles.cancelText}>Cancel</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>New Maintenance Task</Text>
-        <TouchableOpacity onPress={handleSubmit} style={styles.headerButton}>
-          <Text style={styles.saveText}>Create</Text>
-        </TouchableOpacity>
-      </View>
+      <Stack.Screen
+        options={{
+          title: 'New Maintenance Task',
+          headerLeft: () => (
+            <TouchableOpacity onPress={handleCancel}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity onPress={handleSubmit}>
+              <Text style={styles.saveText}>Create</Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
 
       <ScrollView
         style={styles.scrollView}
@@ -459,25 +461,6 @@ export default function AddMaintenanceTaskScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 48,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerButton: {
-    padding: 4,
-    minWidth: 60,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
   },
   cancelText: {
     fontSize: 16,

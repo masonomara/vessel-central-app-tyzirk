@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { useTheme } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { colors, commonStyles } from "@/styles/commonStyles";
@@ -20,12 +19,12 @@ import { MiniChart } from "@/components/MiniChart";
 import { PressableCard } from "@/components/PressableCard";
 import { GradientButton } from "@/components/GradientButton";
 import GlobalSearch from "@/components/GlobalSearch";
+import { ProfileHeaderButton } from "@/components/ProfileHeaderButton";
 
-import { router } from "expo-router";
+import { Stack, router } from "expo-router";
 
 export default function OwnerDashboard() {
-  const theme = useTheme();
-  const { userName, userId, userRole, signOut } = useAuth();
+  const { userName, userId, userRole } = useAuth();
   const [showSearch, setShowSearch] = useState(false);
   const {
     getVesselsForUser,
@@ -194,6 +193,28 @@ export default function OwnerDashboard() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Stack.Screen
+        options={{
+          title: "Dashboard",
+          headerRight: () => (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setShowSearch(true);
+                }}
+              >
+                <IconSymbol
+                  android_material_icon_name="search"
+                  size={24}
+                  color={colors.text}
+                />
+              </TouchableOpacity>
+              <ProfileHeaderButton />
+            </View>
+          ),
+        }}
+      />
       <GlobalSearch visible={showSearch} onClose={() => setShowSearch(false)} />
 
       <ScrollView
@@ -201,43 +222,8 @@ export default function OwnerDashboard() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <View>
-              <Text style={styles.greeting}>Welcome back,</Text>
-              <Text style={commonStyles.title}>{userName}</Text>
-            </View>
-            <View style={styles.headerActions}>
-              <TouchableOpacity
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setShowSearch(true);
-                }}
-                style={styles.iconButton}
-              >
-                <View style={styles.iconButtonGradient}>
-                  <IconSymbol
-                    ios_icon_name="magnifyingglass"
-                    android_material_icon_name="search"
-                    size={20}
-                    color={colors.text}
-                  />
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleViewAnalytics}
-                style={styles.iconButton}
-              >
-                <View style={styles.iconButtonGradient}>
-                  <IconSymbol
-                    ios_icon_name="chart.bar.fill"
-                    android_material_icon_name="analytics"
-                    size={20}
-                    color={colors.text}
-                  />
-                </View>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <Text style={styles.greeting}>Welcome back,</Text>
+          <Text style={commonStyles.title}>{userName}</Text>
           <View style={styles.roleTag}>
             <IconSymbol
               ios_icon_name="crown.fill"
@@ -575,40 +561,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 60,
     paddingHorizontal: 20,
-    paddingBottom: 120,
+    paddingBottom: 20,
   },
   header: {
     marginBottom: 24,
-  },
-  headerTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 16,
   },
   greeting: {
     fontSize: 16,
     color: colors.textSecondary,
     marginBottom: 4,
     fontWeight: "500",
-  },
-  headerActions: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  iconButton: {
-    borderRadius: 12,
-    overflow: "hidden",
-
-    elevation: 3,
-    backgroundColor: colors.card,
-  },
-  iconButtonGradient: {
-    padding: 12,
-    alignItems: "center",
-    justifyContent: "center",
   },
   roleTag: {
     flexDirection: "row",

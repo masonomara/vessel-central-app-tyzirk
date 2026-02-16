@@ -167,15 +167,7 @@ export default function AssignBoatsScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: 'Assign Boats',
-          headerStyle: {
-            backgroundColor: theme.colors.card,
-          },
-          headerTintColor: colors.text,
-        }}
-      />
+      <Stack.Screen options={{ title: 'Assign Boats' }} />
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.searchContainer}>
           <IconSymbol

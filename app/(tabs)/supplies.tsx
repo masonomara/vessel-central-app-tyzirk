@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   TextInput,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useTheme } from "@react-navigation/native";
+import { Stack, useRouter } from "expo-router";
+import { ProfileHeaderButton } from "@/components/ProfileHeaderButton";
 import { colors } from "@/styles/commonStyles";
 import { useData } from "@/contexts/DataContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -175,7 +175,6 @@ const SupplyRequestItem = React.memo(
 
 export default function SuppliesScreen() {
   const router = useRouter();
-  const theme = useTheme();
   const { supplyRequests, approveSupplyRequest, denySupplyRequest } = useData();
   const { userRole, userId, userName } = useAuth();
   const [filterStatus, setFilterStatus] = useState<SupplyRequestStatus | "all">(
@@ -214,10 +213,6 @@ export default function SuppliesScreen() {
     },
     [router],
   );
-
-  const handleAddRequest = useCallback(() => {
-    router.push("/add-supply-request");
-  }, []);
 
   const renderItem = useCallback(
     ({ item }: { item: SupplyRequest }) => (
@@ -313,19 +308,26 @@ export default function SuppliesScreen() {
     <View
       style={[styles.container, { backgroundColor: colors.background }]}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>Supplies</Text>
-        {userRole === "crew" && (
-          <TouchableOpacity style={styles.addButton} onPress={handleAddRequest}>
-            <IconSymbol
-              ios_icon_name="plus.circle.fill"
-              android_material_icon_name="add_circle"
-              size={32}
-              color={colors.accent}
-            />
-          </TouchableOpacity>
-        )}
-      </View>
+      <Stack.Screen
+        options={{
+          title: "Supplies",
+          headerRight: () => (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+              {userRole === "crew" && (
+                <TouchableOpacity onPress={() => router.push("/add-supply-request")}>
+                  <IconSymbol
+                    ios_icon_name="plus"
+                    android_material_icon_name="add"
+                    size={24}
+                    color={colors.accent}
+                  />
+                </TouchableOpacity>
+              )}
+              <ProfileHeaderButton />
+            </View>
+          ),
+        }}
+      />
 
       <FlatList
         data={filteredRequests}
@@ -348,22 +350,6 @@ export default function SuppliesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 16,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: colors.text,
-  },
-  addButton: {
-    padding: 4,
   },
   searchContainer: {
     flexDirection: "row",
@@ -413,7 +399,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: 20,
-    paddingBottom: 120,
+    paddingBottom: 20,
   },
   emptyState: {
     alignItems: "center",

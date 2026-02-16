@@ -202,13 +202,7 @@ export default function NotificationSettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen
-        options={{
-          title: 'Notification Settings',
-          headerStyle: { backgroundColor: colors.background },
-          headerTintColor: colors.text,
-        }}
-      />
+      <Stack.Screen options={{ title: 'Notification Settings' }} />
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.section}>

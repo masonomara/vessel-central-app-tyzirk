@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams, Stack, router } from "expo-router";
 import { colors } from "@/styles/commonStyles";
 import { useData } from "@/contexts/DataContext";
 import { IconSymbol } from "@/components/IconSymbol";
@@ -23,21 +23,7 @@ export default function DocumentDetailScreen() {
   if (!doc) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-          >
-            <IconSymbol
-              ios_icon_name="chevron.left"
-              android_material_icon_name="arrow-back"
-              size={24}
-              color={colors.text}
-            />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Document Not Found</Text>
-          <View style={styles.headerSpacer} />
-        </View>
+        <Stack.Screen options={{ title: 'Document Not Found' }} />
         <View style={styles.centered}>
           <Text style={styles.errorText}>
             This document could not be found.
@@ -60,23 +46,7 @@ export default function DocumentDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <IconSymbol
-            ios_icon_name="chevron.left"
-            android_material_icon_name="arrow-back"
-            size={24}
-            color={colors.text}
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>
-          Document Details
-        </Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <Stack.Screen options={{ title: 'Document Details' }} />
 
       <ScrollView
         style={styles.content}
@@ -212,25 +182,6 @@ function DetailRow({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 16,
-    backgroundColor: colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  backButton: { padding: 8 },
-  headerTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.text,
-    textAlign: "center",
-  },
-  headerSpacer: { width: 40 },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   errorText: { color: colors.textSecondary, fontSize: 16 },
   content: { flex: 1, padding: 16 },

@@ -1,56 +1,21 @@
 
 import React, { useMemo } from "react";
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
-import { useTheme } from "@react-navigation/native";
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { colors, commonStyles } from "@/styles/commonStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
 import { IconSymbol } from "@/components/IconSymbol";
-import { router } from "expo-router";
+import { ProfileHeaderButton } from "@/components/ProfileHeaderButton";
+import { Stack, router } from "expo-router";
 
 export default function CrewDashboard() {
-  const theme = useTheme();
-  const { userName, userId, userRole, signOut } = useAuth();
+  const { userName, userId, userRole } = useAuth();
   const { 
     getVesselsForUser,
     getMaintenanceTasksForUser,
     getSupplyRequestsForUser,
     updateMaintenanceTask
   } = useData();
-
-  const handleLogout = () => {
-    Alert.alert(
-      "Log Out",
-      "Are you sure you want to log out?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "Log Out",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const { error } = await signOut();
-
-              if (error) {
-                Alert.alert("Error", "Failed to log out. Please try again.");
-                return;
-              }
-
-              setTimeout(() => {
-                router.replace("/login");
-              }, 100);
-
-            } catch {
-              Alert.alert("Error", "An unexpected error occurred. Please try again.");
-            }
-          }
-        }
-      ]
-    );
-  };
 
   const myVessels = useMemo(() => {
     if (!userId || !userRole) {
@@ -99,25 +64,19 @@ export default function CrewDashboard() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView 
+      <Stack.Screen
+        options={{
+          title: "Tasks",
+          headerRight: () => <ProfileHeaderButton />,
+        }}
+      />
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <View>
-              <Text style={styles.greeting}>Crew Portal</Text>
-              <Text style={commonStyles.title}>{userName}</Text>
-            </View>
-            <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-              <IconSymbol 
-                ios_icon_name="rectangle.portrait.and.arrow.right" 
-                android_material_icon_name="logout" 
-                size={24} 
-                color={colors.text} 
-              />
-            </TouchableOpacity>
-          </View>
+          <Text style={styles.greeting}>Crew Portal</Text>
+          <Text style={commonStyles.title}>{userName}</Text>
           <View style={styles.roleTag}>
             <IconSymbol 
               ios_icon_name="person.2.fill" 
@@ -320,26 +279,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 60,
     paddingHorizontal: 20,
-    paddingBottom: 120,
+    paddingBottom: 20,
   },
   header: {
     marginBottom: 24,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
   },
   greeting: {
     fontSize: 16,
     color: colors.textSecondary,
     marginBottom: 4,
-  },
-  logoutButton: {
-    padding: 8,
   },
   roleTag: {
     flexDirection: 'row',

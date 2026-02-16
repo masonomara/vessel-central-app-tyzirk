@@ -6,10 +6,9 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Platform,
   Alert,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, commonStyles, shadows } from '@/styles/commonStyles';
 import { useData } from '@/contexts/DataContext';
 import { IconSymbol } from '@/components/IconSymbol';
@@ -33,21 +32,7 @@ export default function CalendarEventDetailScreen() {
   if (!event) {
     return (
       <View style={commonStyles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <IconSymbol
-              ios_icon_name="chevron.left"
-              android_material_icon_name="arrow_back"
-              size={24}
-              color={colors.text}
-            />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Event Details</Text>
-          <View style={{ width: 40 }} />
-        </View>
+        <Stack.Screen options={{ title: 'Event Not Found' }} />
         <View style={styles.emptyState}>
           <Text style={styles.emptyStateText}>Event not found</Text>
         </View>
@@ -88,37 +73,27 @@ export default function CalendarEventDetailScreen() {
 
   return (
     <View style={commonStyles.container}>
+      <Stack.Screen
+        options={{
+          title: 'Event Details',
+          headerRight: () => (
+            <TouchableOpacity onPress={handleDelete}>
+              <IconSymbol
+                ios_icon_name="trash"
+                android_material_icon_name="delete"
+                size={20}
+                color={colors.danger}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <IconSymbol
-              ios_icon_name="chevron.left"
-              android_material_icon_name="arrow_back"
-              size={24}
-              color={colors.text}
-            />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Event Details</Text>
-          <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={handleDelete}
-          >
-            <IconSymbol
-              ios_icon_name="trash"
-              android_material_icon_name="delete"
-              size={20}
-              color={colors.danger}
-            />
-          </TouchableOpacity>
-        </View>
 
         {/* Event Card */}
         <View style={styles.eventCard}>
@@ -262,8 +237,6 @@ export default function CalendarEventDetailScreen() {
           </View>
         )}
 
-        {/* Bottom Padding */}
-        <View style={{ height: 100 }} />
       </ScrollView>
     </View>
   );
@@ -274,36 +247,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: Platform.OS === 'android' ? 48 : 0,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 20,
     paddingBottom: 20,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  deleteButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.card,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   eventCard: {
     flexDirection: 'row',

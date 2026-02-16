@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { IconSymbol } from "@/components/IconSymbol";
 import { GlassView } from "expo-glass-effect";
 import { useTheme } from "@react-navigation/native";
@@ -53,16 +52,12 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView
+    <View
       style={[styles.safeArea, { backgroundColor: colors.background }]}
-      edges={["top"]}
     >
       <ScrollView
         style={styles.container}
-        contentContainerStyle={[
-          styles.contentContainer,
-          Platform.OS !== "ios" && styles.contentContainerWithTabBar,
-        ]}
+        contentContainerStyle={styles.contentContainer}
       >
         <GlassView
           style={[
@@ -200,7 +195,7 @@ export default function ProfileScreen() {
           <Text style={styles.logoutButtonText}>Log Out</Text>
         </TouchableOpacity>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -213,9 +208,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
-  },
-  contentContainerWithTabBar: {
-    paddingBottom: 100,
   },
   profileHeader: {
     alignItems: "center",

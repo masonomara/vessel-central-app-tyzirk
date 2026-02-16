@@ -650,163 +650,163 @@ Work on Phase 2 and 3 together since they're tightly coupled. Phase 4 can be don
 
 ### Phase 2 — NativeTabs + Delete FloatingTabBar
 
-- [ ] Rewrite `app/(tabs)/_layout.tsx` — replace Stack navigator + FloatingTabBar with `NativeTabs` from `expo-router/unstable-native-tabs`
-- [ ] Add `NativeTabs.Trigger` for `owner` with `hidden={userRole !== "owner"}`
-- [ ] Add `NativeTabs.Trigger` for `manager` with `hidden={userRole !== "manager"}`
-- [ ] Add `NativeTabs.Trigger` for `crew` with `hidden={userRole !== "crew"}`
-- [ ] Add `NativeTabs.Trigger` for `calendar` (all roles, no hidden prop)
-- [ ] Add `NativeTabs.Trigger` for `maintenance` with `hidden={userRole === "crew"}`
-- [ ] Add `NativeTabs.Trigger` for `issues` with `hidden={userRole === "owner"}`
-- [ ] Add `NativeTabs.Trigger` for `supplies` with `hidden={userRole === "owner"}`
-- [ ] Add `NativeTabs.Trigger` for `documents` with `hidden={userRole !== "owner"}`
-- [ ] Do NOT add a trigger for `profile` — it is no longer a tab
-- [ ] Set SF Symbol icons (`sf` prop) and Material icons (`md` prop) on each trigger
-- [ ] Remove all old imports: `Stack` from `expo-router`, `FloatingTabBar`, `TabBarItem` type, `useRouter`, `useSegments`, `useCallback`, `useRef`
-- [ ] Remove `getTabsForRole()` function
-- [ ] Remove `handleRoleRedirect` callback, `hasRedirected` ref, and both `useEffect` hooks
-- [ ] Delete `components/FloatingTabBar.tsx`
-- [ ] Check if `expo-blur` `BlurView` is used anywhere else in the codebase — if not, remove `expo-blur` from dependencies
-- [ ] Verify tab count per role: owner 4, manager 5, crew 4 (all ≤ 5)
+- [x] Rewrite `app/(tabs)/_layout.tsx` — replace Stack navigator + FloatingTabBar with `NativeTabs` from `expo-router/unstable-native-tabs`
+- [x] Add `NativeTabs.Trigger` for `owner` with `hidden={userRole !== "owner"}`
+- [x] Add `NativeTabs.Trigger` for `manager` with `hidden={userRole !== "manager"}`
+- [x] Add `NativeTabs.Trigger` for `crew` with `hidden={userRole !== "crew"}`
+- [x] Add `NativeTabs.Trigger` for `calendar` (all roles, no hidden prop)
+- [x] Add `NativeTabs.Trigger` for `maintenance` with `hidden={userRole === "crew"}`
+- [x] Add `NativeTabs.Trigger` for `issues` with `hidden={userRole === "owner"}`
+- [x] Add `NativeTabs.Trigger` for `supplies` with `hidden={userRole === "owner"}`
+- [x] Add `NativeTabs.Trigger` for `documents` with `hidden={userRole !== "owner"}`
+- [x] Do NOT add a trigger for `profile` — it is no longer a tab
+- [x] Set SF Symbol icons (`sf` prop) and Material icons (`md` prop) on each trigger
+- [x] Remove all old imports: `Stack` from `expo-router`, `FloatingTabBar`, `TabBarItem` type, `useRouter`, `useSegments`, `useCallback`, `useRef`
+- [x] Remove `getTabsForRole()` function
+- [x] Remove `handleRoleRedirect` callback, `hasRedirected` ref, and both `useEffect` hooks
+- [x] Delete `components/FloatingTabBar.tsx`
+- [x] Check if `expo-blur` `BlurView` is used anywhere else in the codebase — if not, remove `expo-blur` from dependencies
+- [x] Verify tab count per role: owner 4, manager 5, crew 4 (all ≤ 5)
 
 ### Phase 3 — Root Stack Native Headers
 
-- [ ] Edit `app/_layout.tsx` — add global `screenOptions` to the `<Stack>`: `headerStyle`, `headerTintColor`, `headerTitleStyle`, `headerBackButtonDisplayMode: "minimal"`
-- [ ] Update `index` screen options — keep `headerShown: false`
-- [ ] Update `login` screen options — keep `headerShown: false`
-- [ ] Update `signup` screen options — keep `headerShown: false`
-- [ ] Update `forgot-password` screen options — keep `headerShown: false`
-- [ ] Update `(tabs)` screen options — keep `headerShown: false` (NativeTabs handles its own headers)
-- [ ] Update `modal` screen — set `presentation: "modal"`, `title: "Modal"`; remove `headerShown: true` (now default)
-- [ ] Update `formsheet` screen — set `presentation: "formSheet"`, `title: "Form Sheet"`; remove `headerShown: true`
-- [ ] Keep `transparent-modal` screen — `presentation: "transparentModal"`, `animation: "fade"`, `headerShown: false`
-- [ ] Update `add-maintenance-task` — keep `presentation: "modal"`, `animation: "slide_from_bottom"`, add `title: "New Maintenance Task"`, remove `headerShown: false`
-- [ ] Update `add-issue` — same pattern, `title: "Report Issue"`
-- [ ] Update `add-document` — same pattern, `title: "Upload Document"`
-- [ ] Update `add-calendar-event` — same pattern, `title: "New Event"`
-- [ ] Update `add-supply-request` — same pattern, `title: "Request Supplies"`
-- [ ] Update `add-parts-request` — same pattern, `title: "Request Parts"`
-- [ ] Update `maintenance-detail` — set `title: "Task Details"`, remove `headerShown: false`
-- [ ] Update `issue-detail` — set `title: "Issue Details"`, remove `headerShown: false`
-- [ ] Update `supply-detail` — set `title: "Supply Request"`, remove `headerShown: false`
-- [ ] Update `document-detail` — set `title: "Document"`, remove `headerShown: false`
-- [ ] Update `calendar-event-detail` — set `title: "Event Details"`, remove `headerShown: false`
-- [ ] Add new `<Stack.Screen name="profile" options={{ title: "Profile" }} />`
-- [ ] Update `assign-boats` — set `title: "Assign Boats"`, remove `headerShown: false`
-- [ ] Keep `manager-login` — `headerShown: false`
-- [ ] Update `notification-settings` — set `title: "Notification Settings"`, remove `headerShown: false`
-- [ ] Update `analytics` — set `title: "Analytics"`, remove `headerShown: false`
+- [x] Edit `app/_layout.tsx` — add global `screenOptions` to the `<Stack>`: `headerStyle`, `headerTintColor`, `headerTitleStyle`, `headerBackButtonDisplayMode: "minimal"`
+- [x] Update `index` screen options — keep `headerShown: false`
+- [x] Update `login` screen options — keep `headerShown: false`
+- [x] Update `signup` screen options — keep `headerShown: false`
+- [x] Update `forgot-password` screen options — keep `headerShown: false`
+- [x] Update `(tabs)` screen options — keep `headerShown: false` (NativeTabs handles its own headers)
+- [x] Update `modal` screen — set `presentation: "modal"`, `title: "Modal"`; remove `headerShown: true` (now default)
+- [x] Update `formsheet` screen — set `presentation: "formSheet"`, `title: "Form Sheet"`; remove `headerShown: true`
+- [x] Keep `transparent-modal` screen — `presentation: "transparentModal"`, `animation: "fade"`, `headerShown: false`
+- [x] Update `add-maintenance-task` — keep `presentation: "modal"`, `animation: "slide_from_bottom"`, add `title: "New Maintenance Task"`, remove `headerShown: false`
+- [x] Update `add-issue` — same pattern, `title: "Report Issue"`
+- [x] Update `add-document` — same pattern, `title: "Upload Document"`
+- [x] Update `add-calendar-event` — same pattern, `title: "New Event"`
+- [x] Update `add-supply-request` — same pattern, `title: "Request Supplies"`
+- [x] Update `add-parts-request` — same pattern, `title: "Request Parts"`
+- [x] Update `maintenance-detail` — set `title: "Task Details"`, remove `headerShown: false`
+- [x] Update `issue-detail` — set `title: "Issue Details"`, remove `headerShown: false`
+- [x] Update `supply-detail` — set `title: "Supply Request"`, remove `headerShown: false`
+- [x] Update `document-detail` — set `title: "Document"`, remove `headerShown: false`
+- [x] Update `calendar-event-detail` — set `title: "Event Details"`, remove `headerShown: false`
+- [x] Add new `<Stack.Screen name="profile" options={{ title: "Profile" }} />`
+- [x] Update `assign-boats` — set `title: "Assign Boats"`, remove `headerShown: false`
+- [x] Keep `manager-login` — `headerShown: false`
+- [x] Update `notification-settings` — set `title: "Notification Settings"`, remove `headerShown: false`
+- [x] Update `analytics` — set `title: "Analytics"`, remove `headerShown: false`
 
 ### Phase 4 — ProfileHeaderButton + Screen-by-Screen Header Migration
 
 **New Component**
 
-- [ ] Create `components/ProfileHeaderButton.tsx` — `TouchableOpacity` wrapping a person icon, calls `router.push('/profile')` on press
+- [x] Create `components/ProfileHeaderButton.tsx` — `TouchableOpacity` wrapping a person icon, calls `router.push('/profile')` on press
 
 **Tab Screen Headers (remove custom header, add inline `<Stack.Screen options>`)**
 
-- [ ] `owner.tsx` — add `<Stack.Screen>` with `title: "Dashboard"`, `headerRight` with search button + `<ProfileHeaderButton />`
-- [ ] `owner.tsx` — delete the `<View style={styles.header}>` block (greeting, search icon, analytics icon)
-- [ ] `owner.tsx` — remove logout button/handler from header (keep in profile)
-- [ ] `owner.tsx` — delete styles: `header`, `headerTop`, `headerActions`, `iconButton`, `iconButtonGradient`, `greeting`
-- [ ] `manager.tsx` — add `<Stack.Screen>` with `title: "Dashboard"`, `headerRight` with search button + `<ProfileHeaderButton />`
-- [ ] `manager.tsx` — delete the `<View style={styles.header}>` block
-- [ ] `manager.tsx` — remove logout button/handler from header
-- [ ] `manager.tsx` — delete associated header styles
-- [ ] `crew.tsx` — add `<Stack.Screen>` with `title: "Tasks"`, `headerRight` with `<ProfileHeaderButton />`
-- [ ] `crew.tsx` — delete the `<View style={styles.header}>` block
-- [ ] `crew.tsx` — remove logout button/handler from header
-- [ ] `crew.tsx` — delete associated header styles
-- [ ] `calendar.tsx` — add `<Stack.Screen>` with `title: "Calendar"`, `headerRight` with add event button + `<ProfileHeaderButton />`
-- [ ] `calendar.tsx` — delete the `<View style={styles.header}>` block (title + add button)
-- [ ] `calendar.tsx` — delete styles: `header`, `headerTop`, `headerTitle`, `addButton`
-- [ ] `maintenance.tsx` — add `<Stack.Screen>` with `title: "Maintenance"`, `headerRight` with add task button (owner/manager only) + `<ProfileHeaderButton />`
-- [ ] `maintenance.tsx` — delete the `<View style={styles.header}>` block (title + analytics icon + add icon)
-- [ ] `maintenance.tsx` — delete styles: `header`, `title`, `headerActions`, `iconButton`
-- [ ] `issues.tsx` — add `<Stack.Screen>` with `title: "Issues"`, `headerRight` with add issue button + `<ProfileHeaderButton />`
-- [ ] `issues.tsx` — delete the `<View style={styles.header}>` block
-- [ ] `issues.tsx` — delete styles: `header`, `title`, `addButton`
-- [ ] `supplies.tsx` — add `<Stack.Screen>` with `title: "Supplies"`, `headerRight` with add request button (crew only) + `<ProfileHeaderButton />`
-- [ ] `supplies.tsx` — delete the `<View style={styles.header}>` block
-- [ ] `supplies.tsx` — delete styles: `header`, `title`, `addButton`
-- [ ] `documents.tsx` — add `<Stack.Screen>` with `title: "Documents"`, `headerRight` with add document button (owner/manager only) + `<ProfileHeaderButton />`
-- [ ] `documents.tsx` — delete the `<View style={styles.header}>` block
-- [ ] `documents.tsx` — delete styles: `header`, `title`, `addButton`
+- [x] `owner.tsx` — add `<Stack.Screen>` with `title: "Dashboard"`, `headerRight` with search button + `<ProfileHeaderButton />`
+- [x] `owner.tsx` — delete the `<View style={styles.header}>` block (greeting, search icon, analytics icon)
+- [x] `owner.tsx` — remove logout button/handler from header (keep in profile)
+- [x] `owner.tsx` — delete styles: `header`, `headerTop`, `headerActions`, `iconButton`, `iconButtonGradient`, `greeting`
+- [x] `manager.tsx` — add `<Stack.Screen>` with `title: "Dashboard"`, `headerRight` with search button + `<ProfileHeaderButton />`
+- [x] `manager.tsx` — delete the `<View style={styles.header}>` block
+- [x] `manager.tsx` — remove logout button/handler from header
+- [x] `manager.tsx` — delete associated header styles
+- [x] `crew.tsx` — add `<Stack.Screen>` with `title: "Tasks"`, `headerRight` with `<ProfileHeaderButton />`
+- [x] `crew.tsx` — delete the `<View style={styles.header}>` block
+- [x] `crew.tsx` — remove logout button/handler from header
+- [x] `crew.tsx` — delete associated header styles
+- [x] `calendar.tsx` — add `<Stack.Screen>` with `title: "Calendar"`, `headerRight` with add event button + `<ProfileHeaderButton />`
+- [x] `calendar.tsx` — delete the `<View style={styles.header}>` block (title + add button)
+- [x] `calendar.tsx` — delete styles: `header`, `headerTop`, `headerTitle`, `addButton`
+- [x] `maintenance.tsx` — add `<Stack.Screen>` with `title: "Maintenance"`, `headerRight` with add task button (owner/manager only) + `<ProfileHeaderButton />`
+- [x] `maintenance.tsx` — delete the `<View style={styles.header}>` block (title + analytics icon + add icon)
+- [x] `maintenance.tsx` — delete styles: `header`, `title`, `headerActions`, `iconButton`
+- [x] `issues.tsx` — add `<Stack.Screen>` with `title: "Issues"`, `headerRight` with add issue button + `<ProfileHeaderButton />`
+- [x] `issues.tsx` — delete the `<View style={styles.header}>` block
+- [x] `issues.tsx` — delete styles: `header`, `title`, `addButton`
+- [x] `supplies.tsx` — add `<Stack.Screen>` with `title: "Supplies"`, `headerRight` with add request button (crew only) + `<ProfileHeaderButton />`
+- [x] `supplies.tsx` — delete the `<View style={styles.header}>` block
+- [x] `supplies.tsx` — delete styles: `header`, `title`, `addButton`
+- [x] `documents.tsx` — add `<Stack.Screen>` with `title: "Documents"`, `headerRight` with add document button (owner/manager only) + `<ProfileHeaderButton />`
+- [x] `documents.tsx` — delete the `<View style={styles.header}>` block
+- [x] `documents.tsx` — delete styles: `header`, `title`, `addButton`
 
 **Detail Screen Headers (remove custom header, add dynamic `<Stack.Screen options>`)**
 
-- [ ] `maintenance-detail.tsx` — add `<Stack.Screen options={{ title: task?.title || "Task Details" }} />`
-- [ ] `maintenance-detail.tsx` — delete the `<View style={styles.header}>` block (back button + title + spacer)
-- [ ] `maintenance-detail.tsx` — delete styles: `header`, `backButton`, `headerTitle`
-- [ ] `issue-detail.tsx` — add `<Stack.Screen options={{ title: issue?.title || "Issue Details" }} />`
-- [ ] `issue-detail.tsx` — delete the custom header block (including the one in the error state)
-- [ ] `issue-detail.tsx` — delete styles: `header`, `backButton`, `headerTitle`, `headerSpacer`
-- [ ] `supply-detail.tsx` — add `<Stack.Screen options={{ title: request?.itemName || "Supply Request" }} />`
-- [ ] `supply-detail.tsx` — delete the custom header block (including the one in the error state)
-- [ ] `supply-detail.tsx` — delete styles: `header`, `backButton`, `headerTitle`, `headerSpacer`
-- [ ] `document-detail.tsx` — add `<Stack.Screen options={{ title: doc?.title || "Document" }} />`
-- [ ] `document-detail.tsx` — delete the custom header block (including the one in the error state)
-- [ ] `document-detail.tsx` — delete styles: `header`, `backButton`, `headerTitle`, `headerSpacer`
-- [ ] `calendar-event-detail.tsx` — add `<Stack.Screen options={{ title: event?.title || "Event Details" }} />`
-- [ ] `calendar-event-detail.tsx` — delete the custom header block (including the one in the error state)
-- [ ] `calendar-event-detail.tsx` — delete styles: `header`, `backButton`, `headerTitle`
-- [ ] `analytics.tsx` — delete the custom header block (back button + title + spacer)
-- [ ] `analytics.tsx` — delete styles: `header`, `backButton`, `headerTitle`
+- [x] `maintenance-detail.tsx` — add `<Stack.Screen options={{ title: task?.title || "Task Details" }} />`
+- [x] `maintenance-detail.tsx` — delete the `<View style={styles.header}>` block (back button + title + spacer)
+- [x] `maintenance-detail.tsx` — delete styles: `header`, `backButton`, `headerTitle`
+- [x] `issue-detail.tsx` — add `<Stack.Screen options={{ title: issue?.title || "Issue Details" }} />`
+- [x] `issue-detail.tsx` — delete the custom header block (including the one in the error state)
+- [x] `issue-detail.tsx` — delete styles: `header`, `backButton`, `headerTitle`, `headerSpacer`
+- [x] `supply-detail.tsx` — add `<Stack.Screen options={{ title: request?.itemName || "Supply Request" }} />`
+- [x] `supply-detail.tsx` — delete the custom header block (including the one in the error state)
+- [x] `supply-detail.tsx` — delete styles: `header`, `backButton`, `headerTitle`, `headerSpacer`
+- [x] `document-detail.tsx` — add `<Stack.Screen options={{ title: doc?.title || "Document" }} />`
+- [x] `document-detail.tsx` — delete the custom header block (including the one in the error state)
+- [x] `document-detail.tsx` — delete styles: `header`, `backButton`, `headerTitle`, `headerSpacer`
+- [x] `calendar-event-detail.tsx` — add `<Stack.Screen options={{ title: event?.title || "Event Details" }} />`
+- [x] `calendar-event-detail.tsx` — delete the custom header block (including the one in the error state)
+- [x] `calendar-event-detail.tsx` — delete styles: `header`, `backButton`, `headerTitle`
+- [x] `analytics.tsx` — delete the custom header block (back button + title + spacer)
+- [x] `analytics.tsx` — delete styles: `header`, `backButton`, `headerTitle`
 
 **Add-Form Modal Headers (remove custom header, add `headerLeft`/`headerRight`)**
 
-- [ ] `add-maintenance-task.tsx` — add `<Stack.Screen>` with `headerLeft` (Cancel text button) and `headerRight` (Create text button)
-- [ ] `add-maintenance-task.tsx` — delete the `<View style={styles.header}>` block (Cancel + title + Create)
-- [ ] `add-maintenance-task.tsx` — delete styles: `header`, `headerButton`, `headerTitle`, `cancelText`, `saveText`
-- [ ] `add-issue.tsx` — add `<Stack.Screen>` with `headerLeft` (Cancel) and `headerRight` (Submit)
-- [ ] `add-issue.tsx` — delete the custom header block (back button + title + spacer)
-- [ ] `add-issue.tsx` — delete styles: `header`, `backButton`, `headerTitle`, `headerSpacer`
-- [ ] `add-document.tsx` — add `<Stack.Screen>` with `headerLeft` (Cancel) and `headerRight` (Upload)
-- [ ] `add-document.tsx` — delete the custom header block
-- [ ] `add-document.tsx` — delete styles: `header`, `backButton`, `headerTitle`, `headerSpacer`
-- [ ] `add-calendar-event.tsx` — add `<Stack.Screen>` with `headerLeft` (Cancel) and `headerRight` (Create)
-- [ ] `add-calendar-event.tsx` — delete the custom header block
-- [ ] `add-calendar-event.tsx` — delete styles: `header`, `backButton`, `headerTitle`
-- [ ] `add-supply-request.tsx` — add `<Stack.Screen>` with `headerLeft` (Cancel) and `headerRight` (Submit)
-- [ ] `add-supply-request.tsx` — delete the custom header block
-- [ ] `add-supply-request.tsx` — delete styles: `header`, `backButton`, `headerTitle`, `headerSpacer`
-- [ ] `add-parts-request.tsx` — add `<Stack.Screen>` with `headerLeft` (Cancel) and `headerRight` (Submit)
-- [ ] `add-parts-request.tsx` — delete the custom header block
-- [ ] `add-parts-request.tsx` — delete styles: `header`, `backButton`, `headerTitle`, `headerSpacer`
+- [x] `add-maintenance-task.tsx` — add `<Stack.Screen>` with `headerLeft` (Cancel text button) and `headerRight` (Create text button)
+- [x] `add-maintenance-task.tsx` — delete the `<View style={styles.header}>` block (Cancel + title + Create)
+- [x] `add-maintenance-task.tsx` — delete styles: `header`, `headerButton`, `headerTitle`, `cancelText`, `saveText`
+- [x] `add-issue.tsx` — add `<Stack.Screen>` with `headerLeft` (Cancel) and `headerRight` (Submit)
+- [x] `add-issue.tsx` — delete the custom header block (back button + title + spacer)
+- [x] `add-issue.tsx` — delete styles: `header`, `backButton`, `headerTitle`, `headerSpacer`
+- [x] `add-document.tsx` — add `<Stack.Screen>` with `headerLeft` (Cancel) and `headerRight` (Upload)
+- [x] `add-document.tsx` — delete the custom header block
+- [x] `add-document.tsx` — delete styles: `header`, `backButton`, `headerTitle`, `headerSpacer`
+- [x] `add-calendar-event.tsx` — add `<Stack.Screen>` with `headerLeft` (Cancel) and `headerRight` (Create)
+- [x] `add-calendar-event.tsx` — delete the custom header block
+- [x] `add-calendar-event.tsx` — delete styles: `header`, `backButton`, `headerTitle`
+- [x] `add-supply-request.tsx` — add `<Stack.Screen>` with `headerLeft` (Cancel) and `headerRight` (Submit)
+- [x] `add-supply-request.tsx` — delete the custom header block
+- [x] `add-supply-request.tsx` — delete styles: `header`, `backButton`, `headerTitle`, `headerSpacer`
+- [x] `add-parts-request.tsx` — add `<Stack.Screen>` with `headerLeft` (Cancel) and `headerRight` (Submit)
+- [x] `add-parts-request.tsx` — delete the custom header block
+- [x] `add-parts-request.tsx` — delete styles: `header`, `backButton`, `headerTitle`, `headerSpacer`
 
 **Existing Native Header Screens (verify/clean up)**
 
-- [ ] `notification-settings.tsx` — remove inline `headerStyle` and `headerTintColor` (now inherited from root)
-- [ ] `assign-boats.tsx` — remove inline `headerStyle` and `headerTintColor` (now inherited from root)
+- [x] `notification-settings.tsx` — remove inline `headerStyle` and `headerTintColor` (now inherited from root)
+- [x] `assign-boats.tsx` — remove inline `headerStyle` and `headerTintColor` (now inherited from root)
 
 ### Phase 5 — Style Cleanup
 
-- [ ] `owner.tsx` — remove `paddingTop: 60` from any container/header styles
-- [ ] `manager.tsx` — remove `paddingTop: 60` from any container/header styles
-- [ ] `crew.tsx` — remove `paddingTop: 60` from any container/header styles
-- [ ] `calendar.tsx` — remove `paddingTop` from `scrollContent` style, remove `paddingTop: 20` from header
-- [ ] `maintenance.tsx` — remove `paddingTop: 60` from header style
-- [ ] `issues.tsx` — remove `paddingTop: 60` from header style
-- [ ] `supplies.tsx` — remove `paddingTop: 60` from header style
-- [ ] `documents.tsx` — remove `paddingTop: 60` from header style
-- [ ] `profile.tsx` — remove `SafeAreaView` wrapper with `edges={["top"]}`, replace with a plain `View`
-- [ ] `profile.tsx` — remove `contentContainerWithTabBar` style and its platform conditional
-- [ ] `maintenance-detail.tsx` — remove `paddingTop` from header style
-- [ ] `issue-detail.tsx` — remove `paddingTop` from header style
-- [ ] `supply-detail.tsx` — remove `paddingTop` from header style
-- [ ] `document-detail.tsx` — remove `paddingTop` from header style
-- [ ] `calendar-event-detail.tsx` — remove `paddingTop` from header style
-- [ ] `analytics.tsx` — remove `paddingTop` from header style
-- [ ] `add-maintenance-task.tsx` — remove `paddingTop: 60`/`48` from header style
-- [ ] `add-issue.tsx` — remove `paddingTop` from header style
-- [ ] `add-document.tsx` — remove `paddingTop` from header style
-- [ ] `add-calendar-event.tsx` — remove `paddingTop` from header style
-- [ ] `add-supply-request.tsx` — remove `paddingTop` from header style
-- [ ] `add-parts-request.tsx` — remove `paddingTop` from header style
-- [ ] All tab screens — remove `paddingBottom: 120` and any `contentContainerWithTabBar` bottom padding hacks from ScrollView/FlatList contentContainerStyle
-- [ ] Remove `handleLogout` function and logout button from `owner.tsx` header area
-- [ ] Remove `handleLogout` function and logout button from `manager.tsx` header area
-- [ ] Remove `handleLogout` function and logout button from `crew.tsx` header area
-- [ ] Verify `profile.tsx` still has its own logout button and `handleLogout` function
+- [x] `owner.tsx` — remove `paddingTop: 60` from any container/header styles (already clean — no paddingTop hack existed; removed unused `useTheme`/`theme` and `headerTop` style)
+- [x] `manager.tsx` — remove `paddingTop: 60` from any container/header styles (already clean; removed unused `useTheme`/`theme`)
+- [x] `crew.tsx` — remove `paddingTop: 60` from any container/header styles (already clean; removed unused `useTheme`/`theme`)
+- [x] `calendar.tsx` — remove `paddingTop` from `scrollContent` style (already clean; removed unused `Platform` import)
+- [x] `maintenance.tsx` — remove `paddingTop: 60` from header style (header deleted in Phase 4; removed unused `useTheme`/`theme`)
+- [x] `issues.tsx` — remove `paddingTop: 60` from header style (header deleted in Phase 4; removed unused `useTheme`/`theme`)
+- [x] `supplies.tsx` — remove `paddingTop: 60` from header style (header deleted in Phase 4; removed unused `useTheme`/`theme`)
+- [x] `documents.tsx` — remove `paddingTop: 60` from header style (header deleted in Phase 4; removed unused `useTheme`/`theme`)
+- [x] `profile.tsx` — remove `SafeAreaView` wrapper with `edges={["top"]}`, replace with a plain `View`
+- [x] `profile.tsx` — remove `contentContainerWithTabBar` style and its platform conditional
+- [x] `maintenance-detail.tsx` — remove `paddingTop` from header style (header deleted in Phase 4)
+- [x] `issue-detail.tsx` — remove `paddingTop` from header style (header deleted in Phase 4)
+- [x] `supply-detail.tsx` — remove `paddingTop` from header style (header deleted in Phase 4)
+- [x] `document-detail.tsx` — remove `paddingTop` from header style (header deleted in Phase 4)
+- [x] `calendar-event-detail.tsx` — remove `paddingTop` from header style (header deleted in Phase 4)
+- [x] `analytics.tsx` — remove `paddingTop` from header style (header deleted in Phase 4)
+- [x] `add-maintenance-task.tsx` — remove `paddingTop: 60`/`48` from header style (header deleted in Phase 4)
+- [x] `add-issue.tsx` — remove `paddingTop` from header style (header deleted in Phase 4)
+- [x] `add-document.tsx` — remove `paddingTop` from header style (header deleted in Phase 4)
+- [x] `add-calendar-event.tsx` — remove `paddingTop` from header style (header deleted in Phase 4)
+- [x] `add-supply-request.tsx` — remove `paddingTop` from header style (header deleted in Phase 4)
+- [x] `add-parts-request.tsx` — remove `paddingTop` from header style (header deleted in Phase 4)
+- [x] All tab screens — remove `paddingBottom: 120` and any `contentContainerWithTabBar` bottom padding hacks (already clean — all use paddingBottom: 20)
+- [x] Remove `handleLogout` function and logout button from `owner.tsx` header area (already removed in Phase 4)
+- [x] Remove `handleLogout` function and logout button from `manager.tsx` header area (already removed in Phase 4)
+- [x] Remove `handleLogout` function and logout button from `crew.tsx` header area (already removed in Phase 4)
+- [x] Verify `profile.tsx` still has its own logout button and `handleLogout` function ✓
 
 ### Phase 6 — Dependency Cleanup
 

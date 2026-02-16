@@ -8,8 +8,8 @@ import {
   TextInput,
   ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useTheme } from "@react-navigation/native";
+import { Stack, useRouter } from "expo-router";
+import { ProfileHeaderButton } from "@/components/ProfileHeaderButton";
 import { colors } from "@/styles/commonStyles";
 import { useData } from "@/contexts/DataContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -176,7 +176,6 @@ const IssueItem = React.memo(
 
 export default function IssuesScreen() {
   const router = useRouter();
-  const theme = useTheme();
   const { issues } = useData();
   const { userRole } = useAuth();
   const [filterStatus, setFilterStatus] = useState<TaskStatus | "all">("all");
@@ -365,17 +364,24 @@ export default function IssuesScreen() {
     <View
       style={[styles.container, { backgroundColor: colors.background }]}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>Issues</Text>
-        <TouchableOpacity style={styles.addButton} onPress={handleAddIssue}>
-          <IconSymbol
-            ios_icon_name="plus.circle.fill"
-            android_material_icon_name="add_circle"
-            size={32}
-            color={colors.danger}
-          />
-        </TouchableOpacity>
-      </View>
+      <Stack.Screen
+        options={{
+          title: "Issues",
+          headerRight: () => (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+              <TouchableOpacity onPress={() => router.push("/add-issue")}>
+                <IconSymbol
+                  ios_icon_name="plus"
+                  android_material_icon_name="add"
+                  size={24}
+                  color={colors.accent}
+                />
+              </TouchableOpacity>
+              <ProfileHeaderButton />
+            </View>
+          ),
+        }}
+      />
 
       <FlatList
         data={paginatedIssues}
@@ -399,22 +405,6 @@ export default function IssuesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 16,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: colors.text,
-  },
-  addButton: {
-    padding: 4,
   },
   searchContainer: {
     flexDirection: "row",
@@ -464,7 +454,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: 20,
-    paddingBottom: 120,
+    paddingBottom: 20,
   },
   emptyState: {
     alignItems: "center",

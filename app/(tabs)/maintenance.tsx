@@ -8,7 +8,6 @@ import {
   TextInput,
   ActivityIndicator,
 } from "react-native";
-import { useTheme } from "@react-navigation/native";
 import { colors } from "@/styles/commonStyles";
 import { useData } from "@/contexts/DataContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,7 +15,8 @@ import { IconSymbol } from "@/components/IconSymbol";
 import FilterModal, { FilterOptions } from "@/components/FilterModal";
 import { MaintenanceTask, TaskStatus, TaskPriority } from "@/types";
 import { formatDueDate, isOverdue } from "@/utils/dateUtils";
-import { router } from "expo-router";
+import { Stack, router } from "expo-router";
+import { ProfileHeaderButton } from "@/components/ProfileHeaderButton";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -183,7 +183,6 @@ const MaintenanceTaskItem = React.memo(
 );
 
 export default function MaintenanceScreen() {
-  const theme = useTheme();
   const { maintenanceTasks } = useData();
   const { userRole } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
@@ -261,10 +260,6 @@ export default function MaintenanceScreen() {
 
   const handleAddTask = useCallback(() => {
     router.push("/add-maintenance-task");
-  }, []);
-
-  const handleAnalytics = useCallback(() => {
-    router.push("/analytics");
   }, []);
 
   const handleApplyFilters = useCallback((newFilters: FilterOptions) => {
@@ -426,29 +421,26 @@ export default function MaintenanceScreen() {
     <View
       style={[styles.container, { backgroundColor: colors.background }]}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>Maintenance</Text>
-        <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.iconButton} onPress={handleAnalytics}>
-            <IconSymbol
-              ios_icon_name="chart.bar.fill"
-              android_material_icon_name="analytics"
-              size={24}
-              color={colors.accent}
-            />
-          </TouchableOpacity>
-          {(userRole === "manager" || userRole === "owner") && (
-            <TouchableOpacity style={styles.iconButton} onPress={handleAddTask}>
-              <IconSymbol
-                ios_icon_name="plus.circle.fill"
-                android_material_icon_name="add_circle"
-                size={32}
-                color={colors.accent}
-              />
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
+      <Stack.Screen
+        options={{
+          title: "Maintenance",
+          headerRight: () => (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+              {(userRole === "manager" || userRole === "owner") && (
+                <TouchableOpacity onPress={() => router.push("/add-maintenance-task")}>
+                  <IconSymbol
+                    ios_icon_name="plus"
+                    android_material_icon_name="add"
+                    size={24}
+                    color={colors.accent}
+                  />
+                </TouchableOpacity>
+              )}
+              <ProfileHeaderButton />
+            </View>
+          ),
+        }}
+      />
 
       <FlatList
         data={paginatedTasks}
@@ -480,26 +472,6 @@ export default function MaintenanceScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 16,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: colors.text,
-  },
-  headerActions: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  iconButton: {
-    padding: 4,
   },
   searchContainer: {
     flexDirection: "row",
@@ -566,7 +538,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: 20,
-    paddingBottom: 120,
+    paddingBottom: 20,
   },
   emptyState: {
     alignItems: "center",

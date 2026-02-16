@@ -1,7 +1,6 @@
 
 import React, { useMemo, useState } from "react";
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
-import { useTheme } from "@react-navigation/native";
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { colors, commonStyles } from "@/styles/commonStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
@@ -10,11 +9,11 @@ import { StatCard } from "@/components/StatCard";
 import { ProgressRing } from "@/components/ProgressRing";
 import GlobalSearch from "@/components/GlobalSearch";
 import { RealtimeFeed } from "@/components/RealtimeFeed";
-import { router } from "expo-router";
+import { ProfileHeaderButton } from "@/components/ProfileHeaderButton";
+import { Stack, router } from "expo-router";
 
 export default function ManagerDashboard() {
-  const theme = useTheme();
-  const { userName, userId, userRole, signOut } = useAuth();
+  const { userName, userId, userRole } = useAuth();
   const [showSearch, setShowSearch] = useState(false);
   const { 
     getVesselsForUser, 
@@ -24,40 +23,6 @@ export default function ManagerDashboard() {
     approveSupplyRequest,
     denySupplyRequest
   } = useData();
-
-  const handleLogout = () => {
-    Alert.alert(
-      "Log Out",
-      "Are you sure you want to log out?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "Log Out",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const { error } = await signOut();
-
-              if (error) {
-                Alert.alert("Error", "Failed to log out. Please try again.");
-                return;
-              }
-
-              setTimeout(() => {
-                router.replace("/login");
-              }, 100);
-
-            } catch {
-              Alert.alert("Error", "An unexpected error occurred. Please try again.");
-            }
-          }
-        }
-      ]
-    );
-  };
 
   const myVessels = useMemo(() => {
     if (!userId || !userRole) {
@@ -140,37 +105,32 @@ export default function ManagerDashboard() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Stack.Screen
+        options={{
+          title: "Dashboard",
+          headerRight: () => (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+              <TouchableOpacity onPress={() => setShowSearch(true)}>
+                <IconSymbol
+                  android_material_icon_name="search"
+                  size={24}
+                  color={colors.text}
+                />
+              </TouchableOpacity>
+              <ProfileHeaderButton />
+            </View>
+          ),
+        }}
+      />
       <GlobalSearch visible={showSearch} onClose={() => setShowSearch(false)} />
-      
-      <ScrollView 
+
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <View>
-              <Text style={styles.greeting}>Manager Portal</Text>
-              <Text style={commonStyles.title}>{userName}</Text>
-            </View>
-            <View style={styles.headerActions}>
-              <TouchableOpacity onPress={() => setShowSearch(true)} style={styles.searchButton}>
-                <IconSymbol 
-                  ios_icon_name="magnifyingglass" 
-                  android_material_icon_name="search" 
-                  size={24} 
-                  color={colors.text} 
-                />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-                <IconSymbol 
-                  ios_icon_name="rectangle.portrait.and.arrow.right" 
-                  android_material_icon_name="logout" 
-                  size={24} 
-                  color={colors.text} 
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
+          <Text style={styles.greeting}>Manager Portal</Text>
+          <Text style={commonStyles.title}>{userName}</Text>
           <View style={styles.roleTag}>
             <IconSymbol 
               ios_icon_name="chart.bar.fill" 
@@ -479,33 +439,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 60,
     paddingHorizontal: 20,
-    paddingBottom: 120,
+    paddingBottom: 20,
   },
   header: {
     marginBottom: 24,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  searchButton: {
-    padding: 8,
   },
   greeting: {
     fontSize: 16,
     color: colors.textSecondary,
     marginBottom: 4,
-  },
-  logoutButton: {
-    padding: 8,
   },
   roleTag: {
     flexDirection: 'row',
