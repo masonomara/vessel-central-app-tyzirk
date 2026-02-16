@@ -211,13 +211,11 @@ export default function IssuesScreen() {
   );
 
   const handleAddIssue = useCallback(() => {
-    console.log("Add issue pressed");
     router.push("/add-issue");
   }, []);
 
   const handleLoadMore = useCallback(() => {
     if (!isLoadingMore && hasMore) {
-      console.log("Loading more issues...");
       setIsLoadingMore(true);
 
       // Simulate loading delay for smooth UX

@@ -203,8 +203,7 @@ export default function SuppliesScreen() {
 
   const handleDeny = useCallback(
     (id: string) => {
-      denySupplyRequest(id, "Budget constraints");
-      console.log("Denied request:", id);
+      denySupplyRequest(id, "Request not approved at this time");
     },
     [denySupplyRequest],
   );
@@ -217,7 +216,6 @@ export default function SuppliesScreen() {
   );
 
   const handleAddRequest = useCallback(() => {
-    console.log("Add request pressed");
     router.push("/add-supply-request");
   }, []);
 

@@ -50,24 +50,17 @@ export default function OwnerDashboard() {
         style: "destructive",
         onPress: async () => {
           try {
-            console.log("=== LOGOUT INITIATED FROM OWNER DASHBOARD ===");
-
             const { error } = await signOut();
 
             if (error) {
-              console.error("Logout error:", error);
               Alert.alert("Error", "Failed to log out. Please try again.");
               return;
             }
 
-            console.log("Logout successful, navigating to login...");
-
             setTimeout(() => {
-              console.log("Navigating to login screen...");
               router.replace("/login");
             }, 100);
-          } catch (err) {
-            console.error("Logout exception:", err);
+          } catch {
             Alert.alert(
               "Error",
               "An unexpected error occurred. Please try again.",
@@ -221,19 +214,16 @@ export default function OwnerDashboard() {
 
   const handleViewReports = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    console.log("View reports pressed");
     router.push("/(tabs)/documents");
   };
 
   const handleApproveRequests = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    console.log("Approve requests pressed");
     router.push("/(tabs)/supplies");
   };
 
   const handleViewAnalytics = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    console.log("View analytics pressed");
     router.push("/analytics");
   };
 

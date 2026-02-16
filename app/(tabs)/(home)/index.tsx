@@ -65,12 +65,10 @@ export default function HomeScreen() {
   const checkAuthentication = useCallback(async () => {
     // Only check once
     if (hasCheckedAuth.current) {
-      console.log("Already checked authentication, skipping...");
       return;
     }
 
     hasCheckedAuth.current = true;
-    console.log("Checking authentication...");
 
     try {
       const authToken = await AsyncStorage.getItem("authToken");
@@ -79,16 +77,13 @@ export default function HomeScreen() {
       const userName = await AsyncStorage.getItem("userName");
 
       if (!authToken || !userId || !userRole || !userName) {
-        console.log("No authentication found, redirecting to login");
         router.replace("/login");
       } else {
-        console.log("User authenticated:", userName, "Role:", userRole);
         await setUserRole(userRole as "owner" | "manager" | "crew");
         await setUserName(userName);
         await setUserId(userId);
       }
-    } catch (error) {
-      console.error("Error checking authentication:", error);
+    } catch {
       router.replace("/login");
     } finally {
       setIsCheckingAuth(false);
@@ -331,8 +326,6 @@ export default function HomeScreen() {
 
   const handleRoleSelect = useCallback(
     async (card: UserCardData) => {
-      console.log("Role selected:", card.role, "User ID:", card.id);
-
       // Animate press
       Animated.sequence([
         Animated.timing(scaleAnim, {
@@ -359,7 +352,6 @@ export default function HomeScreen() {
   }, []);
 
   const handleLogout = useCallback(async () => {
-    console.log("Logging out...");
     try {
       await AsyncStorage.removeItem("authToken");
       await AsyncStorage.removeItem("userId");

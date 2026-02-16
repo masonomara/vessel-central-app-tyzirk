@@ -54,8 +54,6 @@ export default function LoginScreen() {
   };
 
   const handleMockLogin = async (user: MockUser) => {
-    console.log('Mock login successful for user:', user.name, 'Role:', user.role);
-    
     // Set auth context
     setUserRole(user.role);
     setUserName(user.name);
@@ -72,8 +70,6 @@ export default function LoginScreen() {
   };
 
   const handleLogin = async () => {
-    console.log('Login attempt with email:', email);
-    
     setEmailError('');
     setPasswordError('');
     
@@ -126,7 +122,6 @@ export default function LoginScreen() {
   };
 
   const handleQuickLogin = async (role: 'owner' | 'manager' | 'crew') => {
-    console.log('Quick login for role:', role);
     const user = MOCK_USERS.find(u => u.role === role);
     if (user) {
       setIsLoading(true);

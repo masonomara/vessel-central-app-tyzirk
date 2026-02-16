@@ -11,9 +11,6 @@ export default function TabLayout() {
   const hasRedirected = useRef(false);
 
   const handleRoleRedirect = useCallback(() => {
-    console.log('Current role:', userRole);
-    console.log('Current segments:', segments);
-
     // Only redirect once when role is set and we're on home
     if (userRole && segments[1] === '(home)' && !hasRedirected.current) {
       hasRedirected.current = true;

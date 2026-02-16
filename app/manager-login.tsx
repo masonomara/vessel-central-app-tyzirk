@@ -51,8 +51,6 @@ export default function ManagerLoginScreen() {
   };
 
   const handleMockLogin = async (manager: MockManager) => {
-    console.log('Mock manager login successful for:', manager.name);
-    
     // Set auth context
     setUserRole(manager.role);
     setUserName(manager.name);
@@ -69,8 +67,6 @@ export default function ManagerLoginScreen() {
   };
 
   const handleLogin = async () => {
-    console.log('Manager login attempt with email:', email);
-    
     setEmailError('');
     setPasswordError('');
     
@@ -119,7 +115,6 @@ export default function ManagerLoginScreen() {
   };
 
   const handleQuickLogin = async () => {
-    console.log('Quick manager login');
     const manager = MOCK_MANAGERS[0];
     setIsLoading(true);
     setTimeout(async () => {

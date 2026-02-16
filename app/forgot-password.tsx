@@ -32,8 +32,6 @@ export default function ForgotPasswordScreen() {
   };
 
   const handleResetPassword = async () => {
-    console.log('Password reset attempt for email:', email);
-    
     setEmailError('');
     
     if (!email.trim()) {

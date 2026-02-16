@@ -32,25 +32,18 @@ export default function CrewDashboard() {
           style: "destructive",
           onPress: async () => {
             try {
-              console.log("=== LOGOUT INITIATED FROM CREW DASHBOARD ===");
-              
               const { error } = await signOut();
-              
+
               if (error) {
-                console.error("Logout error:", error);
                 Alert.alert("Error", "Failed to log out. Please try again.");
                 return;
               }
-              
-              console.log("Logout successful, navigating to login...");
-              
+
               setTimeout(() => {
-                console.log("Navigating to login screen...");
                 router.replace("/login");
               }, 100);
-              
-            } catch (err) {
-              console.error("Logout exception:", err);
+
+            } catch {
               Alert.alert("Error", "An unexpected error occurred. Please try again.");
             }
           }
@@ -85,7 +78,6 @@ export default function CrewDashboard() {
     if (task) {
       const newStatus = task.status === 'completed' ? 'open' : 'completed';
       updateMaintenanceTask(taskId, { status: newStatus });
-      console.log('Task toggled:', taskId, newStatus);
     }
   };
 

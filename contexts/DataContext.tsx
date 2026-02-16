@@ -729,7 +729,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // Filtering functions based on user role and vessel access
   const getVesselsForUser = (userId: string, userRole: 'owner' | 'manager' | 'crew'): Vessel[] => {
-    console.log('Getting vessels for user:', userId, userRole);
     if (userRole === 'owner') {
       return vessels.filter(v => v.ownerId === userId);
     } else if (userRole === 'manager') {
@@ -852,7 +851,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const completeMaintenanceTask = (id: string, record: Omit<CompletionRecord, 'id' | 'taskId'>) => {
     const task = maintenanceTasks.find(t => t.id === id);
     if (!task) {
-      console.log('Task not found');
       return;
     }
 
@@ -888,7 +886,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           nextDate.setFullYear(nextDate.getFullYear() + task.frequencyValue);
           break;
         default:
-          console.log('Unknown frequency');
+          break;
       }
       updates.nextDueDate = nextDate;
       updates.status = 'open';
@@ -945,7 +943,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addIssueComment = (issueId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
     const issue = issues.find(i => i.id === issueId);
     if (!issue) {
-      console.log('Issue not found');
       return;
     }
 
@@ -1160,7 +1157,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const assignOwnerToVessel = (vesselId: string, ownerId: string, ownerName: string) => {
     const vessel = vessels.find(v => v.id === vesselId);
     if (!vessel) {
-      console.log('Vessel not found');
       return;
     }
 
@@ -1181,7 +1177,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const removeOwnerFromVessel = (vesselId: string) => {
     const vessel = vessels.find(v => v.id === vesselId);
     if (!vessel) {
-      console.log('Vessel not found');
       return;
     }
 
@@ -1202,13 +1197,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const assignCrewToVessel = (vesselId: string, crewId: string, crewName: string) => {
     const vessel = vessels.find(v => v.id === vesselId);
     if (!vessel) {
-      console.log('Vessel not found');
       return;
     }
 
     const currentCrewIds = vessel.crewIds || [];
     if (currentCrewIds.includes(crewId)) {
-      console.log('Crew member already assigned to this vessel');
       return;
     }
 
@@ -1232,7 +1225,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const removeCrewFromVessel = (vesselId: string, crewId: string) => {
     const vessel = vessels.find(v => v.id === vesselId);
     if (!vessel) {
-      console.log('Vessel not found');
       return;
     }
 

@@ -39,25 +39,18 @@ export default function ManagerDashboard() {
           style: "destructive",
           onPress: async () => {
             try {
-              console.log("=== LOGOUT INITIATED FROM MANAGER DASHBOARD ===");
-              
               const { error } = await signOut();
-              
+
               if (error) {
-                console.error("Logout error:", error);
                 Alert.alert("Error", "Failed to log out. Please try again.");
                 return;
               }
-              
-              console.log("Logout successful, navigating to login...");
-              
+
               setTimeout(() => {
-                console.log("Navigating to login screen...");
                 router.replace("/login");
               }, 100);
-              
-            } catch (err) {
-              console.error("Logout exception:", err);
+
+            } catch {
               Alert.alert("Error", "An unexpected error occurred. Please try again.");
             }
           }
@@ -132,20 +125,16 @@ export default function ManagerDashboard() {
 
   const handleApprove = (id: string) => {
     if (!userId || !userName) {
-      console.log('User not logged in');
       return;
     }
     approveSupplyRequest(id, userId, userName);
-    console.log('Approved request:', id);
   };
 
   const handleReject = (id: string) => {
-    denySupplyRequest(id, 'Rejected by manager');
-    console.log('Rejected request:', id);
+    denySupplyRequest(id, 'Request not approved at this time');
   };
 
   const handleViewAllRequests = () => {
-    console.log('Navigating to supplies screen');
     router.push('/(tabs)/supplies');
   };
 

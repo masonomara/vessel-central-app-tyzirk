@@ -1289,12 +1289,13 @@ Every task below maps to a specific change described in the phases above. Work t
 
 ### Phase 6: Small Fixes for Polish
 
-- [ ] Remove `console.log` statements from `app/(tabs)/issues.tsx`
-- [ ] Remove `console.log` statements from `app/(tabs)/documents.tsx`
-- [ ] Remove `console.log` statements from `app/(tabs)/supplies.tsx`
-- [ ] Remove `console.log` statements from `contexts/AuthContext.tsx`
-- [ ] Remove `console.log` statements from `app/login.tsx`
-- [ ] Fix hardcoded deny reason in `app/(tabs)/supplies.tsx` ("Budget constraints" -> "Request not approved at this time")
+- [x] Remove `console.log` statements from `app/(tabs)/issues.tsx`
+- [x] Remove `console.log` statements from `app/(tabs)/documents.tsx`
+- [x] Remove `console.log` statements from `app/(tabs)/supplies.tsx`
+- [x] Remove `console.log` statements from `contexts/AuthContext.tsx` (already clean)
+- [x] Remove `console.log` statements from `app/login.tsx`
+- [x] Remove `console.log` statements from all other files: signup, forgot-password, manager-login, tabs/_layout, add-issue, maintenance, crew, index, profile, manager, home/index, owner, DataContext
+- [x] Fix hardcoded deny reason in `app/(tabs)/supplies.tsx` and `app/(tabs)/manager.tsx` ("Budget constraints" / "Rejected by manager" -> "Request not approved at this time")
 
 ### Phase 7: Walkthrough Verification
 

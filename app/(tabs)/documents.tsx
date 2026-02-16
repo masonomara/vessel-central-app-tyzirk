@@ -83,13 +83,11 @@ export default function DocumentsScreen() {
   );
 
   const handleAddDocument = useCallback(() => {
-    console.log("Add document pressed");
     router.push("/add-document");
   }, []);
 
   const handleLoadMore = useCallback(() => {
     if (!isLoadingMore && hasMore) {
-      console.log("Loading more documents...");
       setIsLoadingMore(true);
 
       // Simulate loading delay for smooth UX

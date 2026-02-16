@@ -56,8 +56,6 @@ export default function SignUpScreen() {
   };
 
   const handleSignUp = async () => {
-    console.log('Sign up attempt with email:', email, 'role:', role);
-    
     // Reset errors
     setNameError('');
     setEmailError('');

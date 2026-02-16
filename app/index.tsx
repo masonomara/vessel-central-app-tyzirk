@@ -12,26 +12,21 @@ export default function Index() {
   useEffect(() => {
     // Only check once
     if (hasChecked.current) {
-      console.log('Already checked auth, skipping...');
       return;
     }
-    
+
     hasChecked.current = true;
-    console.log('Checking initial authentication...');
-    
+
     const checkAuthAndRedirect = async () => {
       try {
         const authToken = await AsyncStorage.getItem('authToken');
-        
+
         if (authToken) {
-          console.log('User is authenticated, redirecting to home');
           router.replace('/(tabs)/(home)');
         } else {
-          console.log('User is not authenticated, redirecting to login');
           router.replace('/login');
         }
-      } catch (error) {
-        console.error('Error checking authentication:', error);
+      } catch {
         router.replace('/login');
       }
     };

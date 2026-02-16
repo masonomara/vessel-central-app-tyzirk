@@ -118,9 +118,7 @@ export default function AddIssueScreen() {
                 mimeType: 'image/jpeg',
               });
 
-              console.log(`Image optimized: ${formatFileSize(optimized.originalSize || 0)} → ${formatFileSize(optimized.size || 0)}`);
-            } catch (error) {
-              console.error('Error optimizing image:', error);
+            } catch {
               // Fall back to original image if optimization fails
               newAttachments.push({
                 id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -194,9 +192,7 @@ export default function AddIssueScreen() {
           };
 
           setAttachments([...attachments, newAttachment]);
-          console.log(`Photo optimized: ${formatFileSize(optimized.originalSize || 0)} → ${formatFileSize(optimized.size || 0)}`);
-        } catch (error) {
-          console.error('Error optimizing photo:', error);
+        } catch {
           // Fall back to original image if optimization fails
           const newAttachment: Attachment = {
             id: Date.now().toString() + Math.random().toString(36).substr(2, 9),

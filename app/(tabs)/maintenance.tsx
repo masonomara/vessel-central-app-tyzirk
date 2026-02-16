@@ -256,17 +256,14 @@ export default function MaintenanceScreen() {
   }, [filters]);
 
   const handleTaskPress = useCallback((task: MaintenanceTask) => {
-    console.log("Task pressed:", task.id);
     router.push(`/maintenance-detail?id=${task.id}`);
   }, []);
 
   const handleAddTask = useCallback(() => {
-    console.log("Add task pressed");
     router.push("/add-maintenance-task");
   }, []);
 
   const handleAnalytics = useCallback(() => {
-    console.log("Analytics pressed");
     router.push("/analytics");
   }, []);
 
@@ -277,7 +274,6 @@ export default function MaintenanceScreen() {
 
   const handleLoadMore = useCallback(() => {
     if (!isLoadingMore && hasMore) {
-      console.log("Loading more tasks...");
       setIsLoadingMore(true);
 
       // Simulate loading delay for smooth UX

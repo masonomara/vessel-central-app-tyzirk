@@ -28,25 +28,18 @@ export default function ProfileScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              console.log("=== LOGOUT INITIATED ===");
-              
               const { error } = await signOut();
-              
+
               if (error) {
-                console.error("Logout error:", error);
                 Alert.alert("Error", "Failed to log out. Please try again.");
                 return;
               }
-              
-              console.log("Logout successful, navigating to login...");
-              
+
               setTimeout(() => {
-                console.log("Navigating to login screen...");
                 router.replace("/login");
               }, 100);
-              
-            } catch (err) {
-              console.error("Logout exception:", err);
+
+            } catch {
               Alert.alert("Error", "An unexpected error occurred. Please try again.");
             }
           }
