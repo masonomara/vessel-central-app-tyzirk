@@ -21,7 +21,7 @@ export default function ErrorState({
         ios_icon_name="exclamationmark.triangle.fill"
         android_material_icon_name="error"
         size={64}
-        color={colors.error}
+        color={colors.danger}
       />
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.message}>{message}</Text>

@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: colors.backgroundAlt,
+    backgroundColor: colors.background,
     borderRadius: 8,
     marginBottom: 12,
   },

@@ -193,9 +193,7 @@ export default function OwnerDashboard() {
   };
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: colors.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <GlobalSearch visible={showSearch} onClose={() => setShowSearch(false)} />
 
       <ScrollView
@@ -394,24 +392,17 @@ export default function OwnerDashboard() {
             </View>
           </PressableCard>
 
-          <View style={styles.expenseChartCard}>
-            <LinearGradient
-              colors={[colors.card, colors.cardElevated]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.expenseChartGradient}
-            >
-              <View style={styles.expenseChartHeader}>
-                <Text style={styles.expenseChartTitle}>Expense Trend</Text>
-                <Text style={styles.expenseChartSubtitle}>Last 6 months</Text>
-              </View>
-              <MiniChart
-                data={last6MonthsExpenses}
-                color={colors.success}
-                height={80}
-              />
-            </LinearGradient>
-          </View>
+          <PressableCard style={styles.expenseChartCard}>
+            <View style={styles.expenseChartHeader}>
+              <Text style={styles.expenseChartTitle}>Expense Trend</Text>
+              <Text style={styles.expenseChartSubtitle}>Last 6 months</Text>
+            </View>
+            <MiniChart
+              data={last6MonthsExpenses}
+              color={colors.success}
+              height={80}
+            />
+          </PressableCard>
         </View>
 
         {upcomingMaintenance && (
@@ -477,12 +468,9 @@ export default function OwnerDashboard() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Pending Approvals</Text>
-              <LinearGradient
-                colors={[colors.warning, colors.warningLight]}
-                style={styles.badge}
-              >
+              <View style={styles.badge}>
                 <Text style={styles.badgeText}>{pendingApprovals.length}</Text>
-              </LinearGradient>
+              </View>
             </View>
             {pendingApprovals.slice(0, 2).map((approval, index) => (
               <PressableCard key={approval.id} style={styles.approvalCard}>
@@ -858,7 +846,7 @@ const styles = StyleSheet.create({
     minWidth: 28,
     alignItems: "center",
     justifyContent: "center",
-    elevation: 3,
+    backgroundColor: colors.warning,
   },
   badgeText: {
     color: colors.text,

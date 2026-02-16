@@ -3,59 +3,32 @@ import { StyleSheet } from "react-native";
 export const colors = {
   // Primary Navy/Charcoal Palette
   primary: "#0A2540", // Deep Navy (primary brand color)
-  primaryDark: "#051729", // Darker Navy
   secondary: "#1E3A5F", // Medium Navy
-  charcoal: "#2C3E50", // Charcoal
-  charcoalLight: "#34495E", // Light Charcoal
 
   // Accent Colors
   accent: "#3B82F6", // Bright Blue (operational)
-  accentLight: "#60A5FA", // Light Blue
   gold: "#D4AF37", // Subtle Gold (premium accent)
-  goldLight: "#E8C547", // Light Gold
 
   // Status Colors
   success: "#10B981", // Green for completed/active
-  successLight: "#34D399", // Light Green
   warning: "#F59E0B", // Amber for pending
-  warningLight: "#FBBF24", // Light Amber
   danger: "#EF4444", // Red for urgent/issues
-  dangerLight: "#F87171", // Light Red
   info: "#3B82F6", // Blue for info
-  error: "#EF4444", // Alias for danger
-
-  // Status Pills
-  statusInPort: "#10B981", // Green
-  statusOnCharter: "#3B82F6", // Blue
-  statusInYard: "#F59E0B", // Amber
-  statusOffline: "#6B7280", // Gray
   grey: "#6B7280", // Neutral gray
 
   // Backgrounds - DARKER for better text contrast
   background: "#F5F4ED", // Almost black (darker)
-  backgroundAlt: "#E8E6DC", // Very dark slate (darker)
   card: "#FAF9F5", // Card background (darker)
-  cardHover: "#1A2129", // Card hover state (darker)
-  cardElevated: "#1D242E", // Elevated card (darker)
 
   // Text - Higher contrast
   text: "#141413", // Pure white for maximum contrast
   textSecondary: "#3D3D44", // Lighter gray for better visibility
   textTertiary: "#73726C", // Medium gray
-  textMuted: "#5A6A7E", // Muted gray
+  textMuted: "#73726c80", // Muted gray
 
   // Borders & Dividers
   border: "#1f1e1d26", // Subtle border
   divider: "#1f1e1d4d", // Divider line
-
-  // Overlays
-  overlay: "rgba(0, 0, 0, 0.6)",
-  overlayLight: "rgba(0, 0, 0, 0.3)",
-  overlayDark: "rgba(0, 0, 0, 0.8)",
-
-  // Glass effect
-  glass: "rgba(21, 27, 36, 0.7)",
-  glassBorder: "rgba(168, 181, 199, 0.15)",
 
   // Gradients (for use in LinearGradient)
   gradientStart: "#0A2540",
@@ -184,16 +157,6 @@ export const buttonStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  glassButton: {
-    backgroundColor: colors.glass,
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.xl,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.glassBorder,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   buttonText: {
     color: colors.text,
     fontSize: 16,
@@ -289,30 +252,6 @@ export const commonStyles = StyleSheet.create({
     marginVertical: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,
-  },
-  cardCompact: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: spacing.lg,
-    marginVertical: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  cardElevated: {
-    backgroundColor: colors.cardElevated,
-    borderRadius: 16,
-    padding: spacing.xl,
-    marginVertical: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  cardGlass: {
-    backgroundColor: colors.glass,
-    borderRadius: 16,
-    padding: spacing.xl,
-    marginVertical: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.glassBorder,
   },
 
   // Sections

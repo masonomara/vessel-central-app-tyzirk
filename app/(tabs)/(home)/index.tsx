@@ -122,11 +122,11 @@ export default function HomeScreen() {
               : "Active",
       statusColor:
         owner1Vessels[0]?.status === "charter"
-          ? colors.statusOnCharter
+          ? colors.info
           : owner1Vessels[0]?.status === "docked"
-            ? colors.statusInPort
+            ? colors.success
             : owner1Vessels[0]?.status === "maintenance"
-              ? colors.statusInYard
+              ? colors.warning
               : colors.success,
       operationalData: owner1Vessels[0]?.location || "Monaco Yacht Club",
     });
@@ -150,11 +150,11 @@ export default function HomeScreen() {
               : "Active",
       statusColor:
         owner2Vessels[0]?.status === "charter"
-          ? colors.statusOnCharter
+          ? colors.info
           : owner2Vessels[0]?.status === "docked"
-            ? colors.statusInPort
+            ? colors.success
             : owner2Vessels[0]?.status === "maintenance"
-              ? colors.statusInYard
+              ? colors.warning
               : colors.success,
       operationalData: owner2Vessels[0]?.location || "Port of Miami",
     });
@@ -184,11 +184,11 @@ export default function HomeScreen() {
               : "Active",
       statusColor:
         manager1Vessels[0]?.status === "charter"
-          ? colors.statusOnCharter
+          ? colors.info
           : manager1Vessels[0]?.status === "docked"
-            ? colors.statusInPort
+            ? colors.success
             : manager1Vessels[0]?.status === "maintenance"
-              ? colors.statusInYard
+              ? colors.warning
               : colors.success,
       operationalData: `${manager1Issues.length} issue${manager1Issues.length !== 1 ? "s" : ""} open`,
     });
@@ -217,11 +217,11 @@ export default function HomeScreen() {
               : "Active",
       statusColor:
         manager2Vessels[0]?.status === "charter"
-          ? colors.statusOnCharter
+          ? colors.info
           : manager2Vessels[0]?.status === "docked"
-            ? colors.statusInPort
+            ? colors.success
             : manager2Vessels[0]?.status === "maintenance"
-              ? colors.statusInYard
+              ? colors.warning
               : colors.success,
       operationalData: `${manager2Issues.length} issue${manager2Issues.length !== 1 ? "s" : ""} open`,
     });
@@ -251,11 +251,11 @@ export default function HomeScreen() {
               : "Active",
       statusColor:
         crew1Vessels[0]?.status === "charter"
-          ? colors.statusOnCharter
+          ? colors.info
           : crew1Vessels[0]?.status === "docked"
-            ? colors.statusInPort
+            ? colors.success
             : crew1Vessels[0]?.status === "maintenance"
-              ? colors.statusInYard
+              ? colors.warning
               : colors.success,
       operationalData: `${crew1Tasks.length} task${crew1Tasks.length !== 1 ? "s" : ""} • Fuel 85% • Water 92%`,
     });
@@ -284,11 +284,11 @@ export default function HomeScreen() {
               : "Active",
       statusColor:
         crew3Vessels[0]?.status === "charter"
-          ? colors.statusOnCharter
+          ? colors.info
           : crew3Vessels[0]?.status === "docked"
-            ? colors.statusInPort
+            ? colors.success
             : crew3Vessels[0]?.status === "maintenance"
-              ? colors.statusInYard
+              ? colors.warning
               : colors.success,
       operationalData: `${crew3Tasks.length} task${crew3Tasks.length !== 1 ? "s" : ""} • Fuel 78% • Water 88%`,
     });
