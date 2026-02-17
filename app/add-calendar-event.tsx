@@ -13,12 +13,12 @@ import {
 } from 'react-native';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { colors, commonStyles, shadows } from '@/styles/commonStyles';
-import { useAuth } from '@/contexts/AuthContext';
-import { useData } from '@/contexts/DataContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { CalendarEventType } from '@/types/calendar';
-import { EVENT_TYPE_LABELS, getEventColor } from '@/utils/calendarUtils';
+import { colors, commonStyles, shadows } from '../styles/commonStyles';
+import { useAuth } from '../contexts/AuthContext';
+import { useData } from '../contexts/DataContext';
+import { IconSymbol } from '../components/IconSymbol';
+import { CalendarEventType } from '../types/calendar';
+import { EVENT_TYPE_LABELS, getEventColor } from '../utils/calendarUtils';
 
 export default function AddCalendarEventScreen() {
   const router = useRouter();

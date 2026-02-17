@@ -1,11 +1,11 @@
 import React from "react";
 import { StyleSheet, View, Text, ScrollView } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
-import { colors } from "@/styles/commonStyles";
-import { useData } from "@/contexts/DataContext";
-import { IconSymbol } from "@/components/IconSymbol";
-import { StatCard } from "@/components/StatCard";
-import { PressableCard } from "@/components/PressableCard";
+import { colors } from "../styles/commonStyles";
+import { useData } from "../contexts/DataContext";
+import { IconSymbol } from "../components/IconSymbol";
+import { StatCard } from "../components/StatCard";
+import { PressableCard } from "../components/PressableCard";
 
 export default function VesselDetailScreen() {
   const { id } = useLocalSearchParams();

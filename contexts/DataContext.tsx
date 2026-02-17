@@ -14,7 +14,7 @@ import {
   Attachment,
   Comment,
   CalendarEvent,
-} from '@/types';
+} from '../types';
 
 interface DataContextType {
   vessels: Vessel[];

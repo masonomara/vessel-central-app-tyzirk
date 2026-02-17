@@ -8,13 +8,13 @@ import {
   Alert,
 } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
-import { colors } from "@/styles/commonStyles";
-import { useData } from "@/contexts/DataContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { IconSymbol } from "@/components/IconSymbol";
-import { LinkedDetailRow } from "@/components/LinkedDetailRow";
-import { formatDate } from "@/utils/dateUtils";
-import { SupplyRequestStatus, TaskPriority } from "@/types";
+import { colors } from "../styles/commonStyles";
+import { useData } from "../contexts/DataContext";
+import { useAuth } from "../contexts/AuthContext";
+import { IconSymbol } from "../components/IconSymbol";
+import { LinkedDetailRow } from "../components/LinkedDetailRow";
+import { formatDate } from "../utils/dateUtils";
+import { SupplyRequestStatus, TaskPriority } from "../types";
 
 export default function SupplyDetailScreen() {
   const { id } = useLocalSearchParams();

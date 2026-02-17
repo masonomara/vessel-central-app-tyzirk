@@ -7,12 +7,12 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { IconSymbol } from "@/components/IconSymbol";
+import { IconSymbol } from "../components/IconSymbol";
 import { GlassView } from "expo-glass-effect";
 import { useTheme } from "@react-navigation/native";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "expo-router";
-import { colors } from "@/styles/commonStyles";
+import { colors } from "../styles/commonStyles";
 
 export default function ProfileScreen() {
   const theme = useTheme();

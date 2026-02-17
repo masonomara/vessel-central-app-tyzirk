@@ -7,7 +7,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
-import { colors, spacing } from "@/styles/commonStyles";
+import { colors, spacing } from "../styles/commonStyles";
 
 interface PressableCardProps {
   children: React.ReactNode;

@@ -11,11 +11,11 @@ import {
   Platform,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { colors } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { TaskPriority } from '@/types';
+import { colors } from '../styles/commonStyles';
+import { useData } from '../contexts/DataContext';
+import { useAuth } from '../contexts/AuthContext';
+import { IconSymbol } from '../components/IconSymbol';
+import { TaskPriority } from '../types';
 
 const SUPPLY_CATEGORIES = [
   'Cleaning',

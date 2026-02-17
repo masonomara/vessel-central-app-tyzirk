@@ -13,11 +13,11 @@ import {
   Switch,
 } from 'react-native';
 import { Stack, router } from 'expo-router';
-import { colors } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { TaskPriority, MaintenanceFrequency } from '@/types';
+import { colors } from '../styles/commonStyles';
+import { useData } from '../contexts/DataContext';
+import { useAuth } from '../contexts/AuthContext';
+import { IconSymbol } from '../components/IconSymbol';
+import { TaskPriority, MaintenanceFrequency } from '../types';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function AddMaintenanceTaskScreen() {

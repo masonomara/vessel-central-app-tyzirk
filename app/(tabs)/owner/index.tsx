@@ -9,17 +9,17 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
-import { colors, commonStyles } from "@/styles/commonStyles";
-import { useAuth } from "@/contexts/AuthContext";
-import { useData } from "@/contexts/DataContext";
-import { IconSymbol } from "@/components/IconSymbol";
-import { StatCard } from "@/components/StatCard";
-import { ProgressRing } from "@/components/ProgressRing";
-import { MiniChart } from "@/components/MiniChart";
-import { PressableCard } from "@/components/PressableCard";
-import { GradientButton } from "@/components/GradientButton";
-import GlobalSearch from "@/components/GlobalSearch";
-import { ProfileHeaderButton } from "@/components/ProfileHeaderButton";
+import { colors, commonStyles } from "../../../styles/commonStyles";
+import { useAuth } from "../../../contexts/AuthContext";
+import { useData } from "../../../contexts/DataContext";
+import { IconSymbol } from "../../../components/IconSymbol";
+import { StatCard } from "../../../components/StatCard";
+import { ProgressRing } from "../../../components/ProgressRing";
+import { MiniChart } from "../../../components/MiniChart";
+import { PressableCard } from "../../../components/PressableCard";
+import { GradientButton } from "../../../components/GradientButton";
+import GlobalSearch from "../../../components/GlobalSearch";
+import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 
 import { Stack, router } from "expo-router";
 

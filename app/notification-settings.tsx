@@ -11,8 +11,8 @@ import {
   Platform,
 } from 'react-native';
 import { Stack } from 'expo-router';
-import { colors } from '@/styles/commonStyles';
-import { IconSymbol } from '@/components/IconSymbol';
+import { colors } from '../styles/commonStyles';
+import { IconSymbol } from '../components/IconSymbol';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
 type NotificationCategory =

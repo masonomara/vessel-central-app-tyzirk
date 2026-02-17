@@ -12,10 +12,10 @@ import {
 } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { useTheme } from '@react-navigation/native';
-import { colors } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { Vessel } from '@/types';
+import { colors } from '../styles/commonStyles';
+import { useData } from '../contexts/DataContext';
+import { IconSymbol } from '../components/IconSymbol';
+import { Vessel } from '../types';
 
 type AssignmentType = 'owner' | 'crew';
 

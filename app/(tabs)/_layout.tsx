@@ -8,8 +8,8 @@ import {
   VectorIcon,
 } from "expo-router/unstable-native-tabs";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useAuth } from "@/contexts/AuthContext";
-import { useData } from "@/contexts/DataContext";
+import { useAuth } from "../../contexts/AuthContext";
+import { useData } from "../../contexts/DataContext";
 
 export default function TabLayout() {
   const { userRole, userId } = useAuth();

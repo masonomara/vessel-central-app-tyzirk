@@ -8,15 +8,15 @@ import {
   TextInput,
   ActivityIndicator,
 } from "react-native";
-import { colors } from "@/styles/commonStyles";
-import { useData } from "@/contexts/DataContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { IconSymbol } from "@/components/IconSymbol";
-import FilterModal, { FilterOptions } from "@/components/FilterModal";
-import { MaintenanceTask, TaskStatus, TaskPriority } from "@/types";
-import { formatDueDate, isOverdue } from "@/utils/dateUtils";
+import { colors } from "../../../styles/commonStyles";
+import { useData } from "../../../contexts/DataContext";
+import { useAuth } from "../../../contexts/AuthContext";
+import { IconSymbol } from "../../../components/IconSymbol";
+import FilterModal, { FilterOptions } from "../../../components/FilterModal";
+import { MaintenanceTask, TaskStatus, TaskPriority } from "../../../types";
+import { formatDueDate, isOverdue } from "../../../utils/dateUtils";
 import { Stack, router } from "expo-router";
-import { ProfileHeaderButton } from "@/components/ProfileHeaderButton";
+import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 
 const ITEMS_PER_PAGE = 10;
 

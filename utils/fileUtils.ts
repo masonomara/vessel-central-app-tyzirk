@@ -1,7 +1,7 @@
 
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
-import { Attachment } from '@/types';
+import { Attachment } from '../types';
 
 export const pickImage = async (): Promise<Attachment | null> => {
   try {

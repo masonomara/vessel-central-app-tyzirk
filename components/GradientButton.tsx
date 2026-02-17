@@ -2,7 +2,7 @@
 import { StyleSheet, Text, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { colors, gradients, spacing } from '@/styles/commonStyles';
+import { colors, gradients, spacing } from '../styles/commonStyles';
 import { IconSymbol } from './IconSymbol';
 
 interface GradientButtonProps {

@@ -8,11 +8,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { ProfileHeaderButton } from '@/components/ProfileHeaderButton';
-import { colors, commonStyles, shadows } from '@/styles/commonStyles';
-import { useAuth } from '@/contexts/AuthContext';
-import { useData } from '@/contexts/DataContext';
-import { IconSymbol } from '@/components/IconSymbol';
+import { ProfileHeaderButton } from '../../../components/ProfileHeaderButton';
+import { colors, commonStyles, shadows } from '../../../styles/commonStyles';
+import { useAuth } from '../../../contexts/AuthContext';
+import { useData } from '../../../contexts/DataContext';
+import { IconSymbol } from '../../../components/IconSymbol';
 import {
   getEventsForDate,
   getEventsForMonth,
@@ -23,8 +23,8 @@ import {
   getEventColor,
   getEventTypeLabel,
   sortEventsByDate,
-} from '@/utils/calendarUtils';
-import { CalendarEvent } from '@/types/calendar';
+} from '../../../utils/calendarUtils';
+import { CalendarEvent } from '../../../types/calendar';
 
 export default function CalendarScreen() {
   const router = useRouter();

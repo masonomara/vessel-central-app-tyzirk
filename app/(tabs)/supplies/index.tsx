@@ -8,13 +8,13 @@ import {
   TextInput,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { ProfileHeaderButton } from "@/components/ProfileHeaderButton";
-import { colors } from "@/styles/commonStyles";
-import { useData } from "@/contexts/DataContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { IconSymbol } from "@/components/IconSymbol";
-import { SupplyRequest, SupplyRequestStatus } from "@/types";
-import { formatDate } from "@/utils/dateUtils";
+import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
+import { colors } from "../../../styles/commonStyles";
+import { useData } from "../../../contexts/DataContext";
+import { useAuth } from "../../../contexts/AuthContext";
+import { IconSymbol } from "../../../components/IconSymbol";
+import { SupplyRequest, SupplyRequestStatus } from "../../../types";
+import { formatDate } from "../../../utils/dateUtils";
 
 const SupplyRequestItem = React.memo(
   ({

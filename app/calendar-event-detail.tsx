@@ -9,15 +9,15 @@ import {
   Alert,
 } from 'react-native';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
-import { colors, commonStyles, shadows } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { PressableCard } from '@/components/PressableCard';
+import { colors, commonStyles, shadows } from '../styles/commonStyles';
+import { useData } from '../contexts/DataContext';
+import { IconSymbol } from '../components/IconSymbol';
+import { PressableCard } from '../components/PressableCard';
 import {
   formatEventDateRange,
   getEventColor,
   getEventTypeLabel,
-} from '@/utils/calendarUtils';
+} from '../utils/calendarUtils';
 
 export default function CalendarEventDetailScreen() {
   const router = useRouter();

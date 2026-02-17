@@ -2,7 +2,7 @@
 import React, { memo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { colors } from '@/styles/commonStyles';
+import { colors } from '../styles/commonStyles';
 
 interface ProgressRingProps {
   progress: number;

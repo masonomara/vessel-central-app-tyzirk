@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors } from '@/styles/commonStyles';
+import { colors } from '../styles/commonStyles';
 import { IconSymbol } from './IconSymbol';
 import { PressableCard } from './PressableCard';
 

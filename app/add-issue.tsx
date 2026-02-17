@@ -14,12 +14,12 @@ import {
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { colors } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { TaskPriority, Attachment } from '@/types';
-import { optimizeImage, formatFileSize, validateImage } from '@/utils/imageUtils';
+import { colors } from '../styles/commonStyles';
+import { useData } from '../contexts/DataContext';
+import { useAuth } from '../contexts/AuthContext';
+import { IconSymbol } from '../components/IconSymbol';
+import { TaskPriority, Attachment } from '../types';
+import { optimizeImage, formatFileSize, validateImage } from '../utils/imageUtils';
 
 const ISSUE_CATEGORIES = [
   'Structural',

@@ -8,12 +8,12 @@ import {
   Alert,
 } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
-import { colors } from "@/styles/commonStyles";
-import { useData } from "@/contexts/DataContext";
-import { IconSymbol } from "@/components/IconSymbol";
-import { LinkedDetailRow } from "@/components/LinkedDetailRow";
-import { formatDate, isOverdue } from "@/utils/dateUtils";
-import { formatFileSize } from "@/utils/fileUtils";
+import { colors } from "../styles/commonStyles";
+import { useData } from "../contexts/DataContext";
+import { IconSymbol } from "../components/IconSymbol";
+import { LinkedDetailRow } from "../components/LinkedDetailRow";
+import { formatDate, isOverdue } from "../utils/dateUtils";
+import { formatFileSize } from "../utils/fileUtils";
 
 export default function DocumentDetailScreen() {
   const { id } = useLocalSearchParams();

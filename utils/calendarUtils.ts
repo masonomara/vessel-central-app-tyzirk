@@ -1,6 +1,6 @@
 
-import { CalendarEvent, CalendarEventType } from '@/types/calendar';
-import { colors } from '@/styles/commonStyles';
+import { CalendarEvent, CalendarEventType } from '../types/calendar';
+import { colors } from '../styles/commonStyles';
 
 export const EVENT_TYPE_COLORS: Record<CalendarEventType, string> = {
   maintenance: colors.warning,

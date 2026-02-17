@@ -1,7 +1,7 @@
 import { TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import { IconSymbol } from "@/components/IconSymbol";
-import { colors } from "@/styles/commonStyles";
+import { IconSymbol } from "../components/IconSymbol";
+import { colors } from "../styles/commonStyles";
 
 export function ProfileHeaderButton() {
   const router = useRouter();

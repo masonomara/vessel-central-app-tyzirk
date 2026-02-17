@@ -1,12 +1,12 @@
 
 import React, { useMemo } from "react";
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from "react-native";
-import { PressableCard } from "@/components/PressableCard";
-import { colors, commonStyles } from "@/styles/commonStyles";
-import { useAuth } from "@/contexts/AuthContext";
-import { useData } from "@/contexts/DataContext";
-import { IconSymbol } from "@/components/IconSymbol";
-import { ProfileHeaderButton } from "@/components/ProfileHeaderButton";
+import { PressableCard } from "../../../components/PressableCard";
+import { colors, commonStyles } from "../../../styles/commonStyles";
+import { useAuth } from "../../../contexts/AuthContext";
+import { useData } from "../../../contexts/DataContext";
+import { IconSymbol } from "../../../components/IconSymbol";
+import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { Stack, router } from "expo-router";
 
 export default function CrewDashboard() {

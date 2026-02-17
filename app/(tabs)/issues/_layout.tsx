@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { colors } from "@/styles/commonStyles";
+import { colors } from "../../../styles/commonStyles";
 
 export default function IssuesLayout() {
   return (

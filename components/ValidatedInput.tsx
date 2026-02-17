@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TextInputProps } from 'react-native';
-import { colors } from '@/styles/commonStyles';
-import { ValidationResult } from '@/utils/validation';
+import { colors } from '../styles/commonStyles';
+import { ValidationResult } from '../utils/validation';
 import { IconSymbol } from './IconSymbol';
 
 interface ValidatedInputProps extends TextInputProps {

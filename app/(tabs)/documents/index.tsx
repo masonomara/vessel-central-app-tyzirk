@@ -9,14 +9,14 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { ProfileHeaderButton } from "@/components/ProfileHeaderButton";
-import { colors } from "@/styles/commonStyles";
-import { useData } from "@/contexts/DataContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { IconSymbol } from "@/components/IconSymbol";
-import { Document, DocumentCategory } from "@/types";
-import { formatDate, formatDueDate, isOverdue } from "@/utils/dateUtils";
-import { formatFileSize } from "@/utils/fileUtils";
+import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
+import { colors } from "../../../styles/commonStyles";
+import { useData } from "../../../contexts/DataContext";
+import { useAuth } from "../../../contexts/AuthContext";
+import { IconSymbol } from "../../../components/IconSymbol";
+import { Document, DocumentCategory } from "../../../types";
+import { formatDate, formatDueDate, isOverdue } from "../../../utils/dateUtils";
+import { formatFileSize } from "../../../utils/fileUtils";
 
 const ITEMS_PER_PAGE = 10;
 

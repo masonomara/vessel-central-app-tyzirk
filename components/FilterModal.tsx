@@ -1,9 +1,9 @@
 
 import React, { useState, memo, useCallback } from 'react';
 import { StyleSheet, View, Text, Modal, TouchableOpacity, ScrollView } from 'react-native';
-import { colors } from '@/styles/commonStyles';
-import { IconSymbol } from '@/components/IconSymbol';
-import { TaskStatus, TaskPriority, SupplyRequestStatus } from '@/types';
+import { colors } from '../styles/commonStyles';
+import { IconSymbol } from '../components/IconSymbol';
+import { TaskStatus, TaskPriority, SupplyRequestStatus } from '../types';
 
 interface FilterModalProps {
   visible: boolean;

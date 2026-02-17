@@ -11,13 +11,13 @@ import {
   Platform,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { colors } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { ValidatedInput } from '@/components/ValidatedInput';
-import { TaskPriority } from '@/types';
-import { validateRequired, validatePositiveNumber } from '@/utils/validation';
+import { colors } from '../styles/commonStyles';
+import { useData } from '../contexts/DataContext';
+import { useAuth } from '../contexts/AuthContext';
+import { IconSymbol } from '../components/IconSymbol';
+import { ValidatedInput } from '../components/ValidatedInput';
+import { TaskPriority } from '../types';
+import { validateRequired, validatePositiveNumber } from '../utils/validation';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 

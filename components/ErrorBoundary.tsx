@@ -1,7 +1,7 @@
 
 import React, { Component, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { colors } from '@/styles/commonStyles';
+import { colors } from '../styles/commonStyles';
 import { IconSymbol } from './IconSymbol';
 
 interface Props {

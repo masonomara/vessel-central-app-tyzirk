@@ -1,7 +1,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { colors } from '@/styles/commonStyles';
+import { colors } from '../styles/commonStyles';
 
 interface MiniChartProps {
   data: number[];

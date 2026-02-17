@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { router, Href } from "expo-router";
-import { colors } from "@/styles/commonStyles";
+import { colors } from "../styles/commonStyles";
 import { IconSymbol } from "./IconSymbol";
 import { PressableCard } from "./PressableCard";
 

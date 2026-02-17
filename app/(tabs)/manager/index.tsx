@@ -1,16 +1,16 @@
 
 import React, { useMemo, useState } from "react";
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from "react-native";
-import { PressableCard } from "@/components/PressableCard";
-import { colors, commonStyles } from "@/styles/commonStyles";
-import { useAuth } from "@/contexts/AuthContext";
-import { useData } from "@/contexts/DataContext";
-import { IconSymbol } from "@/components/IconSymbol";
-import { StatCard } from "@/components/StatCard";
-import { ProgressRing } from "@/components/ProgressRing";
-import GlobalSearch from "@/components/GlobalSearch";
-import { RealtimeFeed } from "@/components/RealtimeFeed";
-import { ProfileHeaderButton } from "@/components/ProfileHeaderButton";
+import { PressableCard } from "../../../components/PressableCard";
+import { colors, commonStyles } from "../../../styles/commonStyles";
+import { useAuth } from "../../../contexts/AuthContext";
+import { useData } from "../../../contexts/DataContext";
+import { IconSymbol } from "../../../components/IconSymbol";
+import { StatCard } from "../../../components/StatCard";
+import { ProgressRing } from "../../../components/ProgressRing";
+import GlobalSearch from "../../../components/GlobalSearch";
+import { RealtimeFeed } from "../../../components/RealtimeFeed";
+import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { Stack, router } from "expo-router";
 
 export default function ManagerDashboard() {

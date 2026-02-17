@@ -1,9 +1,9 @@
 import { Stack } from "expo-router";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { DataProvider } from "@/contexts/DataContext";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AuthProvider } from "../contexts/AuthContext";
+import { DataProvider } from "../contexts/DataContext";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 import { View, StyleSheet } from "react-native";
-import { colors } from "@/styles/commonStyles";
+import { colors } from "../styles/commonStyles";
 
 function RootLayoutContent() {
   return (

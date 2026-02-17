@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
-import { colors, spacing } from "@/styles/commonStyles";
+import { colors, spacing } from "../styles/commonStyles";
 import { IconSymbol } from "./IconSymbol";
 
 interface StatCardProps {

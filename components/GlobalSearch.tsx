@@ -1,10 +1,10 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Modal } from 'react-native';
-import { colors } from '@/styles/commonStyles';
-import { IconSymbol } from '@/components/IconSymbol';
-import { searchManager, SearchResult } from '@/utils/searchManager';
-import { useData } from '@/contexts/DataContext';
+import { colors } from '../styles/commonStyles';
+import { IconSymbol } from '../components/IconSymbol';
+import { searchManager, SearchResult } from '../utils/searchManager';
+import { useData } from '../contexts/DataContext';
 import { router } from 'expo-router';
 
 interface GlobalSearchProps {

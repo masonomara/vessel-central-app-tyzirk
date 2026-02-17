@@ -9,13 +9,13 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { ProfileHeaderButton } from "@/components/ProfileHeaderButton";
-import { colors } from "@/styles/commonStyles";
-import { useData } from "@/contexts/DataContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { IconSymbol } from "@/components/IconSymbol";
-import { Issue, TaskStatus, TaskPriority } from "@/types";
-import { formatDate } from "@/utils/dateUtils";
+import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
+import { colors } from "../../../styles/commonStyles";
+import { useData } from "../../../contexts/DataContext";
+import { useAuth } from "../../../contexts/AuthContext";
+import { IconSymbol } from "../../../components/IconSymbol";
+import { Issue, TaskStatus, TaskPriority } from "../../../types";
+import { formatDate } from "../../../utils/dateUtils";
 
 const ITEMS_PER_PAGE = 10;
 

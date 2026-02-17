@@ -2,13 +2,13 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
-import { colors } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { PressableCard } from '@/components/PressableCard';
-import { formatDate, formatDueDate, isOverdue } from '@/utils/dateUtils';
-import { TaskStatus, TaskPriority } from '@/types';
+import { colors } from '../styles/commonStyles';
+import { useData } from '../contexts/DataContext';
+import { useAuth } from '../contexts/AuthContext';
+import { IconSymbol } from '../components/IconSymbol';
+import { PressableCard } from '../components/PressableCard';
+import { formatDate, formatDueDate, isOverdue } from '../utils/dateUtils';
+import { TaskStatus, TaskPriority } from '../types';
 
 export default function MaintenanceDetailScreen() {
   const { id } = useLocalSearchParams();
