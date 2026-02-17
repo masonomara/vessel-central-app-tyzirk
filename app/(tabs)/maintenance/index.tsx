@@ -383,15 +383,6 @@ export default function MaintenanceScreen() {
         </TouchableOpacity>
       );
     }
-
-    return (
-      <View style={styles.endOfList}>
-        <Text style={styles.endOfListText}>
-          Showing all {paginatedTasks.length} task
-          {paginatedTasks.length !== 1 ? "s" : ""}
-        </Text>
-      </View>
-    );
   }, [paginatedTasks.length, isLoadingMore, hasMore, handleLoadMore]);
 
   const ListEmptyComponent = useCallback(

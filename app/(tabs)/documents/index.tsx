@@ -118,14 +118,15 @@ export default function DocumentsScreen() {
         options={{
           title: "Documents",
           headerRight: () => (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+            >
               {(userRole === "manager" || userRole === "owner") && (
                 <TouchableOpacity onPress={() => router.push("/add-document")}>
                   <IconSymbol
                     ios_icon_name="plus"
                     android_material_icon_name="add"
                     size={24}
-                    color={colors.accent}
                   />
                 </TouchableOpacity>
               )}
@@ -345,15 +346,6 @@ export default function DocumentsScreen() {
                 />
               </TouchableOpacity>
             )}
-
-            {!hasMore && paginatedDocuments.length > 0 && (
-              <View style={styles.endOfList}>
-                <Text style={styles.endOfListText}>
-                  Showing all {paginatedDocuments.length} document
-                  {paginatedDocuments.length !== 1 ? "s" : ""}
-                </Text>
-              </View>
-            )}
           </>
         )}
       </View>
@@ -432,12 +424,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  documentCardImportant: {
-
-  },
-  documentCardExpired: {
-
-  },
+  documentCardImportant: {},
+  documentCardExpired: {},
   documentHeader: {
     flexDirection: "row",
     marginBottom: 12,

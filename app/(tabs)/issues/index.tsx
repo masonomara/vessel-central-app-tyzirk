@@ -331,15 +331,6 @@ export default function IssuesScreen() {
         </TouchableOpacity>
       );
     }
-
-    return (
-      <View style={styles.endOfList}>
-        <Text style={styles.endOfListText}>
-          Showing all {paginatedIssues.length} issue
-          {paginatedIssues.length !== 1 ? "s" : ""}
-        </Text>
-      </View>
-    );
   }, [paginatedIssues.length, isLoadingMore, hasMore, handleLoadMore]);
 
   const ListEmptyComponent = useCallback(
@@ -361,14 +352,14 @@ export default function IssuesScreen() {
   );
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: colors.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen
         options={{
           title: "Issues",
           headerRight: () => (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+            >
               <TouchableOpacity onPress={() => router.push("/add-issue")}>
                 <IconSymbol
                   ios_icon_name="plus"
@@ -480,9 +471,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  issueCardUrgent: {
-
-  },
+  issueCardUrgent: {},
   issueHeader: {
     flexDirection: "row",
     justifyContent: "space-between",

@@ -10,10 +10,10 @@ function RootLayoutContent() {
     <View style={styles.container}>
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.text,
           headerTitleStyle: { fontWeight: "600" },
           headerBackButtonDisplayMode: "minimal",
+          headerTransparent: true,
         }}
       >
         {/* Auth screens — no header */}
