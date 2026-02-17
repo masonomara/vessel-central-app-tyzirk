@@ -30,7 +30,7 @@ export type NotificationType = 'issue' | 'supply' | 'maintenance' | 'document' |
 
 export type NotificationPriority = 'low' | 'medium' | 'high';
 
-export type ActivityLogType = 'issue' | 'supply' | 'maintenance' | 'approval' | 'document' | 'system';
+export type ActivityLogType = 'issue' | 'supply' | 'maintenance' | 'approval' | 'document' | 'system' | 'task';
 
 // Core entities
 
@@ -49,7 +49,7 @@ export interface Attachment {
   id: string;
   name: string;
   uri: string;
-  type: 'image' | 'video' | 'document';
+  type: 'image' | 'video' | 'document' | 'pdf';
   size: number;
   uploadedBy: string;
   uploadedAt: Date;
@@ -73,9 +73,9 @@ export interface MaintenanceTask {
   description: string;
   vesselId: string;
   vesselName: string;
-  assignedTo: string;
-  assignedToName: string;
-  assignedToType: 'crew' | 'manager';
+  assignedTo: string | null;
+  assignedToName: string | null;
+  assignedToType: 'crew' | 'manager' | null;
   status: TaskStatus;
   priority: TaskPriority;
   dueDate: Date;
@@ -181,8 +181,8 @@ export interface ActivityLog {
   userRole: string;
   vesselId: string;
   vesselName: string;
-  relatedId: string;
-  relatedType: string;
+  relatedId?: string;
+  relatedType?: string;
   timestamp: Date;
 }
 

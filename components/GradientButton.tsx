@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -36,10 +35,10 @@ export function GradientButton({
     }
   };
 
-  const getGradientColors = () => {
-    if (gradientColors) return gradientColors;
+  const getGradientColors = (): readonly [string, string] => {
+    if (gradientColors && gradientColors.length >= 2) return [gradientColors[0], gradientColors[1]];
     if (disabled) return [colors.textMuted, colors.textMuted];
-    
+
     switch (variant) {
       case 'primary':
         return gradients.primary;

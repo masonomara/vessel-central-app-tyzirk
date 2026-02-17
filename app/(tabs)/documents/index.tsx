@@ -127,6 +127,7 @@ export default function DocumentsScreen() {
                     ios_icon_name="plus"
                     android_material_icon_name="add"
                     size={24}
+                    color={colors.text}
                   />
                 </TouchableOpacity>
               )}
@@ -191,7 +192,7 @@ export default function DocumentsScreen() {
         ))}
       </ScrollView>
 
-      <View
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -348,7 +349,7 @@ export default function DocumentsScreen() {
             )}
           </>
         )}
-      </View>
+      </ScrollView>
     </ScrollView>
   );
 }

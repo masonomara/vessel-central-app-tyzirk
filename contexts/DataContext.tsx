@@ -592,7 +592,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // Use ref to track if data has been loaded
   const hasLoadedData = useRef(false);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadData = useCallback(async () => {
     if (hasLoadedData.current) {

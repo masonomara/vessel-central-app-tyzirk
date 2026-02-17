@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { GlassView } from 'expo-glass-effect';
 import { useTheme } from '@react-navigation/native';
+import { colors } from '@/styles/commonStyles';
 
 export default function Modal() {
   const theme = useTheme();
