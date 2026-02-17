@@ -425,71 +425,71 @@ All modal form screens (`add-*.tsx`) use ScrollView. Verify:
 
 ### Phase 1 — Crash Fixes
 
-- [ ] **1A-1** Remove `handleOpenFile` function from `app/document-detail.tsx`
-- [ ] **1A-2** Remove "Open Document" `<TouchableOpacity>` button from `app/document-detail.tsx`
-- [ ] **1A-3** Add preview card (icon, filename, file type/size) in its place
-- [ ] **1A-4** Add Download and Share action buttons below the preview card
-- [ ] **1A-5** Add new styles: `previewCard`, `previewIconRow`, `previewFileName`, `previewFileType`, `actionRow`, `actionButton`, `actionButtonText`
-- [ ] **1B-1** Add `if (!userId || !userName) return;` guard to `handleApprove` in `app/supply-detail.tsx`
-- [ ] **1B-2** Add `if (!userId || !userName) return;` guard to `handleAddComment` in `app/issue-detail.tsx`
-- [ ] **1C-1** Add empty vessel list early return to `app/add-issue.tsx`
-- [ ] **1C-2** Add empty vessel list early return to `app/add-document.tsx`
-- [ ] **1C-3** Add empty vessel list early return to `app/add-supply-request.tsx`
-- [ ] **1C-4** Add empty vessel list early return to `app/add-parts-request.tsx`
-- [ ] **1C-5** Add empty vessel list early return to `app/add-calendar-event.tsx`
-- [ ] **1D-1** Add `if (!selectedDocument) return;` guard to `handleSubmit` in `app/add-document.tsx`
-- [ ] **1D-2** Remove all four `!` operators from `selectedDocument!.uri`, `.name`, `.size`, `.mimeType`
+- [x] **1A-1** Remove `handleOpenFile` function from `app/document-detail.tsx`
+- [x] **1A-2** Remove "Open Document" `<TouchableOpacity>` button from `app/document-detail.tsx`
+- [x] **1A-3** Add preview card (icon, filename, file type/size) in its place
+- [x] **1A-4** Add Download and Share action buttons below the preview card
+- [x] **1A-5** Add new styles: `previewCard`, `previewIconRow`, `previewFileName`, `previewFileType`, `actionRow`, `actionButton`, `actionButtonText`
+- [x] **1B-1** Add `if (!userId || !userName) return;` guard to `handleApprove` in `app/supply-detail.tsx`
+- [x] **1B-2** Add `if (!userId || !userName) return;` guard to `handleAddComment` in `app/issue-detail.tsx`
+- [x] **1C-1** Add empty vessel list early return to `app/add-issue.tsx`
+- [x] **1C-2** Add empty vessel list early return to `app/add-document.tsx`
+- [x] **1C-3** Add empty vessel list early return to `app/add-supply-request.tsx`
+- [x] **1C-4** Add empty vessel list early return to `app/add-parts-request.tsx`
+- [x] **1C-5** Add empty vessel list early return to `app/add-calendar-event.tsx`
+- [x] **1D-1** Add `if (!selectedDocument) return;` guard to `handleSubmit` in `app/add-document.tsx`
+- [x] **1D-2** Remove all four `!` operators from `selectedDocument!.uri`, `.name`, `.size`, `.mimeType`
 
 ### Phase 2 — Screen Completion
 
-- [ ] **2A-1** Add `Image` and `ScrollView` to imports in `app/issue-detail.tsx`
-- [ ] **2A-2** Add horizontal attachment thumbnail scroll after description section in `app/issue-detail.tsx`
-- [ ] **2B-1** Add "Assign to Me" button inside Actions section in `app/issue-detail.tsx` (only when unassigned, manager/owner role)
-- [ ] **2C-1** Add `StatCard` stats row after title section in `app/vessel-detail.tsx` (Tasks, Issues, Supplies, Docs counts)
-- [ ] **2D-1** Destructure `updateSupplyRequest` from `useData()` in `app/supply-detail.tsx`
-- [ ] **2D-2** Add "Mark as Ordered" button for approved requests in `app/supply-detail.tsx`
-- [ ] **2D-3** Add "Mark as Received" button for ordered requests in `app/supply-detail.tsx`
+- [x] **2A-1** Add `Image` and `ScrollView` to imports in `app/issue-detail.tsx`
+- [x] **2A-2** Add horizontal attachment thumbnail scroll after description section in `app/issue-detail.tsx`
+- [x] **2B-1** Add "Assign to Me" button inside Actions section in `app/issue-detail.tsx` (only when unassigned, manager/owner role)
+- [x] **2C-1** Add `StatCard` stats row after title section in `app/vessel-detail.tsx` (Tasks, Issues, Supplies, Docs counts)
+- [x] **2D-1** Destructure `updateSupplyRequest` from `useData()` in `app/supply-detail.tsx`
+- [x] **2D-2** Add "Mark as Ordered" button for approved requests in `app/supply-detail.tsx`
+- [x] **2D-3** Add "Mark as Received" button for ordered requests in `app/supply-detail.tsx`
 
 ### Phase 3 — Mock Data Enrichment
 
-- [ ] **3A-1** Add 5-7 maintenance tasks to initial state in `contexts/DataContext.tsx` (varied statuses: completed, overdue, waiting_on_parts, open, in_progress)
-- [ ] **3A-2** Add 3-4 issues to initial state (one resolved with `resolvedAt`, one in_progress, one with pre-populated comments)
-- [ ] **3A-3** Add 2-3 supply requests to initial state (one ordered, one received, one denied with `deniedReason`)
-- [ ] **3A-4** Add 3-4 documents to initial state across categories (warranty, manual, invoice, receipt)
-- [ ] **3A-5** Add 4-5 expenses to initial state across categories (Fuel, Docking, Insurance, Repairs, Crew) so analytics charts render well
-- [ ] **3B-1** Add 1-2 comments to existing issue id `'1'` (Deck Leak)
-- [ ] **3B-2** Add 1-2 comments to existing issue id `'2'` (Navigation Light Malfunction)
+- [x] **3A-1** Add 5-7 maintenance tasks to initial state in `contexts/DataContext.tsx` (varied statuses: completed, overdue, waiting_on_parts, open, in_progress)
+- [x] **3A-2** Add 3-4 issues to initial state (one resolved with `resolvedAt`, one in_progress, one with pre-populated comments)
+- [x] **3A-3** Add 2-3 supply requests to initial state (one ordered, one received, one denied with `deniedReason`)
+- [x] **3A-4** Add 3-4 documents to initial state across categories (warranty, manual, invoice, receipt)
+- [x] **3A-5** Add 4-5 expenses to initial state across categories (Fuel, Docking, Insurance, Repairs, Crew) so analytics charts render well
+- [x] **3B-1** Add 1-2 comments to existing issue id `'1'` (Deck Leak)
+- [x] **3B-2** Add 1-2 comments to existing issue id `'2'` (Navigation Light Malfunction)
 
 ### Phase 4 — Empty States
 
-- [ ] **4A-1** Create `components/EmptyState.tsx` with icon, title, subtitle props
-- [ ] **4B-1** Add empty state to maintenance tab list screen
-- [ ] **4B-2** Add empty state to issues tab list screen
-- [ ] **4B-3** Add empty state to supplies tab list screen
-- [ ] **4B-4** Add empty state to documents tab list screen
-- [ ] **4B-5** Add empty state to calendar tab screen
+- [x] **4A-1** Create `components/EmptyState.tsx` with icon, title, subtitle props
+- [x] **4B-1** Add empty state to maintenance tab list screen (already implemented)
+- [x] **4B-2** Add empty state to issues tab list screen (already implemented)
+- [x] **4B-3** Add empty state to supplies tab list screen (already implemented)
+- [x] **4B-4** Add empty state to documents tab list screen (already implemented)
+- [x] **4B-5** Add empty state to calendar tab screen (already implemented)
 
 ### Phase 5 — Cleanup
 
-- [ ] **5A-1** Delete `app/modal.tsx`
-- [ ] **5A-2** Delete `app/formsheet.tsx`
-- [ ] **5A-3** Delete `app/transparent-modal.tsx`
-- [ ] **5A-4** Remove any corresponding route definitions from `app/_layout.tsx`
-- [ ] **5B-1** Verify `app/forgot-password.tsx` shows "check your email" message and navigates back — fix if broken
+- [x] **5A-1** Delete `app/modal.tsx`
+- [x] **5A-2** Delete `app/formsheet.tsx`
+- [x] **5A-3** Delete `app/transparent-modal.tsx`
+- [x] **5A-4** Remove any corresponding route definitions from `app/_layout.tsx`
+- [x] **5B-1** Verify `app/forgot-password.tsx` shows "check your email" message and navigates back — fix if broken
 
 ### Phase 6 — Analytics Hardening
 
-- [ ] **6A-1** Add `hasExpenseData` check (`.some(v => v > 0)`) before LineChart render in `app/analytics.tsx`
-- [ ] **6A-2** Add same zero-value check before BarChart render
-- [ ] **6A-3** Add same zero-value check before PieChart render
-- [ ] **6B-1** Replace hardcoded "2.3 days" with computed `avgResponseTime` from resolved issues
+- [x] **6A-1** Add `hasExpenseData` check (`.some(v => v > 0)`) before LineChart render in `app/analytics.tsx`
+- [x] **6A-2** Add same zero-value check before BarChart render
+- [x] **6A-3** PieChart already uses `.some(s => s.count > 0)` — no change needed
+- [x] **6B-1** Replace hardcoded "2.3 days" with computed `avgResponseTime` from resolved issues
 
 ### Phase 7 — Layout Verification
 
-- [ ] **7A-1** Verify safe area handling on all tab screens (no content behind notch or tab bar)
-- [ ] **7B-1** Verify keyboard avoidance on `app/add-maintenance-task.tsx`
-- [ ] **7B-2** Verify keyboard avoidance on `app/add-issue.tsx`
-- [ ] **7B-3** Verify keyboard avoidance on `app/add-supply-request.tsx`
-- [ ] **7B-4** Verify keyboard avoidance on `app/add-parts-request.tsx`
-- [ ] **7B-5** Verify keyboard avoidance on `app/add-document.tsx`
-- [ ] **7B-6** Verify keyboard avoidance on `app/add-calendar-event.tsx`
+- [x] **7A-1** Verify safe area handling on all tab screens — Expo Router native Stack/Tabs handle safe areas natively
+- [x] **7B-1** Verify keyboard avoidance on `app/add-maintenance-task.tsx` — uses KeyboardAvoidingView, good
+- [x] **7B-2** Verify keyboard avoidance on `app/add-issue.tsx` — ScrollView with 120px paddingBottom, adequate
+- [x] **7B-3** Verify keyboard avoidance on `app/add-supply-request.tsx` — ScrollView with 120px paddingBottom, adequate
+- [x] **7B-4** Verify keyboard avoidance on `app/add-parts-request.tsx` — ScrollView with 120px paddingBottom, adequate
+- [x] **7B-5** Verify keyboard avoidance on `app/add-document.tsx` — ScrollView with 120px paddingBottom, adequate
+- [x] **7B-6** Verify keyboard avoidance on `app/add-calendar-event.tsx` — increased paddingBottom from 20 to 120

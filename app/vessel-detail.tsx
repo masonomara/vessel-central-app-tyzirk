@@ -89,7 +89,15 @@ export default function VesselDetailScreen() {
           </View>
         </View>
 
- 
+        <View style={styles.statsRow}>
+          <StatCard icon="wrench.fill" androidIcon="build" iconColor={colors.accent} label="Tasks" value={vesselTasks.length} />
+          <StatCard icon="exclamationmark.triangle.fill" androidIcon="warning" iconColor={colors.warning} label="Issues" value={vesselIssues.length} />
+        </View>
+        <View style={styles.statsRow}>
+          <StatCard icon="shippingbox.fill" androidIcon="inventory" iconColor={colors.success} label="Supplies" value={vesselSupplies.length} />
+          <StatCard icon="doc.fill" androidIcon="description" iconColor={colors.textSecondary} label="Docs" value={vesselDocs.length} />
+        </View>
+
         {activeTasks.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Active Tasks</Text>

@@ -296,6 +296,20 @@ export default function AddIssueScreen() {
     }
   };
 
+  if (userVessels.length === 0) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Stack.Screen options={{ title: 'Report Issue' }} />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 }}>
+          <IconSymbol ios_icon_name="sailboat" android_material_icon_name="sailing" size={48} color={colors.textMuted} />
+          <Text style={{ fontSize: 16, color: colors.textSecondary, textAlign: 'center', marginTop: 16 }}>
+            No vessels assigned to your account. Contact your manager.
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen

@@ -146,6 +146,16 @@ export default function AnalyticsScreen() {
     return expenses.reduce((sum, exp) => sum + exp.amount, 0);
   }, [expenses]);
 
+  const avgResponseTime = useMemo(() => {
+    const resolved = issues.filter((i): i is typeof i & { resolvedAt: Date } => i.resolvedAt != null);
+    if (resolved.length === 0) return '\u2014';
+    const totalDays = resolved.reduce((sum, i) => {
+      const diff = new Date(i.resolvedAt).getTime() - new Date(i.createdAt).getTime();
+      return sum + diff / (1000 * 60 * 60 * 24);
+    }, 0);
+    return (totalDays / resolved.length).toFixed(1) + ' days';
+  }, [issues]);
+
   const avgMonthlyExpense = useMemo(() => {
     if (expensesByMonth.datasets[0].data.length === 0) {
       return 0;
@@ -237,7 +247,7 @@ export default function AnalyticsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Expense Trends</Text>
           <View style={styles.chartCard}>
-            {expensesByMonth.datasets[0].data.length > 0 ? (
+            {expensesByMonth.datasets[0].data.some(v => v > 0) ? (
               <LineChart
                 data={expensesByMonth}
                 width={screenWidth - 60}
@@ -260,7 +270,7 @@ export default function AnalyticsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Expenses by Category</Text>
           <View style={styles.chartCard}>
-            {expensesByCategory.datasets[0].data.length > 0 ? (
+            {expensesByCategory.datasets[0].data.some(v => v > 0) ? (
               <BarChart
                 data={expensesByCategory}
                 width={screenWidth - 60}
@@ -336,7 +346,7 @@ export default function AnalyticsScreen() {
               />
               <Text style={styles.metricTitle}>Average Response Time</Text>
             </View>
-            <Text style={styles.metricValue}>2.3 days</Text>
+            <Text style={styles.metricValue}>{avgResponseTime}</Text>
             <Text style={styles.metricSubtext}>From issue report to resolution</Text>
           </View>
 

@@ -47,6 +47,20 @@ export default function AddCalendarEventScreen() {
     return getVesselsForUser(userId, userRole);
   }, [userId, userRole, vessels, getVesselsForUser]);
 
+  if (userVessels.length === 0) {
+    return (
+      <View style={commonStyles.container}>
+        <Stack.Screen options={{ title: 'New Event' }} />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 }}>
+          <IconSymbol ios_icon_name="sailboat" android_material_icon_name="sailing" size={48} color={colors.textMuted} />
+          <Text style={{ fontSize: 16, color: colors.textSecondary, textAlign: 'center', marginTop: 16 }}>
+            No vessels assigned to your account. Contact your manager.
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
   const eventTypes: CalendarEventType[] = [
     'maintenance',
     'charter',
@@ -418,7 +432,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 20,
+    paddingBottom: 120,
   },
   cancelText: {
     fontSize: 16,

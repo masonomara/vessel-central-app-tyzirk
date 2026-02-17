@@ -62,6 +62,20 @@ export default function AddDocumentScreen() {
 
   const selectedVessel = vessels.find(v => v.id === selectedVesselId);
 
+  if (userVessels.length === 0) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Stack.Screen options={{ title: 'Upload Document' }} />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 }}>
+          <IconSymbol ios_icon_name="sailboat" android_material_icon_name="sailing" size={48} color={colors.textMuted} />
+          <Text style={{ fontSize: 16, color: colors.textSecondary, textAlign: 'center', marginTop: 16 }}>
+            No vessels assigned to your account. Contact your manager.
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
   const handlePickDocument = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -146,6 +160,7 @@ export default function AddDocumentScreen() {
     if (!validateForm()) {
       return;
     }
+    if (!selectedDocument) return;
 
     setIsSubmitting(true);
 
@@ -159,10 +174,10 @@ export default function AddDocumentScreen() {
         uploadedBy: userId,
         uploadedByName: userName,
         expiryDate: expiryDate.trim() ? new Date(expiryDate) : undefined,
-        fileUri: selectedDocument!.uri,
-        fileName: selectedDocument!.name,
-        fileSize: selectedDocument!.size || 0,
-        fileType: selectedDocument!.mimeType || 'application/octet-stream',
+        fileUri: selectedDocument.uri,
+        fileName: selectedDocument.name,
+        fileSize: selectedDocument.size || 0,
+        fileType: selectedDocument.mimeType || 'application/octet-stream',
         tags: selectedTags,
         isImportant,
       });

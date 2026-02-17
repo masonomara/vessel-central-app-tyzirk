@@ -66,6 +66,20 @@ export default function AddSupplyRequestScreen() {
 
   const selectedVessel = vessels.find(v => v.id === selectedVesselId);
 
+  if (userVessels.length === 0) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Stack.Screen options={{ title: 'Request Supplies' }} />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 }}>
+          <IconSymbol ios_icon_name="sailboat" android_material_icon_name="sailing" size={48} color={colors.textMuted} />
+          <Text style={{ fontSize: 16, color: colors.textSecondary, textAlign: 'center', marginTop: 16 }}>
+            No vessels assigned to your account. Contact your manager.
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
   const validateForm = (): boolean => {
     if (!itemName.trim()) {
       Alert.alert('Validation Error', 'Please enter an item name.');

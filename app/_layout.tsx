@@ -25,24 +25,6 @@ function RootLayoutContent() {
         {/* Tabs — header handled by NativeTabs */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
-        {/* Demo modals */}
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: "modal", title: "Modal" }}
-        />
-        <Stack.Screen
-          name="formsheet"
-          options={{ presentation: "formSheet", title: "Form Sheet" }}
-        />
-        <Stack.Screen
-          name="transparent-modal"
-          options={{
-            presentation: "transparentModal",
-            animation: "fade",
-            headerShown: false,
-          }}
-        />
-
         {/* Add-form modals */}
         <Stack.Screen
           name="add-maintenance-task"

@@ -18,7 +18,7 @@ import { SupplyRequestStatus, TaskPriority } from "../types";
 
 export default function SupplyDetailScreen() {
   const { id } = useLocalSearchParams();
-  const { supplyRequests, approveSupplyRequest, denySupplyRequest } = useData();
+  const { supplyRequests, approveSupplyRequest, denySupplyRequest, updateSupplyRequest } = useData();
   const { userRole, userId, userName } = useAuth();
 
   const request = supplyRequests.find((r) => r.id === id);
@@ -69,6 +69,7 @@ export default function SupplyDetailScreen() {
   };
 
   const handleApprove = () => {
+    if (!userId || !userName) return;
     Alert.alert("Approve Request", `Approve "${request.itemName}"?`, [
       { text: "Cancel", style: "cancel" },
       {
@@ -214,6 +215,42 @@ export default function SupplyDetailScreen() {
                 onPress={handleDeny}
               >
                 <Text style={styles.actionButtonText}>Deny</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+        {(userRole === "owner" || userRole === "manager") &&
+          request.status === "approved" && (
+            <View style={[styles.actionRow, { marginTop: 16 }]}>
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  { backgroundColor: colors.accent },
+                ]}
+                onPress={() => {
+                  updateSupplyRequest(request.id, { status: "ordered" });
+                  Alert.alert("Updated", "Supply request marked as ordered.");
+                }}
+              >
+                <Text style={styles.actionButtonText}>Mark as Ordered</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+        {(userRole === "owner" || userRole === "manager") &&
+          request.status === "ordered" && (
+            <View style={[styles.actionRow, { marginTop: 16 }]}>
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  { backgroundColor: colors.success },
+                ]}
+                onPress={() => {
+                  updateSupplyRequest(request.id, { status: "received" });
+                  Alert.alert("Updated", "Supply request marked as received.");
+                }}
+              >
+                <Text style={styles.actionButtonText}>Mark as Received</Text>
               </TouchableOpacity>
             </View>
           )}

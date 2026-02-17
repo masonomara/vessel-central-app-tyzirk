@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
+  Image,
 } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
 import { colors } from "../styles/commonStyles";
@@ -76,6 +77,7 @@ export default function IssueDetailScreen() {
 
   const handleAddComment = () => {
     if (!commentText.trim()) return;
+    if (!userId || !userName) return;
     addIssueComment(issue.id, {
       userId,
       userName,
@@ -141,6 +143,29 @@ export default function IssueDetailScreen() {
           <Text style={styles.sectionTitle}>Description</Text>
           <Text style={styles.description}>{issue.description}</Text>
         </View>
+
+        {issue.attachments.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Attachments ({issue.attachments.length})
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={{ flexDirection: "row", gap: 12 }}>
+                {issue.attachments.map((att) => (
+                  <View key={att.id} style={styles.attachmentThumb}>
+                    {att.type === "image" ? (
+                      <Image source={{ uri: att.uri }} style={styles.attachmentImage} />
+                    ) : (
+                      <View style={styles.attachmentPlaceholder}>
+                        <IconSymbol ios_icon_name="play.circle.fill" android_material_icon_name="play-circle" size={32} color={colors.text} />
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+        )}
 
         <View style={styles.card}>
           <LinkedDetailRow
@@ -215,6 +240,23 @@ export default function IssueDetailScreen() {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Actions</Text>
               <View style={styles.actionRow}>
+                {!issue.assignedToName && (
+                  <TouchableOpacity
+                    style={[
+                      styles.actionButton,
+                      { backgroundColor: colors.accent },
+                    ]}
+                    onPress={() => {
+                      updateIssue(issue.id, {
+                        assignedTo: userId,
+                        assignedToName: userName,
+                      });
+                      Alert.alert("Assigned", `Issue assigned to ${userName}`);
+                    }}
+                  >
+                    <Text style={styles.actionButtonText}>Assign to Me</Text>
+                  </TouchableOpacity>
+                )}
                 {issue.status === "open" && (
                   <TouchableOpacity
                     style={[
@@ -334,7 +376,10 @@ const styles = StyleSheet.create({
   },
   sendButton: { padding: 4 },
   sendButtonDisabled: { opacity: 0.5 },
-  actionRow: { flexDirection: "row", gap: 12 },
+  attachmentThumb: { width: 120, height: 120, borderRadius: 8, overflow: "hidden", backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
+  attachmentImage: { width: 120, height: 120 },
+  attachmentPlaceholder: { flex: 1, justifyContent: "center", alignItems: "center" },
+  actionRow: { flexDirection: "row", gap: 12, flexWrap: "wrap" },
   actionButton: {
     flex: 1,
     paddingVertical: 14,

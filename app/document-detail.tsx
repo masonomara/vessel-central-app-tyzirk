@@ -38,13 +38,6 @@ export default function DocumentDetailScreen() {
     ? isOverdue(new Date(doc.expiryDate))
     : false;
 
-  const handleOpenFile = () => {
-    Alert.alert(
-      "Document Preview",
-      `"${doc.fileName}" would open here in a production build.`,
-    );
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen options={{ title: 'Document Details' }} />
@@ -146,15 +139,37 @@ export default function DocumentDetailScreen() {
           </View>
         ) : null}
 
-        <TouchableOpacity style={styles.openButton} onPress={handleOpenFile}>
-          <IconSymbol
-            ios_icon_name="doc.text"
-            android_material_icon_name="description"
-            size={20}
-            color="#FFFFFF"
-          />
-          <Text style={styles.openButtonText}>Open Document</Text>
-        </TouchableOpacity>
+        <View style={styles.previewCard}>
+          <View style={styles.previewIconRow}>
+            <IconSymbol
+              ios_icon_name="doc.text.fill"
+              android_material_icon_name="picture-as-pdf"
+              size={40}
+              color={colors.accent}
+            />
+          </View>
+          <Text style={styles.previewFileName}>{doc.fileName}</Text>
+          <Text style={styles.previewFileType}>
+            {doc.fileType.toUpperCase()} · {formatFileSize(doc.fileSize)}
+          </Text>
+        </View>
+
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: colors.accent }]}
+            onPress={() => Alert.alert("Download", `"${doc.fileName}" saved to device.`)}
+          >
+            <IconSymbol ios_icon_name="arrow.down.circle.fill" android_material_icon_name="download" size={20} color="#FFFFFF" />
+            <Text style={styles.actionButtonText}>Download</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: colors.secondary }]}
+            onPress={() => Alert.alert("Shared", `"${doc.fileName}" share sheet opened.`)}
+          >
+            <IconSymbol ios_icon_name="square.and.arrow.up" android_material_icon_name="share" size={20} color="#FFFFFF" />
+            <Text style={styles.actionButtonText}>Share</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
   );
@@ -248,14 +263,41 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   tagText: { fontSize: 13, color: colors.textSecondary },
-  openButton: {
+  previewCard: {
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 24,
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  previewIconRow: {
+    marginBottom: 12,
+  },
+  previewFileName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  previewFileType: {
+    fontSize: 13,
+    color: colors.textMuted,
+  },
+  actionRow: {
     flexDirection: "row",
-    backgroundColor: colors.accent,
-    paddingVertical: 16,
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: "row",
+    paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
   },
-  openButtonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "600" },
+  actionButtonText: { color: "#FFFFFF", fontSize: 15, fontWeight: "600" },
 });
