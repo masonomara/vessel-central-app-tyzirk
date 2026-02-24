@@ -321,7 +321,7 @@ export default function SuppliesScreen() {
                     ios_icon_name="plus"
                     android_material_icon_name="add"
                     size={24}
-                    color={colors.accent}
+                    color={colors.text}
                   />
                 </TouchableOpacity>
               )}

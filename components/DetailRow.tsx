@@ -67,8 +67,14 @@ export function DetailRow({
                 style={[
                   styles.chip,
                   isSelected
-                    ? { backgroundColor: chipColor + "20", borderColor: chipColor }
-                    : { backgroundColor: "transparent", borderColor: colors.borderSoft },
+                    ? {
+                        backgroundColor: chipColor + "20",
+                        borderColor: chipColor,
+                      }
+                    : {
+                        backgroundColor: "transparent",
+                        borderColor: colors.borderSoft,
+                      },
                 ]}
                 onPress={() => {
                   if (!isSelected) chips.onSelect(option.value);
@@ -179,7 +185,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   chipText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600" as const,
   },
 });

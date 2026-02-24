@@ -10,6 +10,9 @@ import {
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useAuth } from "../../contexts/AuthContext";
 import { useData } from "../../contexts/DataContext";
+import { colors } from "../../styles/commonStyles";
+
+const isIOS26 = Platform.OS === "ios" && Number(Platform.Version) >= 26;
 
 export default function TabLayout() {
   const { userRole, userId } = useAuth();
@@ -34,12 +37,25 @@ export default function TabLayout() {
 
   return (
     <NativeTabs
-      tintColor={"red"}
       minimizeBehavior="onScrollDown"
       disableTransparentOnScrollEdge
+      shadowColor="transparent"
+      backgroundColor={colors.surfaceThree}
+      iconColor={{
+        default: colors.textTertiary,
+        selected: colors.text,
+      }}
       labelStyle={{
-        fontSize: 10,
-        fontWeight: "600" as const,
+        default: {
+          fontSize: 10,
+          fontWeight: "500" as const,
+          color: colors.textTertiary,
+        },
+        selected: {
+          fontSize: 10,
+          fontWeight: "500" as const,
+          color: colors.text,
+        },
       }}
     >
       {/* Owner Dashboard */}

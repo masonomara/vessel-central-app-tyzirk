@@ -1,6 +1,21 @@
 # Detail Screen Components
 
-Every data element across all 5 detail screens. All rows use the unified `DetailRow` component which supports three modes: **value** (static text), **linkTo** (navigable), **button** (action), and **chips** (status toggles).
+Every data element across all 5 detail screens. All rows use the unified `DetailRow` component which supports four modes: **value** (static text), **linkTo** (navigable), **button** (action), and **chips** (status toggles).
+
+---
+
+## Badge & Chip Color Rules
+
+Color is only used when it communicates real meaning. Categorical labels are neutral.
+
+| Color usage          | Examples                                         | Color      |
+| -------------------- | ------------------------------------------------ | ---------- |
+| Severity / priority  | Priority badges (urgent, high, medium, low)      | Mapped     |
+| Alert / flag         | IMPORTANT, EXPIRED                               | warning, danger |
+| Workflow status      | Supply status (pending, denied, approved, etc.)  | Mapped     |
+| Attention chip state | Waiting on Parts, Cancelled                      | warning, danger |
+| Category / label     | Issue category, doc category, event type         | **grey** (neutral) |
+| Normal chip state    | Open, In Progress, Scheduled                     | **default** (no color) |
 
 ---
 
@@ -8,11 +23,11 @@ Every data element across all 5 detail screens. All rows use the unified `Detail
 
 ### Title Section
 
-| Element        | Data                          | Interactive? |
-| -------------- | ----------------------------- | ------------ |
-| Title          | `task.title`                  | No           |
-| Priority badge | `task.priority` (color-coded) | No           |
-| Status badge   | `task.status` (color-coded)   | No           |
+| Element        | Data                          | Color   |
+| -------------- | ----------------------------- | ------- |
+| Icon           | wrench (left of title)        | text    |
+| Title          | `task.title`                  | —       |
+| Priority badge | `task.priority`               | Mapped (severity) |
 
 ### Detail Rows
 
@@ -25,12 +40,7 @@ Every data element across all 5 detail screens. All rows use the unified `Detail
 | Frequency      | `"Every {value} {frequency}"`                                           | DetailRow value  | Yes — only if `task.isRecurring` |
 | Estimated Cost | `$task.estimatedCost`                                                   | DetailRow value  | Yes — only if set                |
 | Actual Cost    | `$task.actualCost`                                                      | DetailRow value  | Yes — only if set                |
-
-### Notes Section
-
-| Element    | Data         | Interactive? | Conditional?              |
-| ---------- | ------------ | ------------ | ------------------------- |
-| Notes text | `task.notes` | No           | Yes — only if notes exist |
+| Notes          | `task.notes`                                                            | DetailRow value  | Yes — only if notes exist        |
 
 ### Completion History (list)
 
@@ -45,20 +55,20 @@ Every data element across all 5 detail screens. All rows use the unified `Detail
 
 ### Status Chips
 
-| Element             | Data                              | Type                | Conditional?                                              |
-| ------------------- | --------------------------------- | ------------------- | --------------------------------------------------------- |
-| Status chip row     | DetailRow with chips prop         | DetailRow chips     | Yes — `userRole !== "owner"` AND `status !== "completed"` |
-| "Open" chip         | Sets status to `open`             | Chip (default)      | Selected state if current                                 |
-| "In Progress" chip  | Sets status to `in_progress`      | Chip (accent color) | Selected state if current                                 |
-| "Waiting on Parts"  | Sets status to `waiting_on_parts` | Chip (warning)      | Selected state if current                                 |
+| Element            | Data                              | Color              | Conditional?                                              |
+| ------------------ | --------------------------------- | ------------------ | --------------------------------------------------------- |
+| Status chip row    | DetailRow with chips prop         | —                  | Yes — `userRole !== "owner"` AND `status !== "completed"` |
+| "Open" chip        | Sets status to `open`             | default (neutral)  | Selected state if current                                 |
+| "In Progress" chip | Sets status to `in_progress`      | default (neutral)  | Selected state if current                                 |
+| "Waiting on Parts" | Sets status to `waiting_on_parts` | **warning**        | Selected state if current                                 |
 
 ### Complete Task (form)
 
-| Element                   | Data                                                            | Type            | Conditional?                                              |
-| ------------------------- | --------------------------------------------------------------- | --------------- | --------------------------------------------------------- |
-| Section                   | Completion form                                                 | —               | Yes — `userRole !== "owner"` AND `status !== "completed"` |
-| Notes input               | TextInput (multiline, 3 lines)                                  | TextInput       | No                                                        |
-| Cost input                | TextInput (numeric)                                             | TextInput       | No                                                        |
+| Element                   | Data                                                            | Type             | Conditional?                                              |
+| ------------------------- | --------------------------------------------------------------- | ---------------- | --------------------------------------------------------- |
+| Section                   | Completion form                                                 | —                | Yes — `userRole !== "owner"` AND `status !== "completed"` |
+| Notes input               | TextInput (multiline, 3 lines)                                  | TextInput        | No                                                        |
+| Cost input                | TextInput (numeric)                                             | TextInput        | No                                                        |
 | "Mark as Complete" button | Calls completeMaintenanceTask with confirmation, navigates back | DetailRow button | No                                                        |
 
 ---
@@ -67,12 +77,12 @@ Every data element across all 5 detail screens. All rows use the unified `Detail
 
 ### Title Section
 
-| Element        | Data                           | Interactive?                          |
-| -------------- | ------------------------------ | ------------------------------------- |
-| Title          | `issue.title`                  | No                                    |
-| Priority badge | `issue.priority` (color-coded) | No                                    |
-| Status badge   | `issue.status` (color-coded)   | No                                    |
-| Category badge | `issue.category`               | No — conditional on category existing |
+| Element        | Data                           | Color              |
+| -------------- | ------------------------------ | ------------------ |
+| Icon           | caution triangle (left of title) | text             |
+| Title          | `issue.title`                  | —                  |
+| Priority badge | `issue.priority`               | Mapped (severity)  |
+| Category badge | `issue.category`               | **grey** (neutral) |
 
 ### Detail Rows
 
@@ -112,8 +122,8 @@ Every data element across all 5 detail screens. All rows use the unified `Detail
 | Section                | —                                   | —                | Yes — `owner/manager` AND `status !== "completed"` |
 | "Assign to Me" button  | Calls updateIssue with current user | DetailRow button | Yes — only if `!issue.assignedToName`              |
 | Status chip row        | DetailRow with chips prop           | DetailRow chips  | No (within section)                                |
-| "Open" chip            | Sets status to `open`               | Chip (default)   | Selected state if current                          |
-| "In Progress" chip     | Sets status to `in_progress`        | Chip (accent)    | Selected state if current                          |
+| "Open" chip            | Sets status to `open`               | default (neutral) | Selected state if current                         |
+| "In Progress" chip     | Sets status to `in_progress`        | default (neutral) | Selected state if current                         |
 | "Mark Resolved" button | Sets status to `completed`          | DetailRow button | No (within section)                                |
 
 ---
@@ -122,11 +132,12 @@ Every data element across all 5 detail screens. All rows use the unified `Detail
 
 ### Title Section
 
-| Element        | Data                             | Interactive? |
-| -------------- | -------------------------------- | ------------ |
-| Title          | `request.itemName`               | No           |
-| Status badge   | `request.status` (color-coded)   | No           |
-| Priority badge | `request.priority` (color-coded) | No           |
+| Element        | Data                             | Color             |
+| -------------- | -------------------------------- | ----------------- |
+| Icon           | shipping box (left of title)     | text              |
+| Title          | `request.itemName`               | —                 |
+| Status badge   | `request.status`                 | Mapped (workflow) |
+| Priority badge | `request.priority`               | Mapped (severity) |
 
 ### Detail Rows
 
@@ -144,12 +155,7 @@ Every data element across all 5 detail screens. All rows use the unified `Detail
 | Approved By    | `request.approvedByName`                 | DetailRow value  | Yes — only if set     |
 | Approved On    | `formatDate(request.approvedAt)`         | DetailRow value  | Yes — only if set     |
 | Denial Reason  | `request.deniedReason`                   | DetailRow value  | Yes — only if set     |
-
-### Notes Section
-
-| Element    | Data            | Interactive? | Conditional?              |
-| ---------- | --------------- | ------------ | ------------------------- |
-| Notes text | `request.notes` | No           | Yes — only if notes exist |
+| Notes          | `request.notes`                          | DetailRow value  | Yes — only if notes exist |
 
 ### Actions — Pending
 
@@ -176,12 +182,13 @@ Every data element across all 5 detail screens. All rows use the unified `Detail
 
 ### Title Section
 
-| Element           | Data                                          | Interactive?                          |
-| ----------------- | --------------------------------------------- | ------------------------------------- |
-| Title             | `doc.title`                                   | No                                    |
-| Category badge    | `doc.category`                                | No                                    |
-| "IMPORTANT" badge | Static label                                  | No — conditional on `doc.isImportant` |
-| "EXPIRED" badge   | Static label (computed from `doc.expiryDate`) | No — conditional on `isExpired`       |
+| Element           | Data                                          | Color              |
+| ----------------- | --------------------------------------------- | ------------------ |
+| Icon              | document (left of title)                      | text               |
+| Title             | `doc.title`                                   | —                  |
+| Category badge    | `doc.category`                                | **grey** (neutral) |
+| "IMPORTANT" badge | Static label                                  | **warning** (alert) — conditional on `doc.isImportant` |
+| "EXPIRED" badge   | Static label (computed from `doc.expiryDate`) | **danger** (alert) — conditional on `isExpired` |
 
 ### Detail Rows
 
@@ -223,11 +230,11 @@ Every data element across all 5 detail screens. All rows use the unified `Detail
 
 ### Title Section
 
-| Element      | Data                                                       | Interactive? |
-| ------------ | ---------------------------------------------------------- | ------------ |
-| Title        | `event.title`                                              | No           |
-| Type badge   | `getEventTypeLabel(event.type)` (color from getEventColor) | No           |
-| Status badge | `event.status` (color-coded per status)                    | No           |
+| Element    | Data                          | Color              |
+| ---------- | ----------------------------- | ------------------ |
+| Icon       | calendar (left of title)      | text               |
+| Title      | `event.title`                 | —                  |
+| Type badge | `getEventTypeLabel(event.type)` | **grey** (neutral) |
 
 ### Detail Rows
 
@@ -240,22 +247,17 @@ Every data element across all 5 detail screens. All rows use the unified `Detail
 | Attendees   | `event.attendeeNames.join(", ")`                   | DetailRow value  | Yes — only if length > 0         |
 | Created By  | `event.createdByName`                              | DetailRow value  | No                               |
 | Created     | `event.createdAt` as locale date string            | DetailRow value  | No                               |
-
-### Notes Section
-
-| Element    | Data          | Interactive? | Conditional?              |
-| ---------- | ------------- | ------------ | ------------------------- |
-| Notes text | `event.notes` | No           | Yes — only if notes exist |
+| Notes       | `event.notes`                                      | DetailRow value  | Yes — only if notes exist        |
 
 ### Actions
 
-| Element                | Data                                                        | Type             | Conditional? |
-| ---------------------- | ----------------------------------------------------------- | ---------------- | ------------ |
-| Status chip row        | DetailRow with chips prop                                   | DetailRow chips  | No           |
-| "Scheduled" chip       | Sets status to `scheduled`                                  | Chip (accent)    | Selected state if current |
-| "Cancelled" chip       | Sets status to `cancelled`                                  | Chip (danger)    | Selected state if current |
-| "Mark Complete" button | Calls updateCalendarEvent `status: "completed"`             | DetailRow button | No           |
-| "Delete Event" button  | Calls deleteCalendarEvent with confirmation, navigates back | DetailRow button | No           |
+| Element                | Data                                                        | Type             | Conditional?              |
+| ---------------------- | ----------------------------------------------------------- | ---------------- | ------------------------- |
+| Status chip row        | DetailRow with chips prop                                   | DetailRow chips  | No                        |
+| "Scheduled" chip       | Sets status to `scheduled`                                  | default (neutral) | Selected state if current |
+| "Cancelled" chip       | Sets status to `cancelled`                                  | **danger**       | Selected state if current |
+| "Mark Complete" button | Calls updateCalendarEvent `status: "completed"`             | DetailRow button | No                        |
+| "Delete Event" button  | Calls deleteCalendarEvent with confirmation, navigates back | DetailRow button | No                        |
 
 ---
 
@@ -263,37 +265,41 @@ Every data element across all 5 detail screens. All rows use the unified `Detail
 
 ### DetailRow Modes
 
-All detail screens use a single `DetailRow` component with four modes:
-
-| Mode       | Prop      | Renders                                                    |
-| ---------- | --------- | ---------------------------------------------------------- |
-| **Value**  | `value`   | Label + static text                                        |
-| **Link**   | `linkTo`  | Label + accent text + chevron, navigates on press          |
-| **Button** | `button`  | Label + colored action button                              |
+| Mode       | Prop      | Renders                                                      |
+| ---------- | --------- | ------------------------------------------------------------ |
+| **Value**  | `value`   | Label + static text                                          |
+| **Link**   | `linkTo`  | Label + accent text + chevron, navigates on press            |
+| **Button** | `button`  | Label + colored action button                                |
 | **Chips**  | `chips`   | Label + row of selectable chip toggles (selected/unselected) |
 
 ### Shared across all 5
 
-- Title section (title text + 1-3 color-coded badges)
+- Title section: icon + title text + badges
 - Detail rows via `DetailRow` (value, linkTo, button, or chips)
 - Vessel link (DetailRow with linkTo — present on every screen)
 
+### Badge color rules
+
+- **Color-coded**: Priority (severity), supply status (workflow), IMPORTANT/EXPIRED (alerts), attention chips (Waiting on Parts, Cancelled)
+- **Neutral (grey)**: Category labels, event type labels
+- **Removed**: Status badges on screens with interactive status chips (maintenance, issue, calendar)
+
 ### Unique interactive elements per screen
 
-| Screen          | Unique interactive elements                                                       |
-| --------------- | --------------------------------------------------------------------------------- |
-| **Maintenance** | Status chips (3), completion form (2 text inputs + button)                        |
-| **Issue**       | Status chips (2) + Mark Resolved button, Assign button, comment input + send      |
-| **Supply**      | Approve/Deny buttons, Mark as Ordered button, Mark as Received button (workflow)  |
-| **Document**    | Download button, Share button (always visible)                                    |
-| **Calendar**    | Status chips (2) + Mark Complete button, Delete Event button                      |
+| Screen          | Unique interactive elements                                                      |
+| --------------- | -------------------------------------------------------------------------------- |
+| **Maintenance** | Status chips (3), completion form (2 text inputs + button)                       |
+| **Issue**       | Status chips (2) + Mark Resolved button, Assign button, comment input + send     |
+| **Supply**      | Approve/Deny buttons, Mark as Ordered button, Mark as Received button (workflow) |
+| **Document**    | Download button, Share button (always visible)                                   |
+| **Calendar**    | Status chips (2) + Mark Complete button, Delete Event button                     |
 
 ### Unique static sections per screen
 
 | Screen          | Unique static sections             |
 | --------------- | ---------------------------------- |
-| **Maintenance** | Notes, Completion history list     |
+| **Maintenance** | Completion history list            |
 | **Issue**       | Attachments gallery, Comments list |
-| **Supply**      | Notes                              |
+| **Supply**      | —                                  |
 | **Document**    | Tags pills, Preview card           |
-| **Calendar**    | Notes                              |
+| **Calendar**    | —                                  |

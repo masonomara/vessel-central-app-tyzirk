@@ -47,14 +47,14 @@ export default function VesselDetailScreen() {
           <View
             style={[
               styles.iconCircle,
-              { backgroundColor: colors.accent + "20" },
+              { backgroundColor: colors.text + "20" },
             ]}
           >
             <IconSymbol
               ios_icon_name="sailboat.fill"
               android_material_icon_name="sailing"
               size={40}
-              color={colors.accent}
+              color={colors.text}
             />
           </View>
           <Text style={styles.title}>{vessel.name}</Text>

@@ -19,9 +19,9 @@ import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
+import { BadgeRow } from "../components/BadgeRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate } from "../utils/dateUtils";
-import { getPriorityColor, getStatusColor } from "../utils/colorUtils";
 import { TaskStatus } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
@@ -61,60 +61,25 @@ export default function IssueDetailScreen() {
 
   return (
     <View style={commonStyles.container}>
-      <Stack.Screen options={{ title: "", headerBackTitle: "Back" }} />
+      <Stack.Screen
+        options={{
+          title: "Issue Report",
+          headerBackTitle: "Back",
+        }}
+      />
 
       <ScrollView
         contentContainerStyle={[ds.scrollContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
-          <View style={ds.titleRow}>
-            <IconSymbol
-              ios_icon_name="exclamationmark.triangle.fill"
-              android_material_icon_name="warning"
-              size={22}
-              color={colors.text}
-            />
-            <Text style={ds.title}>{issue.title}</Text>
-          </View>
-          <View style={ds.badgeRow}>
-            <View
-              style={[
-                ds.badge,
-                { backgroundColor: getPriorityColor(issue.priority) + "20" },
-              ]}
-            >
-              <Text
-                style={[
-                  ds.badgeText,
-                  { color: getPriorityColor(issue.priority) },
-                ]}
-              >
-                {issue.priority.toUpperCase()}
-              </Text>
-            </View>
-            <View
-              style={[
-                ds.badge,
-                { backgroundColor: getStatusColor(issue.status) + "20" },
-              ]}
-            >
-              <Text
-                style={[ds.badgeText, { color: getStatusColor(issue.status) }]}
-              >
-                {issue.status.replace("_", " ").toUpperCase()}
-              </Text>
-            </View>
-            {issue.category && (
-              <View
-                style={[ds.badge, { backgroundColor: colors.accent + "20" }]}
-              >
-                <Text style={[ds.badgeText, { color: colors.accent }]}>
-                  {issue.category}
-                </Text>
-              </View>
-            )}
-          </View>
+          <BadgeRow
+            badges={[
+              { type: "priority", value: issue.priority },
+              ...(issue.category ? [{ type: "category" as const, value: issue.category }] : []),
+            ]}
+          />
+          <Text style={ds.title}>{issue.title}</Text>
         </View>
 
         <DetailRow label="Description" value={issue.description} />
@@ -240,7 +205,7 @@ export default function IssueDetailScreen() {
                 chips={{
                   options: [
                     { label: "Open", value: "open" },
-                    { label: "In Progress", value: "in_progress", color: colors.accent },
+                    { label: "In Progress", value: "in_progress" },
                   ],
                   selectedValue: issue.status,
                   onSelect: (value) => handleStatusChange(value as TaskStatus),
@@ -248,7 +213,11 @@ export default function IssueDetailScreen() {
               />
               <DetailRow
                 label="Resolution"
-                button={{ label: "Mark Resolved", onPress: () => handleStatusChange("completed"), color: colors.success }}
+                button={{
+                  label: "Mark Resolved",
+                  onPress: () => handleStatusChange("completed"),
+                  color: colors.success,
+                }}
               />
             </>
           )}

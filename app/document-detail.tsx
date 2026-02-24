@@ -9,6 +9,7 @@ import {
 import { useData } from "../contexts/DataContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
+import { BadgeRow } from "../components/BadgeRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, isOverdue } from "../utils/dateUtils";
 import { formatFileSize } from "../utils/fileUtils";
@@ -31,47 +32,26 @@ export default function DocumentDetailScreen() {
 
   return (
     <View style={commonStyles.container}>
-      <Stack.Screen options={{ title: "", headerBackTitle: "Back" }} />
+      <Stack.Screen
+        options={{
+          title: "Document Details",
+          headerBackTitle: "Back",
+        }}
+      />
 
       <ScrollView
         contentContainerStyle={[ds.scrollContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
-          <View style={ds.titleRow}>
-            <IconSymbol
-              ios_icon_name="doc.fill"
-              android_material_icon_name="description"
-              size={22}
-              color={colors.text}
-            />
-            <Text style={ds.title}>{doc.title}</Text>
-          </View>
-          <View style={ds.badgeRow}>
-            <View style={[ds.badge, { backgroundColor: colors.accent + "20" }]}>
-              <Text style={[ds.badgeText, { color: colors.accent }]}>
-                {doc.category.toUpperCase()}
-              </Text>
-            </View>
-            {doc.isImportant && (
-              <View
-                style={[ds.badge, { backgroundColor: colors.warning + "20" }]}
-              >
-                <Text style={[ds.badgeText, { color: colors.warning }]}>
-                  IMPORTANT
-                </Text>
-              </View>
-            )}
-            {isExpired && (
-              <View
-                style={[ds.badge, { backgroundColor: colors.danger + "20" }]}
-              >
-                <Text style={[ds.badgeText, { color: colors.danger }]}>
-                  EXPIRED
-                </Text>
-              </View>
-            )}
-          </View>
+          <BadgeRow
+            badges={[
+              { type: "category", value: doc.category },
+              ...(doc.isImportant ? [{ type: "alert" as const, value: "important" }] : []),
+              ...(isExpired ? [{ type: "alert" as const, value: "expired" }] : []),
+            ]}
+          />
+          <Text style={ds.title}>{doc.title}</Text>
         </View>
 
         {doc.description ? (
@@ -130,7 +110,8 @@ export default function DocumentDetailScreen() {
           label="Download"
           button={{
             label: "Download",
-            onPress: () => Alert.alert("Download", `"${doc.fileName}" saved to device.`),
+            onPress: () =>
+              Alert.alert("Download", `"${doc.fileName}" saved to device.`),
             color: colors.accent,
           }}
         />
@@ -138,7 +119,8 @@ export default function DocumentDetailScreen() {
           label="Share"
           button={{
             label: "Share",
-            onPress: () => Alert.alert("Shared", `"${doc.fileName}" share sheet opened.`),
+            onPress: () =>
+              Alert.alert("Shared", `"${doc.fileName}" share sheet opened.`),
             color: colors.secondary,
           }}
         />

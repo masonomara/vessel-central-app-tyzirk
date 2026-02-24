@@ -7,12 +7,11 @@ import {
   detailScreenStyles as ds,
 } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
-import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
+import { BadgeRow } from "../components/BadgeRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import {
   formatEventDateRange,
-  getEventColor,
   getEventTypeLabel,
 } from "../utils/calendarUtils";
 import { useTopPadding } from "../hooks/useTopPadding";
@@ -29,21 +28,7 @@ export default function CalendarEventDetailScreen() {
     return <DetailNotFound title="Event Not Found" />;
   }
 
-  const eventColor = getEventColor(event.type);
   const eventTypeLabel = getEventTypeLabel(event.type);
-
-  const getEventStatusColor = () => {
-    switch (event.status) {
-      case "completed":
-        return colors.success;
-      case "cancelled":
-        return colors.danger;
-      case "in_progress":
-        return colors.warning;
-      default:
-        return colors.accent;
-    }
-  };
 
   const handleDelete = () => {
     Alert.alert("Delete Event", "Are you sure you want to delete this event?", [
@@ -71,39 +56,24 @@ export default function CalendarEventDetailScreen() {
 
   return (
     <View style={commonStyles.container}>
-      <Stack.Screen options={{ title: "", headerBackTitle: "Back" }} />
+      <Stack.Screen
+        options={{
+          title: "Calendar Event",
+          headerBackTitle: "Back",
+        }}
+      />
 
       <ScrollView
         contentContainerStyle={[ds.scrollContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
-          <View style={ds.titleRow}>
-            <IconSymbol
-              ios_icon_name="calendar"
-              android_material_icon_name="event"
-              size={22}
-              color={colors.text}
-            />
-            <Text style={ds.title}>{event.title}</Text>
-          </View>
-          <View style={ds.badgeRow}>
-            <View style={[ds.badge, { backgroundColor: eventColor + "20" }]}>
-              <Text style={[ds.badgeText, { color: eventColor }]}>
-                {eventTypeLabel}
-              </Text>
-            </View>
-            <View
-              style={[
-                ds.badge,
-                { backgroundColor: getEventStatusColor() + "20" },
-              ]}
-            >
-              <Text style={[ds.badgeText, { color: getEventStatusColor() }]}>
-                {event.status.replace("_", " ").toUpperCase()}
-              </Text>
-            </View>
-          </View>
+          <BadgeRow
+            badges={[
+              { type: "category", value: eventTypeLabel },
+            ]}
+          />
+          <Text style={ds.title}>{event.title}</Text>
         </View>
 
         {event.description && (
@@ -145,7 +115,7 @@ export default function CalendarEventDetailScreen() {
           label="Status"
           chips={{
             options: [
-              { label: "Scheduled", value: "scheduled", color: colors.accent },
+              { label: "Scheduled", value: "scheduled" },
               { label: "Cancelled", value: "cancelled", color: colors.danger },
             ],
             selectedValue: event.status,

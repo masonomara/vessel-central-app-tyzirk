@@ -8,11 +8,10 @@ import {
 } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
-import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
+import { BadgeRow } from "../components/BadgeRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate } from "../utils/dateUtils";
-import { getPriorityColor, getSupplyStatusColor } from "../utils/colorUtils";
 import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function SupplyDetailScreen() {
@@ -64,56 +63,25 @@ export default function SupplyDetailScreen() {
 
   return (
     <View style={commonStyles.container}>
-      <Stack.Screen options={{ title: "", headerBackTitle: "Back" }} />
+      <Stack.Screen
+        options={{
+          title: "Supply Detail",
+          headerBackTitle: "Back",
+        }}
+      />
 
       <ScrollView
         contentContainerStyle={[ds.scrollContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
-          <View style={ds.titleRow}>
-            <IconSymbol
-              ios_icon_name="shippingbox.fill"
-              android_material_icon_name="inventory-2"
-              size={22}
-              color={colors.text}
-            />
-            <Text style={ds.title}>{request.itemName}</Text>
-          </View>
-          <View style={ds.badgeRow}>
-            <View
-              style={[
-                ds.badge,
-                {
-                  backgroundColor: getSupplyStatusColor(request.status) + "20",
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  ds.badgeText,
-                  { color: getSupplyStatusColor(request.status) },
-                ]}
-              >
-                {request.status.toUpperCase()}
-              </Text>
-            </View>
-            <View
-              style={[
-                ds.badge,
-                { backgroundColor: getPriorityColor(request.priority) + "20" },
-              ]}
-            >
-              <Text
-                style={[
-                  ds.badgeText,
-                  { color: getPriorityColor(request.priority) },
-                ]}
-              >
-                {request.priority.toUpperCase()}
-              </Text>
-            </View>
-          </View>
+          <Text style={ds.title}>{request.itemName}</Text>
+          <BadgeRow
+            badges={[
+              { type: "supplyStatus", value: request.status },
+              { type: "priority", value: request.priority },
+            ]}
+          />
         </View>
 
         <DetailRow label="Description" value={request.description} />
@@ -170,11 +138,19 @@ export default function SupplyDetailScreen() {
             <>
               <DetailRow
                 label="Approval"
-                button={{ label: "Approve", onPress: handleApprove, color: colors.success }}
+                button={{
+                  label: "Approve",
+                  onPress: handleApprove,
+                  color: colors.success,
+                }}
               />
               <DetailRow
                 label="Approval"
-                button={{ label: "Deny", onPress: handleDeny, color: colors.danger }}
+                button={{
+                  label: "Deny",
+                  onPress: handleDeny,
+                  color: colors.danger,
+                }}
               />
             </>
           )}
@@ -189,7 +165,7 @@ export default function SupplyDetailScreen() {
                   updateSupplyRequest(request.id, { status: "ordered" });
                   Alert.alert("Updated", "Supply request marked as ordered.");
                 },
-                color: colors.accent,
+                color: colors.text,
               }}
             />
           )}

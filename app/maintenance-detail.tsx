@@ -17,9 +17,9 @@ import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
+import { BadgeRow } from "../components/BadgeRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, formatDueDate, isOverdue } from "../utils/dateUtils";
-import { getPriorityColor, getStatusColor } from "../utils/colorUtils";
 import { TaskStatus } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
@@ -71,51 +71,24 @@ export default function MaintenanceDetailScreen() {
 
   return (
     <View style={commonStyles.container}>
-      <Stack.Screen options={{ title: "", headerBackTitle: "Back" }} />
+      <Stack.Screen
+        options={{
+          title: "Maintenance Slip",
+          headerBackTitle: "Back",
+        }}
+      />
 
       <ScrollView
         contentContainerStyle={[ds.scrollContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
-          <View style={ds.titleRow}>
-            <IconSymbol
-              ios_icon_name="wrench.and.screwdriver.fill"
-              android_material_icon_name="build"
-              size={22}
-              color={colors.text}
-            />
-            <Text style={ds.title}>{task.title}</Text>
-          </View>
-          <View style={ds.badgeRow}>
-            <View
-              style={[
-                ds.badge,
-                { backgroundColor: getPriorityColor(task.priority) + "20" },
-              ]}
-            >
-              <Text
-                style={[
-                  ds.badgeText,
-                  { color: getPriorityColor(task.priority) },
-                ]}
-              >
-                {task.priority.toUpperCase()}
-              </Text>
-            </View>
-            <View
-              style={[
-                ds.badge,
-                { backgroundColor: getStatusColor(task.status) + "20" },
-              ]}
-            >
-              <Text
-                style={[ds.badgeText, { color: getStatusColor(task.status) }]}
-              >
-                {task.status.replace("_", " ").toUpperCase()}
-              </Text>
-            </View>
-          </View>
+          <BadgeRow
+            badges={[
+              { type: "priority", value: task.priority },
+            ]}
+          />
+          <Text style={ds.title}>{task.title}</Text>
         </View>
 
         <DetailRow label="Description" value={task.description} />
@@ -199,7 +172,7 @@ export default function MaintenanceDetailScreen() {
             chips={{
               options: [
                 { label: "Open", value: "open" },
-                { label: "In Progress", value: "in_progress", color: colors.accent },
+                { label: "In Progress", value: "in_progress" },
                 { label: "Waiting on Parts", value: "waiting_on_parts", color: colors.warning },
               ],
               selectedValue: task.status,

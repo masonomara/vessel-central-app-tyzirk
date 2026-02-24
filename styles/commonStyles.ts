@@ -355,11 +355,7 @@ export const detailScreenStyles = StyleSheet.create({
     color: colors.text,
     flex: 1,
   },
-  badgeRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
+
   badge: {
     paddingHorizontal: 12,
     paddingVertical: 4,

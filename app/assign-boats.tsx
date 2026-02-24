@@ -336,7 +336,7 @@ export default function AssignBoatsScreen() {
           onRequestClose={() => setShowAssignModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { backgroundColor: theme.colors.surfaceOne }]}>
+            <View style={[styles.modalContent, { backgroundColor: colors.surfaceOne }]}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>
                   Assign {assignmentType === 'owner' ? 'Owner' : 'Crew Member'}
