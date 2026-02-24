@@ -343,11 +343,17 @@ export const detailScreenStyles = StyleSheet.create({
     marginBottom: 20,
     paddingHorizontal: 20,
   },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 12,
+  },
   title: {
-    fontSize: 24,
+    fontSize: 27,
     fontWeight: "700",
     color: colors.text,
-    marginBottom: 12,
+    flex: 1,
   },
   badgeRow: {
     flexDirection: "row",

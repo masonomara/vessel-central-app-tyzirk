@@ -78,7 +78,15 @@ export default function MaintenanceDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
-          <Text style={ds.title}>{task.title}</Text>
+          <View style={ds.titleRow}>
+            <IconSymbol
+              ios_icon_name="wrench.and.screwdriver.fill"
+              android_material_icon_name="build"
+              size={22}
+              color={colors.text}
+            />
+            <Text style={ds.title}>{task.title}</Text>
+          </View>
           <View style={ds.badgeRow}>
             <View
               style={[

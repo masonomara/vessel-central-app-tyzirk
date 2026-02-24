@@ -68,7 +68,15 @@ export default function IssueDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
-          <Text style={ds.title}>{issue.title}</Text>
+          <View style={ds.titleRow}>
+            <IconSymbol
+              ios_icon_name="exclamationmark.triangle.fill"
+              android_material_icon_name="warning"
+              size={22}
+              color={colors.text}
+            />
+            <Text style={ds.title}>{issue.title}</Text>
+          </View>
           <View style={ds.badgeRow}>
             <View
               style={[

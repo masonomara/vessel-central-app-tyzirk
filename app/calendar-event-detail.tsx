@@ -7,6 +7,7 @@ import {
   detailScreenStyles as ds,
 } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
+import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import {
@@ -77,7 +78,15 @@ export default function CalendarEventDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
-          <Text style={ds.title}>{event.title}</Text>
+          <View style={ds.titleRow}>
+            <IconSymbol
+              ios_icon_name="calendar"
+              android_material_icon_name="event"
+              size={22}
+              color={colors.text}
+            />
+            <Text style={ds.title}>{event.title}</Text>
+          </View>
           <View style={ds.badgeRow}>
             <View style={[ds.badge, { backgroundColor: eventColor + "20" }]}>
               <Text style={[ds.badgeText, { color: eventColor }]}>

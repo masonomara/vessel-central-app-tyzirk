@@ -8,6 +8,7 @@ import {
 } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
+import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate } from "../utils/dateUtils";
@@ -70,7 +71,15 @@ export default function SupplyDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
-          <Text style={ds.title}>{request.itemName}</Text>
+          <View style={ds.titleRow}>
+            <IconSymbol
+              ios_icon_name="shippingbox.fill"
+              android_material_icon_name="inventory-2"
+              size={22}
+              color={colors.text}
+            />
+            <Text style={ds.title}>{request.itemName}</Text>
+          </View>
           <View style={ds.badgeRow}>
             <View
               style={[

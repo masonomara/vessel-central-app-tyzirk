@@ -38,7 +38,15 @@ export default function DocumentDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
-          <Text style={ds.title}>{doc.title}</Text>
+          <View style={ds.titleRow}>
+            <IconSymbol
+              ios_icon_name="doc.fill"
+              android_material_icon_name="description"
+              size={22}
+              color={colors.text}
+            />
+            <Text style={ds.title}>{doc.title}</Text>
+          </View>
           <View style={ds.badgeRow}>
             <View style={[ds.badge, { backgroundColor: colors.accent + "20" }]}>
               <Text style={[ds.badgeText, { color: colors.accent }]}>
