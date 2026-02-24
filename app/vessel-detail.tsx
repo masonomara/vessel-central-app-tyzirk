@@ -1,4 +1,3 @@
-import React from "react";
 import { StyleSheet, View, Text, ScrollView } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
 import { colors } from "../styles/commonStyles";
@@ -27,9 +26,7 @@ export default function VesselDetailScreen() {
 
   const vesselTasks = maintenanceTasks.filter((t) => t.vesselId === vessel.id);
   const vesselIssues = issues.filter((i) => i.vesselId === vessel.id);
-  const vesselSupplies = supplyRequests.filter(
-    (s) => s.vesselId === vessel.id,
-  );
+  const vesselSupplies = supplyRequests.filter((s) => s.vesselId === vessel.id);
   const vesselDocs = documents.filter((d) => d.vesselId === vessel.id);
 
   const activeTasks = vesselTasks.filter((t) => t.status !== "completed");
@@ -90,12 +87,36 @@ export default function VesselDetailScreen() {
         </View>
 
         <View style={styles.statsRow}>
-          <StatCard icon="wrench.fill" androidIcon="build" iconColor={colors.accent} label="Tasks" value={vesselTasks.length} />
-          <StatCard icon="exclamationmark.triangle.fill" androidIcon="warning" iconColor={colors.warning} label="Issues" value={vesselIssues.length} />
+          <StatCard
+            icon="wrench.fill"
+            androidIcon="build"
+            iconColor={colors.accent}
+            label="Tasks"
+            value={vesselTasks.length}
+          />
+          <StatCard
+            icon="exclamationmark.triangle.fill"
+            androidIcon="warning"
+            iconColor={colors.warning}
+            label="Issues"
+            value={vesselIssues.length}
+          />
         </View>
         <View style={styles.statsRow}>
-          <StatCard icon="shippingbox.fill" androidIcon="inventory" iconColor={colors.success} label="Supplies" value={vesselSupplies.length} />
-          <StatCard icon="doc.fill" androidIcon="description" iconColor={colors.textSecondary} label="Docs" value={vesselDocs.length} />
+          <StatCard
+            icon="shippingbox.fill"
+            androidIcon="inventory"
+            iconColor={colors.success}
+            label="Supplies"
+            value={vesselSupplies.length}
+          />
+          <StatCard
+            icon="doc.fill"
+            androidIcon="description"
+            iconColor={colors.textSecondary}
+            label="Docs"
+            value={vesselDocs.length}
+          />
         </View>
 
         {activeTasks.length > 0 && (
