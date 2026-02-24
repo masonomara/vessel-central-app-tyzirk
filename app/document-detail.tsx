@@ -14,8 +14,10 @@ import { IconSymbol } from "../components/IconSymbol";
 import { LinkedDetailRow } from "../components/LinkedDetailRow";
 import { formatDate, isOverdue } from "../utils/dateUtils";
 import { formatFileSize } from "../utils/fileUtils";
+import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function DocumentDetailScreen() {
+  const topPadding = useTopPadding();
   const { id } = useLocalSearchParams();
   const { documents } = useData();
 
@@ -44,7 +46,7 @@ export default function DocumentDetailScreen() {
 
       <ScrollView
         style={styles.content}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 40, paddingTop: topPadding }}
       >
         <View style={styles.docHeader}>
           <View

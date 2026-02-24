@@ -15,8 +15,10 @@ import { IconSymbol } from "../components/IconSymbol";
 import { LinkedDetailRow } from "../components/LinkedDetailRow";
 import { formatDate } from "../utils/dateUtils";
 import { SupplyRequestStatus, TaskPriority } from "../types";
+import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function SupplyDetailScreen() {
+  const topPadding = useTopPadding();
   const { id } = useLocalSearchParams();
   const { supplyRequests, approveSupplyRequest, denySupplyRequest, updateSupplyRequest } = useData();
   const { userRole, userId, userName } = useAuth();
@@ -104,7 +106,7 @@ export default function SupplyDetailScreen() {
 
       <ScrollView
         style={styles.content}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 40, paddingTop: topPadding }}
       >
         <Text style={styles.title}>{request.itemName}</Text>
         <View style={styles.badgeRow}>

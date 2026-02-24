@@ -17,10 +17,12 @@ import { IconSymbol } from "../../../components/IconSymbol";
 import { Document, DocumentCategory } from "../../../types";
 import { formatDate, formatDueDate, isOverdue } from "../../../utils/dateUtils";
 import { formatFileSize } from "../../../utils/fileUtils";
+import { useTopPadding } from "../../../hooks/useTopPadding";
 
 const ITEMS_PER_PAGE = 10;
 
 export default function DocumentsScreen() {
+  const topPadding = useTopPadding();
   const router = useRouter();
   const { documents } = useData();
   const { userRole } = useAuth();
@@ -113,6 +115,7 @@ export default function DocumentsScreen() {
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: colors.surfaceTwo }]}
+      contentContainerStyle={{ paddingTop: topPadding }}
     >
       <Stack.Screen
         options={{

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
+import { useTopPadding } from "../../../hooks/useTopPadding";
 import { colors } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -174,6 +175,7 @@ const SupplyRequestItem = React.memo(
 );
 
 export default function SuppliesScreen() {
+  const topPadding = useTopPadding();
   const router = useRouter();
   const { supplyRequests, approveSupplyRequest, denySupplyRequest } = useData();
   const { userRole, userId, userName } = useAuth();
@@ -335,7 +337,7 @@ export default function SuppliesScreen() {
         keyExtractor={keyExtractor}
         ListHeaderComponent={ListHeaderComponent}
         ListEmptyComponent={ListEmptyComponent}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={true}
         maxToRenderPerBatch={10}

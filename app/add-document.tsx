@@ -17,6 +17,7 @@ import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { DocumentCategory } from '../types';
+import { useTopPadding } from '../hooks/useTopPadding';
 
 const DOCUMENT_CATEGORIES: DocumentCategory[] = [
   'manual',
@@ -43,6 +44,7 @@ const COMMON_TAGS = [
 ];
 
 export default function AddDocumentScreen() {
+  const topPadding = useTopPadding();
   const router = useRouter();
   const { addDocument, vessels, getVesselsForUser } = useData();
   const { userId, userName, userRole } = useAuth();
@@ -229,7 +231,7 @@ export default function AddDocumentScreen() {
       />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>

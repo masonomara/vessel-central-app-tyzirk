@@ -18,8 +18,10 @@ import { useData } from "../contexts/DataContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { CalendarEventType } from "../types/calendar";
 import { EVENT_TYPE_LABELS, getEventColor } from "../utils/calendarUtils";
+import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function AddCalendarEventScreen() {
+  const topPadding = useTopPadding();
   const router = useRouter();
   const params = useLocalSearchParams();
   const { userId, userName, userRole } = useAuth();
@@ -203,7 +205,7 @@ export default function AddCalendarEventScreen() {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.form}>

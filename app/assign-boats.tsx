@@ -16,6 +16,7 @@ import { colors } from '../styles/commonStyles';
 import { useData } from '../contexts/DataContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { Vessel } from '../types';
+import { useTopPadding } from '../hooks/useTopPadding';
 
 type AssignmentType = 'owner' | 'crew';
 
@@ -28,6 +29,7 @@ interface Assignment {
 }
 
 export default function AssignBoatsScreen() {
+  const topPadding = useTopPadding();
   const theme = useTheme();
   const { 
     vessels, 
@@ -168,7 +170,7 @@ export default function AssignBoatsScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Assign Boats' }} />
-      <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
+      <View style={[styles.container, { backgroundColor: colors.surfaceTwo, paddingTop: topPadding }]}>
         <View style={styles.searchContainer}>
           <IconSymbol
             ios_icon_name="magnifyingglass"

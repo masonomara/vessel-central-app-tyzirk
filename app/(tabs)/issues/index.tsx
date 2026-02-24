@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
+import { useTopPadding } from "../../../hooks/useTopPadding";
 import { colors } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -175,6 +176,7 @@ const IssueItem = React.memo(
 );
 
 export default function IssuesScreen() {
+  const topPadding = useTopPadding();
   const router = useRouter();
   const { issues } = useData();
   const { userRole } = useAuth();
@@ -381,7 +383,7 @@ export default function IssuesScreen() {
         ListHeaderComponent={ListHeaderComponent}
         ListFooterComponent={ListFooterComponent}
         ListEmptyComponent={ListEmptyComponent}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={true}
         maxToRenderPerBatch={10}

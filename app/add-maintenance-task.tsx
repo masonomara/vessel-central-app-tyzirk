@@ -19,8 +19,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { TaskPriority, MaintenanceFrequency } from '../types';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTopPadding } from '../hooks/useTopPadding';
 
 export default function AddMaintenanceTaskScreen() {
+  const topPadding = useTopPadding();
   const { vessels, addMaintenanceTask } = useData();
   const { userId, userName, userRole } = useAuth();
 
@@ -165,7 +167,7 @@ export default function AddMaintenanceTaskScreen() {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >

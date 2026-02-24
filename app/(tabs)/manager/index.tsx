@@ -12,9 +12,11 @@ import GlobalSearch from "../../../components/GlobalSearch";
 import { RealtimeFeed } from "../../../components/RealtimeFeed";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { Stack, router } from "expo-router";
+import { useTopPadding } from "../../../hooks/useTopPadding";
 
 export default function ManagerDashboard() {
   const { userName, userId, userRole } = useAuth();
+  const topPadding = useTopPadding();
   const [showSearch, setShowSearch] = useState(false);
   const { 
     getVesselsForUser, 
@@ -129,7 +131,7 @@ export default function ManagerDashboard() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: topPadding }]}>
           <Text style={styles.greeting}>Manager Portal</Text>
           <Text style={commonStyles.title}>{userName}</Text>
           <View style={styles.roleTag}>

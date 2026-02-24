@@ -85,7 +85,7 @@ function RootLayoutContent() {
         {/* Detail screens */}
         <Stack.Screen
           name="maintenance-detail"
-          options={{ title: "Task Details" }}
+          options={{ title: "" }}
         />
         <Stack.Screen
           name="issue-detail"
@@ -102,7 +102,7 @@ function RootLayoutContent() {
         />
         <Stack.Screen
           name="vessel-detail"
-          options={{ title: "Vessel Details" }}
+          options={{ title: "Vessel Details", headerBackTitle: "Back" }}
         />
 
         {/* Profile — pushed from headerRight button */}

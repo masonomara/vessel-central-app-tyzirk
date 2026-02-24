@@ -5,8 +5,10 @@ import { useData } from "../contexts/DataContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { StatCard } from "../components/StatCard";
 import { PressableCard } from "../components/PressableCard";
+import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function VesselDetailScreen() {
+  const topPadding = useTopPadding();
   const { id } = useLocalSearchParams();
   const { vessels, maintenanceTasks, issues, supplyRequests, documents } =
     useData();
@@ -38,7 +40,7 @@ export default function VesselDetailScreen() {
       <Stack.Screen options={{ title: vessel.name }} />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.titleSection}>

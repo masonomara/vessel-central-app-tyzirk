@@ -8,10 +8,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { PressableCard } from '../components/PressableCard';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+import { useTopPadding } from '../hooks/useTopPadding';
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function AnalyticsScreen() {
+  const topPadding = useTopPadding();
   const { userId, userRole } = useAuth();
   const { 
     getExpensesForUser, 
@@ -185,7 +187,7 @@ export default function AnalyticsScreen() {
     <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
       <Stack.Screen options={{ title: 'Analytics' }} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingTop: topPadding }]} showsVerticalScrollIndicator={false}>
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <IconSymbol 

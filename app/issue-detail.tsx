@@ -17,8 +17,10 @@ import { IconSymbol } from "../components/IconSymbol";
 import { LinkedDetailRow } from "../components/LinkedDetailRow";
 import { formatDate } from "../utils/dateUtils";
 import { TaskStatus, TaskPriority } from "../types";
+import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function IssueDetailScreen() {
+  const topPadding = useTopPadding();
   const { id } = useLocalSearchParams();
   const { issues, updateIssue, addIssueComment } = useData();
   const { userRole, userId, userName } = useAuth();
@@ -94,7 +96,7 @@ export default function IssueDetailScreen() {
 
       <ScrollView
         style={styles.content}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 40, paddingTop: topPadding }}
       >
         <Text style={styles.title}>{issue.title}</Text>
         <View style={styles.badgeRow}>

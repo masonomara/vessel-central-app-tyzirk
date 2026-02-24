@@ -18,8 +18,10 @@ import {
   getEventColor,
   getEventTypeLabel,
 } from '../utils/calendarUtils';
+import { useTopPadding } from '../hooks/useTopPadding';
 
 export default function CalendarEventDetailScreen() {
+  const topPadding = useTopPadding();
   const router = useRouter();
   const params = useLocalSearchParams();
   const { calendarEvents, deleteCalendarEvent, updateCalendarEvent } = useData();
@@ -92,7 +94,7 @@ export default function CalendarEventDetailScreen() {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
       >
 

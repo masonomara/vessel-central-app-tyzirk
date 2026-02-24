@@ -8,8 +8,10 @@ import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { Stack, router } from "expo-router";
+import { useTopPadding } from "../../../hooks/useTopPadding";
 
 export default function CrewDashboard() {
+  const topPadding = useTopPadding();
   const { userName, userId, userRole } = useAuth();
   const { 
     getVesselsForUser,
@@ -75,7 +77,7 @@ export default function CrewDashboard() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: topPadding }]}>
           <Text style={styles.greeting}>Crew Portal</Text>
           <Text style={commonStyles.title}>{userName}</Text>
           <View style={styles.roleTag}>

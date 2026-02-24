@@ -1,23 +1,33 @@
-
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
-import { useLocalSearchParams, Stack, router } from 'expo-router';
-import { colors } from '../styles/commonStyles';
-import { useData } from '../contexts/DataContext';
-import { useAuth } from '../contexts/AuthContext';
-import { IconSymbol } from '../components/IconSymbol';
-import { PressableCard } from '../components/PressableCard';
-import { formatDate, formatDueDate, isOverdue } from '../utils/dateUtils';
-import { TaskStatus, TaskPriority } from '../types';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  TextInput,
+} from "react-native";
+import { useLocalSearchParams, Stack, router } from "expo-router";
+import { colors } from "../styles/commonStyles";
+import { useData } from "../contexts/DataContext";
+import { useAuth } from "../contexts/AuthContext";
+import { IconSymbol } from "../components/IconSymbol";
+import { PressableCard } from "../components/PressableCard";
+import { formatDate, formatDueDate, isOverdue } from "../utils/dateUtils";
+import { TaskStatus, TaskPriority } from "../types";
+import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function MaintenanceDetailScreen() {
+  const topPadding = useTopPadding();
   const { id } = useLocalSearchParams();
-  const { maintenanceTasks, updateMaintenanceTask, completeMaintenanceTask } = useData();
+  const { maintenanceTasks, updateMaintenanceTask, completeMaintenanceTask } =
+    useData();
   const { userRole, userId, userName } = useAuth();
-  const [notes, setNotes] = useState('');
-  const [cost, setCost] = useState('');
+  const [notes, setNotes] = useState("");
+  const [cost, setCost] = useState("");
 
-  const task = maintenanceTasks.find(t => t.id === id);
+  const task = maintenanceTasks.find((t) => t.id === id);
 
   if (!task) {
     return (
@@ -29,75 +39,105 @@ export default function MaintenanceDetailScreen() {
 
   const getPriorityColor = (priority: TaskPriority) => {
     switch (priority) {
-      case 'urgent': return colors.danger;
-      case 'high': return colors.warning;
-      case 'medium': return colors.accent;
-      case 'low': return colors.success;
-      default: return colors.grey;
+      case "urgent":
+        return colors.danger;
+      case "high":
+        return colors.warning;
+      case "medium":
+        return colors.accent;
+      case "low":
+        return colors.success;
+      default:
+        return colors.grey;
     }
   };
 
   const getStatusColor = (status: TaskStatus) => {
     switch (status) {
-      case 'completed': return colors.success;
-      case 'in_progress': return colors.accent;
-      case 'waiting_on_parts': return colors.warning;
-      case 'open': return colors.grey;
-      default: return colors.grey;
+      case "completed":
+        return colors.success;
+      case "in_progress":
+        return colors.accent;
+      case "waiting_on_parts":
+        return colors.warning;
+      case "open":
+        return colors.grey;
+      default:
+        return colors.grey;
     }
   };
 
   const handleStatusChange = (newStatus: TaskStatus) => {
     updateMaintenanceTask(task.id, { status: newStatus });
-    Alert.alert('Success', `Task status updated to ${newStatus}`);
+    Alert.alert("Success", `Task status updated to ${newStatus}`);
   };
 
   const handleComplete = () => {
     if (!userId || !userName) {
-      Alert.alert('Error', 'User not authenticated');
+      Alert.alert("Error", "User not authenticated");
       return;
     }
 
-    Alert.alert(
-      'Complete Task',
-      'Mark this task as completed?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Complete',
-          onPress: () => {
-            completeMaintenanceTask(task.id, {
-              completedBy: userId,
-              completedByName: userName,
-              completedAt: new Date(),
-              notes: notes || 'Task completed',
-              attachments: [],
-              cost: cost ? parseFloat(cost) : undefined,
-            });
-            Alert.alert('Success', 'Task completed successfully');
-            router.back();
-          },
+    Alert.alert("Complete Task", "Mark this task as completed?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Complete",
+        onPress: () => {
+          completeMaintenanceTask(task.id, {
+            completedBy: userId,
+            completedByName: userName,
+            completedAt: new Date(),
+            notes: notes || "Task completed",
+            attachments: [],
+            cost: cost ? parseFloat(cost) : undefined,
+          });
+          Alert.alert("Success", "Task completed successfully");
+          router.back();
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
-      <Stack.Screen options={{ title: 'Task Details' }} />
-
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: topPadding },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.titleSection}>
           <Text style={styles.title}>{task.title}</Text>
           <View style={styles.badges}>
-            <View style={[styles.priorityBadge, { backgroundColor: getPriorityColor(task.priority) + '30' }]}>
-              <Text style={[styles.priorityText, { color: getPriorityColor(task.priority) }]}>
+            <View
+              style={[
+                styles.priorityBadge,
+                { backgroundColor: getPriorityColor(task.priority) + "30" },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.priorityText,
+                  { color: getPriorityColor(task.priority) },
+                ]}
+              >
                 {task.priority.toUpperCase()}
               </Text>
             </View>
-            <View style={[styles.statusBadge, { backgroundColor: getStatusColor(task.status) + '30' }]}>
-              <Text style={[styles.statusText, { color: getStatusColor(task.status) }]}>
-                {task.status.replace('_', ' ').toUpperCase()}
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: getStatusColor(task.status) + "30" },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.statusText,
+                  { color: getStatusColor(task.status) },
+                ]}
+              >
+                {task.status.replace("_", " ").toUpperCase()}
               </Text>
             </View>
           </View>
@@ -114,7 +154,12 @@ export default function MaintenanceDetailScreen() {
             <PressableCard
               variant="ghost"
               style={styles.detailItem}
-              onPress={() => router.push({ pathname: '/vessel-detail', params: { id: task.vesselId } })}
+              onPress={() =>
+                router.push({
+                  pathname: "/vessel-detail",
+                  params: { id: task.vesselId },
+                })
+              }
             >
               <IconSymbol
                 ios_icon_name="sailboat.fill"
@@ -124,7 +169,9 @@ export default function MaintenanceDetailScreen() {
               />
               <View style={styles.detailContent}>
                 <Text style={styles.detailLabel}>Vessel</Text>
-                <Text style={[styles.detailValue, { color: colors.accent }]}>{task.vesselName}</Text>
+                <Text style={[styles.detailValue, { color: colors.accent }]}>
+                  {task.vesselName}
+                </Text>
               </View>
               <IconSymbol
                 ios_icon_name="chevron.right"
@@ -135,18 +182,26 @@ export default function MaintenanceDetailScreen() {
             </PressableCard>
 
             <View style={styles.detailItem}>
-              <IconSymbol 
-                ios_icon_name="calendar" 
-                android_material_icon_name="event" 
-                size={20} 
-                color={isOverdue(task.dueDate) && task.status !== 'completed' ? colors.danger : colors.accent} 
+              <IconSymbol
+                ios_icon_name="calendar"
+                android_material_icon_name="event"
+                size={20}
+                color={
+                  isOverdue(task.dueDate) && task.status !== "completed"
+                    ? colors.danger
+                    : colors.accent
+                }
               />
               <View style={styles.detailContent}>
                 <Text style={styles.detailLabel}>Due Date</Text>
-                <Text style={[
-                  styles.detailValue,
-                  isOverdue(task.dueDate) && task.status !== 'completed' && styles.overdueText
-                ]}>
+                <Text
+                  style={[
+                    styles.detailValue,
+                    isOverdue(task.dueDate) &&
+                      task.status !== "completed" &&
+                      styles.overdueText,
+                  ]}
+                >
                   {formatDueDate(task.dueDate)}
                 </Text>
               </View>
@@ -154,11 +209,11 @@ export default function MaintenanceDetailScreen() {
 
             {task.assignedToName && (
               <View style={styles.detailItem}>
-                <IconSymbol 
-                  ios_icon_name="person.fill" 
-                  android_material_icon_name="person" 
-                  size={20} 
-                  color={colors.accent} 
+                <IconSymbol
+                  ios_icon_name="person.fill"
+                  android_material_icon_name="person"
+                  size={20}
+                  color={colors.accent}
                 />
                 <View style={styles.detailContent}>
                   <Text style={styles.detailLabel}>Assigned To</Text>
@@ -169,11 +224,11 @@ export default function MaintenanceDetailScreen() {
 
             {task.isRecurring && (
               <View style={styles.detailItem}>
-                <IconSymbol 
-                  ios_icon_name="arrow.clockwise" 
-                  android_material_icon_name="repeat" 
-                  size={20} 
-                  color={colors.accent} 
+                <IconSymbol
+                  ios_icon_name="arrow.clockwise"
+                  android_material_icon_name="repeat"
+                  size={20}
+                  color={colors.accent}
                 />
                 <View style={styles.detailContent}>
                   <Text style={styles.detailLabel}>Frequency</Text>
@@ -186,30 +241,34 @@ export default function MaintenanceDetailScreen() {
 
             {task.estimatedCost && (
               <View style={styles.detailItem}>
-                <IconSymbol 
-                  ios_icon_name="dollarsign.circle" 
-                  android_material_icon_name="attach-money" 
-                  size={20} 
-                  color={colors.success} 
+                <IconSymbol
+                  ios_icon_name="dollarsign.circle"
+                  android_material_icon_name="attach-money"
+                  size={20}
+                  color={colors.success}
                 />
                 <View style={styles.detailContent}>
                   <Text style={styles.detailLabel}>Estimated Cost</Text>
-                  <Text style={styles.detailValue}>${task.estimatedCost.toLocaleString()}</Text>
+                  <Text style={styles.detailValue}>
+                    ${task.estimatedCost.toLocaleString()}
+                  </Text>
                 </View>
               </View>
             )}
 
             {task.actualCost && (
               <View style={styles.detailItem}>
-                <IconSymbol 
-                  ios_icon_name="dollarsign.circle.fill" 
-                  android_material_icon_name="payments" 
-                  size={20} 
-                  color={colors.success} 
+                <IconSymbol
+                  ios_icon_name="dollarsign.circle.fill"
+                  android_material_icon_name="payments"
+                  size={20}
+                  color={colors.success}
                 />
                 <View style={styles.detailContent}>
                   <Text style={styles.detailLabel}>Actual Cost</Text>
-                  <Text style={styles.detailValue}>${task.actualCost.toLocaleString()}</Text>
+                  <Text style={styles.detailValue}>
+                    ${task.actualCost.toLocaleString()}
+                  </Text>
                 </View>
               </View>
             )}
@@ -229,33 +288,39 @@ export default function MaintenanceDetailScreen() {
             {task.completionHistory.map((record, index) => (
               <View key={record.id} style={styles.historyCard}>
                 <View style={styles.historyHeader}>
-                  <IconSymbol 
-                    ios_icon_name="checkmark.circle.fill" 
-                    android_material_icon_name="check-circle" 
-                    size={24} 
-                    color={colors.success} 
+                  <IconSymbol
+                    ios_icon_name="checkmark.circle.fill"
+                    android_material_icon_name="check-circle"
+                    size={24}
+                    color={colors.success}
                   />
                   <View style={styles.historyInfo}>
-                    <Text style={styles.historyName}>{record.completedByName}</Text>
-                    <Text style={styles.historyDate}>{formatDate(record.completedAt)}</Text>
+                    <Text style={styles.historyName}>
+                      {record.completedByName}
+                    </Text>
+                    <Text style={styles.historyDate}>
+                      {formatDate(record.completedAt)}
+                    </Text>
                   </View>
                 </View>
                 {record.notes && (
                   <Text style={styles.historyNotes}>{record.notes}</Text>
                 )}
                 {record.cost && (
-                  <Text style={styles.historyCost}>Cost: ${record.cost.toLocaleString()}</Text>
+                  <Text style={styles.historyCost}>
+                    Cost: ${record.cost.toLocaleString()}
+                  </Text>
                 )}
               </View>
             ))}
           </View>
         )}
 
-        {userRole !== 'owner' && task.status !== 'completed' && (
+        {userRole !== "owner" && task.status !== "completed" && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Update Status</Text>
             <View style={styles.statusButtons}>
-              {['open', 'in_progress', 'waiting_on_parts'].map((status) => (
+              {["open", "in_progress", "waiting_on_parts"].map((status) => (
                 <TouchableOpacity
                   key={status}
                   style={[
@@ -264,11 +329,13 @@ export default function MaintenanceDetailScreen() {
                   ]}
                   onPress={() => handleStatusChange(status as TaskStatus)}
                 >
-                  <Text style={[
-                    styles.statusButtonText,
-                    task.status === status && styles.statusButtonTextActive,
-                  ]}>
-                    {status.replace('_', ' ').toUpperCase()}
+                  <Text
+                    style={[
+                      styles.statusButtonText,
+                      task.status === status && styles.statusButtonTextActive,
+                    ]}
+                  >
+                    {status.replace("_", " ").toUpperCase()}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -276,7 +343,7 @@ export default function MaintenanceDetailScreen() {
           </View>
         )}
 
-        {userRole !== 'owner' && task.status !== 'completed' && (
+        {userRole !== "owner" && task.status !== "completed" && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Complete Task</Text>
             <TextInput
@@ -296,12 +363,15 @@ export default function MaintenanceDetailScreen() {
               onChangeText={setCost}
               keyboardType="numeric"
             />
-            <TouchableOpacity style={styles.completeButton} onPress={handleComplete}>
-              <IconSymbol 
-                ios_icon_name="checkmark.circle.fill" 
-                android_material_icon_name="check-circle" 
-                size={24} 
-                color={colors.text} 
+            <TouchableOpacity
+              style={styles.completeButton}
+              onPress={handleComplete}
+            >
+              <IconSymbol
+                ios_icon_name="checkmark.circle.fill"
+                android_material_icon_name="check-circle"
+                size={24}
+                color={colors.text}
               />
               <Text style={styles.completeButtonText}>Mark as Complete</Text>
             </TouchableOpacity>
@@ -325,12 +395,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 12,
   },
   badges: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   priorityBadge: {
@@ -340,7 +410,7 @@ const styles = StyleSheet.create({
   },
   priorityText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   statusBadge: {
     paddingHorizontal: 12,
@@ -349,14 +419,14 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 12,
   },
@@ -369,8 +439,8 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   detailItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     gap: 12,
     backgroundColor: colors.surfaceOne,
     padding: 16,
@@ -388,7 +458,7 @@ const styles = StyleSheet.create({
   },
   detailValue: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   overdueText: {
@@ -413,8 +483,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   historyHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
     marginBottom: 8,
   },
@@ -423,7 +493,7 @@ const styles = StyleSheet.create({
   },
   historyName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   historyDate: {
@@ -439,13 +509,13 @@ const styles = StyleSheet.create({
   },
   historyCost: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.success,
     marginTop: 8,
   },
   statusButtons: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
   statusButton: {
@@ -462,7 +532,7 @@ const styles = StyleSheet.create({
   },
   statusButtonText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.textSecondary,
   },
   statusButtonTextActive: {
@@ -479,9 +549,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   completeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: colors.success,
     borderRadius: 12,
     padding: 16,
@@ -489,13 +559,13 @@ const styles = StyleSheet.create({
   },
   completeButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   errorText: {
     fontSize: 16,
     color: colors.danger,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 100,
   },
 });

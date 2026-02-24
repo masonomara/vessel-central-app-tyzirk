@@ -20,6 +20,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { TaskPriority, Attachment } from '../types';
 import { optimizeImage, formatFileSize, validateImage } from '../utils/imageUtils';
+import { useTopPadding } from '../hooks/useTopPadding';
 
 const ISSUE_CATEGORIES = [
   'Structural',
@@ -37,6 +38,7 @@ const ISSUE_CATEGORIES = [
 const PRIORITY_OPTIONS: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
 
 export default function AddIssueScreen() {
+  const topPadding = useTopPadding();
   const router = useRouter();
   const { addIssue, vessels, getVesselsForUser } = useData();
   const { userId, userName, userRole } = useAuth();
@@ -343,7 +345,7 @@ export default function AddIssueScreen() {
       )}
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>

@@ -17,6 +17,7 @@ import { MaintenanceTask, TaskStatus, TaskPriority } from "../../../types";
 import { formatDueDate, isOverdue } from "../../../utils/dateUtils";
 import { Stack, router } from "expo-router";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
+import { useTopPadding } from "../../../hooks/useTopPadding";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -183,6 +184,7 @@ const MaintenanceTaskItem = React.memo(
 );
 
 export default function MaintenanceScreen() {
+  const topPadding = useTopPadding();
   const { maintenanceTasks } = useData();
   const { userRole } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
@@ -442,7 +444,7 @@ export default function MaintenanceScreen() {
         ListHeaderComponent={ListHeaderComponent}
         ListFooterComponent={ListFooterComponent}
         ListEmptyComponent={ListEmptyComponent}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={true}
         maxToRenderPerBatch={10}

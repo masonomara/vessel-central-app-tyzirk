@@ -1,18 +1,18 @@
-
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-} from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import { ProfileHeaderButton } from '../../../components/ProfileHeaderButton';
-import { colors, commonStyles, shadows } from '../../../styles/commonStyles';
-import { useAuth } from '../../../contexts/AuthContext';
-import { useData } from '../../../contexts/DataContext';
-import { IconSymbol } from '../../../components/IconSymbol';
+} from "react-native";
+import { Stack, useRouter } from "expo-router";
+import { useTopPadding } from "../../../hooks/useTopPadding";
+import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
+import { colors, commonStyles, shadows } from "../../../styles/commonStyles";
+import { useAuth } from "../../../contexts/AuthContext";
+import { useData } from "../../../contexts/DataContext";
+import { IconSymbol } from "../../../components/IconSymbol";
 import {
   getEventsForDate,
   getEventsForMonth,
@@ -23,17 +23,19 @@ import {
   getEventColor,
   getEventTypeLabel,
   sortEventsByDate,
-} from '../../../utils/calendarUtils';
-import { CalendarEvent } from '../../../types/calendar';
+} from "../../../utils/calendarUtils";
+import { CalendarEvent } from "../../../types/calendar";
 
 export default function CalendarScreen() {
   const router = useRouter();
   const { userId, userRole } = useAuth();
   const { calendarEvents, getCalendarEventsForUser } = useData();
-  
+
+  const topPadding = useTopPadding();
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
+  const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
 
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
@@ -87,159 +89,188 @@ export default function CalendarScreen() {
     setSelectedDate(today);
   }, []);
 
-  const handleDayPress = useCallback((day: number) => {
-    const newDate = new Date(currentYear, currentMonth, day);
-    setSelectedDate(newDate);
-  }, [currentYear, currentMonth]);
+  const handleDayPress = useCallback(
+    (day: number) => {
+      const newDate = new Date(currentYear, currentMonth, day);
+      setSelectedDate(newDate);
+    },
+    [currentYear, currentMonth],
+  );
 
-  const handleEventPress = useCallback((event: CalendarEvent) => {
-    router.push({
-      pathname: '/calendar-event-detail',
-      params: { eventId: event.id },
-    });
-  }, [router]);
+  const handleEventPress = useCallback(
+    (event: CalendarEvent) => {
+      router.push({
+        pathname: "/calendar-event-detail",
+        params: { eventId: event.id },
+      });
+    },
+    [router],
+  );
 
   const handleAddEvent = useCallback(() => {
     router.push({
-      pathname: '/add-calendar-event',
+      pathname: "/add-calendar-event",
       params: { date: selectedDate.toISOString() },
     });
   }, [router, selectedDate]);
 
-  const getEventsForDay = useCallback((day: number): CalendarEvent[] => {
-    const date = new Date(currentYear, currentMonth, day);
-    return getEventsForDate(monthEvents, date);
-  }, [currentYear, currentMonth, monthEvents]);
+  const getEventsForDay = useCallback(
+    (day: number): CalendarEvent[] => {
+      const date = new Date(currentYear, currentMonth, day);
+      return getEventsForDate(monthEvents, date);
+    },
+    [currentYear, currentMonth, monthEvents],
+  );
 
-  const isToday = useCallback((day: number): boolean => {
-    const today = new Date();
-    return (
-      day === today.getDate() &&
-      currentMonth === today.getMonth() &&
-      currentYear === today.getFullYear()
-    );
-  }, [currentYear, currentMonth]);
+  const isToday = useCallback(
+    (day: number): boolean => {
+      const today = new Date();
+      return (
+        day === today.getDate() &&
+        currentMonth === today.getMonth() &&
+        currentYear === today.getFullYear()
+      );
+    },
+    [currentYear, currentMonth],
+  );
 
-  const isSelectedDay = useCallback((day: number): boolean => {
-    return (
-      day === selectedDate.getDate() &&
-      currentMonth === selectedDate.getMonth() &&
-      currentYear === selectedDate.getFullYear()
-    );
-  }, [selectedDate, currentYear, currentMonth]);
+  const isSelectedDay = useCallback(
+    (day: number): boolean => {
+      return (
+        day === selectedDate.getDate() &&
+        currentMonth === selectedDate.getMonth() &&
+        currentYear === selectedDate.getFullYear()
+      );
+    },
+    [selectedDate, currentYear, currentMonth],
+  );
 
-  const renderCalendarDay = useCallback((day: number | null, index: number) => {
-    if (day === null) {
-      return <View key={`empty-${index}`} style={styles.dayCell} />;
-    }
+  const renderCalendarDay = useCallback(
+    (day: number | null, index: number) => {
+      if (day === null) {
+        return <View key={`empty-${index}`} style={styles.dayCell} />;
+      }
 
-    const dayEvents = getEventsForDay(day);
-    const hasEvents = dayEvents.length > 0;
-    const isTodayDay = isToday(day);
-    const isSelected = isSelectedDay(day);
+      const dayEvents = getEventsForDay(day);
+      const hasEvents = dayEvents.length > 0;
+      const isTodayDay = isToday(day);
+      const isSelected = isSelectedDay(day);
 
-    return (
-      <TouchableOpacity
-        key={`day-${day}`}
-        style={[
-          styles.dayCell,
-          isTodayDay && styles.todayCell,
-          isSelected && styles.selectedDayCell,
-        ]}
-        onPress={() => handleDayPress(day)}
-      >
-        <Text
+      return (
+        <TouchableOpacity
+          key={`day-${day}`}
           style={[
-            styles.dayText,
-            isTodayDay && styles.todayText,
-            isSelected && styles.selectedDayText,
+            styles.dayCell,
+            isTodayDay && styles.todayCell,
+            isSelected && styles.selectedDayCell,
           ]}
+          onPress={() => handleDayPress(day)}
         >
-          {day}
-        </Text>
-        {hasEvents && (
-          <View style={styles.eventIndicatorContainer}>
-            {dayEvents.slice(0, 3).map((event, idx) => (
-              <View
-                key={`indicator-${event.id}-${idx}`}
-                style={[
-                  styles.eventIndicator,
-                  { backgroundColor: getEventColor(event.type) },
-                ]}
-              />
-            ))}
-          </View>
-        )}
-      </TouchableOpacity>
-    );
-  }, [getEventsForDay, isToday, isSelectedDay, handleDayPress]);
+          <Text
+            style={[
+              styles.dayText,
+              isTodayDay && styles.todayText,
+              isSelected && styles.selectedDayText,
+            ]}
+          >
+            {day}
+          </Text>
+          {hasEvents && (
+            <View style={styles.eventIndicatorContainer}>
+              {dayEvents.slice(0, 3).map((event, idx) => (
+                <View
+                  key={`indicator-${event.id}-${idx}`}
+                  style={[
+                    styles.eventIndicator,
+                    { backgroundColor: getEventColor(event.type) },
+                  ]}
+                />
+              ))}
+            </View>
+          )}
+        </TouchableOpacity>
+      );
+    },
+    [getEventsForDay, isToday, isSelectedDay, handleDayPress],
+  );
 
-  const renderEventItem = useCallback((event: CalendarEvent) => {
-    const eventColor = getEventColor(event.type);
-    const eventTypeLabel = getEventTypeLabel(event.type);
+  const renderEventItem = useCallback(
+    (event: CalendarEvent) => {
+      const eventColor = getEventColor(event.type);
+      const eventTypeLabel = getEventTypeLabel(event.type);
 
-    return (
-      <TouchableOpacity
-        key={event.id}
-        style={styles.eventItem}
-        onPress={() => handleEventPress(event)}
-      >
-        <View style={[styles.eventColorBar, { backgroundColor: eventColor }]} />
-        <View style={styles.eventContent}>
-          <View style={styles.eventHeader}>
-            <Text style={styles.eventTitle} numberOfLines={1}>
-              {event.title}
-            </Text>
-            <View style={[styles.eventTypeBadge, { backgroundColor: eventColor + '20' }]}>
-              <Text style={[styles.eventTypeText, { color: eventColor }]}>
-                {eventTypeLabel}
+      return (
+        <TouchableOpacity
+          key={event.id}
+          style={styles.eventItem}
+          onPress={() => handleEventPress(event)}
+        >
+          <View
+            style={[styles.eventColorBar, { backgroundColor: eventColor }]}
+          />
+          <View style={styles.eventContent}>
+            <View style={styles.eventHeader}>
+              <Text style={styles.eventTitle} numberOfLines={1}>
+                {event.title}
               </Text>
+              <View
+                style={[
+                  styles.eventTypeBadge,
+                  { backgroundColor: eventColor + "20" },
+                ]}
+              >
+                <Text style={[styles.eventTypeText, { color: eventColor }]}>
+                  {eventTypeLabel}
+                </Text>
+              </View>
             </View>
-          </View>
-          
-          <View style={styles.eventDetails}>
-            {!event.allDay && (
+
+            <View style={styles.eventDetails}>
+              {!event.allDay && (
+                <View style={styles.eventDetailRow}>
+                  <IconSymbol
+                    ios_icon_name="clock.fill"
+                    android_material_icon_name="schedule"
+                    size={14}
+                    color={colors.textSecondary}
+                  />
+                  <Text style={styles.eventDetailText}>
+                    {formatEventTime(event.startDate)} -{" "}
+                    {formatEventTime(event.endDate)}
+                  </Text>
+                </View>
+              )}
+
               <View style={styles.eventDetailRow}>
                 <IconSymbol
-                  ios_icon_name="clock.fill"
-                  android_material_icon_name="schedule"
+                  ios_icon_name="sailboat.fill"
+                  android_material_icon_name="directions-boat"
                   size={14}
                   color={colors.textSecondary}
                 />
-                <Text style={styles.eventDetailText}>
-                  {formatEventTime(event.startDate)} - {formatEventTime(event.endDate)}
-                </Text>
+                <Text style={styles.eventDetailText}>{event.vesselName}</Text>
               </View>
-            )}
-            
-            <View style={styles.eventDetailRow}>
-              <IconSymbol
-                ios_icon_name="sailboat.fill"
-                android_material_icon_name="directions-boat"
-                size={14}
-                color={colors.textSecondary}
-              />
-              <Text style={styles.eventDetailText}>{event.vesselName}</Text>
+
+              {event.location && (
+                <View style={styles.eventDetailRow}>
+                  <IconSymbol
+                    ios_icon_name="location.fill"
+                    android_material_icon_name="location-on"
+                    size={14}
+                    color={colors.textSecondary}
+                  />
+                  <Text style={styles.eventDetailText} numberOfLines={1}>
+                    {event.location}
+                  </Text>
+                </View>
+              )}
             </View>
-            
-            {event.location && (
-              <View style={styles.eventDetailRow}>
-                <IconSymbol
-                  ios_icon_name="location.fill"
-                  android_material_icon_name="location-on"
-                  size={14}
-                  color={colors.textSecondary}
-                />
-                <Text style={styles.eventDetailText} numberOfLines={1}>
-                  {event.location}
-                </Text>
-              </View>
-            )}
           </View>
-        </View>
-      </TouchableOpacity>
-    );
-  }, [handleEventPress]);
+        </TouchableOpacity>
+      );
+    },
+    [handleEventPress],
+  );
 
   return (
     <View style={commonStyles.container}>
@@ -247,7 +278,9 @@ export default function CalendarScreen() {
         options={{
           title: "Calendar",
           headerRight: () => (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+            >
               <TouchableOpacity onPress={handleAddEvent}>
                 <IconSymbol
                   ios_icon_name="plus"
@@ -266,7 +299,7 @@ export default function CalendarScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: topPadding }]}>
           <View style={styles.monthNavigation}>
             <TouchableOpacity
               style={styles.navButton}
@@ -279,13 +312,13 @@ export default function CalendarScreen() {
                 color={colors.text}
               />
             </TouchableOpacity>
-            
+
             <View style={styles.monthDisplay}>
               <Text style={styles.monthText}>
                 {getMonthName(currentMonth)} {currentYear}
               </Text>
             </View>
-            
+
             <TouchableOpacity
               style={styles.navButton}
               onPress={handleNextMonth}
@@ -297,11 +330,8 @@ export default function CalendarScreen() {
                 color={colors.text}
               />
             </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.todayButton}
-              onPress={handleToday}
-            >
+
+            <TouchableOpacity style={styles.todayButton} onPress={handleToday}>
               <Text style={styles.todayButtonText}>Today</Text>
             </TouchableOpacity>
           </View>
@@ -311,7 +341,7 @@ export default function CalendarScreen() {
         <View style={styles.calendarContainer}>
           {/* Day Headers */}
           <View style={styles.dayHeaderRow}>
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
               <View key={day} style={styles.dayHeader}>
                 <Text style={styles.dayHeaderText}>{day}</Text>
               </View>
@@ -328,14 +358,15 @@ export default function CalendarScreen() {
         <View style={styles.eventsSection}>
           <View style={styles.eventsSectionHeader}>
             <Text style={styles.eventsSectionTitle}>
-              {selectedDate.toLocaleDateString('en-US', {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric',
+              {selectedDate.toLocaleDateString("en-US", {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
               })}
             </Text>
             <Text style={styles.eventsCount}>
-              {selectedDateEvents.length} {selectedDateEvents.length === 1 ? 'event' : 'events'}
+              {selectedDateEvents.length}{" "}
+              {selectedDateEvents.length === 1 ? "event" : "events"}
             </Text>
           </View>
 
@@ -361,7 +392,6 @@ export default function CalendarScreen() {
             </View>
           )}
         </View>
-
       </ScrollView>
     </View>
   );
@@ -380,26 +410,26 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   monthNavigation: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   navButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: colors.surfaceOne,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   monthDisplay: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     marginHorizontal: 12,
   },
   monthText: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   todayButton: {
@@ -410,7 +440,7 @@ const styles = StyleSheet.create({
   },
   todayButtonText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   calendarContainer: {
@@ -423,32 +453,32 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   dayHeaderRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 8,
   },
   dayHeader: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 8,
   },
   dayHeaderText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.textSecondary,
   },
   calendarGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
   dayCell: {
     width: `${100 / 7}%`,
     aspectRatio: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 4,
   },
   todayCell: {
-    backgroundColor: colors.accent + '20',
+    backgroundColor: colors.accent + "20",
     borderRadius: 8,
   },
   selectedDayCell: {
@@ -457,19 +487,19 @@ const styles = StyleSheet.create({
   },
   dayText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     color: colors.text,
   },
   todayText: {
     color: colors.accent,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   selectedDayText: {
     color: colors.text,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   eventIndicatorContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 2,
     gap: 2,
   },
@@ -483,29 +513,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   eventsSectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   eventsSectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   eventsCount: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     color: colors.textSecondary,
   },
   eventsList: {
     gap: 12,
   },
   eventItem: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: colors.surfaceOne,
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 1,
     borderColor: colors.border,
     ...shadows.small,
@@ -518,15 +548,15 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   eventHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   eventTitle: {
     flex: 1,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginRight: 8,
   },
@@ -537,14 +567,14 @@ const styles = StyleSheet.create({
   },
   eventTypeText: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   eventDetails: {
     gap: 6,
   },
   eventDetailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   eventDetailText: {
@@ -552,8 +582,8 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 48,
   },
   emptyStateText: {
@@ -570,7 +600,7 @@ const styles = StyleSheet.create({
   },
   emptyStateButtonText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
 });
