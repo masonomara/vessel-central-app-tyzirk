@@ -31,7 +31,7 @@ export const getEventTypeLabel = (type: CalendarEventType): string => {
 };
 
 export const formatEventTime = (date: Date): string => {
-  return date.toLocaleTimeString('en-US', {
+  return new Date(date).toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
@@ -39,7 +39,7 @@ export const formatEventTime = (date: Date): string => {
 };
 
 export const formatEventDate = (date: Date): string => {
-  return date.toLocaleDateString('en-US', {
+  return new Date(date).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
