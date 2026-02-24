@@ -17,10 +17,11 @@ import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
-import { BadgeRow } from "../components/BadgeRow";
+import { DropdownRow } from "../components/DropdownRow";
+
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, formatDueDate, isOverdue } from "../utils/dateUtils";
-import { TaskStatus } from "../types";
+import { TaskStatus, TaskPriority } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function MaintenanceDetailScreen() {
@@ -73,7 +74,7 @@ export default function MaintenanceDetailScreen() {
     <View style={commonStyles.container}>
       <Stack.Screen
         options={{
-          title: "Maintenance Slip",
+          title: "Maintenance Details",
           headerBackTitle: "Back",
         }}
       />
@@ -83,11 +84,6 @@ export default function MaintenanceDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
-          <BadgeRow
-            badges={[
-              { type: "priority", value: task.priority },
-            ]}
-          />
           <Text style={ds.title}>{task.title}</Text>
         </View>
 
@@ -128,9 +124,7 @@ export default function MaintenanceDetailScreen() {
           />
         )}
 
-        {task.notes && (
-          <DetailRow label="Notes" value={task.notes} />
-        )}
+        {task.notes && <DetailRow label="Notes" value={task.notes} />}
 
         {task.completionHistory.length > 0 && (
           <View style={ds.section}>
@@ -167,18 +161,33 @@ export default function MaintenanceDetailScreen() {
         )}
 
         {userRole !== "owner" && task.status !== "completed" && (
-          <DetailRow
-            label="Status"
-            chips={{
-              options: [
+          <>
+            <DropdownRow
+              label="Status"
+              options={[
                 { label: "Open", value: "open" },
                 { label: "In Progress", value: "in_progress" },
-                { label: "Waiting on Parts", value: "waiting_on_parts", color: colors.warning },
-              ],
-              selectedValue: task.status,
-              onSelect: (value) => handleStatusChange(value as TaskStatus),
-            }}
-          />
+                { label: "Waiting on Parts", value: "waiting_on_parts" },
+              ]}
+              selectedValue={task.status}
+              onSelect={(value) => handleStatusChange(value as TaskStatus)}
+            />
+            <DropdownRow
+              label="Priority"
+              options={[
+                { label: "Urgent", value: "urgent" },
+                { label: "High", value: "high" },
+                { label: "Medium", value: "medium" },
+                { label: "Low", value: "low" },
+              ]}
+              selectedValue={task.priority}
+              onSelect={(value) =>
+                updateMaintenanceTask(task.id, {
+                  priority: value as TaskPriority,
+                })
+              }
+            />
+          </>
         )}
 
         {userRole !== "owner" && task.status !== "completed" && (
@@ -204,7 +213,11 @@ export default function MaintenanceDetailScreen() {
             </View>
             <DetailRow
               label="Complete Task"
-              button={{ label: "Mark as Complete", onPress: handleComplete, color: colors.success }}
+              button={{
+                label: "Mark as Complete",
+                onPress: handleComplete,
+                color: colors.success,
+              }}
             />
           </>
         )}

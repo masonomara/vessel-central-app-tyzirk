@@ -9,9 +9,10 @@ import {
 import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { DetailRow } from "../components/DetailRow";
-import { BadgeRow } from "../components/BadgeRow";
+import { DropdownRow } from "../components/DropdownRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate } from "../utils/dateUtils";
+import { TaskPriority } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function SupplyDetailScreen() {
@@ -65,7 +66,7 @@ export default function SupplyDetailScreen() {
     <View style={commonStyles.container}>
       <Stack.Screen
         options={{
-          title: "Supply Detail",
+          title: "Supply Details",
           headerBackTitle: "Back",
         }}
       />
@@ -76,13 +77,31 @@ export default function SupplyDetailScreen() {
       >
         <View style={ds.titleSection}>
           <Text style={ds.title}>{request.itemName}</Text>
-          <BadgeRow
-            badges={[
-              { type: "supplyStatus", value: request.status },
-              { type: "priority", value: request.priority },
-            ]}
-          />
         </View>
+
+        <DropdownRow
+          label="Status"
+          options={[
+            { label: "Pending", value: "pending" },
+            { label: "Approved", value: "approved" },
+            { label: "Ordered", value: "ordered" },
+            { label: "Received", value: "received" },
+            { label: "Denied", value: "denied" },
+          ]}
+          selectedValue={request.status}
+          onSelect={(value) => updateSupplyRequest(request.id, { status: value as any })}
+        />
+        <DropdownRow
+          label="Priority"
+          options={[
+            { label: "Urgent", value: "urgent" },
+            { label: "High", value: "high" },
+            { label: "Medium", value: "medium" },
+            { label: "Low", value: "low" },
+          ]}
+          selectedValue={request.priority}
+          onSelect={(value) => updateSupplyRequest(request.id, { priority: value as TaskPriority })}
+        />
 
         <DetailRow label="Description" value={request.description} />
         <DetailRow

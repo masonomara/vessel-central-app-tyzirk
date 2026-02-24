@@ -16,6 +16,20 @@ export const colors = {
   info: "#3B82F6", // Blue for info
   grey: "#6B7280", // Neutral gray
 
+  // Badge Colors (foreground / background pairs)
+  redForeground: "#9d2435",
+  redBackground: "#efd7da",
+  orangeForeground: "#8e3917",
+  orangeBackground: "#f6d6c9",
+  yellowForeground: "#615213",
+  yellowBackground: "#ecdc97",
+  greenForeground: "#016040",
+  greenBackground: "#cee1db",
+  blueForeground: "#1e4ead",
+  blueBackground: "#d2dcf1",
+  purpleForeground: "#7a2ca8",
+  purpleBackground: "#e7d8ef",
+
   // Backgrounds - DARKER for better text contrast
   surfaceOne: "#fbf8f7", // Almost black (darker)
   surfaceTwo: "#f7f2ef", // Almost black (darker)
@@ -340,20 +354,25 @@ export const detailScreenStyles = StyleSheet.create({
     paddingBottom: 40,
   },
   titleSection: {
-    marginBottom: 20,
+    marginBottom: 0,
     paddingHorizontal: 20,
   },
   titleRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    marginBottom: 12,
+    marginBottom: 0,
   },
   title: {
     fontSize: 27,
     fontWeight: "700",
     color: colors.text,
     flex: 1,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginTop: 6,
   },
 
   badge: {

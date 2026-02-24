@@ -8,12 +8,14 @@ import {
 } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { DetailRow } from "../components/DetailRow";
-import { BadgeRow } from "../components/BadgeRow";
+import { DropdownRow } from "../components/DropdownRow";
+
 import { DetailNotFound } from "../components/DetailNotFound";
 import {
   formatEventDateRange,
   getEventTypeLabel,
 } from "../utils/calendarUtils";
+import { CalendarEventType } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function CalendarEventDetailScreen() {
@@ -58,7 +60,7 @@ export default function CalendarEventDetailScreen() {
     <View style={commonStyles.container}>
       <Stack.Screen
         options={{
-          title: "Calendar Event",
+          title: "Event Details",
           headerBackTitle: "Back",
         }}
       />
@@ -68,13 +70,23 @@ export default function CalendarEventDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
-          <BadgeRow
-            badges={[
-              { type: "category", value: eventTypeLabel },
-            ]}
-          />
           <Text style={ds.title}>{event.title}</Text>
         </View>
+
+        <DropdownRow
+          label="Type"
+          options={[
+            { label: "Maintenance", value: "maintenance" },
+            { label: "Charter", value: "charter" },
+            { label: "Inspection", value: "inspection" },
+            { label: "Crew Change", value: "crew_change" },
+            { label: "Provisioning", value: "provisioning" },
+            { label: "Meeting", value: "meeting" },
+            { label: "Other", value: "other" },
+          ]}
+          selectedValue={event.type}
+          onSelect={(value) => updateCalendarEvent(event.id, { type: value as CalendarEventType })}
+        />
 
         {event.description && (
           <DetailRow label="Description" value={event.description} />
@@ -111,20 +123,18 @@ export default function CalendarEventDetailScreen() {
           <DetailRow label="Notes" value={event.notes} />
         )}
 
-        <DetailRow
+        <DropdownRow
           label="Status"
-          chips={{
-            options: [
-              { label: "Scheduled", value: "scheduled" },
-              { label: "Cancelled", value: "cancelled", color: colors.danger },
-            ],
-            selectedValue: event.status,
-            onSelect: (value) => {
-              if (value === "cancelled") handleMarkCancelled();
-              else if (value === "scheduled") {
-                updateCalendarEvent(event.id, { status: "scheduled" });
-              }
-            },
+          options={[
+            { label: "Scheduled", value: "scheduled" },
+            { label: "Cancelled", value: "cancelled" },
+          ]}
+          selectedValue={event.status}
+          onSelect={(value) => {
+            if (value === "cancelled") handleMarkCancelled();
+            else if (value === "scheduled") {
+              updateCalendarEvent(event.id, { status: "scheduled" });
+            }
           }}
         />
         <DetailRow

@@ -9,16 +9,17 @@ import {
 import { useData } from "../contexts/DataContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
-import { BadgeRow } from "../components/BadgeRow";
+import { DropdownRow } from "../components/DropdownRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, isOverdue } from "../utils/dateUtils";
 import { formatFileSize } from "../utils/fileUtils";
+import { DocumentCategory } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function DocumentDetailScreen() {
   const topPadding = useTopPadding();
   const { id } = useLocalSearchParams();
-  const { documents } = useData();
+  const { documents, updateDocument } = useData();
 
   const doc = documents.find((d) => d.id === id);
 
@@ -44,15 +45,24 @@ export default function DocumentDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
-          <BadgeRow
-            badges={[
-              { type: "category", value: doc.category },
-              ...(doc.isImportant ? [{ type: "alert" as const, value: "important" }] : []),
-              ...(isExpired ? [{ type: "alert" as const, value: "expired" }] : []),
-            ]}
-          />
           <Text style={ds.title}>{doc.title}</Text>
         </View>
+
+        <DropdownRow
+          label="Category"
+          options={[
+            { label: "Manual", value: "manual" },
+            { label: "Insurance", value: "insurance" },
+            { label: "Registration", value: "registration" },
+            { label: "Safety", value: "safety" },
+            { label: "Warranty", value: "warranty" },
+            { label: "Invoice", value: "invoice" },
+            { label: "Receipt", value: "receipt" },
+            { label: "Other", value: "other" },
+          ]}
+          selectedValue={doc.category}
+          onSelect={(value) => updateDocument(doc.id, { category: value as DocumentCategory })}
+        />
 
         {doc.description ? (
           <DetailRow label="Description" value={doc.description} />

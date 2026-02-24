@@ -50,17 +50,20 @@
  */
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { colors } from "../styles/commonStyles";
 
 const badgeColors = {
-  red: "#C23C3C",
-  orange: "#C15F3C",
-  yellow: "#C2A03C",
-  blue: "#3C7FC2",
-  grey: "#6B7280",
+  red: { fg: colors.redForeground, bg: colors.redBackground },
+  orange: { fg: colors.orangeForeground, bg: colors.orangeBackground },
+  yellow: { fg: colors.yellowForeground, bg: colors.yellowBackground },
+  green: { fg: colors.greenForeground, bg: colors.greenBackground },
+  blue: { fg: colors.blueForeground, bg: colors.blueBackground },
+  purple: { fg: colors.purpleForeground, bg: colors.purpleBackground },
+  grey: { fg: colors.textSecondary, bg: colors.surfaceThree },
 };
 
 interface BadgeConfig {
-  type: "priority" | "supplyStatus" | "category" | "alert";
+  type: "priority" | "supplyStatus" | "status" | "category" | "alert";
   value: string;
   label?: string;
 }
@@ -69,35 +72,48 @@ interface BadgeRowProps {
   badges: BadgeConfig[];
 }
 
-function resolveColor(type: BadgeConfig["type"], value: string): string {
-  switch (type) {
-    case "alert":
-      return badgeColors.red;
-    case "priority":
-      if (value === "urgent" || value === "high") return badgeColors.red;
-      if (value === "medium") return badgeColors.blue;
-      if (value === "low") return badgeColors.yellow;
-      return badgeColors.grey;
-    case "supplyStatus":
-      if (value === "denied") return badgeColors.red;
-      return badgeColors.blue;
-    case "category":
-      return badgeColors.grey;
-    default:
-      return badgeColors.grey;
+const colorKeywords: [string, { fg: string; bg: string }][] = [
+  // green
+  ["completed", badgeColors.green],
+  // red
+  ["urgent", badgeColors.red],
+  ["high", badgeColors.red],
+  ["denied", badgeColors.red],
+  ["cancelled", badgeColors.red],
+  ["important", badgeColors.red],
+  ["expired", badgeColors.red],
+  // orange
+  ["waiting", badgeColors.orange],
+  // blue
+  ["medium", badgeColors.orange],
+  ["pending", badgeColors.blue],
+  ["approved", badgeColors.blue],
+  ["ordered", badgeColors.blue],
+  ["received", badgeColors.blue],
+  ["in progress", badgeColors.blue],
+  // yellow
+  ["low", badgeColors.yellow],
+];
+
+function resolveColor(value: string): { fg: string; bg: string } {
+  const lower = value.toLowerCase();
+  for (const [keyword, color] of colorKeywords) {
+    if (lower.includes(keyword)) return color;
   }
+  return badgeColors.grey;
 }
 
 function resolveLabel(value: string, label?: string): string {
   if (label) return label;
-  return value.toUpperCase();
+  return value.replace(/_/g, " ").toUpperCase();
 }
 
 const typeOrder: Record<BadgeConfig["type"], number> = {
   alert: 0,
-  priority: 1,
-  supplyStatus: 2,
-  category: 3,
+  status: 1,
+  priority: 2,
+  supplyStatus: 3,
+  category: 4,
 };
 
 export function BadgeRow({ badges }: BadgeRowProps) {
@@ -110,14 +126,14 @@ export function BadgeRow({ badges }: BadgeRowProps) {
   return (
     <View style={styles.row}>
       {sorted.map((badge, i) => {
-        const color = resolveColor(badge.type, badge.value);
+        const { fg, bg } = resolveColor(badge.value);
         const label = resolveLabel(badge.value, badge.label);
         return (
           <View
             key={i}
-            style={[styles.badge, { backgroundColor: color + "20" }]}
+            style={[styles.badge, { backgroundColor: bg }]}
           >
-            <Text style={[styles.badgeText, { color }]}>{label}</Text>
+            <Text style={[styles.badgeText, { color: fg }]}>{label}</Text>
           </View>
         );
       })}
@@ -130,7 +146,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
-    marginTop: 20,
   },
   badge: {
     paddingHorizontal: 8,

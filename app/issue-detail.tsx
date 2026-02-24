@@ -19,10 +19,12 @@ import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
-import { BadgeRow } from "../components/BadgeRow";
+import { DropdownRow } from "../components/DropdownRow";
+import { PriorityDetailRow } from "../components/PriorityDetailRow";
+
 import { DetailNotFound } from "../components/DetailNotFound";
-import { formatDate } from "../utils/dateUtils";
-import { TaskStatus } from "../types";
+import { formatDate, formatDateLong } from "../utils/dateUtils";
+import { TaskStatus, TaskPriority } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function IssueDetailScreen() {
@@ -63,7 +65,7 @@ export default function IssueDetailScreen() {
     <View style={commonStyles.container}>
       <Stack.Screen
         options={{
-          title: "Issue Report",
+          title: "Issue Details",
           headerBackTitle: "Back",
         }}
       />
@@ -73,15 +75,80 @@ export default function IssueDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
-          <BadgeRow
-            badges={[
-              { type: "priority", value: issue.priority },
-              ...(issue.category ? [{ type: "category" as const, value: issue.category }] : []),
-            ]}
-          />
           <Text style={ds.title}>{issue.title}</Text>
+          <Text style={ds.subtitle}>
+            {issue.category ? `${issue.category} issue` : "Issue"} reported{" "}
+            {formatDateLong(new Date(issue.createdAt))} by{" "}
+            {issue.reportedByName}
+          </Text>
         </View>
-
+        <PriorityDetailRow
+          items={[
+            {
+              label: "Vessel",
+              value: issue.vesselName,
+              icon: {
+                ios_icon_name: "sailboat.fill",
+                android_material_icon_name: "directions-boat",
+              },
+              linkTo: {
+                pathname: "/vessel-detail",
+                params: { id: issue.vesselId },
+              },
+            },
+            {
+              label: "Assigned To",
+              value: issue.assignedToName || "Unassigned",
+              icon: {
+                ios_icon_name: "person.fill",
+                android_material_icon_name: "person",
+              },
+            },
+          ]}
+        />
+        {(userRole === "owner" || userRole === "manager") && (
+          <>
+            {!issue.assignedToName && issue.status !== "completed" && (
+              <DetailRow
+                label="Assignment"
+                button={{
+                  label: "Assign to Me",
+                  onPress: () => {
+                    updateIssue(issue.id, {
+                      assignedTo: userId,
+                      assignedToName: userName,
+                    });
+                    Alert.alert("Assigned", `Issue assigned to ${userName}`);
+                  },
+                  color: colors.text,
+                }}
+              />
+            )}
+            <DropdownRow
+              label="Priority"
+              options={[
+                { label: "Urgent", value: "urgent" },
+                { label: "High", value: "high" },
+                { label: "Medium", value: "medium" },
+                { label: "Low", value: "low" },
+              ]}
+              selectedValue={issue.priority}
+              onSelect={(value) =>
+                updateIssue(issue.id, { priority: value as TaskPriority })
+              }
+            />
+            <DropdownRow
+              label="Status"
+              options={[
+                { label: "Open", value: "open" },
+                { label: "In Progress", value: "in_progress" },
+                { label: "Completed", value: "completed" },
+              ]}
+              selectedValue={issue.status}
+              onSelect={(value) => handleStatusChange(value as TaskStatus)}
+            />
+          </>
+        )}
         <DetailRow label="Description" value={issue.description} />
 
         {issue.attachments.length > 0 && (
@@ -115,23 +182,8 @@ export default function IssueDetailScreen() {
           </View>
         )}
 
-        <DetailRow
-          label="Vessel"
-          value={issue.vesselName}
-          linkTo={{
-            pathname: "/vessel-detail",
-            params: { id: issue.vesselId },
-          }}
-        />
-        <DetailRow label="Reported By" value={issue.reportedByName} />
         <DetailRow label="Location" value={issue.location || "Not specified"} />
-        <DetailRow
-          label="Created"
-          value={formatDate(new Date(issue.createdAt))}
-        />
-        {issue.assignedToName && (
-          <DetailRow label="Assigned To" value={issue.assignedToName} />
-        )}
+
         {issue.resolvedAt && (
           <DetailRow
             label="Resolved"
@@ -139,7 +191,7 @@ export default function IssueDetailScreen() {
           />
         )}
 
-        <View style={ds.section}>
+        {/* <View style={ds.section}>
           <Text style={ds.sectionTitle}>
             Comments ({issue.comments.length})
           </Text>
@@ -179,48 +231,7 @@ export default function IssueDetailScreen() {
               />
             </TouchableOpacity>
           </View>
-        </View>
-
-        {(userRole === "owner" || userRole === "manager") &&
-          issue.status !== "completed" && (
-            <>
-              {!issue.assignedToName && (
-                <DetailRow
-                  label="Assignment"
-                  button={{
-                    label: "Assign to Me",
-                    onPress: () => {
-                      updateIssue(issue.id, {
-                        assignedTo: userId,
-                        assignedToName: userName,
-                      });
-                      Alert.alert("Assigned", `Issue assigned to ${userName}`);
-                    },
-                    color: colors.accent,
-                  }}
-                />
-              )}
-              <DetailRow
-                label="Status"
-                chips={{
-                  options: [
-                    { label: "Open", value: "open" },
-                    { label: "In Progress", value: "in_progress" },
-                  ],
-                  selectedValue: issue.status,
-                  onSelect: (value) => handleStatusChange(value as TaskStatus),
-                }}
-              />
-              <DetailRow
-                label="Resolution"
-                button={{
-                  label: "Mark Resolved",
-                  onPress: () => handleStatusChange("completed"),
-                  color: colors.success,
-                }}
-              />
-            </>
-          )}
+        </View> */}
       </ScrollView>
     </View>
   );
