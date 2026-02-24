@@ -15,6 +15,7 @@ Run this on a physical iOS device and an Android device (or emulators). Test eve
 ## 1. Login & Auth Flow
 
 ### 1.1 Login Screen
+
 - [ ] App loads without crash
 - [ ] Quick login buttons for Owner, Manager, Crew are visible
 - [ ] Email/password fields render correctly
@@ -24,16 +25,19 @@ Run this on a physical iOS device and an Android device (or emulators). Test eve
 - [ ] Tapping "Manager Login" navigates to manager-login screen and back works
 
 ### 1.2 Quick Login — Owner
+
 - [ ] Tap Owner quick login → navigates to Owner dashboard
 - [ ] Tab bar shows: **Owner, Calendar, Maintenance, Documents**
 - [ ] No extra or missing tabs
 
 ### 1.3 Quick Login — Manager
+
 - [ ] Log out first (Profile → Logout)
 - [ ] Tap Manager quick login → navigates to Manager dashboard
 - [ ] Tab bar shows: **Manager, Calendar, Maintenance, Issues, Supplies**
 
 ### 1.4 Quick Login — Crew
+
 - [ ] Log out first
 - [ ] Tap Crew quick login → navigates to Crew dashboard
 - [ ] Tab bar shows: **Tasks, Calendar, Issues, Supplies**
@@ -45,6 +49,7 @@ Run this on a physical iOS device and an Android device (or emulators). Test eve
 Login as **Owner**.
 
 ### 2.1 Dashboard Content
+
 - [ ] Fleet Overview section renders vessel cards (Azure Dream, Ocean Pearl, Sea Breeze)
 - [ ] Key Metrics section renders stat cards
 - [ ] Pending Approvals section shows supply requests
@@ -52,6 +57,7 @@ Login as **Owner**.
 - [ ] No blank sections, no missing data
 
 ### 2.2 Navigation from Dashboard
+
 - [ ] Tap a vessel card → navigates to Vessel Detail
 - [ ] Tap a stat card → navigates to relevant tab or analytics
 - [ ] Tap a pending approval → navigates to Supply Detail
@@ -60,6 +66,7 @@ Login as **Owner**.
 - [ ] Profile screen shows user info, logout button works
 
 ### 2.3 Vessel Detail (from dashboard)
+
 - [ ] Title shows vessel name
 - [ ] Stats row shows 4 StatCards: Tasks, Issues, Supplies, Docs with counts
 - [ ] Active Tasks section lists tasks, each tappable → Maintenance Detail
@@ -73,6 +80,7 @@ Login as **Owner**.
 ## 3. Maintenance Tab (Owner or Manager)
 
 ### 3.1 List Screen
+
 - [ ] Shows maintenance tasks with search bar and filters
 - [ ] Multiple tasks visible (should be 9 total with enriched data)
 - [ ] Varied statuses visible: open, in_progress, completed, waiting_on_parts
@@ -82,6 +90,7 @@ Login as **Owner**.
 - [ ] Tap a task card → navigates to Maintenance Detail
 
 ### 3.2 Maintenance Detail
+
 - [ ] Shows task title, description, priority badge, status badge
 - [ ] Shows vessel name (tappable → Vessel Detail)
 - [ ] Shows assigned crew, due date, cost info
@@ -90,6 +99,7 @@ Login as **Owner**.
 - [ ] Back navigation works
 
 ### 3.3 Add Maintenance Task
+
 - [ ] Modal slides up correctly
 - [ ] Cancel button (header left) dismisses modal
 - [ ] All form fields render: title, description, vessel selector, priority, due date, recurring toggle
@@ -104,6 +114,7 @@ Login as **Owner**.
 ## 4. Documents Tab (Owner)
 
 ### 4.1 List Screen
+
 - [ ] Shows documents with search and category filters
 - [ ] Multiple documents visible (should be 7 total)
 - [ ] Category filter chips work (All, Manual, Insurance, Registration, etc.)
@@ -113,6 +124,7 @@ Login as **Owner**.
 - [ ] Tap a document → navigates to Document Detail
 
 ### 4.2 Document Detail
+
 - [ ] Shows document title, category badge
 - [ ] Important badge shows if flagged
 - [ ] Description section renders
@@ -126,6 +138,7 @@ Login as **Owner**.
 - [ ] Back navigation works
 
 ### 4.3 Add Document
+
 - [ ] Modal slides up
 - [ ] "Select Document" picker button renders
 - [ ] Tap picker → system file picker opens (or shows permission dialog)
@@ -139,6 +152,7 @@ Login as **Owner**.
 ## 5. Calendar Tab (All Roles)
 
 ### 5.1 Calendar Screen
+
 - [ ] Calendar grid renders current month
 - [ ] Event dots visible on days with events
 - [ ] Tap a day → shows events for that day below
@@ -147,6 +161,7 @@ Login as **Owner**.
 - [ ] If a day has no events → shows "No events scheduled" empty state
 
 ### 5.2 Calendar Event Detail
+
 - [ ] Shows event title, type badge, status badge
 - [ ] Shows vessel name, location, time range
 - [ ] Shows attendees list
@@ -154,6 +169,7 @@ Login as **Owner**.
 - [ ] Back navigation works
 
 ### 5.3 Add Calendar Event
+
 - [ ] Modal slides up
 - [ ] Event type chips render (maintenance, charter, inspection, etc.)
 - [ ] Vessel chips render
@@ -172,6 +188,7 @@ Login as **Owner**.
 Log in as **Manager** or **Crew**.
 
 ### 6.1 List Screen
+
 - [ ] Shows issues with search and filter chips
 - [ ] Multiple issues visible (should be 5 total)
 - [ ] Filter chips: All, Open, In Progress, Waiting on Parts, Completed
@@ -181,6 +198,7 @@ Log in as **Manager** or **Crew**.
 - [ ] Add issue button → opens Add Issue modal
 
 ### 6.2 Issue Detail
+
 - [ ] Shows title, priority badge, status badge, category badge
 - [ ] Description section renders
 - [ ] **Attachments section** shows if issue has attachments (horizontal scroll of thumbnails)
@@ -198,6 +216,7 @@ Log in as **Manager** or **Crew**.
 - [ ] Back navigation works
 
 ### 6.3 Add Issue
+
 - [ ] Modal slides up
 - [ ] If no vessels assigned → shows empty vessel message (not a crash)
 - [ ] All fields render: title, description, vessel, priority, category, location
@@ -212,6 +231,7 @@ Log in as **Manager** or **Crew**.
 ## 7. Supplies Tab (Manager or Crew)
 
 ### 7.1 List Screen
+
 - [ ] Shows supply requests with search and filter chips
 - [ ] Multiple requests visible (should be 6 total)
 - [ ] Varied statuses: pending, approved, ordered, received, denied
@@ -220,6 +240,7 @@ Log in as **Manager** or **Crew**.
 - [ ] Add button (Crew) → opens Add Supply Request modal
 
 ### 7.2 Supply Detail
+
 - [ ] Shows item name, status badge, priority badge
 - [ ] Description section renders
 - [ ] Detail card shows: Quantity, Estimated Cost, Actual Cost (if present), Vessel (tappable), Category, Requested By, Created
@@ -241,12 +262,14 @@ Log in as **Manager** or **Crew**.
 - [ ] Back navigation works
 
 ### 7.3 Add Supply Request
+
 - [ ] If no vessels assigned → shows empty vessel message
 - [ ] All fields render: item name, description, quantity, unit, cost, vessel, priority, category, notes
 - [ ] Submit with empty fields → validation alerts
 - [ ] Successful submit → success alert, modal dismisses
 
 ### 7.4 Add Parts Request (Crew)
+
 - [ ] If no vessels assigned → shows empty vessel message
 - [ ] Info card renders at top
 - [ ] All fields: part name, part number, description, quantity, vessel, location, urgency, category, vendor, cost
@@ -261,6 +284,7 @@ Log in as **Manager** or **Crew**.
 Log in as **Crew**.
 
 ### 8.1 Crew Dashboard
+
 - [ ] "My Vessels" section shows assigned vessels
 - [ ] Task stats show Pending/Completed counts
 - [ ] "My Tasks" section shows assigned tasks with checkboxes
@@ -271,6 +295,7 @@ Log in as **Crew**.
 - [ ] Each quick action navigates to correct form
 
 ### 8.2 Crew Can't Access Owner-Only Screens
+
 - [ ] No Documents tab visible
 - [ ] No Maintenance tab visible (crew sees "Tasks" tab instead)
 
@@ -281,9 +306,11 @@ Log in as **Crew**.
 Log in as **Owner** or **Manager**.
 
 ### 9.1 Navigation
+
 - [ ] Accessible from Owner dashboard stat cards or Manager quick actions
 
 ### 9.2 Content
+
 - [ ] Total Expenses stat card renders with dollar amount
 - [ ] Avg Monthly stat card renders
 - [ ] Active Tasks stat card renders (tappable → maintenance tab)
@@ -302,6 +329,7 @@ Log in as **Owner** or **Manager**.
 ## 10. Profile & Settings
 
 ### 10.1 Profile Screen
+
 - [ ] Shows user name, email, role
 - [ ] Notification settings link → navigates to Notification Settings
 - [ ] Logout button → returns to login screen
@@ -312,24 +340,29 @@ Log in as **Owner** or **Manager**.
 ## 11. Edge Cases & Stress Tests
 
 ### 11.1 Empty States
+
 - [ ] Filter maintenance to a status with no results → empty state shows
 - [ ] Filter issues to "Completed" → shows completed issues (or empty state if none match filter)
 - [ ] Filter supplies to "Denied" → shows denied request
 - [ ] Search with gibberish text → empty state shows, no crash
 
 ### 11.2 Rapid Navigation
+
 - [ ] Quickly tap between all tabs → no crash, no stale data
 - [ ] Open detail screen → back → open different detail → back → still works
 - [ ] Open form modal → cancel → open again → form is fresh (not stale)
 
 ### 11.3 Long Text
+
 - [ ] Issue with long title/description → text wraps properly, doesn't overflow
 - [ ] Comment with long text → wraps properly in comment card
 
 ### 11.4 Orientation (if applicable)
+
 - [ ] Rotate device → layout adjusts without crash (or lock to portrait if that's the design)
 
 ### 11.5 Background/Foreground
+
 - [ ] Background the app → bring back to foreground → still works, data persists
 
 ---
@@ -337,6 +370,7 @@ Log in as **Owner** or **Manager**.
 ## 12. Cross-Platform Checks
 
 ### iOS-Specific
+
 - [ ] Safe area: content not hidden behind Dynamic Island/notch
 - [ ] Safe area: content not hidden behind home indicator
 - [ ] Tab bar: content not hidden behind tab bar
@@ -345,6 +379,7 @@ Log in as **Owner** or **Manager**.
 - [ ] Scroll bounce feels natural
 
 ### Android-Specific
+
 - [ ] Status bar: content not hidden behind status bar
 - [ ] Navigation bar: content not hidden behind Android nav bar
 - [ ] Back gesture/button works correctly on all screens
@@ -356,17 +391,17 @@ Log in as **Owner** or **Manager**.
 
 ## Test Completion Checklist
 
-| Section | iOS | Android |
-|---------|-----|---------|
-| 1. Login & Auth | | |
-| 2. Owner Dashboard | | |
-| 3. Maintenance Tab | | |
-| 4. Documents Tab | | |
-| 5. Calendar Tab | | |
-| 6. Issues Tab | | |
-| 7. Supplies Tab | | |
-| 8. Crew-Specific | | |
-| 9. Analytics | | |
-| 10. Profile & Settings | | |
-| 11. Edge Cases | | |
-| 12. Cross-Platform | | |
+| Section                | iOS | Android |
+| ---------------------- | --- | ------- |
+| 1. Login & Auth        |     |         |
+| 2. Owner Dashboard     |     |         |
+| 3. Maintenance Tab     |     |         |
+| 4. Documents Tab       |     |         |
+| 5. Calendar Tab        |     |         |
+| 6. Issues Tab          |     |         |
+| 7. Supplies Tab        |     |         |
+| 8. Crew-Specific       |     |         |
+| 9. Analytics           |     |         |
+| 10. Profile & Settings |     |         |
+| 11. Edge Cases         |     |         |
+| 12. Cross-Platform     |     |         |

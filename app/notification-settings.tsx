@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -225,7 +225,7 @@ export default function NotificationSettingsScreen() {
               value={preferences.enabled}
               onValueChange={(value) => updatePreferences({ enabled: value })}
               trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={colors.card}
+              thumbColor={colors.surfaceOne}
             />
           </View>
         </View>
@@ -267,7 +267,7 @@ export default function NotificationSettingsScreen() {
               value={preferences.quietHours.enabled}
               onValueChange={setQuietHoursEnabled}
               trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={colors.card}
+              thumbColor={colors.surfaceOne}
             />
           </View>
 
@@ -341,7 +341,7 @@ export default function NotificationSettingsScreen() {
                     value={categoryPrefs.enabled}
                     onValueChange={(value) => toggleCategory(category, value)}
                     trackColor={{ false: colors.border, true: colors.primary }}
-                    thumbColor={colors.card}
+                    thumbColor={colors.surfaceOne}
                   />
                 </View>
 
@@ -353,7 +353,7 @@ export default function NotificationSettingsScreen() {
                         value={categoryPrefs.pushEnabled}
                         onValueChange={(value) => togglePushForCategory(category, value)}
                         trackColor={{ false: colors.border, true: colors.primary }}
-                        thumbColor={colors.card}
+                        thumbColor={colors.surfaceOne}
                       />
                     </View>
 
@@ -363,7 +363,7 @@ export default function NotificationSettingsScreen() {
                         value={categoryPrefs.inAppEnabled}
                         onValueChange={(value) => toggleInAppForCategory(category, value)}
                         trackColor={{ false: colors.border, true: colors.primary }}
-                        thumbColor={colors.card}
+                        thumbColor={colors.surfaceOne}
                       />
                     </View>
 
@@ -373,7 +373,7 @@ export default function NotificationSettingsScreen() {
                         value={categoryPrefs.sound}
                         onValueChange={(value) => updateCategoryField(category, 'sound', value)}
                         trackColor={{ false: colors.border, true: colors.primary }}
-                        thumbColor={colors.card}
+                        thumbColor={colors.surfaceOne}
                       />
                     </View>
 
@@ -383,7 +383,7 @@ export default function NotificationSettingsScreen() {
                         value={categoryPrefs.vibration}
                         onValueChange={(value) => updateCategoryField(category, 'vibration', value)}
                         trackColor={{ false: colors.border, true: colors.primary }}
-                        thumbColor={colors.card}
+                        thumbColor={colors.surfaceOne}
                       />
                     </View>
                   </View>
@@ -406,7 +406,7 @@ export default function NotificationSettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceTwo,
   },
   scrollView: {
     flex: 1,
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   masterToggle: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   },
   frequencyButton: {
     flex: 1,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 8,
     padding: 12,
     alignItems: 'center',
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   settingRow: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
   },
   timeButton: {
     flex: 1,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 8,
     padding: 12,
     alignItems: 'center',
@@ -518,7 +518,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   categoryCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,

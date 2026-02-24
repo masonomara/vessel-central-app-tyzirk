@@ -16,7 +16,7 @@ export function EmptyState({ ios_icon_name, android_material_icon_name, title, s
         ios_icon_name={ios_icon_name}
         android_material_icon_name={android_material_icon_name}
         size={48}
-        color={colors.textMuted}
+        color={colors.textTertiary}
       />
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>

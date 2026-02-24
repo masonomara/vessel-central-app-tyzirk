@@ -306,7 +306,7 @@ export default function SuppliesScreen() {
 
   return (
     <View
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles.container, { backgroundColor: colors.surfaceTwo }]}
     >
       <Stack.Screen
         options={{
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
     marginRight: 8,
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   requestCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,

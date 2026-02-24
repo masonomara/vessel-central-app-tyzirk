@@ -66,8 +66,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     padding: 16,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
+    borderColor: colors.borderSoft,
+    backgroundColor: colors.surfaceOne,
   },
   gradient: {
     padding: spacing.lg,

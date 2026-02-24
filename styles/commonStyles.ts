@@ -17,17 +17,20 @@ export const colors = {
   grey: "#6B7280", // Neutral gray
 
   // Backgrounds - DARKER for better text contrast
-  background: "#F5F4ED", // Almost black (darker)
-  card: "#FAF9F5", // Card background (darker)
+  surfaceOne: "#fbf8f7", // Almost black (darker)
+  surfaceTwo: "#f7f2ef", // Almost black (darker)
+  surfaceThree: "#efe4dd", // Almost black (darker)
+  container: "#ffffff", // Card background (darker)
 
   // Text - Higher contrast
-  text: "#141413", // Pure white for maximum contrast
-  textSecondary: "#3D3D44", // Lighter gray for better visibility
-  textTertiary: "#73726C", // Medium gray
-  textMuted: "#73726c80", // Muted gray
+  text: "rgba(0, 0, 0, .92)", // Pure white for maximum contrast
+  textSecondary: "rgba(0, 0, 0, .76)", // Lighter gray for better visibility
+  textTertiary: "rgba(0, 0, 0, .38)", // Medium gray
 
   // Borders & Dividers
-  border: "#1f1e1d26", // Subtle border
+  border: "rgba(0, 0, 0, .28)", // Subtle border
+  borderSoft: "rgba(0, 0, 0, .11)", // Subtle border
+
   divider: "#1f1e1d4d", // Divider line
 
   // Gradients (for use in LinearGradient)
@@ -173,13 +176,13 @@ export const buttonStyles = StyleSheet.create({
 
 export const commonStyles = StyleSheet.create({
   wrapper: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceTwo,
     width: "100%",
     height: "100%",
   },
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceTwo,
     width: "100%",
     height: "100%",
   },
@@ -240,13 +243,13 @@ export const commonStyles = StyleSheet.create({
   textMuted: {
     fontSize: 14,
     fontWeight: "400",
-    color: colors.textMuted,
+    color: colors.textTertiary,
     lineHeight: 20,
   },
 
   // Cards
   card: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 16,
     padding: spacing.xl,
     marginVertical: spacing.sm,

@@ -168,7 +168,7 @@ export default function AssignBoatsScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Assign Boats' }} />
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
         <View style={styles.searchContainer}>
           <IconSymbol
             ios_icon_name="magnifyingglass"
@@ -334,7 +334,7 @@ export default function AssignBoatsScreen() {
           onRequestClose={() => setShowAssignModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
+            <View style={[styles.modalContent, { backgroundColor: theme.colors.surfaceOne }]}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>
                   Assign {assignmentType === 'owner' ? 'Owner' : 'Crew Member'}
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   vesselCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -558,7 +558,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceTwo,
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceTwo,
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
@@ -669,7 +669,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cancelButton: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
   },

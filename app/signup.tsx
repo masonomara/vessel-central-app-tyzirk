@@ -180,7 +180,7 @@ export default function SignUpScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Enter your full name"
-                placeholderTextColor={colors.textMuted}
+                placeholderTextColor={colors.textTertiary}
                 value={name}
                 onChangeText={(text) => {
                   setName(text);
@@ -206,7 +206,7 @@ export default function SignUpScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Enter your email"
-                placeholderTextColor={colors.textMuted}
+                placeholderTextColor={colors.textTertiary}
                 value={email}
                 onChangeText={(text) => {
                   setEmail(text);
@@ -286,7 +286,7 @@ export default function SignUpScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Enter manager code"
-                placeholderTextColor={colors.textMuted}
+                placeholderTextColor={colors.textTertiary}
                 value={managerCode}
                 onChangeText={(text) => {
                   setManagerCode(text);
@@ -315,7 +315,7 @@ export default function SignUpScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Create a password"
-                placeholderTextColor={colors.textMuted}
+                placeholderTextColor={colors.textTertiary}
                 value={password}
                 onChangeText={(text) => {
                   setPassword(text);
@@ -353,7 +353,7 @@ export default function SignUpScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Confirm your password"
-                placeholderTextColor={colors.textMuted}
+                placeholderTextColor={colors.textTertiary}
                 value={confirmPassword}
                 onChangeText={(text) => {
                   setConfirmPassword(text);
@@ -447,7 +447,7 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceTwo,
   },
   scrollContent: {
     flexGrow: 1,
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.card + '80',
+    backgroundColor: colors.surfaceOne + '80',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -565,7 +565,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderRadius: 12,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',
@@ -643,7 +643,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 20,

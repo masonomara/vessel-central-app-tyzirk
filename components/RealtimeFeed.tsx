@@ -87,7 +87,7 @@ export function RealtimeFeed({ limit = 20, onItemPress }: RealtimeFeedProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceTwo,
   },
   header: {
     flexDirection: 'row',
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   },
   eventCard: {
     flexDirection: 'row',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,

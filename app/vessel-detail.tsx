@@ -16,7 +16,7 @@ export default function VesselDetailScreen() {
 
   if (!vessel) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
         <Stack.Screen options={{ title: "Vessel Not Found" }} />
         <View style={styles.centered}>
           <Text style={styles.errorText}>Vessel not found</Text>
@@ -37,7 +37,7 @@ export default function VesselDetailScreen() {
   const pendingSupplies = vesselSupplies.filter((s) => s.status === "pending");
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
       <Stack.Screen options={{ title: vessel.name }} />
 
       <ScrollView

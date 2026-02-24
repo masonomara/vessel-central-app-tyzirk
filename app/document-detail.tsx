@@ -23,7 +23,7 @@ export default function DocumentDetailScreen() {
 
   if (!doc) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
         <Stack.Screen options={{ title: 'Document Not Found' }} />
         <View style={styles.centered}>
           <Text style={styles.errorText}>
@@ -39,7 +39,7 @@ export default function DocumentDetailScreen() {
     : false;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
       <Stack.Screen options={{ title: 'Document Details' }} />
 
       <ScrollView
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   },
   description: { fontSize: 15, color: colors.textSecondary, lineHeight: 22 },
   card: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.divider,
   },
-  detailLabel: { fontSize: 14, color: colors.textMuted, flex: 1 },
+  detailLabel: { fontSize: 14, color: colors.textTertiary, flex: 1 },
   detailValue: {
     fontSize: 14,
     color: colors.text,
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   },
   tagText: { fontSize: 13, color: colors.textSecondary },
   previewCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.border,
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
   },
   previewFileType: {
     fontSize: 13,
-    color: colors.textMuted,
+    color: colors.textTertiary,
   },
   actionRow: {
     flexDirection: "row",

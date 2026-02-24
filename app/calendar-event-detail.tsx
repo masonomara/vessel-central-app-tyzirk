@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   eventCard: {
     flexDirection: 'row',
     marginHorizontal: 20,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,

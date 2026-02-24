@@ -21,7 +21,7 @@ export default function MaintenanceDetailScreen() {
 
   if (!task) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
         <Text style={styles.errorText}>Task not found</Text>
       </View>
     );
@@ -83,7 +83,7 @@ export default function MaintenanceDetailScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
       <Stack.Screen options={{ title: 'Task Details' }} />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 12,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
@@ -398,14 +398,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.textSecondary,
     lineHeight: 22,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.border,
   },
   historyCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 8,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   input: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     fontSize: 16,

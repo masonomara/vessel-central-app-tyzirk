@@ -28,7 +28,7 @@ export const StatCard = memo(function StatCard({
   trend,
   trendValue,
   onPress,
-  backgroundColor = colors.card,
+  backgroundColor = colors.surfaceOne,
 }: StatCardProps) {
   const handlePress = () => {
     if (onPress) {

@@ -105,7 +105,7 @@ export default function ManagerDashboard() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
       <Stack.Screen
         options={{
           title: "Dashboard",
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
   roleTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   vesselCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -585,7 +585,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   approvalCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -669,7 +669,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     marginTop: 8,
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
     color: colors.accent,
   },
   maintenanceCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,

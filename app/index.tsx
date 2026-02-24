@@ -38,7 +38,7 @@ export default function Index() {
   }, []); // Empty dependency array - only run once on mount
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.surfaceTwo }}>
       <ActivityIndicator size="large" color={colors.gold} />
     </View>
   );

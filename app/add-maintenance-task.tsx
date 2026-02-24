@@ -143,7 +143,7 @@ export default function AddMaintenanceTaskScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles.container, { backgroundColor: colors.surfaceTwo }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 12,
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
     paddingTop: 14,
   },
   picker: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 12,
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   pickerOptions: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 12,
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
   costInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 12,

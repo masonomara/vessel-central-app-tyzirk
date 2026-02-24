@@ -28,7 +28,7 @@ export default function IssueDetailScreen() {
 
   if (!issue) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
         <Stack.Screen options={{ title: 'Issue Not Found' }} />
         <View style={styles.centered}>
           <Text style={styles.errorText}>This issue could not be found.</Text>
@@ -89,7 +89,7 @@ export default function IssueDetailScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
       <Stack.Screen options={{ title: 'Issue Details' }} />
 
       <ScrollView
@@ -212,7 +212,7 @@ export default function IssueDetailScreen() {
             <TextInput
               style={styles.input}
               placeholder="Add a comment..."
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColor={colors.textTertiary}
               value={commentText}
               onChangeText={setCommentText}
               multiline
@@ -229,7 +229,7 @@ export default function IssueDetailScreen() {
                 ios_icon_name="arrow.up.circle.fill"
                 android_material_icon_name="send"
                 size={32}
-                color={commentText.trim() ? colors.accent : colors.textMuted}
+                color={commentText.trim() ? colors.accent : colors.textTertiary}
               />
             </TouchableOpacity>
           </View>
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   },
   description: { fontSize: 15, color: colors.textSecondary, lineHeight: 22 },
   card: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
@@ -338,10 +338,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.divider,
   },
-  detailLabel: { fontSize: 14, color: colors.textMuted },
+  detailLabel: { fontSize: 14, color: colors.textTertiary },
   detailValue: { fontSize: 14, color: colors.text, fontWeight: "500" },
   commentCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
@@ -354,12 +354,12 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   commentAuthor: { fontSize: 13, fontWeight: "600", color: colors.text },
-  commentDate: { fontSize: 12, color: colors.textMuted },
+  commentDate: { fontSize: 12, color: colors.textTertiary },
   commentBody: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
   commentInput: {
     flexDirection: "row",
     alignItems: "flex-end",
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.border,
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
   },
   sendButton: { padding: 4 },
   sendButtonDisabled: { opacity: 0.5 },
-  attachmentThumb: { width: 120, height: 120, borderRadius: 8, overflow: "hidden", backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
+  attachmentThumb: { width: 120, height: 120, borderRadius: 8, overflow: "hidden", backgroundColor: colors.surfaceOne, borderWidth: 1, borderColor: colors.border },
   attachmentImage: { width: 120, height: 120 },
   attachmentPlaceholder: { flex: 1, justifyContent: "center", alignItems: "center" },
   actionRow: { flexDirection: "row", gap: 12, flexWrap: "wrap" },

@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   calendarContainer: {
     marginHorizontal: 20,
     marginTop: 16,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 16,
     padding: 12,
     borderWidth: 1,
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   },
   eventItem: {
     flexDirection: 'row',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     overflow: 'hidden',
     borderWidth: 1,

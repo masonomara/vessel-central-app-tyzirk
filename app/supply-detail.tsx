@@ -25,7 +25,7 @@ export default function SupplyDetailScreen() {
 
   if (!request) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
         <Stack.Screen options={{ title: 'Request Not Found' }} />
         <View style={styles.centered}>
           <Text style={styles.errorText}>
@@ -99,7 +99,7 @@ export default function SupplyDetailScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
       <Stack.Screen options={{ title: 'Supply Request' }} />
 
       <ScrollView
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   },
   description: { fontSize: 15, color: colors.textSecondary, lineHeight: 22 },
   card: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.divider,
   },
-  detailLabel: { fontSize: 14, color: colors.textMuted },
+  detailLabel: { fontSize: 14, color: colors.textTertiary },
   detailValue: { fontSize: 14, color: colors.text, fontWeight: "500" },
   actionRow: { flexDirection: "row", gap: 12 },
   actionButton: {

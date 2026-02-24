@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.divider,
   },
-  label: { fontSize: 14, color: colors.textMuted },
+  label: { fontSize: 14, color: colors.textTertiary },
   valueRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   value: { fontSize: 14, color: colors.text, fontWeight: "500" },
   valueLinked: { color: colors.accent },

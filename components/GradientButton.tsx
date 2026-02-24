@@ -37,7 +37,7 @@ export function GradientButton({
 
   const getGradientColors = (): readonly [string, string] => {
     if (gradientColors && gradientColors.length >= 2) return [gradientColors[0], gradientColors[1]];
-    if (disabled) return [colors.textMuted, colors.textMuted];
+    if (disabled) return [colors.textTertiary, colors.textTertiary];
 
     switch (variant) {
       case 'primary':
