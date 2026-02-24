@@ -10,13 +10,19 @@ import {
   Image,
 } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
-import { colors } from "../styles/commonStyles";
+import {
+  commonStyles,
+  colors,
+  detailScreenStyles as ds,
+} from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { IconSymbol } from "../components/IconSymbol";
-import { LinkedDetailRow } from "../components/LinkedDetailRow";
+import { DetailRow } from "../components/DetailRow";
+import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate } from "../utils/dateUtils";
-import { TaskStatus, TaskPriority } from "../types";
+import { getPriorityColor, getStatusColor } from "../utils/colorUtils";
+import { TaskStatus } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function IssueDetailScreen() {
@@ -29,45 +35,8 @@ export default function IssueDetailScreen() {
   const issue = issues.find((i) => i.id === id);
 
   if (!issue) {
-    return (
-      <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
-        <Stack.Screen options={{ title: 'Issue Not Found' }} />
-        <View style={styles.centered}>
-          <Text style={styles.errorText}>This issue could not be found.</Text>
-        </View>
-      </View>
-    );
+    return <DetailNotFound title="Issue Not Found" />;
   }
-
-  const getPriorityColor = (priority: TaskPriority) => {
-    switch (priority) {
-      case "urgent":
-        return colors.danger;
-      case "high":
-        return colors.warning;
-      case "medium":
-        return colors.accent;
-      case "low":
-        return colors.success;
-      default:
-        return colors.grey;
-    }
-  };
-
-  const getStatusColor = (status: TaskStatus) => {
-    switch (status) {
-      case "completed":
-        return colors.success;
-      case "in_progress":
-        return colors.accent;
-      case "waiting_on_parts":
-        return colors.warning;
-      case "open":
-        return colors.grey;
-      default:
-        return colors.grey;
-    }
-  };
 
   const handleStatusChange = (newStatus: TaskStatus) => {
     updateIssue(issue.id, { status: newStatus });
@@ -91,75 +60,79 @@ export default function IssueDetailScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
-      <Stack.Screen options={{ title: 'Issue Details' }} />
+    <View style={commonStyles.container}>
+      <Stack.Screen options={{ title: "", headerBackTitle: "Back" }} />
 
       <ScrollView
-        style={styles.content}
-        contentContainerStyle={{ paddingBottom: 40, paddingTop: topPadding }}
+        contentContainerStyle={[ds.scrollContent, { paddingTop: topPadding }]}
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>{issue.title}</Text>
-        <View style={styles.badgeRow}>
-          <View
-            style={[
-              styles.badge,
-              { backgroundColor: getPriorityColor(issue.priority) + "20" },
-            ]}
-          >
-            <Text
-              style={[
-                styles.badgeText,
-                { color: getPriorityColor(issue.priority) },
-              ]}
-            >
-              {issue.priority.toUpperCase()}
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.badge,
-              { backgroundColor: getStatusColor(issue.status) + "20" },
-            ]}
-          >
-            <Text
-              style={[
-                styles.badgeText,
-                { color: getStatusColor(issue.status) },
-              ]}
-            >
-              {issue.status.replace("_", " ").toUpperCase()}
-            </Text>
-          </View>
-          {issue.category && (
+        <View style={ds.titleSection}>
+          <Text style={ds.title}>{issue.title}</Text>
+          <View style={ds.badgeRow}>
             <View
-              style={[styles.badge, { backgroundColor: colors.accent + "20" }]}
+              style={[
+                ds.badge,
+                { backgroundColor: getPriorityColor(issue.priority) + "20" },
+              ]}
             >
-              <Text style={[styles.badgeText, { color: colors.accent }]}>
-                {issue.category}
+              <Text
+                style={[
+                  ds.badgeText,
+                  { color: getPriorityColor(issue.priority) },
+                ]}
+              >
+                {issue.priority.toUpperCase()}
               </Text>
             </View>
-          )}
+            <View
+              style={[
+                ds.badge,
+                { backgroundColor: getStatusColor(issue.status) + "20" },
+              ]}
+            >
+              <Text
+                style={[ds.badgeText, { color: getStatusColor(issue.status) }]}
+              >
+                {issue.status.replace("_", " ").toUpperCase()}
+              </Text>
+            </View>
+            {issue.category && (
+              <View
+                style={[ds.badge, { backgroundColor: colors.accent + "20" }]}
+              >
+                <Text style={[ds.badgeText, { color: colors.accent }]}>
+                  {issue.category}
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Description</Text>
-          <Text style={styles.description}>{issue.description}</Text>
-        </View>
+        <DetailRow label="Description" value={issue.description} />
 
         {issue.attachments.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
+          <View style={ds.section}>
+            <Text style={ds.sectionTitle}>
               Attachments ({issue.attachments.length})
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View style={{ flexDirection: "row", gap: 12 }}>
+              <View style={styles.attachmentRow}>
                 {issue.attachments.map((att) => (
                   <View key={att.id} style={styles.attachmentThumb}>
                     {att.type === "image" ? (
-                      <Image source={{ uri: att.uri }} style={styles.attachmentImage} />
+                      <Image
+                        source={{ uri: att.uri }}
+                        style={styles.attachmentImage}
+                      />
                     ) : (
                       <View style={styles.attachmentPlaceholder}>
-                        <IconSymbol ios_icon_name="play.circle.fill" android_material_icon_name="play-circle" size={32} color={colors.text} />
+                        <IconSymbol
+                          ios_icon_name="play.circle.fill"
+                          android_material_icon_name="play-circle"
+                          size={32}
+                          color={colors.text}
+                        />
                       </View>
                     )}
                   </View>
@@ -169,34 +142,32 @@ export default function IssueDetailScreen() {
           </View>
         )}
 
-        <View style={styles.card}>
-          <LinkedDetailRow
-            label="Vessel"
-            value={issue.vesselName}
-            linkTo={{ pathname: "/vessel-detail", params: { id: issue.vesselId } }}
-          />
-          <DetailRow label="Reported By" value={issue.reportedByName} />
+        <DetailRow
+          label="Vessel"
+          value={issue.vesselName}
+          linkTo={{
+            pathname: "/vessel-detail",
+            params: { id: issue.vesselId },
+          }}
+        />
+        <DetailRow label="Reported By" value={issue.reportedByName} />
+        <DetailRow label="Location" value={issue.location || "Not specified"} />
+        <DetailRow
+          label="Created"
+          value={formatDate(new Date(issue.createdAt))}
+        />
+        {issue.assignedToName && (
+          <DetailRow label="Assigned To" value={issue.assignedToName} />
+        )}
+        {issue.resolvedAt && (
           <DetailRow
-            label="Location"
-            value={issue.location || "Not specified"}
+            label="Resolved"
+            value={formatDate(new Date(issue.resolvedAt))}
           />
-          <DetailRow
-            label="Created"
-            value={formatDate(new Date(issue.createdAt))}
-          />
-          {issue.assignedToName && (
-            <DetailRow label="Assigned To" value={issue.assignedToName} />
-          )}
-          {issue.resolvedAt && (
-            <DetailRow
-              label="Resolved"
-              value={formatDate(new Date(issue.resolvedAt))}
-            />
-          )}
-        </View>
+        )}
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
+        <View style={ds.section}>
+          <Text style={ds.sectionTitle}>
             Comments ({issue.comments.length})
           </Text>
           {issue.comments.map((comment) => (
@@ -239,109 +210,65 @@ export default function IssueDetailScreen() {
 
         {(userRole === "owner" || userRole === "manager") &&
           issue.status !== "completed" && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Actions</Text>
-              <View style={styles.actionRow}>
-                {!issue.assignedToName && (
-                  <TouchableOpacity
-                    style={[
-                      styles.actionButton,
-                      { backgroundColor: colors.accent },
-                    ]}
-                    onPress={() => {
+            <>
+              {!issue.assignedToName && (
+                <DetailRow
+                  label="Assignment"
+                  button={{
+                    label: "Assign to Me",
+                    onPress: () => {
                       updateIssue(issue.id, {
                         assignedTo: userId,
                         assignedToName: userName,
                       });
                       Alert.alert("Assigned", `Issue assigned to ${userName}`);
-                    }}
-                  >
-                    <Text style={styles.actionButtonText}>Assign to Me</Text>
-                  </TouchableOpacity>
-                )}
-                {issue.status === "open" && (
-                  <TouchableOpacity
-                    style={[
-                      styles.actionButton,
-                      { backgroundColor: colors.accent },
-                    ]}
-                    onPress={() => handleStatusChange("in_progress")}
-                  >
-                    <Text style={styles.actionButtonText}>Start Work</Text>
-                  </TouchableOpacity>
-                )}
-                {issue.status === "in_progress" && (
-                  <TouchableOpacity
-                    style={[
-                      styles.actionButton,
-                      { backgroundColor: colors.success },
-                    ]}
-                    onPress={() => handleStatusChange("completed")}
-                  >
-                    <Text style={styles.actionButtonText}>Mark Resolved</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
+                    },
+                    color: colors.accent,
+                  }}
+                />
+              )}
+              <DetailRow
+                label="Status"
+                chips={{
+                  options: [
+                    { label: "Open", value: "open" },
+                    { label: "In Progress", value: "in_progress", color: colors.accent },
+                  ],
+                  selectedValue: issue.status,
+                  onSelect: (value) => handleStatusChange(value as TaskStatus),
+                }}
+              />
+              <DetailRow
+                label="Resolution"
+                button={{ label: "Mark Resolved", onPress: () => handleStatusChange("completed"), color: colors.success }}
+              />
+            </>
           )}
       </ScrollView>
     </View>
   );
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.detailRow}>
-      <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={styles.detailValue}>{value}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  errorText: { color: colors.textSecondary, fontSize: 16 },
-  content: { flex: 1, padding: 16 },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: colors.text,
-    marginBottom: 12,
-  },
-  badgeRow: {
+  attachmentRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 20,
+    gap: 12,
   },
-  badge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
-  badgeText: { fontSize: 12, fontWeight: "700" },
-  section: { marginBottom: 24 },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 12,
-  },
-  description: { fontSize: 15, color: colors.textSecondary, lineHeight: 22 },
-  card: {
+  attachmentThumb: {
+    width: 120,
+    height: 120,
+    borderRadius: 8,
+    overflow: "hidden",
     backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    padding: 16,
     borderWidth: 1,
     borderColor: colors.border,
-    marginBottom: 24,
   },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
+  attachmentImage: { width: 120, height: 120 },
+  attachmentPlaceholder: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  detailLabel: { fontSize: 14, color: colors.textTertiary },
-  detailValue: { fontSize: 14, color: colors.text, fontWeight: "500" },
   commentCard: {
     backgroundColor: colors.surfaceOne,
     borderRadius: 12,
@@ -378,15 +305,4 @@ const styles = StyleSheet.create({
   },
   sendButton: { padding: 4 },
   sendButtonDisabled: { opacity: 0.5 },
-  attachmentThumb: { width: 120, height: 120, borderRadius: 8, overflow: "hidden", backgroundColor: colors.surfaceOne, borderWidth: 1, borderColor: colors.border },
-  attachmentImage: { width: 120, height: 120 },
-  attachmentPlaceholder: { flex: 1, justifyContent: "center", alignItems: "center" },
-  actionRow: { flexDirection: "row", gap: 12, flexWrap: "wrap" },
-  actionButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  actionButtonText: { color: "#FFFFFF", fontSize: 15, fontWeight: "600" },
 });

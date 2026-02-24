@@ -1,17 +1,15 @@
 import React from "react";
+import { StyleSheet, View, Text, ScrollView, Alert } from "react-native";
+import { useLocalSearchParams, Stack } from "expo-router";
 import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
-import { useLocalSearchParams, Stack, router } from "expo-router";
-import { colors } from "../styles/commonStyles";
+  commonStyles,
+  colors,
+  detailScreenStyles as ds,
+} from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { IconSymbol } from "../components/IconSymbol";
-import { LinkedDetailRow } from "../components/LinkedDetailRow";
+import { DetailRow } from "../components/DetailRow";
+import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, isOverdue } from "../utils/dateUtils";
 import { formatFileSize } from "../utils/fileUtils";
 import { useTopPadding } from "../hooks/useTopPadding";
@@ -24,16 +22,7 @@ export default function DocumentDetailScreen() {
   const doc = documents.find((d) => d.id === id);
 
   if (!doc) {
-    return (
-      <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
-        <Stack.Screen options={{ title: 'Document Not Found' }} />
-        <View style={styles.centered}>
-          <Text style={styles.errorText}>
-            This document could not be found.
-          </Text>
-        </View>
-      </View>
-    );
+    return <DetailNotFound title="Document Not Found" />;
   }
 
   const isExpired = doc.expiryDate
@@ -41,56 +30,35 @@ export default function DocumentDetailScreen() {
     : false;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
-      <Stack.Screen options={{ title: 'Document Details' }} />
+    <View style={commonStyles.container}>
+      <Stack.Screen options={{ title: "", headerBackTitle: "Back" }} />
 
       <ScrollView
-        style={styles.content}
-        contentContainerStyle={{ paddingBottom: 40, paddingTop: topPadding }}
+        contentContainerStyle={[ds.scrollContent, { paddingTop: topPadding }]}
+        showsVerticalScrollIndicator={false}
       >
-        <View style={styles.docHeader}>
-          <View
-            style={[
-              styles.iconCircle,
-              { backgroundColor: colors.accent + "20" },
-            ]}
-          >
-            <IconSymbol
-              ios_icon_name="doc.fill"
-              android_material_icon_name="description"
-              size={32}
-              color={colors.accent}
-            />
-          </View>
-          <Text style={styles.title}>{doc.title}</Text>
-          <View style={styles.badgeRow}>
-            <View
-              style={[styles.badge, { backgroundColor: colors.accent + "20" }]}
-            >
-              <Text style={[styles.badgeText, { color: colors.accent }]}>
+        <View style={ds.titleSection}>
+          <Text style={ds.title}>{doc.title}</Text>
+          <View style={ds.badgeRow}>
+            <View style={[ds.badge, { backgroundColor: colors.accent + "20" }]}>
+              <Text style={[ds.badgeText, { color: colors.accent }]}>
                 {doc.category.toUpperCase()}
               </Text>
             </View>
             {doc.isImportant && (
               <View
-                style={[
-                  styles.badge,
-                  { backgroundColor: colors.warning + "20" },
-                ]}
+                style={[ds.badge, { backgroundColor: colors.warning + "20" }]}
               >
-                <Text style={[styles.badgeText, { color: colors.warning }]}>
+                <Text style={[ds.badgeText, { color: colors.warning }]}>
                   IMPORTANT
                 </Text>
               </View>
             )}
             {isExpired && (
               <View
-                style={[
-                  styles.badge,
-                  { backgroundColor: colors.danger + "20" },
-                ]}
+                style={[ds.badge, { backgroundColor: colors.danger + "20" }]}
               >
-                <Text style={[styles.badgeText, { color: colors.danger }]}>
+                <Text style={[ds.badgeText, { color: colors.danger }]}>
                   EXPIRED
                 </Text>
               </View>
@@ -99,38 +67,32 @@ export default function DocumentDetailScreen() {
         </View>
 
         {doc.description ? (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Description</Text>
-            <Text style={styles.description}>{doc.description}</Text>
-          </View>
+          <DetailRow label="Description" value={doc.description} />
+        ) : null}
+        <DetailRow label="File Name" value={doc.fileName} />
+        <DetailRow label="File Size" value={formatFileSize(doc.fileSize)} />
+        <DetailRow label="File Type" value={doc.fileType.toUpperCase()} />
+        <DetailRow
+          label="Vessel"
+          value={doc.vesselName}
+          linkTo={{ pathname: "/vessel-detail", params: { id: doc.vesselId } }}
+        />
+        <DetailRow label="Uploaded By" value={doc.uploadedByName} />
+        <DetailRow
+          label="Uploaded"
+          value={formatDate(new Date(doc.uploadedAt))}
+        />
+        {doc.expiryDate ? (
+          <DetailRow
+            label="Expires"
+            value={formatDate(new Date(doc.expiryDate))}
+            valueColor={isExpired ? colors.danger : undefined}
+          />
         ) : null}
 
-        <View style={styles.card}>
-          <DetailRow label="File Name" value={doc.fileName} />
-          <DetailRow label="File Size" value={formatFileSize(doc.fileSize)} />
-          <DetailRow label="File Type" value={doc.fileType.toUpperCase()} />
-          <LinkedDetailRow
-            label="Vessel"
-            value={doc.vesselName}
-            linkTo={{ pathname: "/vessel-detail", params: { id: doc.vesselId } }}
-          />
-          <DetailRow label="Uploaded By" value={doc.uploadedByName} />
-          <DetailRow
-            label="Uploaded"
-            value={formatDate(new Date(doc.uploadedAt))}
-          />
-          {doc.expiryDate ? (
-            <DetailRow
-              label="Expires"
-              value={formatDate(new Date(doc.expiryDate))}
-              valueColor={isExpired ? colors.danger : colors.text}
-            />
-          ) : null}
-        </View>
-
         {doc.tags.length > 0 ? (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tags</Text>
+          <View style={ds.section}>
+            <Text style={ds.sectionTitle}>Tags</Text>
             <View style={styles.tagRow}>
               {doc.tags.map((tag, i) => (
                 <View key={i} style={styles.tag}>
@@ -156,107 +118,28 @@ export default function DocumentDetailScreen() {
           </Text>
         </View>
 
-        <View style={styles.actionRow}>
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: colors.accent }]}
-            onPress={() => Alert.alert("Download", `"${doc.fileName}" saved to device.`)}
-          >
-            <IconSymbol ios_icon_name="arrow.down.circle.fill" android_material_icon_name="download" size={20} color="#FFFFFF" />
-            <Text style={styles.actionButtonText}>Download</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: colors.secondary }]}
-            onPress={() => Alert.alert("Shared", `"${doc.fileName}" share sheet opened.`)}
-          >
-            <IconSymbol ios_icon_name="square.and.arrow.up" android_material_icon_name="share" size={20} color="#FFFFFF" />
-            <Text style={styles.actionButtonText}>Share</Text>
-          </TouchableOpacity>
-        </View>
+        <DetailRow
+          label="Download"
+          button={{
+            label: "Download",
+            onPress: () => Alert.alert("Download", `"${doc.fileName}" saved to device.`),
+            color: colors.accent,
+          }}
+        />
+        <DetailRow
+          label="Share"
+          button={{
+            label: "Share",
+            onPress: () => Alert.alert("Shared", `"${doc.fileName}" share sheet opened.`),
+            color: colors.secondary,
+          }}
+        />
       </ScrollView>
     </View>
   );
 }
 
-function DetailRow({
-  label,
-  value,
-  valueColor,
-}: {
-  label: string;
-  value: string;
-  valueColor?: string;
-}) {
-  return (
-    <View style={styles.detailRow}>
-      <Text style={styles.detailLabel}>{label}</Text>
-      <Text
-        style={[
-          styles.detailValue,
-          valueColor ? { color: valueColor } : undefined,
-        ]}
-        numberOfLines={2}
-      >
-        {value}
-      </Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  errorText: { color: colors.textSecondary, fontSize: 16 },
-  content: { flex: 1, padding: 16 },
-  docHeader: { alignItems: "center", marginBottom: 24 },
-  iconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: colors.text,
-    textAlign: "center",
-    marginBottom: 12,
-  },
-  badgeRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  badge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
-  badgeText: { fontSize: 12, fontWeight: "700" },
-  section: { marginBottom: 24 },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 12,
-  },
-  description: { fontSize: 15, color: colors.textSecondary, lineHeight: 22 },
-  card: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 24,
-  },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
-  },
-  detailLabel: { fontSize: 14, color: colors.textTertiary, flex: 1 },
-  detailValue: {
-    fontSize: 14,
-    color: colors.text,
-    fontWeight: "500",
-    flex: 1,
-    textAlign: "right",
-  },
   tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   tag: {
     backgroundColor: colors.secondary + "40",
@@ -288,18 +171,4 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textTertiary,
   },
-  actionRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: "row",
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  actionButtonText: { color: "#FFFFFF", fontSize: 15, fontWeight: "600" },
 });
