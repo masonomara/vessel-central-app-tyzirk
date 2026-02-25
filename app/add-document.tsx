@@ -182,6 +182,7 @@ export default function AddDocumentScreen() {
         fileType: selectedDocument.mimeType || 'application/octet-stream',
         tags: selectedTags,
         isImportant,
+        comments: [],
       });
 
       Alert.alert(

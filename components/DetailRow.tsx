@@ -13,6 +13,7 @@ interface ChipOption {
 
 interface DetailRowBaseProps {
   label?: string;
+  inline?: boolean;
   valueColor?: string;
   linkTo?: { pathname: string; params: Record<string, string> };
 }
@@ -43,10 +44,14 @@ interface DetailRowWithChips extends DetailRowBaseProps {
   };
 }
 
-type DetailRowProps = DetailRowWithValue | DetailRowWithButton | DetailRowWithChips;
+type DetailRowProps =
+  | DetailRowWithValue
+  | DetailRowWithButton
+  | DetailRowWithChips;
 
 export function DetailRow({
   label,
+  inline,
   value,
   valueColor,
   linkTo,
@@ -54,7 +59,13 @@ export function DetailRow({
   chips,
 }: DetailRowProps) {
   const content = (
-    <View style={[styles.row, !label && styles.rowNoBorder]}>
+    <View
+      style={[
+        styles.row,
+        !label && styles.rowNoBorder,
+        inline && styles.rowInline,
+      ]}
+    >
       {label ? <Text style={styles.label}>{label}</Text> : null}
       {chips ? (
         <View style={styles.chipRow}>
@@ -108,6 +119,7 @@ export function DetailRow({
           <Text
             style={[
               styles.value,
+              inline && styles.valueInline,
               valueColor ? { color: valueColor } : undefined,
               linkTo && styles.valueLinked,
             ]}
@@ -156,9 +168,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     paddingTop: 0,
   },
+  rowInline: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   label: { fontSize: 16, color: colors.text, fontWeight: "600" },
   valueRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  value: { fontSize: 15, color: colors.text, flex: 1, marginTop: 13 },
+  value: { fontSize: 15, color: colors.text, marginTop: 13 },
+  valueInline: { marginTop: 0, textAlign: "right"},
   valueLinked: { color: colors.accent },
   button: {
     paddingVertical: 10,

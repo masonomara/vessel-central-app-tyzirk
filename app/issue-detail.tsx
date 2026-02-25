@@ -256,7 +256,7 @@ export default function IssueDetailScreen() {
             </View>
           </View>
 
-          {issue.comments.map((comment) => (
+          {(issue.comments || []).map((comment) => (
             <View key={comment.id} style={styles.commentCard}>
               <View style={styles.commentIcon}>
                 <IconSymbol
@@ -296,7 +296,7 @@ export default function IssueDetailScreen() {
                 ios_icon_name="arrow.up.circle.fill"
                 android_material_icon_name="send"
                 size={20}
-                color={commentText.trim() ? colors.container : colors.container}
+                color={colors.container}
               />
             </TouchableOpacity>
           </View>
@@ -312,13 +312,13 @@ const styles = StyleSheet.create({
     paddingTop: 20,
 
     paddingBottom: 16,
-    marginBottom: 24,
-    marginTop: 16,
-    borderRadius: 16,
-    marginHorizontal: 20,
+
+    marginTop: 8,
     backgroundColor: colors.surfaceOne,
-    borderWidth: 1,
+    borderTopWidth: 1,
     borderColor: colors.borderSoft,
+    flex: 1,
+
   },
 
   attachmentRow: {
@@ -377,6 +377,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 12,
+    marginBottom: 20,
+    marginTop: "auto",
   },
   input: {
     flex: 1,

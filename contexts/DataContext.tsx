@@ -47,7 +47,8 @@ interface DataContextType {
   updateMaintenanceTask: (id: string, updates: Partial<MaintenanceTask>) => Promise<void>;
   deleteMaintenanceTask: (id: string) => void;
   completeMaintenanceTask: (id: string, record: Omit<CompletionRecord, 'id' | 'taskId'>) => void;
-  
+  addMaintenanceComment: (taskId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
+
   addIssue: (issue: Omit<Issue, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateIssue: (id: string, updates: Partial<Issue>) => void;
   addIssueComment: (issueId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
@@ -56,10 +57,12 @@ interface DataContextType {
   updateSupplyRequest: (id: string, updates: Partial<SupplyRequest>) => void;
   approveSupplyRequest: (id: string, approvedBy: string, approvedByName: string) => void;
   denySupplyRequest: (id: string, reason: string) => void;
-  
+  addSupplyComment: (requestId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
+
   addDocument: (document: Omit<Document, 'id' | 'uploadedAt'>) => void;
   updateDocument: (id: string, updates: Partial<Document>) => void;
   deleteDocument: (id: string) => void;
+  addDocumentComment: (docId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
   
   addActivityLog: (log: Omit<ActivityLog, 'id' | 'timestamp'>) => void;
   
@@ -136,6 +139,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(),
       updatedAt: new Date(),
       attachments: [],
+      comments: [],
       completionHistory: [],
       estimatedCost: 2500,
       notes: 'Use synthetic oil only',
@@ -159,6 +163,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
       updatedAt: new Date(),
       attachments: [],
+      comments: [],
       completionHistory: [],
       estimatedCost: 500,
       notes: 'Check expiry dates on all equipment',
@@ -180,6 +185,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(),
       updatedAt: new Date(),
       attachments: [],
+      comments: [],
       completionHistory: [],
       notes: '',
     },
@@ -203,6 +209,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
       updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
       attachments: [],
+      comments: [],
       completionHistory: [
         {
           id: 'ch1',
@@ -238,6 +245,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
       updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       attachments: [],
+      comments: [],
       completionHistory: [],
       estimatedCost: 3500,
       notes: 'Waiting on replacement belt from supplier',
@@ -261,6 +269,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
       updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
       attachments: [],
+      comments: [],
       completionHistory: [],
       notes: '',
     },
@@ -283,6 +292,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
       updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
       attachments: [],
+      comments: [],
       completionHistory: [],
       estimatedCost: 400,
       notes: 'Filters ordered and received',
@@ -306,6 +316,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       attachments: [],
+      comments: [],
       completionHistory: [],
       estimatedCost: 2800,
       notes: 'Overdue — needs scheduling ASAP',
@@ -328,6 +339,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
       updatedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
       attachments: [],
+      comments: [],
       completionHistory: [
         {
           id: 'ch2',
@@ -510,6 +522,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
       notes: 'Running low on supplies',
       attachments: [],
+      comments: [],
     },
     {
       id: '2',
@@ -532,6 +545,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
       notes: 'For upcoming engine service',
       attachments: [],
+      comments: [],
     },
     {
       id: '3',
@@ -551,6 +565,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
       notes: 'Urgent replacement needed',
       attachments: [],
+      comments: [],
     },
     {
       id: '4',
@@ -575,6 +590,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       vendor: 'West Marine',
       notes: 'Semco brand preferred',
       attachments: [],
+      comments: [],
     },
     {
       id: '5',
@@ -599,6 +615,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
       notes: 'Old lines showing chafe damage',
       attachments: [],
+      comments: [],
     },
     {
       id: '6',
@@ -619,6 +636,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000),
       notes: '',
       attachments: [],
+      comments: [],
     },
   ]);
 
@@ -640,6 +658,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       fileType: 'application/pdf',
       tags: ['legal', 'required'],
       isImportant: true,
+      comments: [],
     },
     {
       id: '2',
@@ -658,6 +677,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       fileType: 'application/pdf',
       tags: ['insurance', 'required'],
       isImportant: true,
+      comments: [],
     },
     {
       id: '3',
@@ -675,6 +695,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       fileType: 'application/pdf',
       tags: ['safety', 'manual'],
       isImportant: true,
+      comments: [],
     },
     {
       id: '4',
@@ -693,6 +714,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       fileType: 'application/pdf',
       tags: ['warranty', 'maintenance'],
       isImportant: true,
+      comments: [],
     },
     {
       id: '5',
@@ -710,6 +732,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       fileType: 'application/pdf',
       tags: ['crew', 'manual', 'required'],
       isImportant: false,
+      comments: [],
     },
     {
       id: '6',
@@ -727,6 +750,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       fileType: 'application/pdf',
       tags: ['financial', 'invoice'],
       isImportant: false,
+      comments: [],
     },
     {
       id: '7',
@@ -744,6 +768,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       fileType: 'application/pdf',
       tags: ['maintenance', 'required'],
       isImportant: true,
+      comments: [],
     },
   ]);
 
@@ -1376,8 +1401,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updates.completedDate = undefined;
     }
 
+    const costText = record.cost ? ` — Cost: $${record.cost.toLocaleString()}` : '';
+    const completionComment: Comment = {
+      id: generateId(),
+      userId: record.completedBy,
+      userName: record.completedByName,
+      userRole: 'crew',
+      text: `${record.completedByName} completed this task${costText}`,
+      attachments: [],
+      createdAt: new Date(),
+    };
+    updates.comments = [...(task.comments || []), completionComment];
+
     updateMaintenanceTask(id, updates);
-    
+
     addActivityLog({
       type: 'maintenance',
       title: 'Maintenance Task Completed',
@@ -1389,6 +1426,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
       vesselName: task.vesselName,
       relatedId: id,
       relatedType: 'maintenance',
+    });
+  };
+
+  const addMaintenanceComment = (taskId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
+    const task = maintenanceTasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const newComment: Comment = {
+      ...comment,
+      id: generateId(),
+      createdAt: new Date(),
+    };
+
+    updateMaintenanceTask(taskId, {
+      comments: [...(task.comments || []), newComment],
     });
   };
 
@@ -1502,6 +1554,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const addSupplyComment = (requestId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
+    const request = supplyRequests.find(r => r.id === requestId);
+    if (!request) return;
+
+    const newComment: Comment = {
+      ...comment,
+      id: generateId(),
+      createdAt: new Date(),
+    };
+
+    updateSupplyRequest(requestId, {
+      comments: [...(request.comments || []), newComment],
+    });
+  };
+
   // Document functions
   const addDocument = (document: Omit<Document, 'id' | 'uploadedAt'>) => {
     const newDocument: Document = {
@@ -1533,6 +1600,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteDocument = (id: string) => {
     setDocuments(documents.filter(doc => doc.id !== id));
+  };
+
+  const addDocumentComment = (docId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
+    const doc = documents.find(d => d.id === docId);
+    if (!doc) return;
+
+    const newComment: Comment = {
+      ...comment,
+      id: generateId(),
+      createdAt: new Date(),
+    };
+
+    updateDocument(docId, {
+      comments: [...(doc.comments || []), newComment],
+    });
   };
 
   // Activity Log functions
@@ -1760,6 +1842,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         updateMaintenanceTask,
         deleteMaintenanceTask,
         completeMaintenanceTask,
+        addMaintenanceComment,
         addIssue,
         updateIssue,
         addIssueComment,
@@ -1767,9 +1850,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
         updateSupplyRequest,
         approveSupplyRequest,
         denySupplyRequest,
+        addSupplyComment,
         addDocument,
         updateDocument,
         deleteDocument,
+        addDocumentComment,
         addActivityLog,
         addNotification,
         markNotificationAsRead,

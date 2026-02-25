@@ -117,6 +117,7 @@ export default function AddMaintenanceTaskScreen() {
       frequencyValue: isRecurring ? parseInt(frequencyValue) : undefined,
       createdBy: userId || 'unknown',
       attachments: [],
+      comments: [],
       completionHistory: [],
       estimatedCost: estimatedCost ? parseFloat(estimatedCost) : undefined,
       notes: notes.trim(),

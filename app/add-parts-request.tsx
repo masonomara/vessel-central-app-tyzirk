@@ -210,6 +210,7 @@ export default function AddPartsRequestScreen() {
           uploadedBy: userId,
           uploadedAt: new Date(),
         })),
+        comments: [],
       });
 
       Alert.alert(

@@ -134,6 +134,7 @@ export default function AddSupplyRequestScreen() {
         category,
         notes: notes.trim(),
         attachments: [],
+        comments: [],
       });
 
       Alert.alert(

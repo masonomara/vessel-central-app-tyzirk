@@ -86,6 +86,7 @@ export interface MaintenanceTask {
   createdAt: Date;
   updatedAt: Date;
   attachments: Attachment[];
+  comments: Comment[];
   completionHistory: CompletionRecord[];
   estimatedCost?: number;
   actualCost?: number;
@@ -144,6 +145,7 @@ export interface SupplyRequest {
   updatedAt: Date;
   notes: string;
   attachments: Attachment[];
+  comments: Comment[];
   approvedBy?: string;
   approvedByName?: string;
   approvedAt?: Date;
@@ -169,6 +171,7 @@ export interface Document {
   fileType: string;
   tags: string[];
   isImportant: boolean;
+  comments: Comment[];
 }
 
 export interface ActivityLog {

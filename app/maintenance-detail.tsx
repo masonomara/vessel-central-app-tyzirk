@@ -6,6 +6,7 @@ import {
   ScrollView,
   Alert,
   TextInput,
+  TouchableOpacity,
   ActionSheetIOS,
   Platform,
 } from "react-native";
@@ -20,7 +21,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
 import { DropdownRow } from "../components/DropdownRow";
-
+import { PriorityDetailRow } from "../components/PriorityDetailRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, formatDueDate, isOverdue } from "../utils/dateUtils";
 import { TaskStatus, TaskPriority } from "../types";
@@ -40,11 +41,15 @@ const MOCK_USERS: Record<string, string> = {
 export default function MaintenanceDetailScreen() {
   const topPadding = useTopPadding();
   const { id } = useLocalSearchParams();
-  const { maintenanceTasks, vessels, updateMaintenanceTask, completeMaintenanceTask } =
-    useData();
+  const {
+    maintenanceTasks,
+    vessels,
+    updateMaintenanceTask,
+    completeMaintenanceTask,
+    addMaintenanceComment,
+  } = useData();
   const { userRole, userId, userName } = useAuth();
-  const [notes, setNotes] = useState("");
-  const [cost, setCost] = useState("");
+  const [commentText, setCommentText] = useState("");
 
   const task = maintenanceTasks.find((t) => t.id === id);
 
@@ -63,24 +68,51 @@ export default function MaintenanceDetailScreen() {
       return;
     }
 
-    Alert.alert("Complete Task", "Mark this task as completed?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Complete",
-        onPress: () => {
-          completeMaintenanceTask(task.id, {
-            completedBy: userId,
-            completedByName: userName,
-            completedAt: new Date(),
-            notes: notes || "Task completed",
-            attachments: [],
-            cost: cost ? parseFloat(cost) : undefined,
-          });
-          Alert.alert("Success", "Task completed successfully");
-          router.back();
+    if (Platform.OS === "ios") {
+      Alert.prompt(
+        "Complete Task",
+        "Enter actual cost (optional):",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Complete",
+            onPress: (costInput?: string) => {
+              completeMaintenanceTask(task.id, {
+                completedBy: userId,
+                completedByName: userName,
+                completedAt: new Date(),
+                notes: "Task completed",
+                attachments: [],
+                cost: costInput ? parseFloat(costInput) : undefined,
+              });
+              Alert.alert("Success", "Task completed successfully");
+              router.back();
+            },
+          },
+        ],
+        "plain-text",
+        "",
+        "numeric",
+      );
+    } else {
+      Alert.alert("Complete Task", "Mark this task as completed?", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Complete",
+          onPress: () => {
+            completeMaintenanceTask(task.id, {
+              completedBy: userId,
+              completedByName: userName,
+              completedAt: new Date(),
+              notes: "Task completed",
+              attachments: [],
+            });
+            Alert.alert("Success", "Task completed successfully");
+            router.back();
+          },
         },
-      },
-    ]);
+      ]);
+    }
   };
 
   const handleAssign = () => {
@@ -112,11 +144,30 @@ export default function MaintenanceDetailScreen() {
               assignedTo: picked.id,
               assignedToName: picked.name,
             });
-            Alert.alert("Assigned", `Task assigned to ${picked.name}`);
+            addMaintenanceComment(task.id, {
+              userId,
+              userName,
+              userRole,
+              text: `${userName} assigned to ${picked.name}`,
+              attachments: [],
+            });
           }
         },
       );
     }
+  };
+
+  const handleAddComment = () => {
+    if (!commentText.trim()) return;
+    if (!userId || !userName) return;
+    addMaintenanceComment(task.id, {
+      userId,
+      userName,
+      userRole,
+      text: commentText.trim(),
+      attachments: [],
+    });
+    setCommentText("");
   };
 
   return (
@@ -129,31 +180,42 @@ export default function MaintenanceDetailScreen() {
       />
 
       <ScrollView
-        contentContainerStyle={[ds.scrollContent, { paddingTop: topPadding }]}
+        contentContainerStyle={[
+          ds.scrollContent,
+          { paddingTop: topPadding, flexGrow: 1 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
           <Text style={ds.title}>{task.title}</Text>
         </View>
 
-        <DetailRow label="Description" value={task.description} />
-        <DetailRow
-          label="Vessel"
-          value={task.vesselName}
-          linkTo={{ pathname: "/vessel-detail", params: { id: task.vesselId } }}
+        <PriorityDetailRow
+          items={[
+            {
+              label: "Vessel",
+              value: task.vesselName,
+              icon: {
+                ios_icon_name: "sailboat.fill",
+                android_material_icon_name: "directions-boat",
+              },
+              linkTo: {
+                pathname: "/vessel-detail",
+                params: { id: task.vesselId },
+              },
+            },
+            {
+              label: "Assigned To",
+              value: task.assignedToName || "Unassigned",
+              icon: {
+                ios_icon_name: "person.fill",
+                android_material_icon_name: "person",
+              },
+            },
+          ]}
         />
-        <DetailRow
-          label="Due Date"
-          value={formatDueDate(task.dueDate)}
-          valueColor={
-            isOverdue(task.dueDate) && task.status !== "completed"
-              ? colors.danger
-              : undefined
-          }
-        />
-        {task.assignedToName ? (
-          <DetailRow label="Assigned To" value={task.assignedToName} />
-        ) : task.status !== "completed" && userRole !== "owner" ? (
+
+        {!task.assignedToName && task.status !== "completed" && userRole !== "owner" && (
           <DetailRow
             button={{
               label: "Assign to Crew",
@@ -161,74 +223,10 @@ export default function MaintenanceDetailScreen() {
               color: colors.text,
             }}
           />
-        ) : null}
-        {task.isRecurring && (
-          <DetailRow
-            label="Frequency"
-            value={`Every ${task.frequencyValue} ${task.frequency}`}
-          />
-        )}
-        {task.estimatedCost && (
-          <DetailRow
-            label="Estimated Cost"
-            value={`$${task.estimatedCost.toLocaleString()}`}
-          />
-        )}
-        {task.actualCost && (
-          <DetailRow
-            label="Actual Cost"
-            value={`$${task.actualCost.toLocaleString()}`}
-          />
-        )}
-
-        {task.notes && <DetailRow label="Notes" value={task.notes} />}
-
-        {task.completionHistory.length > 0 && (
-          <View style={ds.section}>
-            <Text style={ds.sectionTitle}>Completion History</Text>
-            {task.completionHistory.map((record) => (
-              <View key={record.id} style={styles.historyCard}>
-                <View style={styles.historyHeader}>
-                  <IconSymbol
-                    ios_icon_name="checkmark.circle.fill"
-                    android_material_icon_name="check-circle"
-                    size={24}
-                    color={colors.success}
-                  />
-                  <View style={styles.historyInfo}>
-                    <Text style={styles.historyName}>
-                      {record.completedByName}
-                    </Text>
-                    <Text style={styles.historyDate}>
-                      {formatDate(new Date(record.completedAt))}
-                    </Text>
-                  </View>
-                </View>
-                {record.notes && (
-                  <Text style={styles.historyNotes}>{record.notes}</Text>
-                )}
-                {record.cost && (
-                  <Text style={styles.historyCost}>
-                    Cost: ${record.cost.toLocaleString()}
-                  </Text>
-                )}
-              </View>
-            ))}
-          </View>
         )}
 
         {userRole !== "owner" && task.status !== "completed" && (
           <>
-            <DropdownRow
-              label="Status"
-              options={[
-                { label: "Open", value: "open" },
-                { label: "In Progress", value: "in_progress" },
-                { label: "Waiting on Parts", value: "waiting_on_parts" },
-              ]}
-              selectedValue={task.status}
-              onSelect={(value) => handleStatusChange(value as TaskStatus)}
-            />
             <DropdownRow
               label="Priority"
               options={[
@@ -244,97 +242,193 @@ export default function MaintenanceDetailScreen() {
                 })
               }
             />
-          </>
-        )}
-
-        {userRole !== "owner" && task.status !== "completed" && (
-          <>
-            <View style={styles.formSection}>
-              <TextInput
-                style={styles.input}
-                placeholder="Completion notes..."
-                placeholderTextColor={colors.textSecondary}
-                value={notes}
-                onChangeText={setNotes}
-                multiline
-                numberOfLines={3}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Actual cost (optional)"
-                placeholderTextColor={colors.textSecondary}
-                value={cost}
-                onChangeText={setCost}
-                keyboardType="numeric"
-              />
-            </View>
-            <DetailRow
-              label="Complete Task"
-              button={{
-                label: "Mark as Complete",
-                onPress: handleComplete,
-                color: colors.success,
-              }}
+            <DropdownRow
+              label="Status"
+              options={[
+                { label: "Open", value: "open" },
+                { label: "In Progress", value: "in_progress" },
+                { label: "Waiting on Parts", value: "waiting_on_parts" },
+              ]}
+              selectedValue={task.status}
+              onSelect={(value) => handleStatusChange(value as TaskStatus)}
             />
           </>
         )}
+
+        <DetailRow
+          label="Due Date"
+          inline
+          value={formatDueDate(task.dueDate)}
+          valueColor={
+            isOverdue(task.dueDate) && task.status !== "completed"
+              ? colors.danger
+              : undefined
+          }
+        />
+        {task.isRecurring && (
+          <DetailRow
+            label="Frequency"
+            inline
+            value={`Every ${task.frequencyValue} ${task.frequency}`}
+          />
+        )}
+        {task.estimatedCost && (
+          <DetailRow
+            label="Estimated Cost"
+            inline
+            value={`$${task.estimatedCost.toLocaleString()}`}
+          />
+        )}
+        {task.actualCost && (
+          <DetailRow
+            label="Actual Cost"
+            inline
+            value={`$${task.actualCost.toLocaleString()}`}
+          />
+        )}
+        <DetailRow label="Description" value={task.description} />
+        {task.notes && <DetailRow label="Notes" value={task.notes} />}
+
+        {userRole !== "owner" && task.status !== "completed" && (
+          <DetailRow
+            button={{
+              label: "Mark as Complete",
+              onPress: handleComplete,
+              color: colors.success,
+            }}
+          />
+        )}
+
+        <View style={styles.historySection}>
+          <View style={styles.commentCard}>
+            <View style={styles.commentIcon}>
+              <IconSymbol
+                ios_icon_name="person.fill"
+                android_material_icon_name="person"
+                size={15}
+                color={colors.text}
+              />
+            </View>
+            <View style={styles.commentContent}>
+              <Text style={styles.commentAuthor}>
+                {MOCK_USERS[task.createdBy] || "Unknown"} created this task
+              </Text>
+              <Text style={styles.commentDate}>
+                {formatDate(new Date(task.createdAt))}
+              </Text>
+            </View>
+          </View>
+
+          {(task.comments || []).map((comment) => (
+            <View key={comment.id} style={styles.commentCard}>
+              <View style={styles.commentIcon}>
+                <IconSymbol
+                  ios_icon_name="person.fill"
+                  android_material_icon_name="person"
+                  size={15}
+                  color={colors.text}
+                />
+              </View>
+              <View style={styles.commentContent}>
+                <Text style={styles.commentAuthor}>{comment.userName}</Text>
+                <Text style={styles.commentDate}>
+                  {formatDate(new Date(comment.createdAt))}
+                </Text>
+                <Text style={styles.commentBody}>{comment.text}</Text>
+              </View>
+            </View>
+          ))}
+
+          <View style={styles.commentInput}>
+            <TextInput
+              style={styles.input}
+              placeholder="Add a comment..."
+              placeholderTextColor={colors.textTertiary}
+              value={commentText}
+              onChangeText={setCommentText}
+            />
+            <TouchableOpacity
+              style={[
+                styles.sendButton,
+                !commentText.trim() && styles.sendButtonDisabled,
+              ]}
+              onPress={handleAddComment}
+              disabled={!commentText.trim()}
+            >
+              <IconSymbol
+                ios_icon_name="arrow.up.circle.fill"
+                android_material_icon_name="send"
+                size={20}
+                color={colors.container}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  historyCard: {
+  historySection: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
+    marginTop: 8,
     backgroundColor: colors.surfaceOne,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  historyHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 8,
-  },
-  historyInfo: {
+    borderTopWidth: 1,
+    borderColor: colors.borderSoft,
     flex: 1,
   },
-  historyName: {
-    fontSize: 16,
-    fontWeight: "600",
+  commentCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    marginBottom: 24,
+  },
+  commentIcon: {
+    padding: 6,
+    marginTop: 4.5,
+    backgroundColor: colors.surfaceThree,
+    borderRadius: 100,
+  },
+  commentContent: {
+    flex: 1,
+  },
+  commentAuthor: {
+    fontSize: 15,
+    fontWeight: "500",
     color: colors.text,
-  },
-  historyDate: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-  historyNotes: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginTop: 8,
     lineHeight: 20,
   },
-  historyCost: {
+  commentDate: { fontSize: 12, color: colors.textTertiary, lineHeight: 15 },
+  commentBody: {
     fontSize: 14,
-    fontWeight: "600",
-    color: colors.success,
-    marginTop: 8,
+    color: colors.text,
+    lineHeight: 19,
+    marginTop: 4,
   },
-  formSection: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
+  commentInput: {
+    flexDirection: "row",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    height: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    marginBottom: 20,
+    marginTop: "auto",
   },
   input: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
+    flex: 1,
+    fontSize: 14,
     color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 12,
   },
+  sendButton: {
+    padding: 6,
+    backgroundColor: colors.text,
+    borderRadius: 8,
+  },
+  sendButtonDisabled: { opacity: 0.5 },
 });
