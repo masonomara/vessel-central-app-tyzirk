@@ -23,7 +23,7 @@ import { PriorityDetailRow } from "../components/PriorityDetailRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate } from "../utils/dateUtils";
 import { formatLabel } from "../utils/formatLabel";
-import { TaskPriority } from "../types";
+import { TaskPriority, SupplyRequestStatus } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function SupplyDetailScreen() {
@@ -100,7 +100,7 @@ export default function SupplyDetailScreen() {
   };
 
   const handleStatusChange = (value: string) => {
-    updateSupplyRequest(request.id, { status: value as any });
+    updateSupplyRequest(request.id, { status: value as SupplyRequestStatus });
     addSupplyComment(request.id, {
       userId,
       userName,
@@ -110,6 +110,10 @@ export default function SupplyDetailScreen() {
       attachments: [],
     });
   };
+
+  const isManagerOrOwner = userRole === "manager" || userRole === "owner";
+  const needsApproval = request.status === "pending";
+  const isDenied = request.status === "denied";
 
   const handleAddComment = () => {
     if (!commentText.trim()) return;
@@ -180,18 +184,65 @@ export default function SupplyDetailScreen() {
           selectedValue={request.priority}
           onSelect={(value) => handlePriorityChange(value as TaskPriority)}
         />
-        <DropdownRow
-          label="Status"
-          options={[
-            { label: "Pending", value: "pending" },
-            { label: "Approved", value: "approved" },
-            { label: "Ordered", value: "ordered" },
-            { label: "Received", value: "received" },
-            { label: "Denied", value: "denied" },
-          ]}
-          selectedValue={request.status}
-          onSelect={(value) => handleStatusChange(value)}
-        />
+
+        {needsApproval && isManagerOrOwner && (
+          <View style={styles.approvalRow}>
+            <TouchableOpacity
+              style={styles.approveBtn}
+              onPress={handleApprove}
+              activeOpacity={0.7}
+            >
+              <IconSymbol
+                ios_icon_name="checkmark.circle.fill"
+                android_material_icon_name="check-circle"
+                size={20}
+                color={colors.greenForeground}
+              />
+              <Text style={styles.approveBtnText}>Approve</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.denyBtn}
+              onPress={handleDeny}
+              activeOpacity={0.7}
+            >
+              <IconSymbol
+                ios_icon_name="xmark.circle.fill"
+                android_material_icon_name="cancel"
+                size={20}
+                color={colors.redForeground}
+              />
+              <Text style={styles.denyBtnText}>Deny</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {isDenied ? (
+          <View style={styles.statusRow}>
+            <Text style={styles.statusLabel}>Status</Text>
+            <View style={styles.deniedBadge}>
+              <Text style={styles.deniedBadgeText}>DENIED</Text>
+            </View>
+          </View>
+        ) : needsApproval ? (
+          <View style={styles.statusRow}>
+            <Text style={styles.statusLabel}>Status</Text>
+            <View style={styles.pendingBadge}>
+              <Text style={styles.pendingBadgeText}>PENDING APPROVAL</Text>
+            </View>
+          </View>
+        ) : (
+          <DropdownRow
+            label="Status"
+            options={[
+              { label: "Pending", value: "approved" },
+              { label: "Ordered", value: "ordered" },
+              { label: "Received", value: "received" },
+            ]}
+            selectedValue={request.status}
+            onSelect={(value) => handleStatusChange(value)}
+          />
+        )}
+
         <DetailRow label="Category" inline value={request.category} />
         {request.vendor ? (
           <DetailRow label="Vendor" inline value={request.vendor} />
@@ -294,6 +345,84 @@ export default function SupplyDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  approvalRow: {
+    flexDirection: "row",
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderSoft,
+  },
+  approveBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: colors.greenBackground,
+  },
+  approveBtnText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.greenForeground,
+  },
+  denyBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: colors.redBackground,
+  },
+  denyBtnText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.redForeground,
+  },
+  statusRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderSoft,
+  },
+  statusLabel: {
+    fontSize: 16,
+    color: colors.text,
+    fontWeight: "600",
+    paddingVertical: 16,
+  },
+  deniedBadge: {
+    backgroundColor: colors.redBackground,
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deniedBadgeText: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: colors.redForeground,
+  },
+  pendingBadge: {
+    backgroundColor: colors.blueBackground,
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pendingBadgeText: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: colors.blueForeground,
+  },
   historySection: {
     paddingHorizontal: 20,
     paddingTop: 20,

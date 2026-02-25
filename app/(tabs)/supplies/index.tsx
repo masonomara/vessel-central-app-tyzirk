@@ -4,6 +4,7 @@ import {
   View,
   Text,
   FlatList,
+  SectionList,
   TouchableOpacity,
   TextInput,
 } from "react-native";
@@ -135,7 +136,7 @@ const SupplyRequestItem = React.memo(
 
         <View style={styles.requestFooter}>
           <Text style={styles.timeText}>{formatDate(request.createdAt)}</Text>
-          {userRole === "manager" && request.status === "pending" && (
+          {(userRole === "manager" || userRole === "owner") && request.status === "pending" && (
             <View style={styles.actionButtons}>
               <TouchableOpacity
                 style={styles.approveButton}
@@ -183,9 +184,22 @@ export default function SuppliesScreen() {
     "all",
   );
   const [searchQuery, setSearchQuery] = useState("");
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
 
-  const filteredRequests = useMemo(() => {
-    return supplyRequests.filter((request) => {
+  const toggleSection = useCallback((title: string) => {
+    setCollapsedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(title)) {
+        next.delete(title);
+      } else {
+        next.add(title);
+      }
+      return next;
+    });
+  }, []);
+
+  const sections = useMemo(() => {
+    const filtered = supplyRequests.filter((request) => {
       const matchesStatus =
         filterStatus === "all" || request.status === filterStatus;
       const matchesSearch =
@@ -193,7 +207,34 @@ export default function SuppliesScreen() {
         request.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesStatus && matchesSearch;
     });
-  }, [supplyRequests, filterStatus, searchQuery]);
+
+    const pending = filtered.filter((r) => r.status === "pending");
+    const approved = filtered.filter(
+      (r) => r.status === "approved" || r.status === "ordered" || r.status === "received",
+    );
+    const denied = filtered.filter((r) => r.status === "denied");
+
+    const result: { title: string; count: number; data: SupplyRequest[] }[] = [];
+    if (pending.length > 0)
+      result.push({
+        title: "Needs Approval",
+        count: pending.length,
+        data: collapsedSections.has("Needs Approval") ? [] : pending,
+      });
+    if (approved.length > 0)
+      result.push({
+        title: "Approved",
+        count: approved.length,
+        data: collapsedSections.has("Approved") ? [] : approved,
+      });
+    if (denied.length > 0)
+      result.push({
+        title: "Denied",
+        count: denied.length,
+        data: collapsedSections.has("Denied") ? [] : denied,
+      });
+    return result;
+  }, [supplyRequests, filterStatus, searchQuery, collapsedSections]);
 
   const handleApprove = useCallback(
     (id: string) => {
@@ -230,6 +271,31 @@ export default function SuppliesScreen() {
   );
 
   const keyExtractor = useCallback((item: SupplyRequest) => item.id, []);
+
+  const renderSectionHeader = useCallback(
+    ({ section }: { section: { title: string; count: number } }) => {
+      const collapsed = collapsedSections.has(section.title);
+      return (
+        <TouchableOpacity
+          style={styles.sectionHeaderRow}
+          onPress={() => toggleSection(section.title)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.sectionHeader}>
+            {section.title}
+            <Text style={styles.sectionCount}> ({section.count})</Text>
+          </Text>
+          <IconSymbol
+            ios_icon_name={collapsed ? "chevron.right" : "chevron.down"}
+            android_material_icon_name={collapsed ? "chevron-right" : "expand-more"}
+            size={16}
+            color={colors.textSecondary}
+          />
+        </TouchableOpacity>
+      );
+    },
+    [collapsedSections, toggleSection],
+  );
 
   const ListHeaderComponent = useCallback(
     () => (
@@ -331,19 +397,16 @@ export default function SuppliesScreen() {
         }}
       />
 
-      <FlatList
-        data={filteredRequests}
+      <SectionList
+        sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
+        renderSectionHeader={renderSectionHeader}
         ListHeaderComponent={ListHeaderComponent}
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={[styles.listContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews={true}
-        maxToRenderPerBatch={10}
-        updateCellsBatchingPeriod={50}
-        initialNumToRender={10}
-        windowSize={10}
+        stickySectionHeadersEnabled={false}
       />
     </View>
   );
@@ -402,6 +465,25 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 20,
     paddingBottom: 20,
+  },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 10,
+    marginTop: 4,
+  },
+  sectionHeader: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.textSecondary,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  sectionCount: {
+    fontWeight: "400",
+    textTransform: "none",
+    letterSpacing: 0,
   },
   emptyState: {
     alignItems: "center",

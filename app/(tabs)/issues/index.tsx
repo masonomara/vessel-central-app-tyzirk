@@ -135,7 +135,7 @@ const IssueItem = React.memo(
           </View> */}
           <View style={styles.reportedBy}>
             <Text style={styles.reportedByText}>
-               · {issue.category} · {formatDate(issue.createdAt)}
+               · {issue.vesselName} · {formatDate(issue.createdAt)}
             </Text>
           </View>
         </View>
