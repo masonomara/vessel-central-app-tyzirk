@@ -26,6 +26,7 @@ import { PriorityDetailRow } from "../components/PriorityDetailRow";
 
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate } from "../utils/dateUtils";
+import { formatLabel } from "../utils/formatLabel";
 import { TaskStatus, TaskPriority } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
@@ -55,10 +56,26 @@ export default function IssueDetailScreen() {
 
   const handleStatusChange = (newStatus: TaskStatus) => {
     updateIssue(issue.id, { status: newStatus });
-    Alert.alert(
-      "Updated",
-      `Issue status changed to ${newStatus.replace("_", " ")}`,
-    );
+    addIssueComment(issue.id, {
+      userId,
+      userName,
+      userRole,
+      text: `${userName} changed status to ${formatLabel(newStatus)}`,
+      isSystemComment: true,
+      attachments: [],
+    });
+  };
+
+  const handlePriorityChange = (value: TaskPriority) => {
+    updateIssue(issue.id, { priority: value });
+    addIssueComment(issue.id, {
+      userId,
+      userName,
+      userRole,
+      text: `${userName} updated priority to ${formatLabel(value)}`,
+      isSystemComment: true,
+      attachments: [],
+    });
   };
 
   const handleAddComment = () => {
@@ -107,6 +124,7 @@ export default function IssueDetailScreen() {
               userName,
               userRole,
               text: `${userName} assigned to ${picked.name}`,
+              isSystemComment: true,
               attachments: [],
             });
           }
@@ -178,9 +196,7 @@ export default function IssueDetailScreen() {
                 { label: "Low", value: "low" },
               ]}
               selectedValue={issue.priority}
-              onSelect={(value) =>
-                updateIssue(issue.id, { priority: value as TaskPriority })
-              }
+              onSelect={(value) => handlePriorityChange(value as TaskPriority)}
             />
             <DropdownRow
               label="Status"
@@ -267,11 +283,15 @@ export default function IssueDetailScreen() {
                 />
               </View>
               <View style={styles.commentContent}>
-                <Text style={styles.commentAuthor}>{comment.userName}</Text>
+                <Text style={styles.commentAuthor}>
+                  {comment.isSystemComment ? comment.text : comment.userName}
+                </Text>
                 <Text style={styles.commentDate}>
                   {formatDate(new Date(comment.createdAt))}
                 </Text>
-                <Text style={styles.commentBody}>{comment.text}</Text>
+                {!comment.isSystemComment && (
+                  <Text style={styles.commentBody}>{comment.text}</Text>
+                )}
               </View>
             </View>
           ))}
@@ -313,9 +333,7 @@ const styles = StyleSheet.create({
 
     paddingBottom: 16,
 
-    marginTop: 8,
-    backgroundColor: colors.surfaceOne,
-    borderTopWidth: 1,
+    backgroundColor: colors.surfaceTwo,
     borderColor: colors.borderSoft,
     flex: 1,
 
@@ -349,7 +367,7 @@ const styles = StyleSheet.create({
   commentIcon: {
     padding: 6,
     marginTop: 4.5,
-    backgroundColor: colors.surfaceOne,
+    backgroundColor: colors.surfaceThree,
     borderRadius: 100,
   },
   commentContent: {
@@ -379,6 +397,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 20,
     marginTop: "auto",
+    backgroundColor: colors.container
   },
   input: {
     flex: 1,

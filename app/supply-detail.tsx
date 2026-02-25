@@ -22,6 +22,7 @@ import { DropdownRow } from "../components/DropdownRow";
 import { PriorityDetailRow } from "../components/PriorityDetailRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate } from "../utils/dateUtils";
+import { formatLabel } from "../utils/formatLabel";
 import { TaskPriority } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
@@ -57,6 +58,7 @@ export default function SupplyDetailScreen() {
             userName,
             userRole,
             text: `${userName} approved this request`,
+            isSystemComment: true,
             attachments: [],
           });
         },
@@ -77,11 +79,36 @@ export default function SupplyDetailScreen() {
             userName,
             userRole,
             text: `${userName} denied this request`,
+            isSystemComment: true,
             attachments: [],
           });
         },
       },
     ]);
+  };
+
+  const handlePriorityChange = (value: TaskPriority) => {
+    updateSupplyRequest(request.id, { priority: value });
+    addSupplyComment(request.id, {
+      userId,
+      userName,
+      userRole,
+      text: `${userName} updated priority to ${formatLabel(value)}`,
+      isSystemComment: true,
+      attachments: [],
+    });
+  };
+
+  const handleStatusChange = (value: string) => {
+    updateSupplyRequest(request.id, { status: value as any });
+    addSupplyComment(request.id, {
+      userId,
+      userName,
+      userRole,
+      text: `${userName} changed status to ${formatLabel(value)}`,
+      isSystemComment: true,
+      attachments: [],
+    });
   };
 
   const handleAddComment = () => {
@@ -151,11 +178,7 @@ export default function SupplyDetailScreen() {
             { label: "Low", value: "low" },
           ]}
           selectedValue={request.priority}
-          onSelect={(value) =>
-            updateSupplyRequest(request.id, {
-              priority: value as TaskPriority,
-            })
-          }
+          onSelect={(value) => handlePriorityChange(value as TaskPriority)}
         />
         <DropdownRow
           label="Status"
@@ -167,9 +190,7 @@ export default function SupplyDetailScreen() {
             { label: "Denied", value: "denied" },
           ]}
           selectedValue={request.status}
-          onSelect={(value) =>
-            updateSupplyRequest(request.id, { status: value as any })
-          }
+          onSelect={(value) => handleStatusChange(value)}
         />
 
         <DetailRow
@@ -231,6 +252,7 @@ export default function SupplyDetailScreen() {
                     userName,
                     userRole,
                     text: `${userName} marked as ordered`,
+                    isSystemComment: true,
                     attachments: [],
                   });
                 },
@@ -251,6 +273,7 @@ export default function SupplyDetailScreen() {
                     userName,
                     userRole,
                     text: `${userName} marked as received`,
+                    isSystemComment: true,
                     attachments: [],
                   });
                 },
@@ -290,11 +313,15 @@ export default function SupplyDetailScreen() {
                 />
               </View>
               <View style={styles.commentContent}>
-                <Text style={styles.commentAuthor}>{comment.userName}</Text>
+                <Text style={styles.commentAuthor}>
+                  {comment.isSystemComment ? comment.text : comment.userName}
+                </Text>
                 <Text style={styles.commentDate}>
                   {formatDate(new Date(comment.createdAt))}
                 </Text>
-                <Text style={styles.commentBody}>{comment.text}</Text>
+                {!comment.isSystemComment && (
+                  <Text style={styles.commentBody}>{comment.text}</Text>
+                )}
               </View>
             </View>
           ))}

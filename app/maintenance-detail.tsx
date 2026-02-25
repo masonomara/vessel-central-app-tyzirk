@@ -24,6 +24,7 @@ import { DropdownRow } from "../components/DropdownRow";
 import { PriorityDetailRow } from "../components/PriorityDetailRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, formatDueDate, isOverdue } from "../utils/dateUtils";
+import { formatLabel } from "../utils/formatLabel";
 import { TaskStatus, TaskPriority } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
@@ -59,7 +60,26 @@ export default function MaintenanceDetailScreen() {
 
   const handleStatusChange = (newStatus: TaskStatus) => {
     updateMaintenanceTask(task.id, { status: newStatus });
-    Alert.alert("Success", `Task status updated to ${newStatus}`);
+    addMaintenanceComment(task.id, {
+      userId,
+      userName,
+      userRole,
+      text: `${userName} changed status to ${formatLabel(newStatus)}`,
+      isSystemComment: true,
+      attachments: [],
+    });
+  };
+
+  const handlePriorityChange = (value: TaskPriority) => {
+    updateMaintenanceTask(task.id, { priority: value });
+    addMaintenanceComment(task.id, {
+      userId,
+      userName,
+      userRole,
+      text: `${userName} updated priority to ${formatLabel(value)}`,
+      isSystemComment: true,
+      attachments: [],
+    });
   };
 
   const handleComplete = () => {
@@ -149,6 +169,7 @@ export default function MaintenanceDetailScreen() {
               userName,
               userRole,
               text: `${userName} assigned to ${picked.name}`,
+              isSystemComment: true,
               attachments: [],
             });
           }
@@ -236,11 +257,7 @@ export default function MaintenanceDetailScreen() {
                 { label: "Low", value: "low" },
               ]}
               selectedValue={task.priority}
-              onSelect={(value) =>
-                updateMaintenanceTask(task.id, {
-                  priority: value as TaskPriority,
-                })
-              }
+              onSelect={(value) => handlePriorityChange(value as TaskPriority)}
             />
             <DropdownRow
               label="Status"
@@ -330,11 +347,15 @@ export default function MaintenanceDetailScreen() {
                 />
               </View>
               <View style={styles.commentContent}>
-                <Text style={styles.commentAuthor}>{comment.userName}</Text>
+                <Text style={styles.commentAuthor}>
+                  {comment.isSystemComment ? comment.text : comment.userName}
+                </Text>
                 <Text style={styles.commentDate}>
                   {formatDate(new Date(comment.createdAt))}
                 </Text>
-                <Text style={styles.commentBody}>{comment.text}</Text>
+                {!comment.isSystemComment && (
+                  <Text style={styles.commentBody}>{comment.text}</Text>
+                )}
               </View>
             </View>
           ))}

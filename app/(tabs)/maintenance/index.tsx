@@ -51,7 +51,7 @@ const MaintenanceTaskItem = React.memo(
         case "in_progress":
           return colors.accent;
         case "waiting_on_parts":
-          return colors.warning;
+          return colors.grey;
         case "open":
           return colors.grey;
         default:

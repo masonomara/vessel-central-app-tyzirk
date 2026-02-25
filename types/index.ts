@@ -101,6 +101,7 @@ export interface Comment {
   userName: string | null;
   userRole: string | null;
   text: string;
+  isSystemComment?: boolean;
   attachments: Attachment[];
   createdAt: Date;
 }

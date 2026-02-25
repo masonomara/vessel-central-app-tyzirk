@@ -1346,7 +1346,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   const updateMaintenanceTask = async (id: string, updates: Partial<MaintenanceTask>) => {
-    setMaintenanceTasks(maintenanceTasks.map(task =>
+    setMaintenanceTasks(prev => prev.map(task =>
       task.id === id ? { ...task, ...updates, updatedAt: new Date() } : task
     ));
   };
@@ -1408,6 +1408,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       userName: record.completedByName,
       userRole: 'crew',
       text: `${record.completedByName} completed this task${costText}`,
+      isSystemComment: true,
       attachments: [],
       createdAt: new Date(),
     };
@@ -1430,18 +1431,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   const addMaintenanceComment = (taskId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
-    const task = maintenanceTasks.find(t => t.id === taskId);
-    if (!task) return;
-
     const newComment: Comment = {
       ...comment,
       id: generateId(),
       createdAt: new Date(),
     };
 
-    updateMaintenanceTask(taskId, {
-      comments: [...(task.comments || []), newComment],
-    });
+    setMaintenanceTasks(prev => prev.map(task =>
+      task.id === taskId
+        ? { ...task, comments: [...(task.comments || []), newComment], updatedAt: new Date() }
+        : task
+    ));
   };
 
   // Issue functions
@@ -1469,26 +1469,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   const updateIssue = (id: string, updates: Partial<Issue>) => {
-    setIssues(issues.map(issue =>
+    setIssues(prev => prev.map(issue =>
       issue.id === id ? { ...issue, ...updates, updatedAt: new Date() } : issue
     ));
   };
 
   const addIssueComment = (issueId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
-    const issue = issues.find(i => i.id === issueId);
-    if (!issue) {
-      return;
-    }
-
     const newComment: Comment = {
       ...comment,
       id: generateId(),
       createdAt: new Date(),
     };
 
-    updateIssue(issueId, {
-      comments: [...issue.comments, newComment],
-    });
+    setIssues(prev => prev.map(issue =>
+      issue.id === issueId
+        ? { ...issue, comments: [...(issue.comments || []), newComment], updatedAt: new Date() }
+        : issue
+    ));
   };
 
   // Supply Request functions
@@ -1517,7 +1514,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   const updateSupplyRequest = (id: string, updates: Partial<SupplyRequest>) => {
-    setSupplyRequests(supplyRequests.map(request =>
+    setSupplyRequests(prev => prev.map(request =>
       request.id === id ? { ...request, ...updates, updatedAt: new Date() } : request
     ));
   };
@@ -1555,18 +1552,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   const addSupplyComment = (requestId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
-    const request = supplyRequests.find(r => r.id === requestId);
-    if (!request) return;
-
     const newComment: Comment = {
       ...comment,
       id: generateId(),
       createdAt: new Date(),
     };
 
-    updateSupplyRequest(requestId, {
-      comments: [...(request.comments || []), newComment],
-    });
+    setSupplyRequests(prev => prev.map(request =>
+      request.id === requestId
+        ? { ...request, comments: [...(request.comments || []), newComment], updatedAt: new Date() }
+        : request
+    ));
   };
 
   // Document functions
@@ -1593,7 +1589,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   const updateDocument = (id: string, updates: Partial<Document>) => {
-    setDocuments(documents.map(doc =>
+    setDocuments(prev => prev.map(doc =>
       doc.id === id ? { ...doc, ...updates } : doc
     ));
   };
@@ -1603,18 +1599,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   const addDocumentComment = (docId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
-    const doc = documents.find(d => d.id === docId);
-    if (!doc) return;
-
     const newComment: Comment = {
       ...comment,
       id: generateId(),
       createdAt: new Date(),
     };
 
-    updateDocument(docId, {
-      comments: [...(doc.comments || []), newComment],
-    });
+    setDocuments(prev => prev.map(doc =>
+      doc.id === docId
+        ? { ...doc, comments: [...(doc.comments || []), newComment] }
+        : doc
+    ));
   };
 
   // Activity Log functions

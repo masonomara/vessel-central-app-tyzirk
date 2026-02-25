@@ -15,7 +15,7 @@ const orange = { fg: colors.orangeForeground, bg: colors.orangeBackground };
 const yellow = { fg: colors.yellowForeground, bg: colors.yellowBackground };
 const green = { fg: colors.greenForeground, bg: colors.greenBackground };
 const blue = { fg: colors.blueForeground, bg: colors.blueBackground };
-const neutral = { fg: colors.textSecondary, bg: colors.surfaceOne };
+const neutral = { fg: colors.textSecondary, bg: colors.surfaceThree };
 
 const valueColors: Record<string, { fg: string; bg: string }> = {
   // priority
@@ -29,7 +29,7 @@ const valueColors: Record<string, { fg: string; bg: string }> = {
   denied: red,
   in_progress: neutral,
   open: neutral,
-  waiting_on_parts: orange,
+  waiting_on_parts: neutral,
   scheduled: neutral,
   pending: blue,
   approved: blue,

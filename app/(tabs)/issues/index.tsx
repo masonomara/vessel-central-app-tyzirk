@@ -44,7 +44,7 @@ const IssueItem = React.memo(
         case "in_progress":
           return colors.accent;
         case "waiting_on_parts":
-          return colors.warning;
+          return colors.grey;
         case "open":
           return colors.grey;
         default:
@@ -67,28 +67,13 @@ const IssueItem = React.memo(
       >
         <View style={styles.issueHeader}>
           <View style={styles.issueTitleRow}>
-            <IconSymbol
+            {/* <IconSymbol
               ios_icon_name="exclamationmark.triangle.fill"
               android_material_icon_name="report-problem"
               size={24}
               color={getPriorityColor(issue.priority)}
-            />
+            /> */}
             <Text style={styles.issueTitle}>{issue.title}</Text>
-          </View>
-          <View
-            style={[
-              styles.priorityBadge,
-              { backgroundColor: getPriorityColor(issue.priority) + "30" },
-            ]}
-          >
-            <Text
-              style={[
-                styles.priorityText,
-                { color: getPriorityColor(issue.priority) },
-              ]}
-            >
-              {issue.priority.toUpperCase()}
-            </Text>
           </View>
         </View>
 
@@ -96,7 +81,7 @@ const IssueItem = React.memo(
           {issue.description}
         </Text>
 
-        <View style={styles.issueMeta}>
+        {/* <View style={styles.issueMeta}>
           <View style={styles.metaItem}>
             <IconSymbol
               ios_icon_name="sailboat.fill"
@@ -115,9 +100,24 @@ const IssueItem = React.memo(
             />
             <Text style={styles.metaText}>{issue.location}</Text>
           </View>
-        </View>
+        </View> */}
 
         <View style={styles.issueFooter}>
+          <View
+            style={[
+              styles.priorityBadge,
+              { backgroundColor: getPriorityColor(issue.priority) + "30" },
+            ]}
+          >
+            <Text
+              style={[
+                styles.priorityText,
+                { color: getPriorityColor(issue.priority) },
+              ]}
+            >
+              {issue.priority.toUpperCase()}
+            </Text>
+          </View>
           <View
             style={[
               styles.statusBadge,
@@ -141,7 +141,7 @@ const IssueItem = React.memo(
           </View>
         </View>
 
-        {issue.attachments.length > 0 && (
+        {/* {issue.attachments.length > 0 && (
           <View style={styles.attachmentsIndicator}>
             <IconSymbol
               ios_icon_name="paperclip"
@@ -154,9 +154,9 @@ const IssueItem = React.memo(
               {issue.attachments.length > 1 ? "s" : ""}
             </Text>
           </View>
-        )}
+        )} */}
 
-        {issue.comments.length > 0 && (
+        {/* {issue.comments.length > 0 && (
           <View style={styles.commentsIndicator}>
             <IconSymbol
               ios_icon_name="bubble.left.fill"
@@ -169,7 +169,7 @@ const IssueItem = React.memo(
               {issue.comments.length > 1 ? "s" : ""}
             </Text>
           </View>
-        )}
+        )} */}
       </TouchableOpacity>
     );
   },
@@ -406,7 +406,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginHorizontal: 20,
     marginBottom: 16,
     borderWidth: 1,
     borderColor: colors.border,
@@ -446,7 +445,6 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   listContent: {
-    paddingHorizontal: 20,
     paddingBottom: 20,
   },
   emptyState: {
@@ -466,19 +464,14 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   issueCard: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+    paddingHorizontal: 20,
+    marginTop: 16,
   },
   issueCardUrgent: {},
   issueHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 8,
   },
   issueTitleRow: {
     flexDirection: "row",
@@ -487,25 +480,34 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   issueTitle: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: "600",
     color: colors.text,
     flex: 1,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: 16,
   },
   priorityBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    fontSize: 15,
+    color: colors.text,
+    fontWeight: "500",
+    borderRadius: 4,
+    padding: 6,
+    paddingVertical: 0,
+    lineHeight: 24,
   },
   priorityText: {
     fontSize: 10,
     fontWeight: "700",
   },
   issueDescription: {
-    fontSize: 14,
+    fontSize: 15,
     color: colors.textSecondary,
     marginBottom: 12,
     lineHeight: 20,
+    marginTop: 6,
   },
   issueMeta: {
     flexDirection: "row",
@@ -523,7 +525,8 @@ const styles = StyleSheet.create({
   },
   issueFooter: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
+    gap: 8,
     alignItems: "center",
     marginBottom: 8,
   },

@@ -22,6 +22,7 @@ import { DropdownRow } from "../components/DropdownRow";
 import { PriorityDetailRow } from "../components/PriorityDetailRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, isOverdue } from "../utils/dateUtils";
+import { formatLabel } from "../utils/formatLabel";
 import { formatFileSize } from "../utils/fileUtils";
 import { DocumentCategory } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
@@ -42,6 +43,18 @@ export default function DocumentDetailScreen() {
   const isExpired = doc.expiryDate
     ? isOverdue(new Date(doc.expiryDate))
     : false;
+
+  const handleCategoryChange = (value: DocumentCategory) => {
+    updateDocument(doc.id, { category: value });
+    addDocumentComment(doc.id, {
+      userId,
+      userName,
+      userRole,
+      text: `${userName} changed category to ${formatLabel(value)}`,
+      isSystemComment: true,
+      attachments: [],
+    });
+  };
 
   const handleAddComment = () => {
     if (!commentText.trim()) return;
@@ -114,9 +127,7 @@ export default function DocumentDetailScreen() {
             { label: "Other", value: "other" },
           ]}
           selectedValue={doc.category}
-          onSelect={(value) =>
-            updateDocument(doc.id, { category: value as DocumentCategory })
-          }
+          onSelect={(value) => handleCategoryChange(value as DocumentCategory)}
         />
 
         <DetailRow label="File Name" inline value={doc.fileName} />
@@ -196,11 +207,15 @@ export default function DocumentDetailScreen() {
                 />
               </View>
               <View style={styles.commentContent}>
-                <Text style={styles.commentAuthor}>{comment.userName}</Text>
+                <Text style={styles.commentAuthor}>
+                  {comment.isSystemComment ? comment.text : comment.userName}
+                </Text>
                 <Text style={styles.commentDate}>
                   {formatDate(new Date(comment.createdAt))}
                 </Text>
-                <Text style={styles.commentBody}>{comment.text}</Text>
+                {!comment.isSystemComment && (
+                  <Text style={styles.commentBody}>{comment.text}</Text>
+                )}
               </View>
             </View>
           ))}

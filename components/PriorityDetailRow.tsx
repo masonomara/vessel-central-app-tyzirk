@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   icon: {
-    backgroundColor: colors.surfaceOne,
+    backgroundColor: colors.surfaceThree,
     padding: 8,
     borderRadius: 100,
   },
