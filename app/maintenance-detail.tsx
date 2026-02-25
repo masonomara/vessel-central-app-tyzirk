@@ -200,7 +200,7 @@ export default function MaintenanceDetailScreen() {
                       {record.completedByName}
                     </Text>
                     <Text style={styles.historyDate}>
-                      {formatDate(record.completedAt)}
+                      {formatDate(new Date(record.completedAt))}
                     </Text>
                   </View>
                 </View>

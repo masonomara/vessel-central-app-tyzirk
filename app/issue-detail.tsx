@@ -309,11 +309,16 @@ export default function IssueDetailScreen() {
 const styles = StyleSheet.create({
   historySection: {
     paddingHorizontal: 20,
-    paddingTop: 16,
-    flex: 1,
+    paddingTop: 20,
+
     paddingBottom: 16,
-    marginTop: 24,
-    backgroundColor: colors.surfaceThree,
+    marginBottom: 24,
+    marginTop: 16,
+    borderRadius: 16,
+    marginHorizontal: 20,
+    backgroundColor: colors.surfaceOne,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
   },
 
   attachmentRow: {
@@ -339,7 +344,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 8,
-    marginBottom: 16,
+    marginBottom: 24,
   },
   commentIcon: {
     padding: 6,
@@ -361,11 +366,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text,
     lineHeight: 19,
-    marginTop: 6,
+    marginTop: 4,
   },
   commentInput: {
     flexDirection: "row",
-    backgroundColor: colors.surfaceTwo,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.borderSoft,
