@@ -54,7 +54,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={[styles.safeArea, { backgroundColor: colors.surfaceTwo }]}>
+    <View style={[styles.safeArea, { backgroundColor: colors.surfaceOne }]}>
       <ScrollView
         style={styles.container}
         contentContainerStyle={[styles.contentContainer, { paddingTop: topPadding }]}

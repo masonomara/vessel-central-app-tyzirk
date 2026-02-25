@@ -447,7 +447,7 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
   },
   scrollContent: {
     flexGrow: 1,

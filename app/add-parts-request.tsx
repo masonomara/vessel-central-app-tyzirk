@@ -83,7 +83,7 @@ export default function AddPartsRequestScreen() {
 
   if (userVessels.length === 0) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
+      <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
         <Stack.Screen options={{ title: 'Request Parts' }} />
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 }}>
           <IconSymbol ios_icon_name="sailboat" android_material_icon_name="sailing" size={48} color={colors.textTertiary} />
@@ -242,7 +242,7 @@ export default function AddPartsRequestScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
+    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
       <Stack.Screen
         options={{
           title: 'Request Parts',

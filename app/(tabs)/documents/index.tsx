@@ -114,7 +114,7 @@ export default function DocumentsScreen() {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.surfaceTwo }]}
+      style={[styles.container, { backgroundColor: colors.surfaceOne }]}
       contentContainerStyle={{ paddingTop: topPadding }}
     >
       <Stack.Screen
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 8,
     marginBottom: 12,
   },

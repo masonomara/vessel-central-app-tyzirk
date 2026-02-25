@@ -13,7 +13,7 @@ export default function CalendarLayout() {
         headerShadowVisible: false,
         headerStyle: { backgroundColor: Platform.OS === "ios" && Number(Platform.Version) >= 26
             ? "transparent"
-            : colors.surfaceTwo },
+            : colors.surfaceOne },
       }}
     />
   );

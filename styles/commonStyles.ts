@@ -190,13 +190,13 @@ export const buttonStyles = StyleSheet.create({
 
 export const commonStyles = StyleSheet.create({
   wrapper: {
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
     width: "100%",
     height: "100%",
   },
   container: {
     flex: 1,
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
     width: "100%",
     height: "100%",
   },

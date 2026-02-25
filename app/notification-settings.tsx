@@ -408,7 +408,7 @@ export default function NotificationSettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
   },
   scrollView: {
     flex: 1,

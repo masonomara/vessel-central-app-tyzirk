@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
   commentIcon: {
     padding: 6,
     marginTop: 4.5,
-    backgroundColor: colors.surfaceThree,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 100,
   },
   commentContent: {

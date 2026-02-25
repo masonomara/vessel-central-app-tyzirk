@@ -87,7 +87,7 @@ export function RealtimeFeed({ limit = 20, onItemPress }: RealtimeFeedProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
   },
   header: {
     flexDirection: 'row',

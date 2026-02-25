@@ -236,7 +236,7 @@ export default function GlobalSearch({ visible, onClose }: GlobalSearchProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
     paddingTop: 48,
   },
   header: {

@@ -59,7 +59,7 @@ const badgeColors = {
   green: { fg: colors.greenForeground, bg: colors.greenBackground },
   blue: { fg: colors.blueForeground, bg: colors.blueBackground },
   purple: { fg: colors.purpleForeground, bg: colors.purpleBackground },
-  grey: { fg: colors.textSecondary, bg: colors.surfaceThree },
+  grey: { fg: colors.textSecondary, bg: colors.surfaceOne },
 };
 
 interface BadgeConfig {

@@ -308,7 +308,7 @@ export default function SuppliesScreen() {
 
   return (
     <View
-      style={[styles.container, { backgroundColor: colors.surfaceTwo }]}
+      style={[styles.container, { backgroundColor: colors.surfaceOne }]}
     >
       <Stack.Screen
         options={{

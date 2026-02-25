@@ -15,7 +15,7 @@ const orange = { fg: colors.orangeForeground, bg: colors.orangeBackground };
 const yellow = { fg: colors.yellowForeground, bg: colors.yellowBackground };
 const green = { fg: colors.greenForeground, bg: colors.greenBackground };
 const blue = { fg: colors.blueForeground, bg: colors.blueBackground };
-const neutral = { fg: colors.textSecondary, bg: colors.surfaceThree };
+const neutral = { fg: colors.textSecondary, bg: colors.surfaceOne };
 
 const valueColors: Record<string, { fg: string; bg: string }> = {
   // priority

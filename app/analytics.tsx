@@ -184,7 +184,7 @@ export default function AnalyticsScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceTwo }]}>
+    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
       <Stack.Screen options={{ title: 'Analytics' }} />
 
       <ScrollView contentContainerStyle={[styles.scrollContent, { paddingTop: topPadding }]} showsVerticalScrollIndicator={false}>

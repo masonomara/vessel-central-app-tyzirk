@@ -505,13 +505,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 2,
     borderColor: colors.border,
     marginRight: 8,
   },
   typeChipSelected: {
-    backgroundColor: colors.surfaceThree,
+    backgroundColor: colors.surfaceOne,
   },
   typeChipText: {
     fontSize: 14,
@@ -525,13 +525,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
     marginRight: 8,
   },
   vesselChipSelected: {
-    backgroundColor: colors.surfaceThree,
+    backgroundColor: colors.surfaceOne,
     borderColor: colors.text,
   },
   vesselChipText: {

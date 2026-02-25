@@ -170,7 +170,7 @@ export default function AssignBoatsScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Assign Boats' }} />
-      <View style={[styles.container, { backgroundColor: colors.surfaceTwo, paddingTop: topPadding }]}>
+      <View style={[styles.container, { backgroundColor: colors.surfaceOne, paddingTop: topPadding }]}>
         <View style={styles.searchContainer}>
           <IconSymbol
             ios_icon_name="magnifyingglass"
@@ -560,7 +560,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
@@ -626,7 +626,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,

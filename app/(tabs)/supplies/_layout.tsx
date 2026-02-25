@@ -15,7 +15,7 @@ export default function SuppliesLayout() {
           backgroundColor:
             Platform.OS === "ios" && Number(Platform.Version) >= 26
               ? "transparent"
-              : colors.surfaceTwo,
+              : colors.surfaceOne,
         },
       }}
     />
