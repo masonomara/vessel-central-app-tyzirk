@@ -118,7 +118,7 @@ const IssueItem = React.memo(
               {issue.priority.toUpperCase()}
             </Text>
           </View>
-          <View
+          {/* <View
             style={[
               styles.statusBadge,
               { backgroundColor: getStatusColor(issue.status) + "30" },
@@ -132,12 +132,11 @@ const IssueItem = React.memo(
             >
               {issue.status.replace("_", " ").toUpperCase()}
             </Text>
-          </View>
+          </View> */}
           <View style={styles.reportedBy}>
             <Text style={styles.reportedByText}>
-              Reported by {issue.reportedByName}
+               · {issue.category} · {formatDate(issue.createdAt)}
             </Text>
-            <Text style={styles.timeText}>{formatDate(issue.createdAt)}</Text>
           </View>
         </View>
 
