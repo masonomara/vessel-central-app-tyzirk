@@ -386,14 +386,7 @@ export const detailScreenStyles = StyleSheet.create({
   section: {
     marginBottom: 24,
   },
-  sectionOblique: {
-    backgroundColor: colors.surfaceOne,
-    borderWidth: 1,
-    borderColor: colors.borderSoft,
-    padding: 20,
-    marginTop: 16,
-    borderRadius: 0,
-  },
+
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",

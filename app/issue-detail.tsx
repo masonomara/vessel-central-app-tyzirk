@@ -25,7 +25,7 @@ import { DropdownRow } from "../components/DropdownRow";
 import { PriorityDetailRow } from "../components/PriorityDetailRow";
 
 import { DetailNotFound } from "../components/DetailNotFound";
-import { formatDate, formatDateLong } from "../utils/dateUtils";
+import { formatDate } from "../utils/dateUtils";
 import { TaskStatus, TaskPriority } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
@@ -102,7 +102,13 @@ export default function IssueDetailScreen() {
               assignedTo: picked.id,
               assignedToName: picked.name,
             });
-            Alert.alert("Assigned", `Issue assigned to ${picked.name}`);
+            addIssueComment(issue.id, {
+              userId,
+              userName,
+              userRole,
+              text: `${userName} assigned to ${picked.name}`,
+              attachments: [],
+            });
           }
         },
       );
@@ -119,16 +125,14 @@ export default function IssueDetailScreen() {
       />
 
       <ScrollView
-        contentContainerStyle={[ds.scrollContent, { paddingTop: topPadding }]}
+        contentContainerStyle={[
+          ds.scrollContent,
+          { paddingTop: topPadding, flexGrow: 1 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={ds.titleSection}>
           <Text style={ds.title}>{issue.title}</Text>
-          {/* <Text style={ds.subtitle}>
-            {issue.category ? `${issue.category} issue` : "Issue"} reported{" "}
-            {formatDateLong(new Date(issue.createdAt))} by{" "}
-            {issue.reportedByName}
-          </Text> */}
         </View>
         <PriorityDetailRow
           items={[
@@ -232,18 +236,46 @@ export default function IssueDetailScreen() {
           />
         )}
 
-        <View style={ds.sectionOblique}>
+        <View style={styles.historySection}>
+          <View style={styles.commentCard}>
+            <View style={styles.commentIcon}>
+              <IconSymbol
+                ios_icon_name="person.fill"
+                android_material_icon_name="person"
+                size={15}
+                color={colors.text}
+              />
+            </View>
+            <View style={styles.commentContent}>
+              <Text style={styles.commentAuthor}>
+                {issue.reportedByName} created this issue
+              </Text>
+              <Text style={styles.commentDate}>
+                {formatDate(new Date(issue.createdAt))}
+              </Text>
+            </View>
+          </View>
+
           {issue.comments.map((comment) => (
             <View key={comment.id} style={styles.commentCard}>
-              <View style={styles.commentHeader}>
+              <View style={styles.commentIcon}>
+                <IconSymbol
+                  ios_icon_name="person.fill"
+                  android_material_icon_name="person"
+                  size={15}
+                  color={colors.text}
+                />
+              </View>
+              <View style={styles.commentContent}>
                 <Text style={styles.commentAuthor}>{comment.userName}</Text>
                 <Text style={styles.commentDate}>
                   {formatDate(new Date(comment.createdAt))}
                 </Text>
+                <Text style={styles.commentBody}>{comment.text}</Text>
               </View>
-              <Text style={styles.commentBody}>{comment.text}</Text>
             </View>
           ))}
+
           <View style={styles.commentInput}>
             <TextInput
               style={styles.input}
@@ -251,7 +283,6 @@ export default function IssueDetailScreen() {
               placeholderTextColor={colors.textTertiary}
               value={commentText}
               onChangeText={setCommentText}
-              multiline
             />
             <TouchableOpacity
               style={[
@@ -264,8 +295,8 @@ export default function IssueDetailScreen() {
               <IconSymbol
                 ios_icon_name="arrow.up.circle.fill"
                 android_material_icon_name="send"
-                size={32}
-                color={commentText.trim() ? colors.accent : colors.textTertiary}
+                size={20}
+                color={commentText.trim() ? colors.container : colors.container}
               />
             </TouchableOpacity>
           </View>
@@ -276,6 +307,15 @@ export default function IssueDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  historySection: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    flex: 1,
+    paddingBottom: 16,
+    marginTop: 24,
+    backgroundColor: colors.surfaceThree,
+  },
+
   attachmentRow: {
     flexDirection: "row",
     gap: 12,
@@ -296,34 +336,51 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   commentCard: {
-    marginBottom: 8,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    marginBottom: 16,
   },
-  commentHeader: {
-    flexDirection: "column",
-    justifyContent: "space-between",
-    marginBottom: 0,
+  commentIcon: {
+    padding: 6,
+    marginTop: 4.5,
+    backgroundColor: colors.surfaceThree,
+    borderRadius: 100,
   },
-  commentAuthor: { fontSize: 15, fontWeight: "500", color: colors.text, lineHeight: 20, },
-  commentDate: { fontSize: 12, color: colors.textTertiary, lineHeight: 15, },
-  commentBody: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
+  commentContent: {
+    flex: 1,
+  },
+  commentAuthor: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: colors.text,
+    lineHeight: 20,
+  },
+  commentDate: { fontSize: 12, color: colors.textTertiary, lineHeight: 15 },
+  commentBody: {
+    fontSize: 14,
+    color: colors.text,
+    lineHeight: 19,
+    marginTop: 6,
+  },
   commentInput: {
     flexDirection: "row",
-    alignItems: "flex-end",
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
+    backgroundColor: colors.surfaceTwo,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: colors.border,
-    padding: 8,
-    marginTop: 8,
+    borderColor: colors.borderSoft,
+    height: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
   },
   input: {
     flex: 1,
     fontSize: 14,
     color: colors.text,
-    maxHeight: 100,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
   },
-  sendButton: { padding: 4 },
+  sendButton: { padding: 6, backgroundColor: colors.text,
+    borderRadius: 8,
+   },
   sendButtonDisabled: { opacity: 0.5 },
 });
