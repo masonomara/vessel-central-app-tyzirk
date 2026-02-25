@@ -12,7 +12,7 @@ interface ChipOption {
 }
 
 interface DetailRowBaseProps {
-  label: string;
+  label?: string;
   valueColor?: string;
   linkTo?: { pathname: string; params: Record<string, string> };
 }
@@ -54,8 +54,8 @@ export function DetailRow({
   chips,
 }: DetailRowProps) {
   const content = (
-    <View style={styles.row}>
-      <Text style={styles.label}>{label}</Text>
+    <View style={[styles.row, !label && styles.rowNoBorder]}>
+      {label ? <Text style={styles.label}>{label}</Text> : null}
       {chips ? (
         <View style={styles.chipRow}>
           {chips.options.map((option) => {
@@ -151,6 +151,10 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.borderSoft,
     paddingHorizontal: 20,
+  },
+  rowNoBorder: {
+    borderTopWidth: 0,
+    paddingTop: 0,
   },
   label: { fontSize: 16, color: colors.text, fontWeight: "600" },
   valueRow: { flexDirection: "row", alignItems: "center", gap: 4 },

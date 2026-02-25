@@ -8,6 +8,8 @@ import {
   Alert,
   TextInput,
   Image,
+  ActionSheetIOS,
+  Platform,
 } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
 import {
@@ -27,10 +29,21 @@ import { formatDate, formatDateLong } from "../utils/dateUtils";
 import { TaskStatus, TaskPriority } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
+const MOCK_USERS: Record<string, string> = {
+  manager1: "Sarah Johnson",
+  manager2: "Tom Wilson",
+  manager3: "Alex Martinez",
+  crew1: "Mike Davis",
+  crew2: "Sarah Williams",
+  crew3: "Jane Smith",
+  crew4: "Tom Anderson",
+  crew5: "Lisa Martinez",
+};
+
 export default function IssueDetailScreen() {
   const topPadding = useTopPadding();
   const { id } = useLocalSearchParams();
-  const { issues, updateIssue, addIssueComment } = useData();
+  const { issues, vessels, updateIssue, addIssueComment } = useData();
   const { userRole, userId, userName } = useAuth();
   const [commentText, setCommentText] = useState("");
 
@@ -61,6 +74,41 @@ export default function IssueDetailScreen() {
     setCommentText("");
   };
 
+  const handleAssign = () => {
+    const vessel = vessels.find((v) => v.id === issue.vesselId);
+    if (!vessel) return;
+
+    const assignableIds = [vessel.managerId, ...(vessel.crewIds || [])].filter(
+      Boolean,
+    );
+
+    const assignable = assignableIds
+      .map((id) => ({ id, name: MOCK_USERS[id] }))
+      .filter((u) => u.name);
+
+    if (assignable.length === 0) {
+      Alert.alert("No Crew", "No assignable crew for this vessel.");
+      return;
+    }
+
+    if (Platform.OS === "ios") {
+      const labels = [...assignable.map((u) => u.name), "Cancel"];
+      ActionSheetIOS.showActionSheetWithOptions(
+        { options: labels, cancelButtonIndex: labels.length - 1 },
+        (index) => {
+          if (index < assignable.length) {
+            const picked = assignable[index];
+            updateIssue(issue.id, {
+              assignedTo: picked.id,
+              assignedToName: picked.name,
+            });
+            Alert.alert("Assigned", `Issue assigned to ${picked.name}`);
+          }
+        },
+      );
+    }
+  };
+
   return (
     <View style={commonStyles.container}>
       <Stack.Screen
@@ -76,11 +124,11 @@ export default function IssueDetailScreen() {
       >
         <View style={ds.titleSection}>
           <Text style={ds.title}>{issue.title}</Text>
-          <Text style={ds.subtitle}>
+          {/* <Text style={ds.subtitle}>
             {issue.category ? `${issue.category} issue` : "Issue"} reported{" "}
             {formatDateLong(new Date(issue.createdAt))} by{" "}
             {issue.reportedByName}
-          </Text>
+          </Text> */}
         </View>
         <PriorityDetailRow
           items={[
@@ -110,16 +158,9 @@ export default function IssueDetailScreen() {
           <>
             {!issue.assignedToName && issue.status !== "completed" && (
               <DetailRow
-                label="Assignment"
                 button={{
-                  label: "Assign to Me",
-                  onPress: () => {
-                    updateIssue(issue.id, {
-                      assignedTo: userId,
-                      assignedToName: userName,
-                    });
-                    Alert.alert("Assigned", `Issue assigned to ${userName}`);
-                  },
+                  label: "Assign to Crew",
+                  onPress: handleAssign,
                   color: colors.text,
                 }}
               />
@@ -191,10 +232,7 @@ export default function IssueDetailScreen() {
           />
         )}
 
-        {/* <View style={ds.section}>
-          <Text style={ds.sectionTitle}>
-            Comments ({issue.comments.length})
-          </Text>
+        <View style={ds.sectionOblique}>
           {issue.comments.map((comment) => (
             <View key={comment.id} style={styles.commentCard}>
               <View style={styles.commentHeader}>
@@ -231,7 +269,7 @@ export default function IssueDetailScreen() {
               />
             </TouchableOpacity>
           </View>
-        </View> */}
+        </View>
       </ScrollView>
     </View>
   );
@@ -258,20 +296,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   commentCard: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    padding: 12,
     marginBottom: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   commentHeader: {
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "space-between",
-    marginBottom: 6,
+    marginBottom: 0,
   },
-  commentAuthor: { fontSize: 13, fontWeight: "600", color: colors.text },
-  commentDate: { fontSize: 12, color: colors.textTertiary },
+  commentAuthor: { fontSize: 15, fontWeight: "500", color: colors.text, lineHeight: 20, },
+  commentDate: { fontSize: 12, color: colors.textTertiary, lineHeight: 15, },
   commentBody: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
   commentInput: {
     flexDirection: "row",

@@ -6,6 +6,8 @@ import {
   ScrollView,
   Alert,
   TextInput,
+  ActionSheetIOS,
+  Platform,
 } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
 import {
@@ -24,10 +26,21 @@ import { formatDate, formatDueDate, isOverdue } from "../utils/dateUtils";
 import { TaskStatus, TaskPriority } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
+const MOCK_USERS: Record<string, string> = {
+  manager1: "Sarah Johnson",
+  manager2: "Tom Wilson",
+  manager3: "Alex Martinez",
+  crew1: "Mike Davis",
+  crew2: "Sarah Williams",
+  crew3: "Jane Smith",
+  crew4: "Tom Anderson",
+  crew5: "Lisa Martinez",
+};
+
 export default function MaintenanceDetailScreen() {
   const topPadding = useTopPadding();
   const { id } = useLocalSearchParams();
-  const { maintenanceTasks, updateMaintenanceTask, completeMaintenanceTask } =
+  const { maintenanceTasks, vessels, updateMaintenanceTask, completeMaintenanceTask } =
     useData();
   const { userRole, userId, userName } = useAuth();
   const [notes, setNotes] = useState("");
@@ -70,6 +83,42 @@ export default function MaintenanceDetailScreen() {
     ]);
   };
 
+  const handleAssign = () => {
+    const vessel = vessels.find((v) => v.id === task.vesselId);
+    if (!vessel) return;
+
+    const assignableIds = [
+      vessel.managerId,
+      ...(vessel.crewIds || []),
+    ].filter(Boolean);
+
+    const assignable = assignableIds
+      .map((id) => ({ id, name: MOCK_USERS[id] }))
+      .filter((u) => u.name);
+
+    if (assignable.length === 0) {
+      Alert.alert("No Crew", "No assignable crew for this vessel.");
+      return;
+    }
+
+    if (Platform.OS === "ios") {
+      const labels = [...assignable.map((u) => u.name), "Cancel"];
+      ActionSheetIOS.showActionSheetWithOptions(
+        { options: labels, cancelButtonIndex: labels.length - 1 },
+        (index) => {
+          if (index < assignable.length) {
+            const picked = assignable[index];
+            updateMaintenanceTask(task.id, {
+              assignedTo: picked.id,
+              assignedToName: picked.name,
+            });
+            Alert.alert("Assigned", `Task assigned to ${picked.name}`);
+          }
+        },
+      );
+    }
+  };
+
   return (
     <View style={commonStyles.container}>
       <Stack.Screen
@@ -102,9 +151,17 @@ export default function MaintenanceDetailScreen() {
               : undefined
           }
         />
-        {task.assignedToName && (
+        {task.assignedToName ? (
           <DetailRow label="Assigned To" value={task.assignedToName} />
-        )}
+        ) : task.status !== "completed" && userRole !== "owner" ? (
+          <DetailRow
+            button={{
+              label: "Assign to Crew",
+              onPress: handleAssign,
+              color: colors.text,
+            }}
+          />
+        ) : null}
         {task.isRecurring && (
           <DetailRow
             label="Frequency"

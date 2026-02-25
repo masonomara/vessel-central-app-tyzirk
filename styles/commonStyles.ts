@@ -351,7 +351,6 @@ export const commonStyles = StyleSheet.create({
 export const detailScreenStyles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 0,
-    paddingBottom: 40,
   },
   titleSection: {
     marginBottom: 0,
@@ -386,6 +385,14 @@ export const detailScreenStyles = StyleSheet.create({
   },
   section: {
     marginBottom: 24,
+  },
+  sectionOblique: {
+    backgroundColor: colors.surfaceOne,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    padding: 20,
+    marginTop: 16,
+    borderRadius: 0,
   },
   sectionTitle: {
     fontSize: 16,
