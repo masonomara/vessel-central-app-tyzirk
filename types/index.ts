@@ -92,6 +92,7 @@ export interface MaintenanceTask {
   actualCost?: number;
   completedDate?: Date;
   nextDueDate?: Date;
+  category: string;
   notes: string;
 }
 

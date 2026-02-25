@@ -8,7 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import { useLocalSearchParams, Stack, router } from "expo-router";
+import { useLocalSearchParams, Stack } from "expo-router";
 import {
   commonStyles,
   colors,
@@ -192,7 +192,10 @@ export default function SupplyDetailScreen() {
           selectedValue={request.status}
           onSelect={(value) => handleStatusChange(value)}
         />
-
+        <DetailRow label="Category" inline value={request.category} />
+        {request.vendor ? (
+          <DetailRow label="Vendor" inline value={request.vendor} />
+        ) : null}
         <DetailRow
           label="Quantity"
           inline
@@ -210,77 +213,11 @@ export default function SupplyDetailScreen() {
             value={`$${request.actualCost.toFixed(2)}`}
           />
         )}
-        <DetailRow label="Category" inline value={request.category} />
-        {request.vendor ? (
-          <DetailRow label="Vendor" inline value={request.vendor} />
-        ) : null}
 
         <DetailRow label="Description" value={request.description} />
         {request.notes ? (
           <DetailRow label="Notes" value={request.notes} />
         ) : null}
-
-        {(userRole === "owner" || userRole === "manager") &&
-          request.status === "pending" && (
-            <>
-              <DetailRow
-                button={{
-                  label: "Approve",
-                  onPress: handleApprove,
-                  color: colors.success,
-                }}
-              />
-              <DetailRow
-                button={{
-                  label: "Deny",
-                  onPress: handleDeny,
-                  color: colors.danger,
-                }}
-              />
-            </>
-          )}
-
-        {(userRole === "owner" || userRole === "manager") &&
-          request.status === "approved" && (
-            <DetailRow
-              button={{
-                label: "Mark as Ordered",
-                onPress: () => {
-                  updateSupplyRequest(request.id, { status: "ordered" });
-                  addSupplyComment(request.id, {
-                    userId,
-                    userName,
-                    userRole,
-                    text: `${userName} marked as ordered`,
-                    isSystemComment: true,
-                    attachments: [],
-                  });
-                },
-                color: colors.text,
-              }}
-            />
-          )}
-
-        {(userRole === "owner" || userRole === "manager") &&
-          request.status === "ordered" && (
-            <DetailRow
-              button={{
-                label: "Mark as Received",
-                onPress: () => {
-                  updateSupplyRequest(request.id, { status: "received" });
-                  addSupplyComment(request.id, {
-                    userId,
-                    userName,
-                    userRole,
-                    text: `${userName} marked as received`,
-                    isSystemComment: true,
-                    attachments: [],
-                  });
-                },
-                color: colors.success,
-              }}
-            />
-          )}
 
         <View style={styles.historySection}>
           <View style={styles.commentCard}>
@@ -361,9 +298,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
-    marginTop: 8,
-    backgroundColor: colors.surfaceOne,
-    borderTopWidth: 1,
+    backgroundColor: colors.surfaceTwo,
     borderColor: colors.borderSoft,
     flex: 1,
   },
@@ -376,7 +311,7 @@ const styles = StyleSheet.create({
   commentIcon: {
     padding: 6,
     marginTop: 4.5,
-    backgroundColor: colors.surfaceOne,
+    backgroundColor: colors.surfaceThree,
     borderRadius: 100,
   },
   commentContent: {
@@ -406,16 +341,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 20,
     marginTop: "auto",
+    backgroundColor: colors.container,
   },
   input: {
     flex: 1,
     fontSize: 14,
     color: colors.text,
   },
-  sendButton: {
-    padding: 6,
-    backgroundColor: colors.text,
-    borderRadius: 8,
-  },
+  sendButton: { padding: 6, backgroundColor: colors.text, borderRadius: 8 },
   sendButtonDisabled: { opacity: 0.5 },
 });

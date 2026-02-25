@@ -76,6 +76,7 @@ interface DataContextType {
   addCalendarEvent: (event: Omit<CalendarEvent, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateCalendarEvent: (id: string, updates: Partial<CalendarEvent>) => void;
   deleteCalendarEvent: (id: string) => void;
+  addCalendarEventComment: (eventId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
   
   loadData: () => Promise<void>;
   saveData: () => Promise<void>;
@@ -84,6 +85,7 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 const STORAGE_KEY = '@vessel_co_data';
+const DATA_VERSION = 2;
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [vessels, setVessels] = useState<Vessel[]>([
@@ -141,6 +143,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       attachments: [],
       comments: [],
       completionHistory: [],
+      category: 'Mechanical',
       estimatedCost: 2500,
       notes: 'Use synthetic oil only',
     },
@@ -165,6 +168,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       attachments: [],
       comments: [],
       completionHistory: [],
+      category: 'Safety',
       estimatedCost: 500,
       notes: 'Check expiry dates on all equipment',
     },
@@ -187,6 +191,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       attachments: [],
       comments: [],
       completionHistory: [],
+      category: 'Cleaning',
       notes: '',
     },
     {
@@ -223,6 +228,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         },
       ],
       estimatedCost: 1500,
+      category: 'Structural',
       actualCost: 1200,
       notes: 'Coordinate with dive team',
     },
@@ -247,6 +253,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       attachments: [],
       comments: [],
       completionHistory: [],
+      category: 'Electrical',
       estimatedCost: 3500,
       notes: 'Waiting on replacement belt from supplier',
     },
@@ -271,6 +278,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       attachments: [],
       comments: [],
       completionHistory: [],
+      category: 'Plumbing',
       notes: '',
     },
     {
@@ -294,6 +302,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       attachments: [],
       comments: [],
       completionHistory: [],
+      category: 'Mechanical',
       estimatedCost: 400,
       notes: 'Filters ordered and received',
     },
@@ -318,6 +327,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       attachments: [],
       comments: [],
       completionHistory: [],
+      category: 'Plumbing',
       estimatedCost: 2800,
       notes: 'Overdue — needs scheduling ASAP',
     },
@@ -351,6 +361,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           attachments: [],
         },
       ],
+      category: 'Mechanical',
       notes: '',
     },
   ]);
@@ -1000,6 +1011,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         { id: '2', minutes: 60, method: 'notification' },
       ],
       relatedTaskId: '1',
+      comments: [],
     },
     {
       id: '2',
@@ -1024,6 +1036,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         { id: '3', minutes: 10080, method: 'notification' },
         { id: '4', minutes: 2880, method: 'notification' },
       ],
+      comments: [],
     },
     {
       id: '3',
@@ -1048,6 +1061,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         { id: '5', minutes: 1440, method: 'notification' },
       ],
       relatedTaskId: '2',
+      comments: [],
     },
     {
       id: '4',
@@ -1071,6 +1085,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       reminders: [
         { id: '6', minutes: 1440, method: 'notification' },
       ],
+      comments: [],
     },
     {
       id: '5',
@@ -1094,6 +1109,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       reminders: [
         { id: '7', minutes: 720, method: 'notification' },
       ],
+      comments: [],
     },
   ]);
 
@@ -1111,6 +1127,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (data) {
         const parsed = JSON.parse(data);
 
+        if (!parsed._version || parsed._version < DATA_VERSION) {
+          await AsyncStorage.removeItem(STORAGE_KEY);
+          hasLoadedData.current = true;
+          return;
+        }
+
         if (parsed.vessels) {
           setVessels(parsed.vessels);
         }
@@ -1118,6 +1140,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         if (parsed.maintenanceTasks) {
           setMaintenanceTasks(parsed.maintenanceTasks.map((task: MaintenanceTask) => ({
             ...task,
+            category: task.category || '',
             dueDate: new Date(task.dueDate),
             createdAt: new Date(task.createdAt),
             updatedAt: new Date(task.updatedAt),
@@ -1177,6 +1200,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         if (parsed.calendarEvents) {
           setCalendarEvents(parsed.calendarEvents.map((event: CalendarEvent) => ({
             ...event,
+            comments: event.comments || [],
             startDate: new Date(event.startDate),
             endDate: new Date(event.endDate),
             createdAt: new Date(event.createdAt),
@@ -1203,6 +1227,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     saveTimeoutRef.current = setTimeout(async () => {
       try {
         const data = {
+          _version: DATA_VERSION,
           vessels,
           maintenanceTasks,
           issues,
@@ -1697,13 +1722,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   const updateCalendarEvent = (id: string, updates: Partial<CalendarEvent>) => {
-    setCalendarEvents(calendarEvents.map(event =>
+    setCalendarEvents(prev => prev.map(event =>
       event.id === id ? { ...event, ...updates, updatedAt: new Date() } : event
     ));
   };
 
   const deleteCalendarEvent = (id: string) => {
-    setCalendarEvents(calendarEvents.filter(event => event.id !== id));
+    setCalendarEvents(prev => prev.filter(event => event.id !== id));
+  };
+
+  const addCalendarEventComment = (eventId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
+    const newComment: Comment = {
+      ...comment,
+      id: generateId(),
+      createdAt: new Date(),
+    };
+    setCalendarEvents(prev => prev.map(event =>
+      event.id === eventId
+        ? { ...event, comments: [...(event.comments || []), newComment], updatedAt: new Date() }
+        : event
+    ));
   };
 
   // Vessel assignment functions
@@ -1859,6 +1897,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addCalendarEvent,
         updateCalendarEvent,
         deleteCalendarEvent,
+        addCalendarEventComment,
         loadData,
         saveData,
       }}

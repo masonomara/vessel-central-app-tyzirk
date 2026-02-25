@@ -136,6 +136,7 @@ export default function AddCalendarEventScreen() {
       reminders: [
         { id: Date.now().toString(), minutes: 1440, method: "notification" },
       ],
+      comments: [],
     });
 
     Alert.alert("Success", "Calendar event created successfully", [

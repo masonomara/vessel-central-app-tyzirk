@@ -31,9 +31,9 @@ const valueColors: Record<string, { fg: string; bg: string }> = {
   open: neutral,
   waiting_on_parts: neutral,
   scheduled: neutral,
-  pending: blue,
-  approved: blue,
-  ordered: blue,
+  pending: neutral,
+  approved: neutral,
+  ordered: neutral,
   received: green,
   // categories (neutral)
   maintenance: neutral,

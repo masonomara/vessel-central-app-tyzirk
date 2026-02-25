@@ -1,5 +1,6 @@
+import { Comment } from './index';
 
-export type CalendarEventType = 
+export type CalendarEventType =
   | 'maintenance' 
   | 'charter' 
   | 'inspection' 
@@ -33,6 +34,7 @@ export interface CalendarEvent {
   relatedTaskId?: string;
   relatedIssueId?: string;
   color?: string;
+  comments: Comment[];
 }
 
 export interface EventReminder {

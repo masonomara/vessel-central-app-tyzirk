@@ -11,7 +11,7 @@ import {
   ActionSheetIOS,
   Platform,
 } from "react-native";
-import { useLocalSearchParams, Stack, router } from "expo-router";
+import { useLocalSearchParams, Stack } from "expo-router";
 import {
   commonStyles,
   colors,
@@ -203,6 +203,7 @@ export default function IssueDetailScreen() {
               options={[
                 { label: "Open", value: "open" },
                 { label: "In Progress", value: "in_progress" },
+                { label: "Waiting on Parts", value: "waiting_on_parts" },
                 { label: "Completed", value: "completed" },
               ]}
               selectedValue={issue.status}
@@ -210,6 +211,7 @@ export default function IssueDetailScreen() {
             />
           </>
         )}
+        <DetailRow label="Category" inline value={issue.category} />
         <DetailRow label="Description" value={issue.description} />
 
         {issue.attachments.length > 0 && (
@@ -327,18 +329,6 @@ export default function IssueDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  historySection: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-
-    paddingBottom: 16,
-
-    backgroundColor: colors.surfaceTwo,
-    borderColor: colors.borderSoft,
-    flex: 1,
-
-  },
-
   attachmentRow: {
     flexDirection: "row",
     gap: 12,
@@ -357,6 +347,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  historySection: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
+    backgroundColor: colors.surfaceTwo,
+    borderColor: colors.borderSoft,
+    flex: 1,
   },
   commentCard: {
     flexDirection: "row",
@@ -397,15 +395,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 20,
     marginTop: "auto",
-    backgroundColor: colors.container
+    backgroundColor: colors.container,
   },
   input: {
     flex: 1,
     fontSize: 14,
     color: colors.text,
   },
-  sendButton: { padding: 6, backgroundColor: colors.text,
-    borderRadius: 8,
-   },
+  sendButton: { padding: 6, backgroundColor: colors.text, borderRadius: 8 },
   sendButtonDisabled: { opacity: 0.5 },
 });

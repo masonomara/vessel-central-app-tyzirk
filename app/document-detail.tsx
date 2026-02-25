@@ -18,19 +18,17 @@ import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
-import { DropdownRow } from "../components/DropdownRow";
 import { PriorityDetailRow } from "../components/PriorityDetailRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, isOverdue } from "../utils/dateUtils";
 import { formatLabel } from "../utils/formatLabel";
 import { formatFileSize } from "../utils/fileUtils";
-import { DocumentCategory } from "../types";
 import { useTopPadding } from "../hooks/useTopPadding";
 
 export default function DocumentDetailScreen() {
   const topPadding = useTopPadding();
   const { id } = useLocalSearchParams();
-  const { documents, updateDocument, addDocumentComment } = useData();
+  const { documents, addDocumentComment } = useData();
   const { userId, userName, userRole } = useAuth();
   const [commentText, setCommentText] = useState("");
 
@@ -43,18 +41,6 @@ export default function DocumentDetailScreen() {
   const isExpired = doc.expiryDate
     ? isOverdue(new Date(doc.expiryDate))
     : false;
-
-  const handleCategoryChange = (value: DocumentCategory) => {
-    updateDocument(doc.id, { category: value });
-    addDocumentComment(doc.id, {
-      userId,
-      userName,
-      userRole,
-      text: `${userName} changed category to ${formatLabel(value)}`,
-      isSystemComment: true,
-      attachments: [],
-    });
-  };
 
   const handleAddComment = () => {
     if (!commentText.trim()) return;
@@ -113,26 +99,31 @@ export default function DocumentDetailScreen() {
             },
           ]}
         />
+        <TouchableOpacity
+          style={styles.previewSection}
+          onPress={() =>
+            Alert.alert(
+              "No File Available",
+              "This document has no file attached.",
+            )
+          }
+          activeOpacity={0.7}
+        >
+          <View style={styles.previewPlaceholder}>
+            <IconSymbol
+              ios_icon_name="doc.fill"
+              android_material_icon_name="description"
+              size={40}
+              color={colors.textTertiary}
+            />
+            <Text style={styles.previewText}>View {doc.title}</Text>
+            <Text style={styles.previewSubtext}>
+              {doc.fileName} ({formatFileSize(doc.fileSize)})
+            </Text>
+          </View>
+        </TouchableOpacity>
 
-        <DropdownRow
-          label="Category"
-          options={[
-            { label: "Manual", value: "manual" },
-            { label: "Insurance", value: "insurance" },
-            { label: "Registration", value: "registration" },
-            { label: "Safety", value: "safety" },
-            { label: "Warranty", value: "warranty" },
-            { label: "Invoice", value: "invoice" },
-            { label: "Receipt", value: "receipt" },
-            { label: "Other", value: "other" },
-          ]}
-          selectedValue={doc.category}
-          onSelect={(value) => handleCategoryChange(value as DocumentCategory)}
-        />
-
-        <DetailRow label="File Name" inline value={doc.fileName} />
-        <DetailRow label="File Size" inline value={formatFileSize(doc.fileSize)} />
-        <DetailRow label="File Type" inline value={doc.fileType.toUpperCase()} />
+        <DetailRow label="Category" inline value={formatLabel(doc.category)} />
         {doc.expiryDate ? (
           <DetailRow
             label="Expires"
@@ -158,23 +149,6 @@ export default function DocumentDetailScreen() {
             </View>
           </View>
         ) : null}
-
-        <DetailRow
-          button={{
-            label: "Download",
-            onPress: () =>
-              Alert.alert("Download", `"${doc.fileName}" saved to device.`),
-            color: colors.accent,
-          }}
-        />
-        <DetailRow
-          button={{
-            label: "Share",
-            onPress: () =>
-              Alert.alert("Shared", `"${doc.fileName}" share sheet opened.`),
-            color: colors.secondary,
-          }}
-        />
 
         <View style={styles.historySection}>
           <View style={styles.commentCard}>
@@ -251,6 +225,31 @@ export default function DocumentDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  previewSection: {
+    marginHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    overflow: "hidden",
+  },
+  previewPlaceholder: {
+    height: 180,
+    backgroundColor: colors.surfaceTwo,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+  },
+  previewText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  previewSubtext: {
+    fontSize: 13,
+    color: colors.textTertiary,
+  },
   tagSection: {
     paddingHorizontal: 20,
     paddingTop: 16,
@@ -276,9 +275,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
-    marginTop: 8,
-    backgroundColor: colors.surfaceOne,
-    borderTopWidth: 1,
+    backgroundColor: colors.surfaceTwo,
     borderColor: colors.borderSoft,
     flex: 1,
   },
@@ -291,7 +288,7 @@ const styles = StyleSheet.create({
   commentIcon: {
     padding: 6,
     marginTop: 4.5,
-    backgroundColor: colors.surfaceOne,
+    backgroundColor: colors.surfaceThree,
     borderRadius: 100,
   },
   commentContent: {
@@ -321,16 +318,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 20,
     marginTop: "auto",
+    backgroundColor: colors.container,
   },
   input: {
     flex: 1,
     fontSize: 14,
     color: colors.text,
   },
-  sendButton: {
-    padding: 6,
-    backgroundColor: colors.text,
-    borderRadius: 8,
-  },
+  sendButton: { padding: 6, backgroundColor: colors.text, borderRadius: 8 },
   sendButtonDisabled: { opacity: 0.5 },
 });

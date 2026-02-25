@@ -10,7 +10,7 @@ import {
   ActionSheetIOS,
   Platform,
 } from "react-native";
-import { useLocalSearchParams, Stack, router } from "expo-router";
+import { useLocalSearchParams, Stack } from "expo-router";
 import {
   commonStyles,
   colors,
@@ -59,6 +59,52 @@ export default function MaintenanceDetailScreen() {
   }
 
   const handleStatusChange = (newStatus: TaskStatus) => {
+    if (newStatus === "completed") {
+      if (!userId || !userName) return;
+      if (Platform.OS === "ios") {
+        Alert.prompt(
+          "Complete Task",
+          "Enter actual cost (optional):",
+          [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Complete",
+              onPress: (costInput?: string) => {
+                completeMaintenanceTask(task.id, {
+                  completedBy: userId,
+                  completedByName: userName,
+                  completedAt: new Date(),
+                  notes: "Task completed",
+                  attachments: [],
+                  cost: costInput ? parseFloat(costInput) : undefined,
+                });
+              },
+            },
+          ],
+          "plain-text",
+          "",
+          "numeric",
+        );
+      } else {
+        Alert.alert("Complete Task", "Mark this task as completed?", [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Complete",
+            onPress: () => {
+              completeMaintenanceTask(task.id, {
+                completedBy: userId,
+                completedByName: userName,
+                completedAt: new Date(),
+                notes: "Task completed",
+                attachments: [],
+              });
+            },
+          },
+        ]);
+      }
+      return;
+    }
+
     updateMaintenanceTask(task.id, { status: newStatus });
     addMaintenanceComment(task.id, {
       userId,
@@ -82,67 +128,13 @@ export default function MaintenanceDetailScreen() {
     });
   };
 
-  const handleComplete = () => {
-    if (!userId || !userName) {
-      Alert.alert("Error", "User not authenticated");
-      return;
-    }
-
-    if (Platform.OS === "ios") {
-      Alert.prompt(
-        "Complete Task",
-        "Enter actual cost (optional):",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Complete",
-            onPress: (costInput?: string) => {
-              completeMaintenanceTask(task.id, {
-                completedBy: userId,
-                completedByName: userName,
-                completedAt: new Date(),
-                notes: "Task completed",
-                attachments: [],
-                cost: costInput ? parseFloat(costInput) : undefined,
-              });
-              Alert.alert("Success", "Task completed successfully");
-              router.back();
-            },
-          },
-        ],
-        "plain-text",
-        "",
-        "numeric",
-      );
-    } else {
-      Alert.alert("Complete Task", "Mark this task as completed?", [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Complete",
-          onPress: () => {
-            completeMaintenanceTask(task.id, {
-              completedBy: userId,
-              completedByName: userName,
-              completedAt: new Date(),
-              notes: "Task completed",
-              attachments: [],
-            });
-            Alert.alert("Success", "Task completed successfully");
-            router.back();
-          },
-        },
-      ]);
-    }
-  };
-
   const handleAssign = () => {
     const vessel = vessels.find((v) => v.id === task.vesselId);
     if (!vessel) return;
 
-    const assignableIds = [
-      vessel.managerId,
-      ...(vessel.crewIds || []),
-    ].filter(Boolean);
+    const assignableIds = [vessel.managerId, ...(vessel.crewIds || [])].filter(
+      Boolean,
+    );
 
     const assignable = assignableIds
       .map((id) => ({ id, name: MOCK_USERS[id] }))
@@ -236,41 +228,40 @@ export default function MaintenanceDetailScreen() {
           ]}
         />
 
-        {!task.assignedToName && task.status !== "completed" && userRole !== "owner" && (
-          <DetailRow
-            button={{
-              label: "Assign to Crew",
-              onPress: handleAssign,
-              color: colors.text,
-            }}
-          />
-        )}
+        {!task.assignedToName &&
+          task.status !== "completed" &&
+          userRole !== "owner" && (
+            <DetailRow
+              button={{
+                label: "Assign to Crew",
+                onPress: handleAssign,
+                color: colors.text,
+              }}
+            />
+          )}
 
-        {userRole !== "owner" && task.status !== "completed" && (
-          <>
-            <DropdownRow
-              label="Priority"
-              options={[
-                { label: "Urgent", value: "urgent" },
-                { label: "High", value: "high" },
-                { label: "Medium", value: "medium" },
-                { label: "Low", value: "low" },
-              ]}
-              selectedValue={task.priority}
-              onSelect={(value) => handlePriorityChange(value as TaskPriority)}
-            />
-            <DropdownRow
-              label="Status"
-              options={[
-                { label: "Open", value: "open" },
-                { label: "In Progress", value: "in_progress" },
-                { label: "Waiting on Parts", value: "waiting_on_parts" },
-              ]}
-              selectedValue={task.status}
-              onSelect={(value) => handleStatusChange(value as TaskStatus)}
-            />
-          </>
-        )}
+        <DropdownRow
+          label="Priority"
+          options={[
+            { label: "Urgent", value: "urgent" },
+            { label: "High", value: "high" },
+            { label: "Medium", value: "medium" },
+            { label: "Low", value: "low" },
+          ]}
+          selectedValue={task.priority}
+          onSelect={(value) => handlePriorityChange(value as TaskPriority)}
+        />
+        <DropdownRow
+          label="Status"
+          options={[
+            { label: "Open", value: "open" },
+            { label: "In Progress", value: "in_progress" },
+            { label: "Waiting on Parts", value: "waiting_on_parts" },
+            { label: "Completed", value: "completed" },
+          ]}
+          selectedValue={task.status}
+          onSelect={(value) => handleStatusChange(value as TaskStatus)}
+        />
 
         <DetailRow
           label="Due Date"
@@ -305,16 +296,6 @@ export default function MaintenanceDetailScreen() {
         )}
         <DetailRow label="Description" value={task.description} />
         {task.notes && <DetailRow label="Notes" value={task.notes} />}
-
-        {userRole !== "owner" && task.status !== "completed" && (
-          <DetailRow
-            button={{
-              label: "Mark as Complete",
-              onPress: handleComplete,
-              color: colors.success,
-            }}
-          />
-        )}
 
         <View style={styles.historySection}>
           <View style={styles.commentCard}>
@@ -395,9 +376,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
-    marginTop: 8,
-    backgroundColor: colors.surfaceOne,
-    borderTopWidth: 1,
+    backgroundColor: colors.surfaceTwo,
     borderColor: colors.borderSoft,
     flex: 1,
   },
@@ -410,7 +389,7 @@ const styles = StyleSheet.create({
   commentIcon: {
     padding: 6,
     marginTop: 4.5,
-    backgroundColor: colors.surfaceOne,
+    backgroundColor: colors.surfaceThree,
     borderRadius: 100,
   },
   commentContent: {
@@ -440,16 +419,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 20,
     marginTop: "auto",
+    backgroundColor: colors.container,
   },
   input: {
     flex: 1,
     fontSize: 14,
     color: colors.text,
   },
-  sendButton: {
-    padding: 6,
-    backgroundColor: colors.text,
-    borderRadius: 8,
-  },
+  sendButton: { padding: 6, backgroundColor: colors.text, borderRadius: 8 },
   sendButtonDisabled: { opacity: 0.5 },
 });
