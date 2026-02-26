@@ -26,8 +26,6 @@ function RootLayoutContent() {
         {/* Auth screens — no header */}
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="signup" options={{ headerShown: false }} />
-        <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
 
         {/* Tabs — header handled by NativeTabs */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -107,7 +105,6 @@ function RootLayoutContent() {
 
         {/* Utility screens */}
         <Stack.Screen name="assign-boats" options={{ title: "Assign Boats" }} />
-        <Stack.Screen name="manager-login" options={{ headerShown: false }} />
         <Stack.Screen
           name="notification-settings"
           options={{ title: "Notification Settings" }}
