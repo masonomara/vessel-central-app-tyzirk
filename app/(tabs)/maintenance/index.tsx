@@ -18,47 +18,21 @@ import { formatDueDate, isOverdue } from "../../../utils/dateUtils";
 import { Stack, router } from "expo-router";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { useTopPadding } from "../../../hooks/useTopPadding";
+import { getPriorityBadgeColors } from "../../../utils/colorUtils";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const MaintenanceTaskItem = React.memo(
   ({
     task,
     onPress,
     onComplete,
+    isLast,
   }: {
     task: MaintenanceTask;
     onPress: (task: MaintenanceTask) => void;
     onComplete: (id: string) => void;
+    isLast: boolean;
   }) => {
-    const getPriorityColor = (priority: TaskPriority) => {
-      switch (priority) {
-        case "urgent":
-          return colors.danger;
-        case "high":
-          return colors.warning;
-        case "medium":
-          return colors.accent;
-        case "low":
-          return colors.success;
-        default:
-          return colors.grey;
-      }
-    };
-
-    const getStatusColor = (status: TaskStatus) => {
-      switch (status) {
-        case "completed":
-          return colors.success;
-        case "in_progress":
-          return colors.accent;
-        case "waiting_on_parts":
-          return colors.grey;
-        case "open":
-          return colors.grey;
-        default:
-          return colors.grey;
-      }
-    };
-
     const handlePress = useCallback(() => {
       onPress(task);
     }, [task, onPress]);
@@ -70,140 +44,58 @@ const MaintenanceTaskItem = React.memo(
     const isCompleted = task.status === "completed";
 
     return (
-      <TouchableOpacity
-        style={[
-          styles.taskCard,
-          isOverdue(task.dueDate) &&
-            task.status !== "completed" &&
-            styles.taskCardOverdue,
-        ]}
-        onPress={handlePress}
-        activeOpacity={0.7}
-      >
-        <View style={styles.taskCardRow}>
+      <TouchableOpacity style={[styles.taskCard, isLast && styles.taskCardLast]} onPress={handlePress}>
+        <View style={styles.topRow}>
           <Pressable
             style={[
               styles.completeButton,
-              { backgroundColor: isCompleted ? "blue" : "blue" },
+              {
+                backgroundColor: isCompleted
+                  ? colors.greenBackground
+                  : "transparent",
+              },
+              {
+                borderColor: isCompleted
+                  ? colors.greenBackground
+                  : colors.border,
+              },
+              { borderWidth: 1 },
             ]}
             onPress={handleComplete}
             hitSlop={8}
           >
-            <IconSymbol
-              ios_icon_name={isCompleted ? "checkmark.circle.fill" : "circle"}
-              android_material_icon_name={
-                isCompleted ? "check-circle" : "radio-button-unchecked"
-              }
-              size={16}
-              color={isCompleted ? colors.success : colors.textTertiary}
-            />
-          </Pressable>
-          <View style={styles.taskContent}>
-            <View style={styles.taskHeader}>
-              <View style={styles.taskTitleRow}>
-                <Text style={styles.taskTitle}>{task.title}</Text>
-                {task.isRecurring && (
-                  <IconSymbol
-                    ios_icon_name="arrow.clockwise"
-                    android_material_icon_name="repeat"
-                    size={16}
-                    color={colors.accent}
-                  />
-                )}
-              </View>
-              <View
-                style={[
-                  styles.priorityBadge,
-                  { backgroundColor: getPriorityColor(task.priority) + "30" },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.priorityText,
-                    { color: getPriorityColor(task.priority) },
-                  ]}
-                >
-                  {task.priority.toUpperCase()}
-                </Text>
-              </View>
-            </View>
-
-            <Text style={styles.taskDescription} numberOfLines={2}>
-              {task.description}
-            </Text>
-
-            <View style={styles.taskMeta}>
-              <View style={styles.metaItem}>
-                <IconSymbol
-                  ios_icon_name="sailboat.fill"
-                  android_material_icon_name="sailing"
-                  size={16}
-                  color={colors.textSecondary}
-                />
-                <Text style={styles.metaText}>{task.vesselName}</Text>
-              </View>
-              {task.assignedToName && (
-                <View style={styles.metaItem}>
-                  <IconSymbol
-                    ios_icon_name="person.fill"
-                    android_material_icon_name="person"
-                    size={16}
-                    color={colors.textSecondary}
-                  />
-                  <Text style={styles.metaText}>{task.assignedToName}</Text>
-                </View>
-              )}
-            </View>
-
-            <View style={styles.taskFooter}>
-              <View
-                style={[
-                  styles.statusBadge,
-                  { backgroundColor: getStatusColor(task.status) + "30" },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.statusText,
-                    { color: getStatusColor(task.status) },
-                  ]}
-                >
-                  {task.status.replace("_", " ").toUpperCase()}
-                </Text>
-              </View>
-              <View style={styles.dueDateContainer}>
-                <IconSymbol
-                  ios_icon_name="calendar"
-                  android_material_icon_name="event"
-                  size={16}
-                  color={
-                    isOverdue(task.dueDate) && task.status !== "completed"
-                      ? colors.danger
-                      : colors.textSecondary
-                  }
-                />
-                <Text
-                  style={[
-                    styles.dueDateText,
-                    isOverdue(task.dueDate) &&
-                      task.status !== "completed" &&
-                      styles.dueDateOverdue,
-                  ]}
-                >
-                  {formatDueDate(task.dueDate)}
-                </Text>
-              </View>
-            </View>
-
-            {task.estimatedCost && (
-              <View style={styles.costContainer}>
-                <Text style={styles.costLabel}>Est. Cost:</Text>
-                <Text style={styles.costValue}>
-                  ${task.estimatedCost.toLocaleString()}
-                </Text>
-              </View>
+            {isCompleted && (
+              <IconSymbol
+                ios_icon_name={isCompleted ? "checkmark.circle.fill" : "circle"}
+                android_material_icon_name={isCompleted ? "check" : ""}
+                size={16}
+                color={colors.greenForeground}
+              />
             )}
-          </View>
+          </Pressable>
+
+          <Text style={styles.taskTitle} numberOfLines={2}>
+            {task.title}
+          </Text>
+          <Text
+            style={[
+              styles.priorityText,
+              { color: getPriorityBadgeColors(task.priority).fg },
+              { backgroundColor: getPriorityBadgeColors(task.priority).bg },
+            ]}
+          >
+            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+          </Text>
+        </View>
+        <View style={styles.bottomRow}>
+          <Text style={styles.taskDescription} numberOfLines={2}>
+            {task.description}
+          </Text>
+        </View>
+        <View style={styles.taskMeta}>
+          <Text style={styles.metaText}>
+            {task.vesselName} • {formatDueDate(task.dueDate)}
+          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -212,6 +104,7 @@ const MaintenanceTaskItem = React.memo(
 
 export default function MaintenanceScreen() {
   const topPadding = useTopPadding();
+  const insets = useSafeAreaInsets();
   const { maintenanceTasks, updateMaintenanceTask } = useData();
   const { userRole } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
@@ -303,11 +196,12 @@ export default function MaintenanceScreen() {
   );
 
   const renderItem = useCallback(
-    ({ item }: { item: MaintenanceTask }) => (
+    ({ item, index, section }: { item: MaintenanceTask; index: number; section: { data: MaintenanceTask[] } }) => (
       <MaintenanceTaskItem
         task={item}
         onPress={handleTaskPress}
         onComplete={handleComplete}
+        isLast={index === section.data.length - 1}
       />
     ),
     [handleTaskPress, handleComplete],
@@ -467,7 +361,7 @@ export default function MaintenanceScreen() {
         renderSectionHeader={renderSectionHeader}
         ListHeaderComponent={ListHeaderComponent}
         ListEmptyComponent={ListEmptyComponent}
-        contentContainerStyle={[styles.listContent, { paddingTop: topPadding }]}
+        contentContainerStyle={[styles.listContent, { paddingTop: topPadding, paddingBottom: insets.bottom + 64 }]}
         showsVerticalScrollIndicator={false}
         stickySectionHeadersEnabled={false}
       />
@@ -549,115 +443,65 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   taskCard: {
-    backgroundColor: colors.surfaceOne,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
     borderRadius: 16,
     padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: colors.surfaceOne,
+    marginBottom: 10,
   },
-  taskCardRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+  taskCardLast: {
+    marginBottom: 16,
   },
   completeButton: {
-    paddingTop: 2,
-    paddingRight: 12,
-  },
-  taskContent: {
-    flex: 1,
-  },
-  taskCardOverdue: {},
-  taskHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 8,
-  },
-  taskTitleRow: {
-    flexDirection: "row",
+    height: 20,
+    width: 20,
+    borderRadius: 100,
     alignItems: "center",
-    gap: 8,
-    flex: 1,
+    justifyContent: "center",
   },
   taskTitle: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: "500",
     color: colors.text,
     flex: 1,
   },
-  priorityBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  priorityText: {
-    fontSize: 10,
-    fontWeight: "700",
+  topRow: {
+    flexDirection: "row",
+    gap: 16,
   },
   taskDescription: {
     fontSize: 14,
     color: colors.textSecondary,
-    marginBottom: 12,
+    lineHeight: 19,
+    marginTop: 4,
+  },
+  bottomRow: {
+    paddingLeft: 36,
+  },
+  priorityText: {
+    fontSize: 13,
+    color: colors.text,
+    fontWeight: "500",
+    borderRadius: 4,
+    padding: 4,
+    paddingVertical: 0,
     lineHeight: 20,
+    height: 20,
+    marginRight: 0,
+    marginTop: 0,
+  },
+  metaText: {
+    fontSize: 12,
+    color: colors.textTertiary,
+    lineHeight: 15,
   },
   taskMeta: {
     flexDirection: "row",
-    gap: 16,
-    marginBottom: 12,
-  },
-  metaItem: {
-    flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-  },
-  metaText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  taskFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  dueDateContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  dueDateText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  dueDateOverdue: {
-    color: colors.danger,
-    fontWeight: "600",
-  },
-  costContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  costLabel: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    marginRight: 8,
-  },
-  costValue: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.accent,
+    marginLeft: 36,
+    gap: 8,
+    marginTop: 4,
   },
 });

@@ -10,6 +10,7 @@ import { Stack, useRouter } from "expo-router";
 import { useTopPadding } from "../../../hooks/useTopPadding";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { colors, commonStyles, shadows } from "../../../styles/commonStyles";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
@@ -32,6 +33,7 @@ export default function CalendarScreen() {
   const { calendarEvents, getCalendarEventsForUser } = useData();
 
   const topPadding = useTopPadding();
+  const insets = useSafeAreaInsets();
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -195,76 +197,29 @@ export default function CalendarScreen() {
   );
 
   const renderEventItem = useCallback(
-    (event: CalendarEvent) => {
-      const eventColor = getEventColor(event.type);
-      const eventTypeLabel = getEventTypeLabel(event.type);
-
+    (event: CalendarEvent, index: number, array: CalendarEvent[]) => {
+      const isLast = index === array.length - 1;
       return (
         <TouchableOpacity
           key={event.id}
-          style={styles.eventItem}
+          style={[styles.eventCard, isLast && styles.eventCardLast]}
           onPress={() => handleEventPress(event)}
         >
-          <View
-            style={[styles.eventColorBar, { backgroundColor: eventColor }]}
-          />
-          <View style={styles.eventContent}>
-            <View style={styles.eventHeader}>
-              <Text style={styles.eventTitle} numberOfLines={1}>
-                {event.title}
-              </Text>
-              <View
-                style={[
-                  styles.eventTypeBadge,
-                  { backgroundColor: eventColor + "20" },
-                ]}
-              >
-                <Text style={[styles.eventTypeText, { color: eventColor }]}>
-                  {eventTypeLabel}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.eventDetails}>
-              {!event.allDay && (
-                <View style={styles.eventDetailRow}>
-                  <IconSymbol
-                    ios_icon_name="clock.fill"
-                    android_material_icon_name="schedule"
-                    size={14}
-                    color={colors.textSecondary}
-                  />
-                  <Text style={styles.eventDetailText}>
-                    {formatEventTime(event.startDate)} -{" "}
-                    {formatEventTime(event.endDate)}
-                  </Text>
-                </View>
-              )}
-
-              <View style={styles.eventDetailRow}>
-                <IconSymbol
-                  ios_icon_name="sailboat.fill"
-                  android_material_icon_name="directions-boat"
-                  size={14}
-                  color={colors.textSecondary}
-                />
-                <Text style={styles.eventDetailText}>{event.vesselName}</Text>
-              </View>
-
-              {event.location && (
-                <View style={styles.eventDetailRow}>
-                  <IconSymbol
-                    ios_icon_name="location.fill"
-                    android_material_icon_name="location-on"
-                    size={14}
-                    color={colors.textSecondary}
-                  />
-                  <Text style={styles.eventDetailText} numberOfLines={1}>
-                    {event.location}
-                  </Text>
-                </View>
-              )}
-            </View>
+          <View style={styles.eventTopRow}>
+            <Text style={styles.eventTitle} numberOfLines={2}>
+              {event.title}
+            </Text>
+          </View>
+          <View style={styles.eventBottomRow}>
+            <Text style={styles.eventDescription} numberOfLines={2}>
+              {event.description}
+            </Text>
+          </View>
+          <View style={styles.eventMeta}>
+            <Text style={styles.eventMetaText}>
+              {event.vesselName}
+              {event.location ? ` • ${event.location}` : ""}
+            </Text>
           </View>
         </TouchableOpacity>
       );
@@ -296,7 +251,10 @@ export default function CalendarScreen() {
       />
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 64 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.header, { paddingTop: topPadding }]}>
@@ -529,57 +487,47 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   eventsList: {
-    gap: 12,
+    gap: 8,
   },
-  eventItem: {
-    flexDirection: "row",
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    overflow: "hidden",
+  eventCard: {
     borderWidth: 1,
-    borderColor: colors.border,
-    ...shadows.small,
-  },
-  eventColorBar: {
-    width: 4,
-  },
-  eventContent: {
-    flex: 1,
+    borderColor: colors.borderSoft,
+    borderRadius: 16,
     padding: 16,
+    backgroundColor: colors.surfaceOne,
+    marginBottom: 10,
   },
-  eventHeader: {
+  eventCardLast: {
+    marginBottom: 16,
+  },
+  eventTopRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
+    gap: 16,
   },
   eventTitle: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: "500",
     color: colors.text,
-    marginRight: 8,
+    flex: 1,
   },
-  eventTypeBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+  eventBottomRow: {},
+  eventDescription: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 19,
+    marginTop: 4,
   },
-  eventTypeText: {
-    fontSize: 11,
-    fontWeight: "600",
+  eventMetaText: {
+    fontSize: 12,
+    color: colors.textTertiary,
+    lineHeight: 15,
   },
-  eventDetails: {
-    gap: 6,
-  },
-  eventDetailRow: {
+  eventMeta: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-  },
-  eventDetailText: {
-    fontSize: 13,
-    color: colors.textSecondary,
+    gap: 8,
+    marginTop: 4,
   },
   emptyState: {
     alignItems: "center",

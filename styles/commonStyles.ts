@@ -12,7 +12,7 @@ export const colors = {
   // Status Colors
   success: "#10B981", // Green for completed/active
   warning: "#F59E0B", // Amber for pending
-  danger: "#EF4444", // Red for urgent/issues
+  danger: "#9d2435", // Red for urgent/issues
   info: "#3B82F6", // Blue for info
   grey: "#6B7280", // Neutral gray
 
@@ -58,8 +58,8 @@ export const colors = {
   gradientSuccessEnd: "#059669",
   gradientWarningStart: "#F59E0B",
   gradientWarningEnd: "#D97706",
-  gradientDangerStart: "#EF4444",
-  gradientDangerEnd: "#DC2626",
+  gradientDangerStart: "#9d2435",
+  gradientDangerEnd: "#9d2435",
 };
 
 export const gradients = {
@@ -351,28 +351,28 @@ export const commonStyles = StyleSheet.create({
 export const indexScreenStyles = StyleSheet.create({
   // Filter chips
   filterContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   filterContent: {
     paddingHorizontal: 20,
-    gap: 8,
+    gap: 10,
+    marginTop: 16,
   },
   filterChip: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 8,
     backgroundColor: colors.surfaceOne,
     borderWidth: 1,
-    borderColor: colors.border,
-    marginRight: 8,
+    borderColor: colors.borderSoft,
   },
   filterChipActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
+    backgroundColor: colors.surfaceThree,
+    borderColor: colors.surfaceThree,
   },
   filterChipText: {
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: 14,
+    fontWeight: "500",
     color: colors.textSecondary,
   },
   filterChipTextActive: {
@@ -386,23 +386,23 @@ export const indexScreenStyles = StyleSheet.create({
     justifyContent: "space-between",
     height: 56,
     paddingHorizontal: 20,
-    marginTop: 2,
-    // borderTopWidth: 1,
-    // borderColor: colors.borderSoft,
+    borderTopWidth: 4,
+    borderColor: colors.surfaceOne,
   },
   sectionHeader: {
-    fontSize: 18,
+    fontSize: 16,
+    lineHeight: 21,
     fontWeight: "600",
     color: colors.text,
     flex: 1,
   },
   sectionCount: {
-    fontSize: 16,
+    fontSize: 14,
     color: colors.textTertiary,
   },
   dropdown: {
     padding: 0,
-    paddingRight: 2,
+    paddingRight: 3,
   },
 });
 

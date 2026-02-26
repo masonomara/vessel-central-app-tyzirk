@@ -18,6 +18,8 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
 import { SupplyRequest, SupplyRequestStatus } from "../../../types";
 import { formatDate } from "../../../utils/dateUtils";
+import { getPriorityBadgeColors } from "../../../utils/colorUtils";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SupplyRequestItem = React.memo(
   ({
@@ -25,31 +27,16 @@ const SupplyRequestItem = React.memo(
     onPress,
     onApprove,
     onDeny,
-    userRole,
+    showActions,
+    isLast,
   }: {
     request: SupplyRequest;
     onPress: (request: SupplyRequest) => void;
     onApprove: (id: string) => void;
     onDeny: (id: string) => void;
-    userRole: string | null;
+    showActions: boolean;
+    isLast: boolean;
   }) => {
-    const getStatusColor = (status: SupplyRequestStatus) => {
-      switch (status) {
-        case "approved":
-          return colors.success;
-        case "ordered":
-          return colors.accent;
-        case "received":
-          return colors.success;
-        case "denied":
-          return colors.danger;
-        case "pending":
-          return colors.warning;
-        default:
-          return colors.grey;
-      }
-    };
-
     const handlePress = useCallback(() => {
       onPress(request);
     }, [request, onPress]);
@@ -64,115 +51,45 @@ const SupplyRequestItem = React.memo(
 
     return (
       <TouchableOpacity
-        style={styles.requestCard}
+        style={[styles.requestCard, isLast && styles.requestCardLast]}
         onPress={handlePress}
-        activeOpacity={0.7}
       >
-        <View style={styles.requestHeader}>
-          <View style={styles.requestTitleRow}>
-            <IconSymbol
-              ios_icon_name="shippingbox.fill"
-              android_material_icon_name="inventory-2"
-              size={24}
-              color={colors.accent}
-            />
-            <Text style={styles.requestTitle}>{request.itemName}</Text>
-          </View>
-          <View
+        <View style={styles.topRow}>
+          <Text style={styles.requestTitle} numberOfLines={2}>
+            {request.itemName}
+          </Text>
+          <Text
             style={[
-              styles.statusBadge,
-              { backgroundColor: getStatusColor(request.status) + "30" },
+              styles.priorityText,
+              { color: getPriorityBadgeColors(request.priority).fg },
+              { backgroundColor: getPriorityBadgeColors(request.priority).bg },
             ]}
           >
-            <Text
-              style={[
-                styles.statusText,
-                { color: getStatusColor(request.status) },
-              ]}
-            >
-              {request.status.toUpperCase()}
-            </Text>
-          </View>
+            {request.priority.charAt(0).toUpperCase() +
+              request.priority.slice(1)}
+          </Text>
         </View>
-
-        <Text style={styles.requestDescription} numberOfLines={2}>
-          {request.description}
-        </Text>
-
-        <View style={styles.requestDetails}>
-          <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Quantity:</Text>
-            <Text style={styles.detailValue}>
-              {request.quantity} {request.unit}
-            </Text>
-          </View>
-          <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Est. Cost:</Text>
-            <Text style={styles.detailValue}>
-              ${request.estimatedCost.toLocaleString()}
-            </Text>
-          </View>
+        <View style={styles.bottomRow}>
+          <Text style={styles.requestDescription} numberOfLines={2}>
+            {request.description}
+          </Text>
         </View>
-
         <View style={styles.requestMeta}>
-          <View style={styles.metaItem}>
-            <IconSymbol
-              ios_icon_name="sailboat.fill"
-              android_material_icon_name="sailing"
-              size={16}
-              color={colors.textSecondary}
-            />
-            <Text style={styles.metaText}>{request.vesselName}</Text>
-          </View>
-          <View style={styles.metaItem}>
-            <IconSymbol
-              ios_icon_name="person.fill"
-              android_material_icon_name="person"
-              size={16}
-              color={colors.textSecondary}
-            />
-            <Text style={styles.metaText}>{request.requestedByName}</Text>
-          </View>
+          <Text style={styles.metaText}>
+            {request.vesselName} • {formatDate(request.createdAt)}
+          </Text>
         </View>
-
-        <View style={styles.requestFooter}>
-          <Text style={styles.timeText}>{formatDate(request.createdAt)}</Text>
-          {(userRole === "manager" || userRole === "owner") &&
-            request.status === "pending" && (
-              <View style={styles.actionButtons}>
-                <TouchableOpacity
-                  style={styles.approveButton}
-                  onPress={handleApprove}
-                >
-                  <IconSymbol
-                    ios_icon_name="checkmark.circle.fill"
-                    android_material_icon_name="check-circle"
-                    size={20}
-                    color={colors.success}
-                  />
-                  <Text style={styles.approveButtonText}>Approve</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.denyButton}
-                  onPress={handleDeny}
-                >
-                  <IconSymbol
-                    ios_icon_name="xmark.circle.fill"
-                    android_material_icon_name="cancel"
-                    size={20}
-                    color={colors.danger}
-                  />
-                  <Text style={styles.denyButtonText}>Deny</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-        </View>
-
-        {request.approvedByName && (
-          <View style={styles.approvalInfo}>
-            <Text style={styles.approvalText}>
-              Approved by {request.approvedByName}
-            </Text>
+        {showActions && request.status === "pending" && (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={styles.approveButton}
+              onPress={handleApprove}
+            >
+              <Text style={styles.approveButtonText}>Approve</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.denyButton} onPress={handleDeny}>
+              <Text style={styles.denyButtonText}>Deny</Text>
+            </TouchableOpacity>
           </View>
         )}
       </TouchableOpacity>
@@ -182,6 +99,7 @@ const SupplyRequestItem = React.memo(
 
 export default function SuppliesScreen() {
   const topPadding = useTopPadding();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { supplyRequests, approveSupplyRequest, denySupplyRequest } = useData();
   const { userRole, userId, userName } = useAuth();
@@ -266,13 +184,22 @@ export default function SuppliesScreen() {
   );
 
   const renderItem = useCallback(
-    ({ item }: { item: SupplyRequest }) => (
+    ({
+      item,
+      index,
+      section,
+    }: {
+      item: SupplyRequest;
+      index: number;
+      section: { data: SupplyRequest[] };
+    }) => (
       <SupplyRequestItem
         request={item}
         onPress={handleRequestPress}
         onApprove={handleApprove}
         onDeny={handleDeny}
-        userRole={userRole}
+        showActions={userRole === "manager" || userRole === "owner"}
+        isLast={index === section.data.length - 1}
       />
     ),
     [handleRequestPress, handleApprove, handleDeny, userRole],
@@ -340,7 +267,8 @@ export default function SuppliesScreen() {
                 <Text
                   style={[
                     indexScreenStyles.filterChipText,
-                    filterVessel === vessel && indexScreenStyles.filterChipTextActive,
+                    filterVessel === vessel &&
+                      indexScreenStyles.filterChipTextActive,
                   ]}
                 >
                   {vessel === "all" ? "All" : vessel}
@@ -405,7 +333,10 @@ export default function SuppliesScreen() {
         renderSectionHeader={renderSectionHeader}
         ListHeaderComponent={ListHeaderComponent}
         ListEmptyComponent={ListEmptyComponent}
-        contentContainerStyle={[styles.listContent, { paddingTop: topPadding }]}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingTop: topPadding, paddingBottom: insets.bottom + 64 },
+        ]}
         showsVerticalScrollIndicator={false}
         stickySectionHeadersEnabled={false}
       />
@@ -450,133 +381,85 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   requestCard: {
-    backgroundColor: colors.surfaceOne,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
     borderRadius: 16,
     padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: colors.surfaceOne,
+    marginBottom: 10,
   },
-  requestHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 8,
+  requestCardLast: {
+    marginBottom: 16,
   },
-  requestTitleRow: {
+  topRow: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    flex: 1,
+    gap: 16,
   },
   requestTitle: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: "500",
     color: colors.text,
     flex: 1,
   },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+  priorityText: {
+    fontSize: 13,
+    color: colors.text,
+    fontWeight: "500",
+    borderRadius: 4,
+    padding: 4,
+    paddingVertical: 0,
+    lineHeight: 20,
+    height: 20,
+    marginRight: 0,
+    marginTop: 0,
   },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
+  bottomRow: {},
   requestDescription: {
     fontSize: 14,
     color: colors.textSecondary,
-    marginBottom: 12,
-    lineHeight: 20,
+    lineHeight: 19,
+    marginTop: 4,
   },
-  requestDetails: {
-    flexDirection: "row",
-    gap: 24,
-    marginBottom: 12,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: colors.border,
-  },
-  detailItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  detailLabel: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  detailValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.text,
+  metaText: {
+    fontSize: 12,
+    color: colors.textTertiary,
+    lineHeight: 15,
   },
   requestMeta: {
     flexDirection: "row",
-    gap: 16,
-    marginBottom: 12,
-  },
-  metaItem: {
-    flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-  },
-  metaText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  requestFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  timeText: {
-    fontSize: 12,
-    color: colors.grey,
+    gap: 8,
+    marginTop: 4,
   },
   actionButtons: {
     flexDirection: "row",
     gap: 8,
+
+    paddingTop: 16,
   },
   approveButton: {
-    flexDirection: "row",
+    flex: 1,
     alignItems: "center",
-    gap: 4,
-    backgroundColor: colors.success + "30",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: colors.greenForeground,
+    paddingVertical: 8,
     borderRadius: 8,
   },
   approveButtonText: {
     fontSize: 13,
     fontWeight: "600",
-    color: colors.success,
+    color: colors.container,
   },
   denyButton: {
-    flexDirection: "row",
+    flex: 1,
     alignItems: "center",
-    gap: 4,
-    backgroundColor: colors.danger + "30",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: colors.redForeground,
+    paddingVertical: 8,
     borderRadius: 8,
   },
   denyButtonText: {
     fontSize: 13,
     fontWeight: "600",
-    color: colors.danger,
-  },
-  approvalInfo: {
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  approvalText: {
-    fontSize: 12,
-    color: colors.success,
-    fontStyle: "italic",
+    color: colors.container,
   },
 });

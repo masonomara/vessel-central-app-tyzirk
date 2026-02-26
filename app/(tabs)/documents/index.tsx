@@ -19,9 +19,11 @@ import { Document } from "../../../types";
 import { formatDate, formatDueDate, isOverdue } from "../../../utils/dateUtils";
 import { formatFileSize } from "../../../utils/fileUtils";
 import { useTopPadding } from "../../../hooks/useTopPadding";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function DocumentsScreen() {
   const topPadding = useTopPadding();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { documents } = useData();
   const { userRole } = useAuth();
@@ -107,117 +109,25 @@ export default function DocumentsScreen() {
   );
 
   const renderItem = useCallback(
-    ({ item: doc }: { item: Document }) => (
+    ({ item: doc, index, section }: { item: Document; index: number; section: { data: Document[] } }) => (
       <TouchableOpacity
         key={doc.id}
-        style={[
-          styles.documentCard,
-          doc.isImportant && styles.documentCardImportant,
-          doc.expiryDate &&
-            isOverdue(doc.expiryDate) &&
-            styles.documentCardExpired,
-        ]}
+        style={[styles.documentCard, index === section.data.length - 1 && styles.documentCardLast]}
         onPress={() => handleDocumentPress(doc)}
-        activeOpacity={0.7}
       >
-        <View style={styles.documentHeader}>
-          <View style={styles.documentIconContainer}>
-            <IconSymbol
-              ios_icon_name="doc.fill"
-              android_material_icon_name={getCategoryIcon(doc.category)}
-              size={32}
-              color={colors.accent}
-            />
-          </View>
-          <View style={styles.documentInfo}>
-            <View style={styles.documentTitleRow}>
-              <Text style={styles.documentTitle}>{doc.title}</Text>
-              {doc.isImportant && (
-                <IconSymbol
-                  ios_icon_name="star.fill"
-                  android_material_icon_name="star"
-                  size={16}
-                  color={colors.gold}
-                />
-              )}
-            </View>
-            <Text style={styles.documentDescription} numberOfLines={1}>
-              {doc.description}
-            </Text>
-          </View>
+        <View style={styles.topRow}>
+          <Text style={styles.documentTitle} numberOfLines={2}>
+            {doc.title}
+          </Text>
         </View>
-
-        <View style={styles.documentMeta}>
-          <View style={styles.metaItem}>
-            <IconSymbol
-              ios_icon_name="sailboat.fill"
-              android_material_icon_name="sailing"
-              size={16}
-              color={colors.textSecondary}
-            />
-            <Text style={styles.metaText}>{doc.vesselName}</Text>
-          </View>
-          <View style={styles.metaItem}>
-            <IconSymbol
-              ios_icon_name="doc.text"
-              android_material_icon_name="insert-drive-file"
-              size={16}
-              color={colors.textSecondary}
-            />
-            <Text style={styles.metaText}>
-              {formatFileSize(doc.fileSize)}
-            </Text>
-          </View>
+        <View style={styles.bottomRow}>
+          <Text style={styles.documentDescription} numberOfLines={2}>
+            {doc.description}
+          </Text>
         </View>
-
-        {doc.expiryDate && (
-          <View
-            style={[
-              styles.expiryContainer,
-              isOverdue(doc.expiryDate) &&
-                styles.expiryContainerExpired,
-            ]}
-          >
-            <IconSymbol
-              ios_icon_name="calendar"
-              android_material_icon_name="event"
-              size={16}
-              color={
-                isOverdue(doc.expiryDate)
-                  ? colors.danger
-                  : colors.textSecondary
-              }
-            />
-            <Text
-              style={[
-                styles.expiryText,
-                isOverdue(doc.expiryDate) && styles.expiryTextExpired,
-              ]}
-            >
-              {isOverdue(doc.expiryDate) ? "Expired" : "Expires"}:{" "}
-              {formatDueDate(doc.expiryDate)}
-            </Text>
-          </View>
-        )}
-
-        {doc.tags.length > 0 && (
-          <View style={styles.tagsContainer}>
-            {doc.tags.map((tag, index) => (
-              <View key={index} style={styles.tag}>
-                <Text style={styles.tagText}>{tag}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-
-        <View style={styles.documentFooter}>
-          <View style={styles.categoryBadge}>
-            <Text style={styles.categoryText}>
-              {doc.category.toUpperCase()}
-            </Text>
-          </View>
-          <Text style={styles.uploadedText}>
-            Uploaded {formatDate(doc.uploadedAt)}
+        <View style={styles.docMeta}>
+          <Text style={styles.metaText}>
+            {doc.vesselName} • {formatDate(doc.uploadedAt)}
           </Text>
         </View>
       </TouchableOpacity>
@@ -350,7 +260,7 @@ export default function DocumentsScreen() {
         renderSectionHeader={renderSectionHeader}
         ListHeaderComponent={ListHeaderComponent}
         ListEmptyComponent={ListEmptyComponent}
-        contentContainerStyle={[styles.listContent, { paddingTop: topPadding }]}
+        contentContainerStyle={[styles.listContent, { paddingTop: topPadding, paddingBottom: insets.bottom + 64 }]}
         showsVerticalScrollIndicator={false}
         stickySectionHeadersEnabled={false}
       />
@@ -395,115 +305,43 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   documentCard: {
-    backgroundColor: colors.surfaceOne,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
     borderRadius: 16,
     padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: colors.surfaceOne,
+    marginBottom: 10,
   },
-  documentCardImportant: {},
-  documentCardExpired: {},
-  documentHeader: {
+  documentCardLast: {
+    marginBottom: 16,
+  },
+  topRow: {
     flexDirection: "row",
-    marginBottom: 12,
-  },
-  documentIconContainer: {
-    marginRight: 12,
-  },
-  documentInfo: {
-    flex: 1,
-  },
-  documentTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 4,
+    gap: 16,
   },
   documentTitle: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: "500",
     color: colors.text,
     flex: 1,
   },
+  bottomRow: {},
   documentDescription: {
     fontSize: 14,
     color: colors.textSecondary,
-  },
-  documentMeta: {
-    flexDirection: "row",
-    gap: 16,
-    marginBottom: 12,
-  },
-  metaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
+    lineHeight: 19,
+    marginTop: 4,
   },
   metaText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  expiryContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  expiryContainerExpired: {
-    backgroundColor: colors.danger + "20",
-  },
-  expiryText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    fontWeight: "500",
-  },
-  expiryTextExpired: {
-    color: colors.danger,
-    fontWeight: "600",
-  },
-  tagsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 12,
-  },
-  tag: {
-    backgroundColor: colors.accent + "20",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  tagText: {
-    fontSize: 11,
-    color: colors.accent,
-    fontWeight: "600",
-  },
-  documentFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  categoryBadge: {
-    backgroundColor: colors.primary + "30",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  categoryText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: colors.primary,
-  },
-  uploadedText: {
     fontSize: 12,
-    color: colors.grey,
+    color: colors.textTertiary,
+    lineHeight: 15,
+  },
+  docMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 4,
   },
 });

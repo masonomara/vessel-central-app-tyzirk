@@ -18,16 +18,19 @@ import { IconSymbol } from "../../../components/IconSymbol";
 import { Issue } from "../../../types";
 import { formatDate } from "../../../utils/dateUtils";
 import { getPriorityBadgeColors } from "../../../utils/colorUtils";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const IssueItem = React.memo(
   ({
     issue,
     onPress,
     onComplete,
+    isLast,
   }: {
     issue: Issue;
     onPress: (issue: Issue) => void;
     onComplete: (id: string) => void;
+    isLast: boolean;
   }) => {
     const handlePress = useCallback(() => {
       onPress(issue);
@@ -40,7 +43,10 @@ const IssueItem = React.memo(
     const isCompleted = issue.status === "completed";
 
     return (
-      <TouchableOpacity style={[styles.issueCard]} onPress={handlePress}>
+      <TouchableOpacity
+        style={[styles.issueCard, isLast && styles.issueCardLast]}
+        onPress={handlePress}
+      >
         <View style={styles.topRow}>
           <Pressable
             style={[
@@ -83,10 +89,6 @@ const IssueItem = React.memo(
           >
             {issue.priority.charAt(0).toUpperCase() + issue.priority.slice(1)}
           </Text>
-
-          {/* <Text style={styles.reportedByText}>
-          {issue.vesselName} · {formatDate(issue.createdAt)}
-        </Text> */}
         </View>
         <View style={styles.bottomRow}>
           <Text style={styles.issueDescription} numberOfLines={2}>
@@ -105,6 +107,7 @@ const IssueItem = React.memo(
 
 export default function IssuesScreen() {
   const topPadding = useTopPadding();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { issues, updateIssue } = useData();
   const [filterVessel, setFilterVessel] = useState<string>("all");
@@ -181,11 +184,20 @@ export default function IssuesScreen() {
   );
 
   const renderItem = useCallback(
-    ({ item, index }: { item: Issue; index: number }) => (
+    ({
+      item,
+      index,
+      section,
+    }: {
+      item: Issue;
+      index: number;
+      section: { data: Issue[] };
+    }) => (
       <IssueItem
         issue={item}
         onPress={handleIssuePress}
         onComplete={handleComplete}
+        isLast={index === section.data.length - 1}
       />
     ),
     [handleIssuePress, handleComplete],
@@ -206,8 +218,8 @@ export default function IssuesScreen() {
             android_material_icon_name={
               collapsed ? "chevron-right" : "expand-more"
             }
-            size={24}
-            color={colors.text}
+            size={16}
+            color={colors.textSecondary}
             style={indexScreenStyles.dropdown}
           />
           <Text style={indexScreenStyles.sectionHeader}>{section.title}</Text>
@@ -234,7 +246,7 @@ export default function IssuesScreen() {
           <TextInput
             style={styles.searchInput}
             placeholder="Search issues..."
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -320,6 +332,14 @@ export default function IssuesScreen() {
         keyExtractor={keyExtractor}
         renderSectionHeader={renderSectionHeader}
         ListHeaderComponent={ListHeaderComponent}
+        ListFooterComponent={
+          <View
+            style={{
+              backgroundColor: colors.surfaceOne,
+              height: insets.bottom + 64,
+            }}
+          />
+        }
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={[styles.listContent, { marginTop: topPadding }]}
         showsVerticalScrollIndicator={false}
@@ -336,13 +356,14 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.surfaceOne,
+    backgroundColor: colors.container,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-
+    marginHorizontal: 20,
+    gap: 10,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   searchInput: {
     flex: 1,
@@ -350,8 +371,6 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   listContent: {
-    paddingBottom: 20,
-
     backgroundColor: colors.surfaceTwo,
   },
   emptyState: {
@@ -375,7 +394,10 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: colors.surfaceOne,
     marginHorizontal: 20,
-    marginBottom: 8,
+    marginBottom: 10,
+  },
+  issueCardLast: {
+    marginBottom: 16,
   },
 
   completeButton: {
