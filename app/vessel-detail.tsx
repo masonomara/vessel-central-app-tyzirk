@@ -40,15 +40,15 @@ export default function VesselDetailScreen() {
       <Stack.Screen options={{ title: vessel.name }} />
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingTop: topPadding }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: topPadding },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.titleSection}>
           <View
-            style={[
-              styles.iconCircle,
-              { backgroundColor: colors.text + "20" },
-            ]}
+            style={[styles.iconCircle, { backgroundColor: colors.text + "20" }]}
           >
             <IconSymbol
               ios_icon_name="sailboat.fill"
@@ -86,39 +86,6 @@ export default function VesselDetailScreen() {
               </Text>
             </View>
           </View>
-        </View>
-
-        <View style={styles.statsRow}>
-          <StatCard
-            icon="wrench.fill"
-            androidIcon="build"
-            iconColor={colors.accent}
-            label="Tasks"
-            value={vesselTasks.length}
-          />
-          <StatCard
-            icon="exclamationmark.triangle.fill"
-            androidIcon="warning"
-            iconColor={colors.warning}
-            label="Issues"
-            value={vesselIssues.length}
-          />
-        </View>
-        <View style={styles.statsRow}>
-          <StatCard
-            icon="shippingbox.fill"
-            androidIcon="inventory"
-            iconColor={colors.success}
-            label="Supplies"
-            value={vesselSupplies.length}
-          />
-          <StatCard
-            icon="doc.fill"
-            androidIcon="description"
-            iconColor={colors.textSecondary}
-            label="Docs"
-            value={vesselDocs.length}
-          />
         </View>
 
         {activeTasks.length > 0 && (

@@ -349,6 +349,36 @@ export const commonStyles = StyleSheet.create({
 });
 
 export const indexScreenStyles = StyleSheet.create({
+  // Screen shell
+  container: {
+    flex: 1,
+  },
+  listContent: {
+    backgroundColor: colors.surfaceTwo,
+  },
+  listHeaderComponent: {
+    backgroundColor: colors.surfaceOne,
+  },
+
+  // Search bar
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.container,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginHorizontal: 20,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: colors.text,
+  },
+
   // Filter chips
   filterContainer: {
     marginBottom: 20,
@@ -403,6 +433,97 @@ export const indexScreenStyles = StyleSheet.create({
   dropdown: {
     padding: 0,
     paddingRight: 3,
+  },
+
+  // Card base
+  card: {
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    borderRadius: 16,
+    padding: 16,
+    backgroundColor: colors.surfaceOne,
+    marginHorizontal: 20,
+    marginBottom: 10,
+  },
+  cardLast: {
+    marginBottom: 16,
+  },
+
+  // Card internals
+  topRow: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  cardTitle: {
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: "500",
+    color: colors.text,
+    flex: 1,
+  },
+  cardDescription: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 19,
+    marginTop: 4,
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 4,
+  },
+  metaText: {
+    fontSize: 12,
+    color: colors.textTertiary,
+    lineHeight: 15,
+  },
+  priorityText: {
+    fontSize: 13,
+    color: colors.text,
+    fontWeight: "500",
+    borderRadius: 4,
+    padding: 4,
+    paddingVertical: 0,
+    lineHeight: 20,
+    height: 20,
+  },
+
+  // Checkbox (issues + maintenance)
+  completeButton: {
+    height: 20,
+    width: 20,
+    borderRadius: 100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // Offset for rows under checkbox
+  bottomRowWithCheckbox: {
+    paddingLeft: 36,
+  },
+  metaRowWithCheckbox: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 36,
+    gap: 8,
+    marginTop: 4,
+  },
+
+  // Empty state
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+  },
+  emptyStateText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: colors.textSecondary,
   },
 });
 

@@ -3,10 +3,8 @@ import {
   StyleSheet,
   View,
   Text,
-  FlatList,
   SectionList,
   TouchableOpacity,
-  TextInput,
   Pressable,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
@@ -19,6 +17,9 @@ import { Issue } from "../../../types";
 import { formatDate } from "../../../utils/dateUtils";
 import { getPriorityBadgeColors } from "../../../utils/colorUtils";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SearchBar } from "../../../components/SearchBar";
+import { FilterRow } from "../../../components/FilterRow";
+import { CollapsibleSectionHeader } from "../../../components/CollapsibleSectionHeader";
 
 const IssueItem = React.memo(
   ({
@@ -44,14 +45,13 @@ const IssueItem = React.memo(
 
     return (
       <TouchableOpacity
-        style={[styles.issueCard, isLast && styles.issueCardLast]}
+        style={[indexScreenStyles.card, isLast && indexScreenStyles.cardLast]}
         onPress={handlePress}
       >
-        <View style={styles.topRow}>
+        <View style={indexScreenStyles.topRow}>
           <Pressable
             style={[
-              styles.completeButton,
-
+              indexScreenStyles.completeButton,
               {
                 backgroundColor: isCompleted
                   ? colors.greenBackground
@@ -77,12 +77,12 @@ const IssueItem = React.memo(
             )}
           </Pressable>
 
-          <Text style={styles.issueTitle} numberOfLines={2}>
+          <Text style={indexScreenStyles.cardTitle} numberOfLines={2}>
             {issue.title}
           </Text>
           <Text
             style={[
-              styles.priorityText,
+              indexScreenStyles.priorityText,
               { color: getPriorityBadgeColors(issue.priority).fg },
               { backgroundColor: getPriorityBadgeColors(issue.priority).bg },
             ]}
@@ -90,13 +90,13 @@ const IssueItem = React.memo(
             {issue.priority.charAt(0).toUpperCase() + issue.priority.slice(1)}
           </Text>
         </View>
-        <View style={styles.bottomRow}>
-          <Text style={styles.issueDescription} numberOfLines={2}>
+        <View style={indexScreenStyles.bottomRowWithCheckbox}>
+          <Text style={indexScreenStyles.cardDescription} numberOfLines={2}>
             {issue.description}
           </Text>
         </View>
-        <View style={styles.taskMeta}>
-          <Text style={styles.metaText}>
+        <View style={indexScreenStyles.metaRowWithCheckbox}>
+          <Text style={indexScreenStyles.metaText}>
             {issue.vesselName} • {formatDate(issue.createdAt)}
           </Text>
         </View>
@@ -206,80 +206,30 @@ export default function IssuesScreen() {
   const keyExtractor = useCallback((item: Issue) => item.id, []);
 
   const renderSectionHeader = useCallback(
-    ({ section }: { section: { title: string; count: number } }) => {
-      const collapsed = collapsedSections.has(section.title);
-      return (
-        <Pressable
-          style={indexScreenStyles.sectionHeaderRow}
-          onPress={() => toggleSection(section.title)}
-        >
-          <IconSymbol
-            ios_icon_name={collapsed ? "chevron.right" : "chevron.down"}
-            android_material_icon_name={
-              collapsed ? "chevron-right" : "expand-more"
-            }
-            size={16}
-            color={colors.textSecondary}
-            style={indexScreenStyles.dropdown}
-          />
-          <Text style={indexScreenStyles.sectionHeader}>{section.title}</Text>
-          <Text style={indexScreenStyles.sectionCount}>
-            {" "}
-            {section.count} items
-          </Text>
-        </Pressable>
-      );
-    },
+    ({ section }: { section: { title: string; count: number } }) => (
+      <CollapsibleSectionHeader
+        title={section.title}
+        count={section.count}
+        collapsed={collapsedSections.has(section.title)}
+        onToggle={() => toggleSection(section.title)}
+      />
+    ),
     [collapsedSections, toggleSection],
   );
 
   const ListHeaderComponent = useCallback(
     () => (
-      <View style={styles.listHeaderComponent}>
-        <View style={styles.searchContainer}>
-          <IconSymbol
-            ios_icon_name="magnifyingglass"
-            android_material_icon_name="search"
-            size={20}
-            color={colors.textSecondary}
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search issues..."
-            placeholderTextColor={colors.textTertiary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-
-        <View style={indexScreenStyles.filterContainer}>
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={["all", ...vesselNames]}
-            renderItem={({ item: vessel }) => (
-              <TouchableOpacity
-                style={[
-                  indexScreenStyles.filterChip,
-                  filterVessel === vessel && indexScreenStyles.filterChipActive,
-                ]}
-                onPress={() => setFilterVessel(vessel)}
-              >
-                <Text
-                  style={[
-                    indexScreenStyles.filterChipText,
-                    filterVessel === vessel &&
-                      indexScreenStyles.filterChipTextActive,
-                  ]}
-                >
-                  {vessel === "all" ? "All" : vessel}
-                </Text>
-              </TouchableOpacity>
-            )}
-            keyExtractor={(item) => item}
-            contentContainerStyle={indexScreenStyles.filterContent}
-          />
-        </View>
+      <View style={indexScreenStyles.listHeaderComponent}>
+        <SearchBar
+          placeholder="Search issues..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        <FilterRow
+          options={["all", ...vesselNames]}
+          selected={filterVessel}
+          onSelect={setFilterVessel}
+        />
       </View>
     ),
     [searchQuery, filterVessel, vesselNames],
@@ -287,15 +237,15 @@ export default function IssuesScreen() {
 
   const ListEmptyComponent = useCallback(
     () => (
-      <View style={styles.emptyState}>
+      <View style={indexScreenStyles.emptyState}>
         <IconSymbol
           ios_icon_name="checkmark.circle"
           android_material_icon_name="check-circle"
           size={64}
           color={colors.success}
         />
-        <Text style={styles.emptyStateText}>No issues found</Text>
-        <Text style={styles.emptyStateSubtext}>
+        <Text style={indexScreenStyles.emptyStateText}>No issues found</Text>
+        <Text style={indexScreenStyles.emptyStateSubtext}>
           All systems running smoothly!
         </Text>
       </View>
@@ -304,7 +254,9 @@ export default function IssuesScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+    <View
+      style={[indexScreenStyles.container, { backgroundColor: colors.surfaceOne }]}
+    >
       <Stack.Screen
         options={{
           title: "Issues",
@@ -341,128 +293,13 @@ export default function IssuesScreen() {
           />
         }
         ListEmptyComponent={ListEmptyComponent}
-        contentContainerStyle={[styles.listContent, { marginTop: topPadding }]}
+        contentContainerStyle={[
+          indexScreenStyles.listContent,
+          { marginTop: topPadding },
+        ]}
         showsVerticalScrollIndicator={false}
         stickySectionHeadersEnabled={false}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.container,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginHorizontal: 20,
-    gap: 10,
-    borderWidth: 1,
-    borderColor: colors.borderSoft,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    color: colors.text,
-  },
-  listContent: {
-    backgroundColor: colors.surfaceTwo,
-  },
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-  },
-  emptyStateText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.text,
-  },
-  emptyStateSubtext: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  issueCard: {
-    borderWidth: 1,
-    borderColor: colors.borderSoft,
-    borderRadius: 16,
-    padding: 16,
-    backgroundColor: colors.surfaceOne,
-    marginHorizontal: 20,
-    marginBottom: 10,
-  },
-  issueCardLast: {
-    marginBottom: 16,
-  },
-
-  completeButton: {
-    height: 20,
-    width: 20,
-    borderRadius: 100,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  issueTitle: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: "500",
-    color: colors.text,
-    flex: 1,
-  },
-  topRow: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  issueDescription: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    lineHeight: 19,
-    marginTop: 4,
-  },
-  bottomRow: {
-    paddingLeft: 36,
-  },
-  reportedByText: {
-    fontSize: 14,
-    lineHeight: 19,
-    color: colors.textTertiary,
-  },
-  priorityBadge: {
-    borderRadius: 4,
-    padding: 6,
-    paddingVertical: 0,
-  },
-  priorityText: {
-    fontSize: 13,
-    color: colors.text,
-    fontWeight: "500",
-    borderRadius: 4,
-    padding: 4,
-    paddingVertical: 0,
-    lineHeight: 20,
-    height: 20,
-    marginRight: 0,
-    marginTop: 0,
-  },
-  metaText: {
-    fontSize: 12,
-    color: colors.textTertiary,
-    lineHeight: 15,
-  },
-  listHeaderComponent: {
-    backgroundColor: colors.surfaceOne,
-  },
-  taskMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 36,
-    gap: 8,
-    marginTop: 4,
-  },
-});
