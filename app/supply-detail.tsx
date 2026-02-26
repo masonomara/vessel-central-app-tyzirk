@@ -217,19 +217,21 @@ export default function SupplyDetailScreen() {
         />
 
         {isDenied ? (
-          <View style={styles.statusRow}>
-            <Text style={styles.statusLabel}>Status</Text>
-            <View style={styles.deniedBadge}>
-              <Text style={styles.deniedBadgeText}>Denied</Text>
-            </View>
-          </View>
+          <DropdownRow
+            label="Status"
+            options={[{ label: "Denied", value: "denied" }]}
+            selectedValue="denied"
+            onSelect={() => {}}
+            disabled
+          />
         ) : needsApproval ? (
-          <View style={styles.statusRow}>
-            <Text style={styles.statusLabel}>Status</Text>
-            <View style={styles.pendingBadge}>
-              <Text style={styles.pendingBadgeText}>Pending</Text>
-            </View>
-          </View>
+          <DropdownRow
+            label="Status"
+            options={[{ label: "Pending", value: "pending" }]}
+            selectedValue="pending"
+            onSelect={() => {}}
+            disabled
+          />
         ) : (
           <DropdownRow
             label="Status"
@@ -347,7 +349,7 @@ export default function SupplyDetailScreen() {
 const styles = StyleSheet.create({
   approvalRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 8,
     paddingHorizontal: 20,
     paddingVertical: 12,
   },
@@ -380,46 +382,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: colors.container,
-  },
-  statusRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    borderTopWidth: 1,
-    borderTopColor: colors.borderSoft,
-  },
-  statusLabel: {
-    fontSize: 16,
-    color: colors.text,
-    fontWeight: "600",
-    paddingVertical: 16,
-  },
-  deniedBadge: {
-    backgroundColor: colors.redBackground,
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    height: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  deniedBadgeText: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: colors.redForeground,
-  },
-  pendingBadge: {
-    backgroundColor: colors.blueBackground,
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    height: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  pendingBadgeText: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: colors.blueForeground,
   },
   historySection: {
     paddingHorizontal: 20,

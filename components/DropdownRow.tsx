@@ -64,6 +64,7 @@ interface DropdownRowProps {
   options: DropdownOption[];
   selectedValue: string;
   onSelect: (value: string) => void;
+  disabled?: boolean;
 }
 
 export function DropdownRow({
@@ -71,6 +72,7 @@ export function DropdownRow({
   options,
   selectedValue,
   onSelect,
+  disabled,
 }: DropdownRowProps) {
   const selectedOption = options.find((o) => o.value === selectedValue);
 
@@ -97,11 +99,7 @@ export function DropdownRow({
   return (
     <View style={styles.row}>
       <Text style={styles.label}>{label}</Text>
-      <TouchableOpacity
-        style={styles.selector}
-        onPress={handlePress}
-        activeOpacity={0.7}
-      >
+      {disabled ? (
         <Text
           style={[
             styles.selectorText,
@@ -113,13 +111,31 @@ export function DropdownRow({
         >
           {selectedOption?.label ?? selectedValue}
         </Text>
-        <IconSymbol
-          ios_icon_name="chevron.down"
-          android_material_icon_name="keyboard-arrow-down"
-          size={14}
-          color={colors.textTertiary}
-        />
-      </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          style={styles.selector}
+          onPress={handlePress}
+          activeOpacity={0.7}
+        >
+          <Text
+            style={[
+              styles.selectorText,
+              {
+                color: (valueColors[selectedValue] || defaultColor).fg,
+                backgroundColor: (valueColors[selectedValue] || defaultColor).bg,
+              },
+            ]}
+          >
+            {selectedOption?.label ?? selectedValue}
+          </Text>
+          <IconSymbol
+            ios_icon_name="chevron.down"
+            android_material_icon_name="keyboard-arrow-down"
+            size={14}
+            color={colors.textTertiary}
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
