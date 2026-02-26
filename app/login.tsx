@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Animated,
   Keyboard,
+  ImageBackground,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -174,18 +175,26 @@ export default function LoginScreen() {
   };
 
   return (
-    <LinearGradient
-      colors={["#0A2540", "#122D4D", "#1E3A5F"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0.3, y: 1 }}
+    <ImageBackground
+      source={require("../public/login.jpg")}
       style={styles.container}
+      resizeMode="cover"
     >
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      <LinearGradient
+        colors={[
+          "rgba(0,0,0,0.35)",
+          "rgba(0,0,0,0.5)",
+          "rgba(0,0,0,0.85)",
+        ]}
+        locations={[0, 0.4, 1]}
+        style={styles.overlay}
       >
-        {/* Center brand */}
-        <View style={styles.brandSection}>
+        <KeyboardAvoidingView
+          style={styles.keyboardView}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+          {/* Center brand */}
+          <View style={styles.brandSection}>
           <IconSymbol
             ios_icon_name="sailboat.fill"
             android_material_icon_name="sailing"
@@ -347,19 +356,23 @@ export default function LoginScreen() {
             </View>
           )}
         </View>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
 
-      {isLoading && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color={colors.gold} />
-        </View>
-      )}
-    </LinearGradient>
+        {isLoading && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="large" color={colors.gold} />
+          </View>
+        )}
+      </LinearGradient>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  overlay: {
     flex: 1,
   },
   keyboardView: {
