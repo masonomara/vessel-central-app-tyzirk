@@ -389,8 +389,6 @@ export const indexScreenStyles = StyleSheet.create({
     marginTop: 2,
     // borderTopWidth: 1,
     // borderColor: colors.borderSoft,
-   
-    
   },
   sectionHeader: {
     fontSize: 18,

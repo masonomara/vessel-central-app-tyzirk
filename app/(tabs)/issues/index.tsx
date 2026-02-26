@@ -15,8 +15,9 @@ import { useTopPadding } from "../../../hooks/useTopPadding";
 import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { Issue, TaskPriority } from "../../../types";
+import { Issue } from "../../../types";
 import { formatDate } from "../../../utils/dateUtils";
+import { getPriorityBadgeColors } from "../../../utils/colorUtils";
 
 const IssueItem = React.memo(
   ({
@@ -28,21 +29,6 @@ const IssueItem = React.memo(
     onPress: (issue: Issue) => void;
     onComplete: (id: string) => void;
   }) => {
-    const getPriorityColor = (priority: TaskPriority) => {
-      switch (priority) {
-        case "urgent":
-          return colors.danger;
-        case "high":
-          return colors.warning;
-        case "medium":
-          return colors.accent;
-        case "low":
-          return colors.success;
-        default:
-          return colors.grey;
-      }
-    };
-
     const handlePress = useCallback(() => {
       onPress(issue);
     }, [issue, onPress]);
@@ -88,19 +74,19 @@ const IssueItem = React.memo(
           <Text style={styles.issueTitle} numberOfLines={2}>
             {issue.title}
           </Text>
+          <Text
+            style={[
+              styles.priorityText,
+              { color: getPriorityBadgeColors(issue.priority).fg },
+              { backgroundColor: getPriorityBadgeColors(issue.priority).bg },
+            ]}
+          >
+            {issue.priority.charAt(0).toUpperCase() + issue.priority.slice(1)}
+          </Text>
 
           {/* <Text style={styles.reportedByText}>
           {issue.vesselName} · {formatDate(issue.createdAt)}
         </Text> */}
-
-          <Text
-            style={[
-              styles.priorityText,
-              { color: getPriorityColor(issue.priority) },
-            ]}
-          >
-            {issue.priority}
-          </Text>
         </View>
         <View style={styles.bottomRow}>
           <Text style={styles.issueDescription} numberOfLines={2}>
@@ -108,11 +94,9 @@ const IssueItem = React.memo(
           </Text>
         </View>
         <View style={styles.taskMeta}>
-          <Text style={styles.metaText}>{issue.vesselName}</Text>
-
-          {issue.assignedToName && (
-            <Text style={styles.metaText}> • {issue.assignedToName}</Text>
-          )}
+          <Text style={styles.metaText}>
+            {issue.vesselName} • {formatDate(issue.createdAt)}
+          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -202,7 +186,6 @@ export default function IssuesScreen() {
         issue={item}
         onPress={handleIssuePress}
         onComplete={handleComplete}
-        isFirst={index === 0}
       />
     ),
     [handleIssuePress, handleComplete],
@@ -404,9 +387,9 @@ const styles = StyleSheet.create({
   },
 
   issueTitle: {
-    fontSize: 16,
-    lineHeight: 21,
-    fontWeight: "600",
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: "500",
     color: colors.text,
     flex: 1,
   },
@@ -418,45 +401,46 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
     lineHeight: 19,
-
-    marginTop: 3,
+    marginTop: 4,
   },
   bottomRow: {
     paddingLeft: 36,
   },
   reportedByText: {
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 14,
+    lineHeight: 19,
     color: colors.textTertiary,
   },
-  metaText: {
-    fontSize: 12,
-    lineHeight: 16,
-    color: colors.textSecondary,
-  },
   priorityBadge: {
-    fontSize: 15,
+    borderRadius: 4,
+    padding: 6,
+    paddingVertical: 0,
+  },
+  priorityText: {
+    fontSize: 13,
     color: colors.text,
     fontWeight: "500",
     borderRadius: 4,
-
-    lineHeight: 24,
+    padding: 4,
+    paddingVertical: 0,
+    lineHeight: 20,
+    height: 20,
+    marginRight: 0,
+    marginTop: 0,
   },
-  priorityText: {
-    fontSize: 10,
-    fontWeight: "700",
+  metaText: {
+    fontSize: 12,
+    color: colors.textTertiary,
+    lineHeight: 15,
   },
   listHeaderComponent: {
     backgroundColor: colors.surfaceOne,
   },
   taskMeta: {
     flexDirection: "row",
-    marginLeft: 34,
-    marginTop: 6,
-
-  },
-  metaItem: {
-    flexDirection: "row",
-    flex: 1,
+    alignItems: "center",
+    marginLeft: 36,
+    gap: 8,
+    marginTop: 4,
   },
 });

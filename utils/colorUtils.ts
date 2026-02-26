@@ -16,6 +16,24 @@ export function getPriorityColor(priority: TaskPriority): string {
   }
 }
 
+export function getPriorityBadgeColors(priority: TaskPriority): {
+  fg: string;
+  bg: string;
+} {
+  switch (priority) {
+    case "urgent":
+      return { fg: colors.redForeground, bg: colors.redBackground };
+    case "high":
+      return { fg: colors.redForeground, bg: colors.redBackground };
+    case "medium":
+      return { fg: colors.orangeForeground, bg: colors.orangeBackground };
+    case "low":
+      return { fg: colors.yellowForeground, bg: colors.yellowBackground };
+    default:
+      return { fg: colors.textSecondary, bg: colors.surfaceThree };
+  }
+}
+
 export function getStatusColor(status: TaskStatus): string {
   switch (status) {
     case "completed":
