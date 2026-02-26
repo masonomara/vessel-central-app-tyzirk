@@ -6,6 +6,7 @@ import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
+import { ItemCard } from "../../../components/ItemCard";
 import { Document } from "../../../types";
 import { formatDate } from "../../../utils/dateUtils";
 import { useTopPadding } from "../../../hooks/useTopPadding";
@@ -96,28 +97,14 @@ export default function DocumentsScreen() {
       index: number;
       section: { data: Document[] };
     }) => (
-      <TouchableOpacity
-        key={doc.id}
-        style={[
-          indexScreenStyles.card,
-          index === section.data.length - 1 && indexScreenStyles.cardLast,
-        ]}
+      <ItemCard
+        title={doc.title}
+        description={doc.description}
+        vesselName={doc.vesselName}
         onPress={() => handleDocumentPress(doc)}
-      >
-        <View style={indexScreenStyles.topRow}>
-          <Text style={indexScreenStyles.cardTitle} numberOfLines={2}>
-            {doc.title}
-          </Text>
-        </View>
-        <Text style={indexScreenStyles.cardDescription} numberOfLines={2}>
-          {doc.description}
-        </Text>
-        <View style={indexScreenStyles.metaRow}>
-          <Text style={indexScreenStyles.metaText}>
-            {doc.vesselName} • {formatDate(doc.uploadedAt)}
-          </Text>
-        </View>
-      </TouchableOpacity>
+        isLast={index === section.data.length - 1}
+        metaText={formatDate(doc.uploadedAt)}
+      />
     ),
     [handleDocumentPress],
   );

@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
+import { ItemCard } from "../../../components/ItemCard";
 import {
   getEventsForDate,
   getEventsForMonth,
@@ -198,36 +199,23 @@ export default function CalendarScreen() {
   );
 
   const renderEventItem = useCallback(
-    (event: CalendarEvent, index: number, array: CalendarEvent[]) => {
-      const isLast = index === array.length - 1;
-      return (
-        <TouchableOpacity
-          key={event.id}
-          style={[styles.eventCard, isLast && styles.eventCardLast]}
-          onPress={() => handleEventPress(event)}
-        >
-          <View style={styles.eventTopRow}>
-            <Text style={styles.eventTitle} numberOfLines={2}>
-              {event.title}
-            </Text>
-            <Text style={styles.dateBadge}>
-              {formatEventDateRange(event.startDate, event.endDate, event.allDay)}
-            </Text>
-          </View>
-          <View style={styles.eventBottomRow}>
-            <Text style={styles.eventDescription} numberOfLines={2}>
-              {event.description}
-            </Text>
-          </View>
-          <View style={styles.eventMeta}>
-            <Text style={styles.eventMetaText}>
-              {event.vesselName}
-              {event.location ? ` • ${event.location}` : ""}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      );
-    },
+    (event: CalendarEvent, index: number, array: CalendarEvent[]) => (
+      <ItemCard
+        key={event.id}
+        title={event.title}
+        description={event.description}
+        vesselName={event.vesselName}
+        onPress={() => handleEventPress(event)}
+        isLast={index === array.length - 1}
+        style={{ marginHorizontal: 0 }}
+        badge={{
+          label: formatEventDateRange(event.startDate, event.endDate, event.allDay),
+          fg: colors.textSecondary,
+          bg: colors.surfaceThree,
+        }}
+        metaText={event.location || undefined}
+      />
+    ),
     [handleEventPress],
   );
 
@@ -395,15 +383,15 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   todayButton: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
     paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: colors.accent,
+    borderRadius: 8,
+    backgroundColor: colors.text,
   },
   todayButtonText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: colors.text,
+    fontWeight: "500",
+    color: colors.container,
   },
   calendarContainer: {
     marginHorizontal: 20,
@@ -425,7 +413,7 @@ const styles = StyleSheet.create({
   },
   dayHeaderText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
     color: colors.textSecondary,
   },
   calendarGrid: {
@@ -440,25 +428,25 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   todayCell: {
-    backgroundColor: colors.accent + "20",
-    borderRadius: 8,
+    backgroundColor: colors.surfaceTwo,
+    borderRadius: 6,
   },
   selectedDayCell: {
-    backgroundColor: colors.accent,
+    backgroundColor: colors.surfaceThree,
     borderRadius: 8,
   },
   dayText: {
     fontSize: 14,
     fontWeight: "500",
-    color: colors.text,
+    color: colors.textSecondary,
   },
   todayText: {
-    color: colors.accent,
-    fontWeight: "600",
+    color: colors.textSecondary,
+    fontWeight: "500",
   },
   selectedDayText: {
-    color: colors.text,
-    fontWeight: "600",
+    color: colors.container,
+    fontWeight: "500",
   },
   eventIndicatorContainer: {
     flexDirection: "row",
@@ -493,57 +481,6 @@ const styles = StyleSheet.create({
   eventsList: {
     gap: 8,
   },
-  eventCard: {
-    borderWidth: 1,
-    borderColor: colors.borderSoft,
-    borderRadius: 16,
-    padding: 16,
-    backgroundColor: colors.surfaceOne,
-    marginBottom: 10,
-  },
-  eventCardLast: {
-    marginBottom: 16,
-  },
-  eventTopRow: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  eventTitle: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: "500",
-    color: colors.text,
-    flex: 1,
-  },
-  eventBottomRow: {},
-  eventDescription: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    lineHeight: 19,
-    marginTop: 4,
-  },
-  eventMetaText: {
-    fontSize: 12,
-    color: colors.textTertiary,
-    lineHeight: 15,
-  },
-  dateBadge: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: colors.textSecondary,
-    backgroundColor: colors.surfaceThree,
-    borderRadius: 4,
-    padding: 4,
-    paddingVertical: 0,
-    lineHeight: 20,
-    height: 20,
-  },
-  eventMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 4,
-  },
   emptyState: {
     alignItems: "center",
     justifyContent: "center",
@@ -559,7 +496,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: colors.accent,
   },
   emptyStateButtonText: {
     fontSize: 14,

@@ -13,6 +13,7 @@ import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
+import { ItemCard } from "../../../components/ItemCard";
 import { SupplyRequest } from "../../../types";
 import { formatDate } from "../../../utils/dateUtils";
 import { getPriorityBadgeColors } from "../../../utils/colorUtils";
@@ -20,80 +21,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SearchBar } from "../../../components/SearchBar";
 import { FilterRow } from "../../../components/FilterRow";
 import { CollapsibleSectionHeader } from "../../../components/CollapsibleSectionHeader";
-
-const SupplyRequestItem = React.memo(
-  ({
-    request,
-    onPress,
-    onApprove,
-    onDeny,
-    showActions,
-    isLast,
-  }: {
-    request: SupplyRequest;
-    onPress: (request: SupplyRequest) => void;
-    onApprove: (id: string) => void;
-    onDeny: (id: string) => void;
-    showActions: boolean;
-    isLast: boolean;
-  }) => {
-    const handlePress = useCallback(() => {
-      onPress(request);
-    }, [request, onPress]);
-
-    const handleApprove = useCallback(() => {
-      onApprove(request.id);
-    }, [request.id, onApprove]);
-
-    const handleDeny = useCallback(() => {
-      onDeny(request.id);
-    }, [request.id, onDeny]);
-
-    return (
-      <TouchableOpacity
-        style={[indexScreenStyles.card, isLast && indexScreenStyles.cardLast]}
-        onPress={handlePress}
-      >
-        <View style={indexScreenStyles.topRow}>
-          <Text style={indexScreenStyles.cardTitle} numberOfLines={2}>
-            {request.itemName} - ${request.estimatedCost}
-          </Text>
-          <Text
-            style={[
-              indexScreenStyles.priorityText,
-              { color: getPriorityBadgeColors(request.priority).fg },
-              { backgroundColor: getPriorityBadgeColors(request.priority).bg },
-            ]}
-          >
-            {request.priority.charAt(0).toUpperCase() +
-              request.priority.slice(1)}
-          </Text>
-        </View>
-        <Text style={indexScreenStyles.cardDescription} numberOfLines={2}>
-          {request.description}
-        </Text>
-        <View style={indexScreenStyles.metaRow}>
-          <Text style={indexScreenStyles.metaText}>
-            {request.vesselName} • {formatDate(request.createdAt)}
-          </Text>
-        </View>
-        {showActions && request.status === "pending" && (
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              style={styles.approveButton}
-              onPress={handleApprove}
-            >
-              <Text style={styles.approveButtonText}>Approve</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.denyButton} onPress={handleDeny}>
-              <Text style={styles.denyButtonText}>Deny</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </TouchableOpacity>
-    );
-  },
-);
 
 export default function SuppliesScreen() {
   const topPadding = useTopPadding();
@@ -191,13 +118,30 @@ export default function SuppliesScreen() {
       index: number;
       section: { data: SupplyRequest[] };
     }) => (
-      <SupplyRequestItem
-        request={item}
-        onPress={handleRequestPress}
-        onApprove={handleApprove}
-        onDeny={handleDeny}
-        showActions={userRole === "manager" || userRole === "owner"}
+      <ItemCard
+        title={`${item.itemName} - $${item.estimatedCost}`}
+        description={item.description}
+        vesselName={item.vesselName}
+        onPress={() => handleRequestPress(item)}
         isLast={index === section.data.length - 1}
+        badge={{
+          label: item.priority.charAt(0).toUpperCase() + item.priority.slice(1),
+          fg: getPriorityBadgeColors(item.priority).fg,
+          bg: getPriorityBadgeColors(item.priority).bg,
+        }}
+        metaText={formatDate(item.createdAt)}
+        actions={
+          (userRole === "manager" || userRole === "owner") && item.status === "pending" ? (
+            <View style={styles.actionButtons}>
+              <TouchableOpacity style={styles.approveButton} onPress={() => handleApprove(item.id)}>
+                <Text style={styles.approveButtonText}>Approve</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.denyButton} onPress={() => handleDeny(item.id)}>
+                <Text style={styles.denyButtonText}>Deny</Text>
+              </TouchableOpacity>
+            </View>
+          ) : undefined
+        }
       />
     ),
     [handleRequestPress, handleApprove, handleDeny, userRole],

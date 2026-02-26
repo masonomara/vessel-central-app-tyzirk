@@ -1,17 +1,38 @@
+import React, { useState, useCallback } from "react";
 import { StyleSheet, View, Text, ScrollView } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
 import { colors } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { IconSymbol } from "../components/IconSymbol";
-import { StatCard } from "../components/StatCard";
-import { PressableCard } from "../components/PressableCard";
+import { ItemCard } from "../components/ItemCard";
+import { CollapsibleSectionHeader } from "../components/CollapsibleSectionHeader";
 import { useTopPadding } from "../hooks/useTopPadding";
+import { formatDate, formatDueDate } from "../utils/dateUtils";
+import { formatEventDateRange } from "../utils/calendarUtils";
+import { getPriorityBadgeColors } from "../utils/colorUtils";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function VesselDetailScreen() {
   const topPadding = useTopPadding();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams();
-  const { vessels, maintenanceTasks, issues, supplyRequests, documents } =
+  const { vessels, maintenanceTasks, issues, supplyRequests, documents, calendarEvents } =
     useData();
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
+    new Set(),
+  );
+
+  const toggleSection = useCallback((title: string) => {
+    setCollapsedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(title)) {
+        next.delete(title);
+      } else {
+        next.add(title);
+      }
+      return next;
+    });
+  }, []);
 
   const vessel = vessels.find((v) => v.id === id);
 
@@ -30,10 +51,11 @@ export default function VesselDetailScreen() {
   const vesselIssues = issues.filter((i) => i.vesselId === vessel.id);
   const vesselSupplies = supplyRequests.filter((s) => s.vesselId === vessel.id);
   const vesselDocs = documents.filter((d) => d.vesselId === vessel.id);
+  const vesselEvents = calendarEvents.filter((e) => e.vesselId === vessel.id);
 
   const activeTasks = vesselTasks.filter((t) => t.status !== "completed");
   const openIssues = vesselIssues.filter((i) => i.status !== "completed");
-  const pendingSupplies = vesselSupplies.filter((s) => s.status === "pending");
+  const pendingSupplies = vesselSupplies.filter((s) => s.status !== "received" && s.status !== "denied");
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
@@ -88,125 +110,169 @@ export default function VesselDetailScreen() {
           </View>
         </View>
 
-        {activeTasks.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Active Tasks</Text>
-            {activeTasks.slice(0, 5).map((task) => (
-              <PressableCard
-                key={task.id}
-                style={styles.listCard}
-                onPress={() =>
-                  router.push({
-                    pathname: "/maintenance-detail",
-                    params: { id: task.id },
-                  })
-                }
-              >
-                <View style={styles.listCardContent}>
-                  <Text style={styles.listTitle}>{task.title}</Text>
-                  <Text style={styles.listSubtext}>
-                    {task.status.replace("_", " ")} · {task.priority}
-                  </Text>
-                </View>
-                <IconSymbol
-                  ios_icon_name="chevron.right"
-                  android_material_icon_name="chevron-right"
-                  size={16}
-                  color={colors.textSecondary}
-                />
-              </PressableCard>
-            ))}
-          </View>
-        )}
+        <View style={styles.listArea}>
+          {openIssues.length > 0 && (
+            <View>
+              <CollapsibleSectionHeader
+                title="Open Issues"
+                count={openIssues.length}
+                collapsed={collapsedSections.has("Open Issues")}
+                onToggle={() => toggleSection("Open Issues")}
+              />
+              {!collapsedSections.has("Open Issues") &&
+                openIssues.map((issue, index) => (
+                  <ItemCard
+                    key={issue.id}
+                    title={issue.title}
+                    description={issue.description}
+                    vesselName={vessel.name}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/issue-detail",
+                        params: { id: issue.id },
+                      })
+                    }
+                    isLast={index === openIssues.length - 1}
+                    badge={{
+                      label: issue.priority.charAt(0).toUpperCase() + issue.priority.slice(1),
+                      fg: getPriorityBadgeColors(issue.priority).fg,
+                      bg: getPriorityBadgeColors(issue.priority).bg,
+                    }}
+                    metaText={formatDate(issue.createdAt)}
+                  />
+                ))}
+            </View>
+          )}
 
-        {openIssues.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Open Issues</Text>
-            {openIssues.slice(0, 5).map((issue) => (
-              <PressableCard
-                key={issue.id}
-                style={styles.listCard}
-                onPress={() =>
-                  router.push({
-                    pathname: "/issue-detail",
-                    params: { id: issue.id },
-                  })
-                }
-              >
-                <View style={styles.listCardContent}>
-                  <Text style={styles.listTitle}>{issue.title}</Text>
-                  <Text style={styles.listSubtext}>{issue.priority}</Text>
-                </View>
-                <IconSymbol
-                  ios_icon_name="chevron.right"
-                  android_material_icon_name="chevron-right"
-                  size={16}
-                  color={colors.textSecondary}
-                />
-              </PressableCard>
-            ))}
-          </View>
-        )}
+          {vesselEvents.length > 0 && (
+            <View>
+              <CollapsibleSectionHeader
+                title="Events"
+                count={vesselEvents.length}
+                collapsed={collapsedSections.has("Events")}
+                onToggle={() => toggleSection("Events")}
+              />
+              {!collapsedSections.has("Events") &&
+                vesselEvents.map((event, index) => (
+                  <ItemCard
+                    key={event.id}
+                    title={event.title}
+                    description={event.description}
+                    vesselName={vessel.name}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/calendar-event-detail",
+                        params: { eventId: event.id },
+                      })
+                    }
+                    isLast={index === vesselEvents.length - 1}
+                    badge={{
+                      label: formatEventDateRange(event.startDate, event.endDate, event.allDay),
+                      fg: colors.textSecondary,
+                      bg: colors.surfaceThree,
+                    }}
+                    metaText={event.location || undefined}
+                  />
+                ))}
+            </View>
+          )}
 
-        {pendingSupplies.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Pending Supplies</Text>
-            {pendingSupplies.slice(0, 5).map((req) => (
-              <PressableCard
-                key={req.id}
-                style={styles.listCard}
-                onPress={() =>
-                  router.push({
-                    pathname: "/supply-detail",
-                    params: { id: req.id },
-                  })
-                }
-              >
-                <View style={styles.listCardContent}>
-                  <Text style={styles.listTitle}>{req.itemName}</Text>
-                  <Text style={styles.listSubtext}>
-                    ${req.estimatedCost} · {req.status}
-                  </Text>
-                </View>
-                <IconSymbol
-                  ios_icon_name="chevron.right"
-                  android_material_icon_name="chevron-right"
-                  size={16}
-                  color={colors.textSecondary}
-                />
-              </PressableCard>
-            ))}
-          </View>
-        )}
+          {activeTasks.length > 0 && (
+            <View>
+              <CollapsibleSectionHeader
+                title="Maintenance"
+                count={activeTasks.length}
+                collapsed={collapsedSections.has("Maintenance")}
+                onToggle={() => toggleSection("Maintenance")}
+              />
+              {!collapsedSections.has("Maintenance") &&
+                activeTasks.map((task, index) => (
+                  <ItemCard
+                    key={task.id}
+                    title={`${task.title}${task.estimatedCost != null ? ` - $${task.estimatedCost}` : ""}`}
+                    description={task.description}
+                    vesselName={vessel.name}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/maintenance-detail",
+                        params: { id: task.id },
+                      })
+                    }
+                    isLast={index === activeTasks.length - 1}
+                    badge={{
+                      label: task.priority.charAt(0).toUpperCase() + task.priority.slice(1),
+                      fg: getPriorityBadgeColors(task.priority).fg,
+                      bg: getPriorityBadgeColors(task.priority).bg,
+                    }}
+                    metaText={formatDueDate(task.dueDate)}
+                  />
+                ))}
+            </View>
+          )}
 
-        {vesselDocs.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Documents</Text>
-            {vesselDocs.slice(0, 5).map((doc) => (
-              <PressableCard
-                key={doc.id}
-                style={styles.listCard}
-                onPress={() =>
-                  router.push({
-                    pathname: "/document-detail",
-                    params: { id: doc.id },
-                  })
-                }
-              >
-                <View style={styles.listCardContent}>
-                  <Text style={styles.listTitle}>{doc.title}</Text>
-                  <Text style={styles.listSubtext}>{doc.category}</Text>
-                </View>
-                <IconSymbol
-                  ios_icon_name="chevron.right"
-                  android_material_icon_name="chevron-right"
-                  size={16}
-                  color={colors.textSecondary}
-                />
-              </PressableCard>
-            ))}
-          </View>
-        )}
+          {pendingSupplies.length > 0 && (
+            <View>
+              <CollapsibleSectionHeader
+                title="Supplies"
+                count={pendingSupplies.length}
+                collapsed={collapsedSections.has("Supplies")}
+                onToggle={() => toggleSection("Supplies")}
+              />
+              {!collapsedSections.has("Supplies") &&
+                pendingSupplies.map((req, index) => (
+                  <ItemCard
+                    key={req.id}
+                    title={`${req.itemName} - $${req.estimatedCost}`}
+                    description={req.description}
+                    vesselName={vessel.name}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/supply-detail",
+                        params: { id: req.id },
+                      })
+                    }
+                    isLast={index === pendingSupplies.length - 1}
+                    badge={{
+                      label: req.priority.charAt(0).toUpperCase() + req.priority.slice(1),
+                      fg: getPriorityBadgeColors(req.priority).fg,
+                      bg: getPriorityBadgeColors(req.priority).bg,
+                    }}
+                    metaText={formatDate(req.createdAt)}
+                  />
+                ))}
+            </View>
+          )}
+
+          {vesselDocs.length > 0 && (
+            <View>
+              <CollapsibleSectionHeader
+                title="Documents"
+                count={vesselDocs.length}
+                collapsed={collapsedSections.has("Documents")}
+                onToggle={() => toggleSection("Documents")}
+              />
+              {!collapsedSections.has("Documents") &&
+                vesselDocs.map((doc, index) => (
+                  <ItemCard
+                    key={doc.id}
+                    title={doc.title}
+                    description={doc.description}
+                    vesselName={vessel.name}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/document-detail",
+                        params: { id: doc.id },
+                      })
+                    }
+                    isLast={index === vesselDocs.length - 1}
+                    metaText={formatDate(doc.uploadedAt)}
+                  />
+                ))}
+            </View>
+          )}
+
+          <View style={{ height: insets.bottom + 64 }} />
+        </View>
       </ScrollView>
     </View>
   );
@@ -216,8 +282,9 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   errorText: { color: colors.textSecondary, fontSize: 16 },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
-  titleSection: { alignItems: "center", marginBottom: 24 },
+  scrollContent: { paddingBottom: 0 },
+  titleSection: { alignItems: "center", marginBottom: 24, paddingHorizontal: 20 },
+  listArea: { backgroundColor: colors.surfaceTwo },
   iconCircle: {
     width: 80,
     height: 80,
@@ -241,20 +308,4 @@ const styles = StyleSheet.create({
   statusBadge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
   statusText: { fontSize: 12, fontWeight: "600" },
   statsRow: { flexDirection: "row", gap: 12, marginBottom: 24 },
-  section: { marginBottom: 24 },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 12,
-  },
-  listCard: { flexDirection: "row", alignItems: "center", marginBottom: 8 },
-  listCardContent: { flex: 1 },
-  listTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 2,
-  },
-  listSubtext: { fontSize: 13, color: colors.textSecondary },
 });

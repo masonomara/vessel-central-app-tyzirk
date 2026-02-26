@@ -1,16 +1,10 @@
 import React, { useState, useMemo, useCallback } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  SectionList,
-  TouchableOpacity,
-  Pressable,
-} from "react-native";
+import { StyleSheet, View, Text, SectionList, TouchableOpacity } from "react-native";
 import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
+import { ItemCard } from "../../../components/ItemCard";
 import { MaintenanceTask } from "../../../types";
 import { formatDueDate, isOverdue } from "../../../utils/dateUtils";
 import { Stack, router } from "expo-router";
@@ -21,91 +15,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SearchBar } from "../../../components/SearchBar";
 import { FilterRow } from "../../../components/FilterRow";
 import { CollapsibleSectionHeader } from "../../../components/CollapsibleSectionHeader";
-
-const MaintenanceTaskItem = React.memo(
-  ({
-    task,
-    onPress,
-    onComplete,
-    isLast,
-  }: {
-    task: MaintenanceTask;
-    onPress: (task: MaintenanceTask) => void;
-    onComplete: (id: string) => void;
-    isLast: boolean;
-  }) => {
-    const handlePress = useCallback(() => {
-      onPress(task);
-    }, [task, onPress]);
-
-    const handleComplete = useCallback(() => {
-      onComplete(task.id);
-    }, [task.id, onComplete]);
-
-    const isCompleted = task.status === "completed";
-
-    return (
-      <TouchableOpacity
-        style={[indexScreenStyles.card, isLast && indexScreenStyles.cardLast]}
-        onPress={handlePress}
-      >
-        <View style={indexScreenStyles.topRow}>
-          <Pressable
-            style={[
-              indexScreenStyles.completeButton,
-              {
-                backgroundColor: isCompleted
-                  ? colors.greenBackground
-                  : "transparent",
-              },
-              {
-                borderColor: isCompleted
-                  ? colors.greenBackground
-                  : colors.border,
-              },
-              { borderWidth: 1 },
-            ]}
-            onPress={handleComplete}
-            hitSlop={8}
-          >
-            {isCompleted && (
-              <IconSymbol
-                ios_icon_name={isCompleted ? "checkmark.circle.fill" : "circle"}
-                android_material_icon_name={isCompleted ? "check" : ""}
-                size={16}
-                color={colors.greenForeground}
-              />
-            )}
-          </Pressable>
-
-          <Text style={indexScreenStyles.cardTitle} numberOfLines={2}>
-            {task.title}
-            {task.estimatedCost != null ? ` - $${task.estimatedCost}` : ""}
-          </Text>
-          <Text
-            style={[
-              indexScreenStyles.priorityText,
-              { color: getPriorityBadgeColors(task.priority).fg },
-              { backgroundColor: getPriorityBadgeColors(task.priority).bg },
-            ]}
-          >
-            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-          </Text>
-        </View>
-        <View style={indexScreenStyles.bottomRowWithCheckbox}>
-          <Text style={indexScreenStyles.cardDescription} numberOfLines={2}>
-            {task.description}
-          </Text>
-        </View>
-        <View style={indexScreenStyles.metaRowWithCheckbox}>
-          <Text style={indexScreenStyles.metaText}>
-            {task.vesselName} • {formatDueDate(task.dueDate)}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
-  },
-);
 
 export default function MaintenanceScreen() {
   const topPadding = useTopPadding();
@@ -210,11 +119,21 @@ export default function MaintenanceScreen() {
       index: number;
       section: { data: MaintenanceTask[] };
     }) => (
-      <MaintenanceTaskItem
-        task={item}
-        onPress={handleTaskPress}
-        onComplete={handleComplete}
+      <ItemCard
+        title={`${item.title}${item.estimatedCost != null ? ` - $${item.estimatedCost}` : ""}`}
+        description={item.description}
+        vesselName={item.vesselName}
+        onPress={() => handleTaskPress(item)}
         isLast={index === section.data.length - 1}
+        showCheckbox
+        isCompleted={item.status === "completed"}
+        onComplete={() => handleComplete(item.id)}
+        badge={{
+          label: item.priority.charAt(0).toUpperCase() + item.priority.slice(1),
+          fg: getPriorityBadgeColors(item.priority).fg,
+          bg: getPriorityBadgeColors(item.priority).bg,
+        }}
+        metaText={formatDueDate(item.dueDate)}
       />
     ),
     [handleTaskPress, handleComplete],
