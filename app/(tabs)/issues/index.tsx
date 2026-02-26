@@ -4,24 +4,32 @@ import {
   View,
   Text,
   FlatList,
+  SectionList,
   TouchableOpacity,
   TextInput,
-  ActivityIndicator,
+  Pressable,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { useTopPadding } from "../../../hooks/useTopPadding";
-import { colors } from "../../../styles/commonStyles";
+import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
-import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { Issue, TaskStatus, TaskPriority } from "../../../types";
+import { Issue, TaskPriority } from "../../../types";
 import { formatDate } from "../../../utils/dateUtils";
 
-const ITEMS_PER_PAGE = 10;
-
 const IssueItem = React.memo(
-  ({ issue, onPress }: { issue: Issue; onPress: (issue: Issue) => void }) => {
+  ({
+    issue,
+    onPress,
+    onComplete,
+    isFirst,
+  }: {
+    issue: Issue;
+    onPress: (issue: Issue) => void;
+    onComplete: (id: string) => void;
+    isFirst: boolean;
+  }) => {
     const getPriorityColor = (priority: TaskPriority) => {
       switch (priority) {
         case "urgent":
@@ -37,138 +45,70 @@ const IssueItem = React.memo(
       }
     };
 
-    const getStatusColor = (status: TaskStatus) => {
-      switch (status) {
-        case "completed":
-          return colors.success;
-        case "in_progress":
-          return colors.accent;
-        case "waiting_on_parts":
-          return colors.grey;
-        case "open":
-          return colors.grey;
-        default:
-          return colors.grey;
-      }
-    };
-
     const handlePress = useCallback(() => {
       onPress(issue);
     }, [issue, onPress]);
 
+    const handleComplete = useCallback(() => {
+      onComplete(issue.id);
+    }, [issue.id, onComplete]);
+
+    const isCompleted = issue.status === "completed";
+
     return (
-      <TouchableOpacity
-        style={[
-          styles.issueCard,
-          issue.priority === "urgent" && styles.issueCardUrgent,
-        ]}
-        onPress={handlePress}
-        activeOpacity={0.7}
-      >
-        <View style={styles.issueHeader}>
-          <View style={styles.issueTitleRow}>
-            {/* <IconSymbol
-              ios_icon_name="exclamationmark.triangle.fill"
-              android_material_icon_name="report-problem"
-              size={24}
-              color={getPriorityColor(issue.priority)}
-            /> */}
-            <Text style={styles.issueTitle}>{issue.title}</Text>
-          </View>
-        </View>
-
-        <Text style={styles.issueDescription} numberOfLines={2}>
-          {issue.description}
-        </Text>
-
-        {/* <View style={styles.issueMeta}>
-          <View style={styles.metaItem}>
-            <IconSymbol
-              ios_icon_name="sailboat.fill"
-              android_material_icon_name="sailing"
-              size={16}
-              color={colors.textSecondary}
-            />
-            <Text style={styles.metaText}>{issue.vesselName}</Text>
-          </View>
-          <View style={styles.metaItem}>
-            <IconSymbol
-              ios_icon_name="location.fill"
-              android_material_icon_name="location-on"
-              size={16}
-              color={colors.textSecondary}
-            />
-            <Text style={styles.metaText}>{issue.location}</Text>
-          </View>
-        </View> */}
-
-        <View style={styles.issueFooter}>
-          <View
+      <TouchableOpacity style={[styles.issueCard]} onPress={handlePress}>
+        <View style={styles.topRow}>
+          <Pressable
             style={[
-              styles.priorityBadge,
-              { backgroundColor: getPriorityColor(issue.priority) + "30" },
+              styles.completeButton,
+
+              {
+                backgroundColor: isCompleted
+                  ? colors.greenBackground
+                  : "transparent",
+              },
+              {
+                borderColor: isCompleted
+                  ? colors.greenBackground
+                  : colors.border,
+              },
+              { borderWidth: 1 },
+            ]}
+            onPress={handleComplete}
+            hitSlop={8}
+          >
+            {isCompleted && (
+              <IconSymbol
+                ios_icon_name={isCompleted ? "checkmark.circle.fill" : "circle"}
+                android_material_icon_name={isCompleted ? "check" : ""}
+                size={16}
+                color={colors.greenForeground}
+              />
+            )}
+          </Pressable>
+
+          <Text style={styles.issueTitle} numberOfLines={2}>
+            {issue.title}
+          </Text>
+
+          {/* <Text style={styles.reportedByText}>
+          {issue.vesselName} · {formatDate(issue.createdAt)}
+        </Text> */}
+
+          <Text
+            style={[
+              styles.priorityText,
+              { color: getPriorityColor(issue.priority) },
             ]}
           >
-            <Text
-              style={[
-                styles.priorityText,
-                { color: getPriorityColor(issue.priority) },
-              ]}
-            >
-              {issue.priority.toUpperCase()}
-            </Text>
-          </View>
-          {/* <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: getStatusColor(issue.status) + "30" },
-            ]}
-          >
-            <Text
-              style={[
-                styles.statusText,
-                { color: getStatusColor(issue.status) },
-              ]}
-            >
-              {issue.status.replace("_", " ").toUpperCase()}
-            </Text>
-          </View> */}
-          <View style={styles.reportedBy}>
-            <Text style={styles.reportedByText}>
-               · {issue.vesselName} · {formatDate(issue.createdAt)}
-            </Text>
-          </View>
+            {issue.priority}
+          </Text>
         </View>
-
-        {/* {issue.attachments.length > 0 && (
-          <View style={styles.attachmentsIndicator}>
-            <IconSymbol
-              ios_icon_name="paperclip"
-              android_material_icon_name="attach-file"
-              size={16}
-              color={colors.accent}
-            />
-            <Text style={styles.attachmentsText}>
-              {issue.attachments.length} attachment
-              {issue.attachments.length > 1 ? "s" : ""}
-            </Text>
-          </View>
-        )} */}
-
-        {/* {issue.comments.length > 0 && (
-          <View style={styles.commentsIndicator}>
-            <IconSymbol
-              ios_icon_name="bubble.left.fill"
-              android_material_icon_name="comment"
-              size={16}
-              color={colors.accent}
-            />
-            <Text style={styles.commentsText}>
-              {issue.comments.length} comment
-              {issue.comments.length > 1 ? "s" : ""}
-            </Text>
-          </View>
-        )} */}
+        <View style={styles.bottomRow}>
+          <Text style={styles.issueDescription} numberOfLines={2}>
+            {issue.description}
+          </Text>
+        </View>
       </TouchableOpacity>
     );
   },
@@ -177,31 +117,65 @@ const IssueItem = React.memo(
 export default function IssuesScreen() {
   const topPadding = useTopPadding();
   const router = useRouter();
-  const { issues } = useData();
-  const { userRole } = useAuth();
-  const [filterStatus, setFilterStatus] = useState<TaskStatus | "all">("all");
+  const { issues, updateIssue } = useData();
+  const [filterVessel, setFilterVessel] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
+    new Set(),
+  );
 
-  const filteredIssues = useMemo(() => {
-    return issues.filter((issue) => {
-      const matchesStatus =
-        filterStatus === "all" || issue.status === filterStatus;
+  const vesselNames = useMemo(() => {
+    const names = new Set<string>();
+    issues.forEach((issue) => {
+      if (issue.vesselName) names.add(issue.vesselName);
+    });
+    return Array.from(names).sort();
+  }, [issues]);
+
+  const toggleSection = useCallback((title: string) => {
+    setCollapsedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(title)) {
+        next.delete(title);
+      } else {
+        next.add(title);
+      }
+      return next;
+    });
+  }, []);
+
+  const sections = useMemo(() => {
+    const filtered = issues.filter((issue) => {
+      const matchesVessel =
+        filterVessel === "all" || issue.vesselName === filterVessel;
       const matchesSearch =
         issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         issue.description.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesStatus && matchesSearch;
+      return matchesVessel && matchesSearch;
     });
-  }, [issues, filterStatus, searchQuery]);
 
-  const paginatedIssues = useMemo(() => {
-    return filteredIssues.slice(0, currentPage * ITEMS_PER_PAGE);
-  }, [filteredIssues, currentPage]);
+    const open = filtered.filter((i) => i.status === "open");
+    const inProgress = filtered.filter((i) => i.status === "in_progress");
+    const waitingOnParts = filtered.filter(
+      (i) => i.status === "waiting_on_parts",
+    );
+    const completed = filtered.filter((i) => i.status === "completed");
 
-  const hasMore = useMemo(() => {
-    return paginatedIssues.length < filteredIssues.length;
-  }, [paginatedIssues.length, filteredIssues.length]);
+    const sectionDefs: { title: string; items: Issue[] }[] = [
+      { title: "Open", items: open },
+      { title: "In Progress", items: inProgress },
+      { title: "Waiting on Parts", items: waitingOnParts },
+      { title: "Completed", items: completed },
+    ];
+
+    return sectionDefs
+      .filter((s) => s.items.length > 0)
+      .map((s) => ({
+        title: s.title,
+        count: s.items.length,
+        data: collapsedSections.has(s.title) ? [] : s.items,
+      }));
+  }, [issues, filterVessel, searchQuery, collapsedSections]);
 
   const handleIssuePress = useCallback(
     (issue: Issue) => {
@@ -210,44 +184,58 @@ export default function IssuesScreen() {
     [router],
   );
 
-  const handleAddIssue = useCallback(() => {
-    router.push("/add-issue");
-  }, []);
-
-  const handleLoadMore = useCallback(() => {
-    if (!isLoadingMore && hasMore) {
-      setIsLoadingMore(true);
-
-      // Simulate loading delay for smooth UX
-      setTimeout(() => {
-        setCurrentPage((prev) => prev + 1);
-        setIsLoadingMore(false);
-      }, 300);
-    }
-  }, [isLoadingMore, hasMore]);
-
-  const handleSearchChange = useCallback((text: string) => {
-    setSearchQuery(text);
-    setCurrentPage(1); // Reset to first page when search changes
-  }, []);
-
-  const handleFilterChange = useCallback((status: TaskStatus | "all") => {
-    setFilterStatus(status);
-    setCurrentPage(1); // Reset to first page when filter changes
-  }, []);
+  const handleComplete = useCallback(
+    (id: string) => {
+      updateIssue(id, { status: "completed" });
+    },
+    [updateIssue],
+  );
 
   const renderItem = useCallback(
-    ({ item }: { item: Issue }) => (
-      <IssueItem issue={item} onPress={handleIssuePress} />
+    ({ item, index }: { item: Issue; index: number }) => (
+      <IssueItem
+        issue={item}
+        onPress={handleIssuePress}
+        onComplete={handleComplete}
+        isFirst={index === 0}
+      />
     ),
-    [handleIssuePress],
+    [handleIssuePress, handleComplete],
   );
 
   const keyExtractor = useCallback((item: Issue) => item.id, []);
 
+  const renderSectionHeader = useCallback(
+    ({ section }: { section: { title: string; count: number } }) => {
+      const collapsed = collapsedSections.has(section.title);
+      return (
+        <Pressable
+          style={indexScreenStyles.sectionHeaderRow}
+          onPress={() => toggleSection(section.title)}
+        >
+          <IconSymbol
+            ios_icon_name={collapsed ? "chevron.right" : "chevron.down"}
+            android_material_icon_name={
+              collapsed ? "chevron-right" : "expand-more"
+            }
+            size={24}
+            color={colors.text}
+            style={indexScreenStyles.dropdown}
+          />
+          <Text style={indexScreenStyles.sectionHeader}>{section.title}</Text>
+          <Text style={indexScreenStyles.sectionCount}>
+            {" "}
+            {section.count} items
+          </Text>
+        </Pressable>
+      );
+    },
+    [collapsedSections, toggleSection],
+  );
+
   const ListHeaderComponent = useCallback(
     () => (
-      <>
+      <View style={styles.listHeaderComponent}>
         <View style={styles.searchContainer}>
           <IconSymbol
             ios_icon_name="magnifyingglass"
@@ -260,79 +248,42 @@ export default function IssuesScreen() {
             placeholder="Search issues..."
             placeholderTextColor={colors.textSecondary}
             value={searchQuery}
-            onChangeText={handleSearchChange}
+            onChangeText={setSearchQuery}
           />
         </View>
 
-        <View style={styles.filterContainer}>
+        <View style={indexScreenStyles.filterContainer}>
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
-            data={[
-              "all",
-              "open",
-              "in_progress",
-              "waiting_on_parts",
-              "completed",
-            ]}
-            renderItem={({ item: status }) => (
+            data={["all", ...vesselNames]}
+            renderItem={({ item: vessel }) => (
               <TouchableOpacity
                 style={[
-                  styles.filterChip,
-                  filterStatus === status && styles.filterChipActive,
+                  indexScreenStyles.filterChip,
+                  filterVessel === vessel && indexScreenStyles.filterChipActive,
                 ]}
-                onPress={() => handleFilterChange(status as TaskStatus | "all")}
+                onPress={() => setFilterVessel(vessel)}
               >
                 <Text
                   style={[
-                    styles.filterChipText,
-                    filterStatus === status && styles.filterChipTextActive,
+                    indexScreenStyles.filterChipText,
+                    filterVessel === vessel &&
+                      indexScreenStyles.filterChipTextActive,
                   ]}
                 >
-                  {status.replace("_", " ").toUpperCase()}
+                  {vessel === "all" ? "All" : vessel}
                 </Text>
               </TouchableOpacity>
             )}
             keyExtractor={(item) => item}
-            contentContainerStyle={styles.filterContent}
+            contentContainerStyle={indexScreenStyles.filterContent}
           />
         </View>
-      </>
+      </View>
     ),
-    [searchQuery, filterStatus, handleSearchChange, handleFilterChange],
+    [searchQuery, filterVessel, vesselNames],
   );
-
-  const ListFooterComponent = useCallback(() => {
-    if (paginatedIssues.length === 0) {
-      return null;
-    }
-
-    if (isLoadingMore) {
-      return (
-        <View style={styles.loadingMore}>
-          <ActivityIndicator size="small" color={colors.danger} />
-          <Text style={styles.loadingMoreText}>Loading more issues...</Text>
-        </View>
-      );
-    }
-
-    if (hasMore) {
-      return (
-        <TouchableOpacity
-          style={styles.loadMoreButton}
-          onPress={handleLoadMore}
-        >
-          <Text style={styles.loadMoreText}>Load More</Text>
-          <IconSymbol
-            ios_icon_name="chevron.down"
-            android_material_icon_name="expand-more"
-            size={20}
-            color={colors.danger}
-          />
-        </TouchableOpacity>
-      );
-    }
-  }, [paginatedIssues.length, isLoadingMore, hasMore, handleLoadMore]);
 
   const ListEmptyComponent = useCallback(
     () => (
@@ -375,20 +326,16 @@ export default function IssuesScreen() {
         }}
       />
 
-      <FlatList
-        data={paginatedIssues}
+      <SectionList
+        sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
+        renderSectionHeader={renderSectionHeader}
         ListHeaderComponent={ListHeaderComponent}
-        ListFooterComponent={ListFooterComponent}
         ListEmptyComponent={ListEmptyComponent}
-        contentContainerStyle={[styles.listContent, { paddingTop: topPadding }]}
+        contentContainerStyle={[styles.listContent, { marginTop: topPadding }]}
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews={true}
-        maxToRenderPerBatch={10}
-        updateCellsBatchingPeriod={50}
-        initialNumToRender={10}
-        windowSize={10}
+        stickySectionHeadersEnabled={false}
       />
     </View>
   );
@@ -405,46 +352,19 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginBottom: 16,
+
     borderWidth: 1,
     borderColor: colors.border,
   },
   searchInput: {
     flex: 1,
-    marginLeft: 12,
     fontSize: 16,
-    color: colors.text,
-  },
-  filterContainer: {
-    marginBottom: 16,
-  },
-  filterContent: {
-    paddingHorizontal: 20,
-    gap: 8,
-  },
-  filterChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: colors.surfaceOne,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginRight: 8,
-  },
-  filterChipActive: {
-    backgroundColor: colors.danger,
-    borderColor: colors.danger,
-  },
-  filterChipText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
-  filterChipTextActive: {
     color: colors.text,
   },
   listContent: {
     paddingBottom: 20,
+
+    backgroundColor: colors.surfaceTwo,
   },
   emptyState: {
     alignItems: "center",
@@ -455,162 +375,68 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: colors.text,
-    marginTop: 16,
   },
   emptyStateSubtext: {
     fontSize: 14,
     color: colors.textSecondary,
-    marginTop: 8,
   },
   issueCard: {
-    paddingHorizontal: 20,
-    marginTop: 16,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    borderRadius: 16,
+    padding: 16,
+    backgroundColor: colors.surfaceOne,
+    marginHorizontal: 20,
+    marginBottom: 8,
   },
-  issueCardUrgent: {},
-  issueHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  issueTitleRow: {
-    flexDirection: "row",
+
+  completeButton: {
+    height: 20,
+    width: 20,
+    borderRadius: 100,
     alignItems: "center",
-    gap: 8,
-    flex: 1,
+    justifyContent: "center",
   },
+
   issueTitle: {
     fontSize: 16,
     lineHeight: 21,
     fontWeight: "600",
     color: colors.text,
     flex: 1,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingTop: 16,
+  },
+  topRow: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  issueDescription: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 19,
+
+    marginTop: 11,
+  },
+  bottomRow: {
+    paddingLeft: 36,
+  },
+  reportedByText: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.textTertiary,
   },
   priorityBadge: {
     fontSize: 15,
     color: colors.text,
     fontWeight: "500",
     borderRadius: 4,
-    padding: 6,
-    paddingVertical: 0,
+
     lineHeight: 24,
   },
   priorityText: {
     fontSize: 10,
     fontWeight: "700",
   },
-  issueDescription: {
-    fontSize: 15,
-    color: colors.textSecondary,
-    marginBottom: 12,
-    lineHeight: 20,
-    marginTop: 6,
-  },
-  issueMeta: {
-    flexDirection: "row",
-    gap: 16,
-    marginBottom: 12,
-  },
-  metaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  metaText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  issueFooter: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    gap: 8,
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  reportedBy: {
-    alignItems: "flex-end",
-  },
-  reportedByText: {
-    fontSize: 12,
-    color: colors.textSecondary,
-  },
-  timeText: {
-    fontSize: 11,
-    color: colors.grey,
-    marginTop: 2,
-  },
-  attachmentsIndicator: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  attachmentsText: {
-    fontSize: 12,
-    color: colors.accent,
-    fontWeight: "500",
-  },
-  commentsIndicator: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 4,
-  },
-  commentsText: {
-    fontSize: 12,
-    color: colors.accent,
-    fontWeight: "500",
-  },
-  loadMoreButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+  listHeaderComponent: {
     backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    paddingVertical: 16,
-    marginTop: 8,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 8,
-  },
-  loadMoreText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.danger,
-  },
-  loadingMore: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 20,
-    gap: 12,
-  },
-  loadingMoreText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  endOfList: {
-    alignItems: "center",
-    paddingVertical: 20,
-  },
-  endOfListText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    fontStyle: "italic",
   },
 });

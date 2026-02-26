@@ -1,6 +1,11 @@
-
 import React, { useMemo } from "react";
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import { PressableCard } from "../../../components/PressableCard";
 import { colors, commonStyles } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -13,11 +18,11 @@ import { useTopPadding } from "../../../hooks/useTopPadding";
 export default function CrewDashboard() {
   const topPadding = useTopPadding();
   const { userName, userId, userRole } = useAuth();
-  const { 
+  const {
     getVesselsForUser,
     getMaintenanceTasksForUser,
     getSupplyRequestsForUser,
-    updateMaintenanceTask
+    updateMaintenanceTask,
   } = useData();
 
   const myVessels = useMemo(() => {
@@ -42,26 +47,26 @@ export default function CrewDashboard() {
   }, [userId, userRole, getSupplyRequestsForUser]);
 
   const toggleTaskCompletion = (taskId: string) => {
-    const task = myTasks.find(t => t.id === taskId);
+    const task = myTasks.find((t) => t.id === taskId);
     if (task) {
-      const newStatus = task.status === 'completed' ? 'open' : 'completed';
+      const newStatus = task.status === "completed" ? "open" : "completed";
       updateMaintenanceTask(taskId, { status: newStatus });
     }
   };
 
   const pendingTasks = useMemo(() => {
-    return myTasks.filter(t => t.status !== 'completed');
+    return myTasks.filter((t) => t.status !== "completed");
   }, [myTasks]);
 
   const completedTasks = useMemo(() => {
-    return myTasks.filter(t => t.status === 'completed');
+    return myTasks.filter((t) => t.status === "completed");
   }, [myTasks]);
 
   const formatTime = (date: Date) => {
-    return new Date(date).toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
+    return new Date(date).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -81,35 +86,17 @@ export default function CrewDashboard() {
           <Text style={styles.greeting}>Crew Portal</Text>
           <Text style={commonStyles.title}>{userName}</Text>
           <View style={styles.roleTag}>
-            <IconSymbol 
-              ios_icon_name="person.2.fill" 
-              android_material_icon_name="groups" 
-              size={16} 
-              color={colors.success} 
+            <IconSymbol
+              ios_icon_name="person.2.fill"
+              android_material_icon_name="groups"
+              size={16}
+              color={colors.success}
             />
             <Text style={styles.roleText}>Crew Member</Text>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>My Vessels</Text>
-          {myVessels.map((vessel) => (
-            <PressableCard key={vessel.id} style={styles.vesselCard} onPress={() => router.push({ pathname: '/vessel-detail', params: { id: vessel.id } })}>
-              <IconSymbol
-                ios_icon_name="sailboat.fill"
-                android_material_icon_name="sailing"
-                size={24}
-                color={colors.accent}
-              />
-              <View style={styles.vesselInfo}>
-                <Text style={styles.vesselName}>{vessel.name}</Text>
-                <Text style={styles.vesselLocation}>{vessel.location}</Text>
-              </View>
-            </PressableCard>
-          ))}
-        </View>
-
-        <View style={styles.statsRow}>
+        {/* <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>{pendingTasks.length}</Text>
             <Text style={styles.statLabel}>Pending Tasks</Text>
@@ -118,7 +105,7 @@ export default function CrewDashboard() {
             <Text style={styles.statNumber}>{completedTasks.length}</Text>
             <Text style={styles.statLabel}>Completed</Text>
           </View>
-        </View>
+        </View> */}
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -134,13 +121,16 @@ export default function CrewDashboard() {
             myTasks.map((task) => (
               <View
                 key={task.id}
-                style={[styles.taskCard, task.status === 'completed' && styles.taskCardCompleted]}
+                style={[
+                  styles.taskCard,
+                  task.status === "completed" && styles.taskCardCompleted,
+                ]}
               >
                 <TouchableOpacity
                   style={styles.taskCheckbox}
                   onPress={() => toggleTaskCompletion(task.id)}
                 >
-                  {task.status === 'completed' ? (
+                  {task.status === "completed" ? (
                     <IconSymbol
                       ios_icon_name="checkmark.circle.fill"
                       android_material_icon_name="check-circle"
@@ -159,22 +149,45 @@ export default function CrewDashboard() {
                 <PressableCard
                   variant="ghost"
                   style={styles.taskContent}
-                  onPress={() => router.push({ pathname: '/maintenance-detail', params: { id: task.id } })}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/maintenance-detail",
+                      params: { id: task.id },
+                    })
+                  }
                 >
                   <View style={styles.taskHeader}>
-                    <Text style={[styles.taskTitle, task.status === 'completed' && styles.taskTitleCompleted]}>
+                    <Text
+                      style={[
+                        styles.taskTitle,
+                        task.status === "completed" &&
+                          styles.taskTitleCompleted,
+                      ]}
+                    >
                       {task.title}
                     </Text>
-                    <View style={[
-                      styles.priorityBadge,
-                      task.priority === 'high' || task.priority === 'urgent' ? styles.priorityHigh :
-                      task.priority === 'medium' ? styles.priorityMedium :
-                      styles.priorityLow
-                    ]}>
-                      <Text style={styles.priorityText}>{task.priority.toUpperCase()}</Text>
+                    <View
+                      style={[
+                        styles.priorityBadge,
+                        task.priority === "high" || task.priority === "urgent"
+                          ? styles.priorityHigh
+                          : task.priority === "medium"
+                            ? styles.priorityMedium
+                            : styles.priorityLow,
+                      ]}
+                    >
+                      <Text style={styles.priorityText}>
+                        {task.priority.toUpperCase()}
+                      </Text>
                     </View>
                   </View>
-                  <Text style={[styles.taskDescription, task.status === 'completed' && styles.taskDescriptionCompleted]}>
+                  <Text
+                    style={[
+                      styles.taskDescription,
+                      task.status === "completed" &&
+                        styles.taskDescriptionCompleted,
+                    ]}
+                  >
                     {task.description}
                   </Text>
                   <Text style={styles.taskVessel}>{task.vesselName}</Text>
@@ -186,7 +199,9 @@ export default function CrewDashboard() {
                       color={colors.textSecondary}
                     />
                     <Text style={styles.taskTime}>
-                      {task.status === 'completed' ? 'Completed' : `Due: ${formatTime(task.dueDate)}`}
+                      {task.status === "completed"
+                        ? "Completed"
+                        : `Due: ${formatTime(task.dueDate)}`}
                     </Text>
                   </View>
                 </PressableCard>
@@ -201,34 +216,56 @@ export default function CrewDashboard() {
           <Text style={styles.sectionTitle}>Supply Requests</Text>
           {mySupplyRequests.length > 0 ? (
             mySupplyRequests.map((request) => (
-              <PressableCard key={request.id} style={styles.supplyCard} onPress={() => router.push({ pathname: '/supply-detail', params: { id: request.id } })}>
+              <PressableCard
+                key={request.id}
+                style={styles.supplyCard}
+                onPress={() =>
+                  router.push({
+                    pathname: "/supply-detail",
+                    params: { id: request.id },
+                  })
+                }
+              >
                 <View style={styles.supplyHeader}>
-                  <IconSymbol 
-                    ios_icon_name="shippingbox.fill" 
-                    android_material_icon_name="inventory-2" 
-                    size={24} 
-                    color={colors.accent} 
+                  <IconSymbol
+                    ios_icon_name="shippingbox.fill"
+                    android_material_icon_name="inventory-2"
+                    size={24}
+                    color={colors.accent}
                   />
                   <View style={styles.supplyInfo}>
                     <Text style={styles.supplyItem}>{request.itemName}</Text>
                     <Text style={styles.supplyQuantity}>
-                      {request.quantity} {request.unit} - ${request.estimatedCost}
+                      {request.quantity} {request.unit} - $
+                      {request.estimatedCost}
                     </Text>
-                    <Text style={styles.supplyVessel}>{request.vesselName}</Text>
+                    <Text style={styles.supplyVessel}>
+                      {request.vesselName}
+                    </Text>
                   </View>
                 </View>
-                <View style={[
-                  styles.supplyStatus,
-                  request.status === 'approved' ? styles.supplyStatusApproved : 
-                  request.status === 'denied' ? styles.supplyStatusDenied :
-                  styles.supplyStatusPending
-                ]}>
-                  <Text style={[
-                    styles.supplyStatusText,
-                    request.status === 'approved' ? styles.supplyStatusTextApproved : 
-                    request.status === 'denied' ? styles.supplyStatusTextDenied :
-                    styles.supplyStatusTextPending
-                  ]}>{request.status.toUpperCase()}</Text>
+                <View
+                  style={[
+                    styles.supplyStatus,
+                    request.status === "approved"
+                      ? styles.supplyStatusApproved
+                      : request.status === "denied"
+                        ? styles.supplyStatusDenied
+                        : styles.supplyStatusPending,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.supplyStatusText,
+                      request.status === "approved"
+                        ? styles.supplyStatusTextApproved
+                        : request.status === "denied"
+                          ? styles.supplyStatusTextDenied
+                          : styles.supplyStatusTextPending,
+                    ]}
+                  >
+                    {request.status.toUpperCase()}
+                  </Text>
                 </View>
               </PressableCard>
             ))
@@ -237,45 +274,31 @@ export default function CrewDashboard() {
           )}
         </View>
 
-        <View style={styles.quickActions}>
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => router.push('/add-issue')}
-          >
-            <IconSymbol 
-              ios_icon_name="exclamationmark.triangle.fill" 
-              android_material_icon_name="report-problem" 
-              size={24} 
-              color={colors.text} 
-            />
-            <Text style={styles.actionButtonText}>Report Issue</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => router.push('/add-parts-request')}
-          >
-            <IconSymbol 
-              ios_icon_name="wrench.and.screwdriver.fill" 
-              android_material_icon_name="build" 
-              size={24} 
-              color={colors.text} 
-            />
-            <Text style={styles.actionButtonText}>Request Parts</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => router.push('/add-supply-request')}
-          >
-            <IconSymbol 
-              ios_icon_name="plus.circle.fill" 
-              android_material_icon_name="add-circle" 
-              size={24} 
-              color={colors.text} 
-            />
-            <Text style={styles.actionButtonText}>Request Supplies</Text>
-          </TouchableOpacity>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>My Vessels</Text>
+          {myVessels.map((vessel) => (
+            <PressableCard
+              key={vessel.id}
+              style={styles.vesselCard}
+              onPress={() =>
+                router.push({
+                  pathname: "/vessel-detail",
+                  params: { id: vessel.id },
+                })
+              }
+            >
+              <IconSymbol
+                ios_icon_name="sailboat.fill"
+                android_material_icon_name="sailing"
+                size={24}
+                color={colors.accent}
+              />
+              <View style={styles.vesselInfo}>
+                <Text style={styles.vesselName}>{vessel.name}</Text>
+                <Text style={styles.vesselLocation}>{vessel.location}</Text>
+              </View>
+            </PressableCard>
+          ))}
         </View>
       </ScrollView>
     </View>
@@ -299,32 +322,32 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   roleTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: colors.surfaceOne,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     gap: 6,
   },
   roleText: {
     color: colors.success,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 16,
   },
   vesselCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
@@ -338,7 +361,7 @@ const styles = StyleSheet.create({
   },
   vesselName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 2,
   },
@@ -347,7 +370,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   statsRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     marginBottom: 24,
   },
@@ -356,24 +379,24 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
     borderColor: colors.border,
   },
   statNumber: {
     fontSize: 32,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.accent,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 14,
     color: colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
     gap: 12,
   },
@@ -383,16 +406,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     minWidth: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   badgeText: {
     color: colors.text,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   taskCard: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
@@ -412,20 +435,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   taskHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: 6,
   },
   taskTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     flex: 1,
     marginRight: 8,
   },
   taskTitleCompleted: {
-    textDecorationLine: 'line-through',
+    textDecorationLine: "line-through",
     color: colors.textSecondary,
   },
   taskDescription: {
@@ -435,17 +458,17 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   taskDescriptionCompleted: {
-    textDecorationLine: 'line-through',
+    textDecorationLine: "line-through",
   },
   taskVessel: {
     fontSize: 13,
     color: colors.accent,
     marginBottom: 8,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   taskFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   taskTime: {
@@ -458,23 +481,23 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   priorityHigh: {
-    backgroundColor: colors.danger + '30',
+    backgroundColor: colors.danger + "30",
   },
   priorityMedium: {
-    backgroundColor: colors.warning + '30',
+    backgroundColor: colors.warning + "30",
   },
   priorityLow: {
-    backgroundColor: colors.success + '30',
+    backgroundColor: colors.success + "30",
   },
   priorityText: {
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   supplyCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
@@ -483,8 +506,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   supplyHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
     flex: 1,
   },
@@ -493,7 +516,7 @@ const styles = StyleSheet.create({
   },
   supplyItem: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 2,
   },
@@ -505,7 +528,7 @@ const styles = StyleSheet.create({
   supplyVessel: {
     fontSize: 13,
     color: colors.accent,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   supplyStatus: {
     paddingHorizontal: 12,
@@ -513,17 +536,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   supplyStatusApproved: {
-    backgroundColor: colors.success + '30',
+    backgroundColor: colors.success + "30",
   },
   supplyStatusPending: {
-    backgroundColor: colors.warning + '30',
+    backgroundColor: colors.warning + "30",
   },
   supplyStatusDenied: {
-    backgroundColor: colors.danger + '30',
+    backgroundColor: colors.danger + "30",
   },
   supplyStatusText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   supplyStatusTextApproved: {
     color: colors.success,
@@ -537,7 +560,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     color: colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     padding: 20,
   },
   quickActions: {
@@ -545,8 +568,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: colors.primary,
     borderRadius: 12,
     padding: 16,
@@ -554,7 +577,7 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
 });

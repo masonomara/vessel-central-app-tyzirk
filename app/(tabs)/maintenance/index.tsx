@@ -4,30 +4,30 @@ import {
   View,
   Text,
   FlatList,
+  SectionList,
   TouchableOpacity,
   TextInput,
-  ActivityIndicator,
+  Pressable,
 } from "react-native";
-import { colors } from "../../../styles/commonStyles";
+import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import FilterModal, { FilterOptions } from "../../../components/FilterModal";
 import { MaintenanceTask, TaskStatus, TaskPriority } from "../../../types";
 import { formatDueDate, isOverdue } from "../../../utils/dateUtils";
 import { Stack, router } from "expo-router";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { useTopPadding } from "../../../hooks/useTopPadding";
 
-const ITEMS_PER_PAGE = 10;
-
 const MaintenanceTaskItem = React.memo(
   ({
     task,
     onPress,
+    onComplete,
   }: {
     task: MaintenanceTask;
     onPress: (task: MaintenanceTask) => void;
+    onComplete: (id: string) => void;
   }) => {
     const getPriorityColor = (priority: TaskPriority) => {
       switch (priority) {
@@ -63,6 +63,12 @@ const MaintenanceTaskItem = React.memo(
       onPress(task);
     }, [task, onPress]);
 
+    const handleComplete = useCallback(() => {
+      onComplete(task.id);
+    }, [task.id, onComplete]);
+
+    const isCompleted = task.status === "completed";
+
     return (
       <TouchableOpacity
         style={[
@@ -74,110 +80,131 @@ const MaintenanceTaskItem = React.memo(
         onPress={handlePress}
         activeOpacity={0.7}
       >
-        <View style={styles.taskHeader}>
-          <View style={styles.taskTitleRow}>
-            <Text style={styles.taskTitle}>{task.title}</Text>
-            {task.isRecurring && (
-              <IconSymbol
-                ios_icon_name="arrow.clockwise"
-                android_material_icon_name="repeat"
-                size={16}
-                color={colors.accent}
-              />
+        <View style={styles.taskCardRow}>
+          <Pressable
+            style={[
+              styles.completeButton,
+              { backgroundColor: isCompleted ? "blue" : "blue" },
+            ]}
+            onPress={handleComplete}
+            hitSlop={8}
+          >
+            <IconSymbol
+              ios_icon_name={isCompleted ? "checkmark.circle.fill" : "circle"}
+              android_material_icon_name={
+                isCompleted ? "check-circle" : "radio-button-unchecked"
+              }
+              size={16}
+              color={isCompleted ? colors.success : colors.textTertiary}
+            />
+          </Pressable>
+          <View style={styles.taskContent}>
+            <View style={styles.taskHeader}>
+              <View style={styles.taskTitleRow}>
+                <Text style={styles.taskTitle}>{task.title}</Text>
+                {task.isRecurring && (
+                  <IconSymbol
+                    ios_icon_name="arrow.clockwise"
+                    android_material_icon_name="repeat"
+                    size={16}
+                    color={colors.accent}
+                  />
+                )}
+              </View>
+              <View
+                style={[
+                  styles.priorityBadge,
+                  { backgroundColor: getPriorityColor(task.priority) + "30" },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.priorityText,
+                    { color: getPriorityColor(task.priority) },
+                  ]}
+                >
+                  {task.priority.toUpperCase()}
+                </Text>
+              </View>
+            </View>
+
+            <Text style={styles.taskDescription} numberOfLines={2}>
+              {task.description}
+            </Text>
+
+            <View style={styles.taskMeta}>
+              <View style={styles.metaItem}>
+                <IconSymbol
+                  ios_icon_name="sailboat.fill"
+                  android_material_icon_name="sailing"
+                  size={16}
+                  color={colors.textSecondary}
+                />
+                <Text style={styles.metaText}>{task.vesselName}</Text>
+              </View>
+              {task.assignedToName && (
+                <View style={styles.metaItem}>
+                  <IconSymbol
+                    ios_icon_name="person.fill"
+                    android_material_icon_name="person"
+                    size={16}
+                    color={colors.textSecondary}
+                  />
+                  <Text style={styles.metaText}>{task.assignedToName}</Text>
+                </View>
+              )}
+            </View>
+
+            <View style={styles.taskFooter}>
+              <View
+                style={[
+                  styles.statusBadge,
+                  { backgroundColor: getStatusColor(task.status) + "30" },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.statusText,
+                    { color: getStatusColor(task.status) },
+                  ]}
+                >
+                  {task.status.replace("_", " ").toUpperCase()}
+                </Text>
+              </View>
+              <View style={styles.dueDateContainer}>
+                <IconSymbol
+                  ios_icon_name="calendar"
+                  android_material_icon_name="event"
+                  size={16}
+                  color={
+                    isOverdue(task.dueDate) && task.status !== "completed"
+                      ? colors.danger
+                      : colors.textSecondary
+                  }
+                />
+                <Text
+                  style={[
+                    styles.dueDateText,
+                    isOverdue(task.dueDate) &&
+                      task.status !== "completed" &&
+                      styles.dueDateOverdue,
+                  ]}
+                >
+                  {formatDueDate(task.dueDate)}
+                </Text>
+              </View>
+            </View>
+
+            {task.estimatedCost && (
+              <View style={styles.costContainer}>
+                <Text style={styles.costLabel}>Est. Cost:</Text>
+                <Text style={styles.costValue}>
+                  ${task.estimatedCost.toLocaleString()}
+                </Text>
+              </View>
             )}
           </View>
-          <View
-            style={[
-              styles.priorityBadge,
-              { backgroundColor: getPriorityColor(task.priority) + "30" },
-            ]}
-          >
-            <Text
-              style={[
-                styles.priorityText,
-                { color: getPriorityColor(task.priority) },
-              ]}
-            >
-              {task.priority.toUpperCase()}
-            </Text>
-          </View>
         </View>
-
-        <Text style={styles.taskDescription} numberOfLines={2}>
-          {task.description}
-        </Text>
-
-        <View style={styles.taskMeta}>
-          <View style={styles.metaItem}>
-            <IconSymbol
-              ios_icon_name="sailboat.fill"
-              android_material_icon_name="sailing"
-              size={16}
-              color={colors.textSecondary}
-            />
-            <Text style={styles.metaText}>{task.vesselName}</Text>
-          </View>
-          {task.assignedToName && (
-            <View style={styles.metaItem}>
-              <IconSymbol
-                ios_icon_name="person.fill"
-                android_material_icon_name="person"
-                size={16}
-                color={colors.textSecondary}
-              />
-              <Text style={styles.metaText}>{task.assignedToName}</Text>
-            </View>
-          )}
-        </View>
-
-        <View style={styles.taskFooter}>
-          <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: getStatusColor(task.status) + "30" },
-            ]}
-          >
-            <Text
-              style={[
-                styles.statusText,
-                { color: getStatusColor(task.status) },
-              ]}
-            >
-              {task.status.replace("_", " ").toUpperCase()}
-            </Text>
-          </View>
-          <View style={styles.dueDateContainer}>
-            <IconSymbol
-              ios_icon_name="calendar"
-              android_material_icon_name="event"
-              size={16}
-              color={
-                isOverdue(task.dueDate) && task.status !== "completed"
-                  ? colors.danger
-                  : colors.textSecondary
-              }
-            />
-            <Text
-              style={[
-                styles.dueDateText,
-                isOverdue(task.dueDate) &&
-                  task.status !== "completed" &&
-                  styles.dueDateOverdue,
-              ]}
-            >
-              {formatDueDate(task.dueDate)}
-            </Text>
-          </View>
-        </View>
-
-        {task.estimatedCost && (
-          <View style={styles.costContainer}>
-            <Text style={styles.costLabel}>Est. Cost:</Text>
-            <Text style={styles.costValue}>
-              ${task.estimatedCost.toLocaleString()}
-            </Text>
-          </View>
-        )}
       </TouchableOpacity>
     );
   },
@@ -185,115 +212,132 @@ const MaintenanceTaskItem = React.memo(
 
 export default function MaintenanceScreen() {
   const topPadding = useTopPadding();
-  const { maintenanceTasks } = useData();
+  const { maintenanceTasks, updateMaintenanceTask } = useData();
   const { userRole } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<FilterOptions>({
-    status: "all",
-    priority: "all",
-    dateRange: "all",
-  });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [filterVessel, setFilterVessel] = useState<string>("all");
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
+    new Set(),
+  );
 
-  const filteredTasks = useMemo(() => {
-    return maintenanceTasks.filter((task) => {
-      const matchesStatus =
-        filters.status === "all" || task.status === filters.status;
-      const matchesPriority =
-        filters.priority === "all" || task.priority === filters.priority;
+  const vesselNames = useMemo(() => {
+    const names = new Set<string>();
+    maintenanceTasks.forEach((task) => {
+      if (task.vesselName) names.add(task.vesselName);
+    });
+    return Array.from(names).sort();
+  }, [maintenanceTasks]);
+
+  const toggleSection = useCallback((title: string) => {
+    setCollapsedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(title)) {
+        next.delete(title);
+      } else {
+        next.add(title);
+      }
+      return next;
+    });
+  }, []);
+
+  const sections = useMemo(() => {
+    const filtered = maintenanceTasks.filter((task) => {
+      const matchesVessel =
+        filterVessel === "all" || task.vesselName === filterVessel;
       const matchesSearch =
         task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-      let matchesDate = true;
-      if (filters.dateRange !== "all") {
-        const now = new Date();
-        const taskDate = new Date(task.dueDate);
-
-        if (filters.dateRange === "today") {
-          matchesDate = taskDate.toDateString() === now.toDateString();
-        } else if (filters.dateRange === "week") {
-          const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-          matchesDate = taskDate <= weekFromNow;
-        } else if (filters.dateRange === "month") {
-          const monthFromNow = new Date(
-            now.getTime() + 30 * 24 * 60 * 60 * 1000,
-          );
-          matchesDate = taskDate <= monthFromNow;
-        }
-      }
-
-      return matchesStatus && matchesPriority && matchesSearch && matchesDate;
+      return matchesVessel && matchesSearch;
     });
-  }, [maintenanceTasks, filters, searchQuery]);
 
-  const paginatedTasks = useMemo(() => {
-    return filteredTasks.slice(0, currentPage * ITEMS_PER_PAGE);
-  }, [filteredTasks, currentPage]);
+    const open = filtered.filter((t) => t.status === "open");
+    const inProgress = filtered.filter((t) => t.status === "in_progress");
+    const waitingOnParts = filtered.filter(
+      (t) => t.status === "waiting_on_parts",
+    );
+    const completed = filtered.filter((t) => t.status === "completed");
 
-  const hasMore = useMemo(() => {
-    return paginatedTasks.length < filteredTasks.length;
-  }, [paginatedTasks.length, filteredTasks.length]);
+    const sectionDefs: { title: string; items: MaintenanceTask[] }[] = [
+      { title: "Open", items: open },
+      { title: "In Progress", items: inProgress },
+      { title: "Waiting on Parts", items: waitingOnParts },
+      { title: "Completed", items: completed },
+    ];
 
-  const stats = useMemo(
-    () => ({
-      total: filteredTasks.length,
-      overdue: filteredTasks.filter(
+    return sectionDefs
+      .filter((s) => s.items.length > 0)
+      .map((s) => ({
+        title: s.title,
+        count: s.items.length,
+        data: collapsedSections.has(s.title) ? [] : s.items,
+      }));
+  }, [maintenanceTasks, filterVessel, searchQuery, collapsedSections]);
+
+  const stats = useMemo(() => {
+    const filtered = maintenanceTasks.filter((task) => {
+      const matchesVessel =
+        filterVessel === "all" || task.vesselName === filterVessel;
+      const matchesSearch =
+        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesVessel && matchesSearch;
+    });
+    return {
+      total: filtered.length,
+      overdue: filtered.filter(
         (t) => isOverdue(t.dueDate) && t.status !== "completed",
       ).length,
-      completed: filteredTasks.filter((t) => t.status === "completed").length,
-    }),
-    [filteredTasks],
-  );
-
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    if (filters.status !== "all") count++;
-    if (filters.priority !== "all") count++;
-    if (filters.dateRange !== "all") count++;
-    return count;
-  }, [filters]);
+      completed: filtered.filter((t) => t.status === "completed").length,
+    };
+  }, [maintenanceTasks, filterVessel, searchQuery]);
 
   const handleTaskPress = useCallback((task: MaintenanceTask) => {
     router.push(`/maintenance-detail?id=${task.id}`);
   }, []);
 
-  const handleAddTask = useCallback(() => {
-    router.push("/add-maintenance-task");
-  }, []);
-
-  const handleApplyFilters = useCallback((newFilters: FilterOptions) => {
-    setFilters(newFilters);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, []);
-
-  const handleLoadMore = useCallback(() => {
-    if (!isLoadingMore && hasMore) {
-      setIsLoadingMore(true);
-
-      // Simulate loading delay for smooth UX
-      setTimeout(() => {
-        setCurrentPage((prev) => prev + 1);
-        setIsLoadingMore(false);
-      }, 300);
-    }
-  }, [isLoadingMore, hasMore]);
-
-  const handleSearchChange = useCallback((text: string) => {
-    setSearchQuery(text);
-    setCurrentPage(1); // Reset to first page when search changes
-  }, []);
+  const handleComplete = useCallback(
+    (id: string) => {
+      updateMaintenanceTask(id, { status: "completed" });
+    },
+    [updateMaintenanceTask],
+  );
 
   const renderItem = useCallback(
     ({ item }: { item: MaintenanceTask }) => (
-      <MaintenanceTaskItem task={item} onPress={handleTaskPress} />
+      <MaintenanceTaskItem
+        task={item}
+        onPress={handleTaskPress}
+        onComplete={handleComplete}
+      />
     ),
-    [handleTaskPress],
+    [handleTaskPress, handleComplete],
   );
 
   const keyExtractor = useCallback((item: MaintenanceTask) => item.id, []);
+
+  const renderSectionHeader = useCallback(
+    ({ section }: { section: { title: string; count: number } }) => {
+      const collapsed = collapsedSections.has(section.title);
+      return (
+        <Pressable
+          style={indexScreenStyles.sectionHeaderRow}
+          onPress={() => toggleSection(section.title)}
+        >
+          <IconSymbol
+            ios_icon_name={collapsed ? "chevron.right" : "chevron.down"}
+            android_material_icon_name={
+              collapsed ? "chevron-right" : "expand-more"
+            }
+            size={24}
+            color={colors.textSecondary}
+            style={indexScreenStyles.dropdown}
+          />
+          <Text style={indexScreenStyles.sectionHeader}>{section.title}</Text>
+        </Pressable>
+      );
+    },
+    [collapsedSections, toggleSection],
+  );
 
   const ListHeaderComponent = useCallback(
     () => (
@@ -310,26 +354,37 @@ export default function MaintenanceScreen() {
             placeholder="Search tasks..."
             placeholderTextColor={colors.textSecondary}
             value={searchQuery}
-            onChangeText={handleSearchChange}
+            onChangeText={setSearchQuery}
           />
-          <TouchableOpacity
-            onPress={() => setShowFilters(true)}
-            style={styles.filterButton}
-          >
-            <IconSymbol
-              ios_icon_name="line.3.horizontal.decrease.circle"
-              android_material_icon_name="filter-list"
-              size={24}
-              color={
-                activeFilterCount > 0 ? colors.accent : colors.textSecondary
-              }
-            />
-            {activeFilterCount > 0 && (
-              <View style={styles.filterBadge}>
-                <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
-              </View>
+        </View>
+
+        <View style={indexScreenStyles.filterContainer}>
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={["all", ...vesselNames]}
+            renderItem={({ item: vessel }) => (
+              <TouchableOpacity
+                style={[
+                  indexScreenStyles.filterChip,
+                  filterVessel === vessel && indexScreenStyles.filterChipActive,
+                ]}
+                onPress={() => setFilterVessel(vessel)}
+              >
+                <Text
+                  style={[
+                    indexScreenStyles.filterChipText,
+                    filterVessel === vessel &&
+                      indexScreenStyles.filterChipTextActive,
+                  ]}
+                >
+                  {vessel === "all" ? "All" : vessel}
+                </Text>
+              </TouchableOpacity>
             )}
-          </TouchableOpacity>
+            keyExtractor={(item) => item}
+            contentContainerStyle={indexScreenStyles.filterContent}
+          />
         </View>
 
         <View style={styles.statsRow}>
@@ -352,40 +407,8 @@ export default function MaintenanceScreen() {
         </View>
       </>
     ),
-    [searchQuery, activeFilterCount, stats, handleSearchChange],
+    [searchQuery, filterVessel, vesselNames, stats],
   );
-
-  const ListFooterComponent = useCallback(() => {
-    if (paginatedTasks.length === 0) {
-      return null;
-    }
-
-    if (isLoadingMore) {
-      return (
-        <View style={styles.loadingMore}>
-          <ActivityIndicator size="small" color={colors.accent} />
-          <Text style={styles.loadingMoreText}>Loading more tasks...</Text>
-        </View>
-      );
-    }
-
-    if (hasMore) {
-      return (
-        <TouchableOpacity
-          style={styles.loadMoreButton}
-          onPress={handleLoadMore}
-        >
-          <Text style={styles.loadMoreText}>Load More</Text>
-          <IconSymbol
-            ios_icon_name="chevron.down"
-            android_material_icon_name="expand-more"
-            size={20}
-            color={colors.accent}
-          />
-        </TouchableOpacity>
-      );
-    }
-  }, [paginatedTasks.length, isLoadingMore, hasMore, handleLoadMore]);
 
   const ListEmptyComponent = useCallback(
     () => (
@@ -400,14 +423,14 @@ export default function MaintenanceScreen() {
         {(userRole === "manager" || userRole === "owner") && (
           <TouchableOpacity
             style={styles.emptyStateButton}
-            onPress={handleAddTask}
+            onPress={() => router.push("/add-maintenance-task")}
           >
             <Text style={styles.emptyStateButtonText}>Create First Task</Text>
           </TouchableOpacity>
         )}
       </View>
     ),
-    [userRole, handleAddTask],
+    [userRole],
   );
 
   return (
@@ -437,28 +460,16 @@ export default function MaintenanceScreen() {
         }}
       />
 
-      <FlatList
-        data={paginatedTasks}
+      <SectionList
+        sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
+        renderSectionHeader={renderSectionHeader}
         ListHeaderComponent={ListHeaderComponent}
-        ListFooterComponent={ListFooterComponent}
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={[styles.listContent, { paddingTop: topPadding }]}
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews={true}
-        maxToRenderPerBatch={10}
-        updateCellsBatchingPeriod={50}
-        initialNumToRender={10}
-        windowSize={10}
-      />
-
-      <FilterModal
-        visible={showFilters}
-        onClose={() => setShowFilters(false)}
-        onApply={handleApplyFilters}
-        filterType="maintenance"
-        currentFilters={filters}
+        stickySectionHeadersEnabled={false}
       />
     </View>
   );
@@ -485,26 +496,6 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     fontSize: 16,
     color: colors.text,
-  },
-  filterButton: {
-    padding: 4,
-    position: "relative",
-  },
-  filterBadge: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    backgroundColor: colors.accent,
-    borderRadius: 8,
-    minWidth: 16,
-    height: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  filterBadgeText: {
-    color: colors.text,
-    fontSize: 10,
-    fontWeight: "700",
   },
   statsRow: {
     flexDirection: "row",
@@ -564,6 +555,17 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: colors.border,
+  },
+  taskCardRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  completeButton: {
+    paddingTop: 2,
+    paddingRight: 12,
+  },
+  taskContent: {
+    flex: 1,
   },
   taskCardOverdue: {},
   taskHeader: {
@@ -657,43 +659,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: colors.accent,
-  },
-  loadMoreButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    paddingVertical: 16,
-    marginTop: 8,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 8,
-  },
-  loadMoreText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.accent,
-  },
-  loadingMore: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 20,
-    gap: 12,
-  },
-  loadingMoreText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  endOfList: {
-    alignItems: "center",
-    paddingVertical: 20,
-  },
-  endOfListText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    fontStyle: "italic",
   },
 });

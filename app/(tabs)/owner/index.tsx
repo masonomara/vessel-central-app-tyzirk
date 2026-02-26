@@ -233,7 +233,87 @@ export default function OwnerDashboard() {
             <Text style={styles.roleText}>Owner</Text>
           </View>
         </View>
-
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          {myActivityLogs.length > 0 ? (
+            myActivityLogs.map((log, index) => (
+              <PressableCard
+                key={log.id}
+                style={styles.activityCard}
+                onPress={() => {
+                  switch (log.type) {
+                    case "maintenance":
+                    case "task":
+                      router.push({
+                        pathname: "/maintenance-detail",
+                        params: { id: log.relatedId },
+                      });
+                      break;
+                    case "issue":
+                      router.push({
+                        pathname: "/issue-detail",
+                        params: { id: log.relatedId },
+                      });
+                      break;
+                    case "supply":
+                      router.push({
+                        pathname: "/supply-detail",
+                        params: { id: log.relatedId },
+                      });
+                      break;
+                  }
+                }}
+              >
+                <LinearGradient
+                  colors={
+                    log.type === "maintenance" || log.type === "task"
+                      ? [colors.success + "30", colors.success + "10"]
+                      : log.type === "issue"
+                        ? [colors.danger + "30", colors.danger + "10"]
+                        : [colors.accent + "30", colors.accent + "10"]
+                  }
+                  style={styles.activityIcon}
+                >
+                  <IconSymbol
+                    ios_icon_name={
+                      log.type === "maintenance" || log.type === "task"
+                        ? "checkmark.circle.fill"
+                        : log.type === "issue"
+                          ? "exclamationmark.triangle.fill"
+                          : "info.circle.fill"
+                    }
+                    android_material_icon_name={
+                      log.type === "maintenance" || log.type === "task"
+                        ? "check-circle"
+                        : log.type === "issue"
+                          ? "warning"
+                          : "info"
+                    }
+                    size={20}
+                    color={
+                      log.type === "maintenance" || log.type === "task"
+                        ? colors.success
+                        : log.type === "issue"
+                          ? colors.danger
+                          : colors.accent
+                    }
+                  />
+                </LinearGradient>
+                <View style={styles.activityContent}>
+                  <Text style={styles.activityTitle}>{log.title}</Text>
+                  <Text style={styles.activityDescription}>
+                    {log.description}
+                  </Text>
+                  <Text style={styles.activityTime}>
+                    {new Date(log.timestamp).toLocaleString()}
+                  </Text>
+                </View>
+              </PressableCard>
+            ))
+          ) : (
+            <Text style={styles.emptyText}>No recent activity</Text>
+          )}
+        </View>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Fleet Overview</Text>
           <View style={styles.fleetGrid}>
@@ -301,7 +381,7 @@ export default function OwnerDashboard() {
           </View>
         </View>
 
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={styles.sectionTitle}>Key Metrics</Text>
 
           <View style={styles.statsGrid}>
@@ -350,7 +430,7 @@ export default function OwnerDashboard() {
               onPress={handleApproveRequests}
             />
           </View>
-        </View>
+        </View> */}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Performance</Text>
@@ -526,88 +606,6 @@ export default function OwnerDashboard() {
             />
           </View>
         )}
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
-          {myActivityLogs.length > 0 ? (
-            myActivityLogs.map((log, index) => (
-              <PressableCard
-                key={log.id}
-                style={styles.activityCard}
-                onPress={() => {
-                  switch (log.type) {
-                    case "maintenance":
-                    case "task":
-                      router.push({
-                        pathname: "/maintenance-detail",
-                        params: { id: log.relatedId },
-                      });
-                      break;
-                    case "issue":
-                      router.push({
-                        pathname: "/issue-detail",
-                        params: { id: log.relatedId },
-                      });
-                      break;
-                    case "supply":
-                      router.push({
-                        pathname: "/supply-detail",
-                        params: { id: log.relatedId },
-                      });
-                      break;
-                  }
-                }}
-              >
-                <LinearGradient
-                  colors={
-                    log.type === "maintenance" || log.type === "task"
-                      ? [colors.success + "30", colors.success + "10"]
-                      : log.type === "issue"
-                        ? [colors.danger + "30", colors.danger + "10"]
-                        : [colors.accent + "30", colors.accent + "10"]
-                  }
-                  style={styles.activityIcon}
-                >
-                  <IconSymbol
-                    ios_icon_name={
-                      log.type === "maintenance" || log.type === "task"
-                        ? "checkmark.circle.fill"
-                        : log.type === "issue"
-                          ? "exclamationmark.triangle.fill"
-                          : "info.circle.fill"
-                    }
-                    android_material_icon_name={
-                      log.type === "maintenance" || log.type === "task"
-                        ? "check-circle"
-                        : log.type === "issue"
-                          ? "warning"
-                          : "info"
-                    }
-                    size={20}
-                    color={
-                      log.type === "maintenance" || log.type === "task"
-                        ? colors.success
-                        : log.type === "issue"
-                          ? colors.danger
-                          : colors.accent
-                    }
-                  />
-                </LinearGradient>
-                <View style={styles.activityContent}>
-                  <Text style={styles.activityTitle}>{log.title}</Text>
-                  <Text style={styles.activityDescription}>
-                    {log.description}
-                  </Text>
-                  <Text style={styles.activityTime}>
-                    {new Date(log.timestamp).toLocaleString()}
-                  </Text>
-                </View>
-              </PressableCard>
-            ))
-          ) : (
-            <Text style={styles.emptyText}>No recent activity</Text>
-          )}
-        </View>
       </ScrollView>
     </View>
   );

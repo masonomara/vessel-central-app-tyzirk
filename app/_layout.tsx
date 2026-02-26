@@ -83,10 +83,7 @@ function RootLayoutContent() {
         />
 
         {/* Detail screens */}
-        <Stack.Screen
-          name="maintenance-detail"
-          options={{ title: "" }}
-        />
+        <Stack.Screen name="maintenance-detail" options={{ title: "" }} />
         <Stack.Screen
           name="issue-detail"
           options={{ title: "Issue Details" }}

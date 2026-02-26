@@ -7,11 +7,12 @@ import {
   SectionList,
   TouchableOpacity,
   TextInput,
+  Pressable,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { useTopPadding } from "../../../hooks/useTopPadding";
-import { colors } from "../../../styles/commonStyles";
+import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
@@ -136,31 +137,35 @@ const SupplyRequestItem = React.memo(
 
         <View style={styles.requestFooter}>
           <Text style={styles.timeText}>{formatDate(request.createdAt)}</Text>
-          {(userRole === "manager" || userRole === "owner") && request.status === "pending" && (
-            <View style={styles.actionButtons}>
-              <TouchableOpacity
-                style={styles.approveButton}
-                onPress={handleApprove}
-              >
-                <IconSymbol
-                  ios_icon_name="checkmark.circle.fill"
-                  android_material_icon_name="check-circle"
-                  size={20}
-                  color={colors.success}
-                />
-                <Text style={styles.approveButtonText}>Approve</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.denyButton} onPress={handleDeny}>
-                <IconSymbol
-                  ios_icon_name="xmark.circle.fill"
-                  android_material_icon_name="cancel"
-                  size={20}
-                  color={colors.danger}
-                />
-                <Text style={styles.denyButtonText}>Deny</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+          {(userRole === "manager" || userRole === "owner") &&
+            request.status === "pending" && (
+              <View style={styles.actionButtons}>
+                <TouchableOpacity
+                  style={styles.approveButton}
+                  onPress={handleApprove}
+                >
+                  <IconSymbol
+                    ios_icon_name="checkmark.circle.fill"
+                    android_material_icon_name="check-circle"
+                    size={20}
+                    color={colors.success}
+                  />
+                  <Text style={styles.approveButtonText}>Approve</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.denyButton}
+                  onPress={handleDeny}
+                >
+                  <IconSymbol
+                    ios_icon_name="xmark.circle.fill"
+                    android_material_icon_name="cancel"
+                    size={20}
+                    color={colors.danger}
+                  />
+                  <Text style={styles.denyButtonText}>Deny</Text>
+                </TouchableOpacity>
+              </View>
+            )}
         </View>
 
         {request.approvedByName && (
@@ -180,11 +185,19 @@ export default function SuppliesScreen() {
   const router = useRouter();
   const { supplyRequests, approveSupplyRequest, denySupplyRequest } = useData();
   const { userRole, userId, userName } = useAuth();
-  const [filterStatus, setFilterStatus] = useState<SupplyRequestStatus | "all">(
-    "all",
-  );
+  const [filterVessel, setFilterVessel] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
+    new Set(),
+  );
+
+  const vesselNames = useMemo(() => {
+    const names = new Set<string>();
+    supplyRequests.forEach((r) => {
+      if (r.vesselName) names.add(r.vesselName);
+    });
+    return Array.from(names).sort();
+  }, [supplyRequests]);
 
   const toggleSection = useCallback((title: string) => {
     setCollapsedSections((prev) => {
@@ -200,41 +213,36 @@ export default function SuppliesScreen() {
 
   const sections = useMemo(() => {
     const filtered = supplyRequests.filter((request) => {
-      const matchesStatus =
-        filterStatus === "all" || request.status === filterStatus;
+      const matchesVessel =
+        filterVessel === "all" || request.vesselName === filterVessel;
       const matchesSearch =
         request.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         request.description.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesStatus && matchesSearch;
+      return matchesVessel && matchesSearch;
     });
 
-    const pending = filtered.filter((r) => r.status === "pending");
-    const approved = filtered.filter(
-      (r) => r.status === "approved" || r.status === "ordered" || r.status === "received",
-    );
+    const needsApproval = filtered.filter((r) => r.status === "pending");
+    const pending = filtered.filter((r) => r.status === "approved");
+    const ordered = filtered.filter((r) => r.status === "ordered");
+    const received = filtered.filter((r) => r.status === "received");
     const denied = filtered.filter((r) => r.status === "denied");
 
-    const result: { title: string; count: number; data: SupplyRequest[] }[] = [];
-    if (pending.length > 0)
-      result.push({
-        title: "Needs Approval",
-        count: pending.length,
-        data: collapsedSections.has("Needs Approval") ? [] : pending,
-      });
-    if (approved.length > 0)
-      result.push({
-        title: "Approved",
-        count: approved.length,
-        data: collapsedSections.has("Approved") ? [] : approved,
-      });
-    if (denied.length > 0)
-      result.push({
-        title: "Denied",
-        count: denied.length,
-        data: collapsedSections.has("Denied") ? [] : denied,
-      });
-    return result;
-  }, [supplyRequests, filterStatus, searchQuery, collapsedSections]);
+    const sectionDefs: { title: string; items: SupplyRequest[] }[] = [
+      { title: "Needs Approval", items: needsApproval },
+      { title: "Pending", items: pending },
+      { title: "Ordered", items: ordered },
+      { title: "Received", items: received },
+      { title: "Denied", items: denied },
+    ];
+
+    return sectionDefs
+      .filter((s) => s.items.length > 0)
+      .map((s) => ({
+        title: s.title,
+        count: s.items.length,
+        data: collapsedSections.has(s.title) ? [] : s.items,
+      }));
+  }, [supplyRequests, filterVessel, searchQuery, collapsedSections]);
 
   const handleApprove = useCallback(
     (id: string) => {
@@ -276,22 +284,22 @@ export default function SuppliesScreen() {
     ({ section }: { section: { title: string; count: number } }) => {
       const collapsed = collapsedSections.has(section.title);
       return (
-        <TouchableOpacity
-          style={styles.sectionHeaderRow}
+        <Pressable
+          style={indexScreenStyles.sectionHeaderRow}
           onPress={() => toggleSection(section.title)}
-          activeOpacity={0.7}
         >
-          <Text style={styles.sectionHeader}>
-            {section.title}
-            <Text style={styles.sectionCount}> ({section.count})</Text>
-          </Text>
           <IconSymbol
             ios_icon_name={collapsed ? "chevron.right" : "chevron.down"}
-            android_material_icon_name={collapsed ? "chevron-right" : "expand-more"}
-            size={16}
+            android_material_icon_name={
+              collapsed ? "chevron-right" : "expand-more"
+            }
+            size={18}
             color={colors.textSecondary}
+            style={indexScreenStyles.dropdown}
           />
-        </TouchableOpacity>
+          <Text style={indexScreenStyles.sectionHeader}>{section.title}</Text>
+          <Text style={indexScreenStyles.sectionCount}> {section.count}</Text>
+        </Pressable>
       );
     },
     [collapsedSections, toggleSection],
@@ -316,45 +324,36 @@ export default function SuppliesScreen() {
           />
         </View>
 
-        <View style={styles.filterContainer}>
+        <View style={indexScreenStyles.filterContainer}>
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
-            data={[
-              "all",
-              "pending",
-              "approved",
-              "denied",
-              "ordered",
-              "received",
-            ]}
-            renderItem={({ item: status }) => (
+            data={["all", ...vesselNames]}
+            renderItem={({ item: vessel }) => (
               <TouchableOpacity
                 style={[
-                  styles.filterChip,
-                  filterStatus === status && styles.filterChipActive,
+                  indexScreenStyles.filterChip,
+                  filterVessel === vessel && indexScreenStyles.filterChipActive,
                 ]}
-                onPress={() =>
-                  setFilterStatus(status as SupplyRequestStatus | "all")
-                }
+                onPress={() => setFilterVessel(vessel)}
               >
                 <Text
                   style={[
-                    styles.filterChipText,
-                    filterStatus === status && styles.filterChipTextActive,
+                    indexScreenStyles.filterChipText,
+                    filterVessel === vessel && indexScreenStyles.filterChipTextActive,
                   ]}
                 >
-                  {status.toUpperCase()}
+                  {vessel === "all" ? "All" : vessel}
                 </Text>
               </TouchableOpacity>
             )}
             keyExtractor={(item) => item}
-            contentContainerStyle={styles.filterContent}
+            contentContainerStyle={indexScreenStyles.filterContent}
           />
         </View>
       </>
     ),
-    [searchQuery, filterStatus],
+    [searchQuery, filterVessel, vesselNames],
   );
 
   const ListEmptyComponent = useCallback(
@@ -373,16 +372,18 @@ export default function SuppliesScreen() {
   );
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: colors.surfaceOne }]}
-    >
+    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
       <Stack.Screen
         options={{
           title: "Supplies",
           headerRight: () => (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+            >
               {userRole === "crew" && (
-                <TouchableOpacity onPress={() => router.push("/add-supply-request")}>
+                <TouchableOpacity
+                  onPress={() => router.push("/add-supply-request")}
+                >
                   <IconSymbol
                     ios_icon_name="plus"
                     android_material_icon_name="add"
@@ -434,56 +435,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text,
   },
-  filterContainer: {
-    marginBottom: 16,
-  },
-  filterContent: {
-    paddingHorizontal: 20,
-    gap: 8,
-  },
-  filterChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: colors.surfaceOne,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginRight: 8,
-  },
-  filterChipActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  filterChipText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
-  filterChipTextActive: {
-    color: colors.text,
-  },
   listContent: {
     paddingHorizontal: 20,
     paddingBottom: 20,
-  },
-  sectionHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 10,
-    marginTop: 4,
-  },
-  sectionHeader: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.textSecondary,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  sectionCount: {
-    fontWeight: "400",
-    textTransform: "none",
-    letterSpacing: 0,
   },
   emptyState: {
     alignItems: "center",

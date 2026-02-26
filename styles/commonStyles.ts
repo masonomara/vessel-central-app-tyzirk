@@ -348,6 +348,66 @@ export const commonStyles = StyleSheet.create({
   },
 });
 
+export const indexScreenStyles = StyleSheet.create({
+  // Filter chips
+  filterContainer: {
+    marginBottom: 16,
+  },
+  filterContent: {
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: colors.surfaceOne,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginRight: 8,
+  },
+  filterChipActive: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  filterChipText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.textSecondary,
+  },
+  filterChipTextActive: {
+    color: colors.text,
+  },
+
+  // Collapsible section headers
+  sectionHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    height: 56,
+    paddingHorizontal: 20,
+    marginTop: 2,
+    // borderTopWidth: 1,
+    // borderColor: colors.borderSoft,
+   
+    
+  },
+  sectionHeader: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: colors.text,
+    flex: 1,
+  },
+  sectionCount: {
+    fontSize: 16,
+    color: colors.textTertiary,
+  },
+  dropdown: {
+    padding: 0,
+    paddingRight: 2,
+  },
+});
+
 export const detailScreenStyles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 0,
