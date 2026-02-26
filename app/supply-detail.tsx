@@ -173,6 +173,37 @@ export default function SupplyDetailScreen() {
           ]}
         />
 
+        {needsApproval && isManagerOrOwner && (
+          <View style={styles.approvalRow}>
+            <TouchableOpacity
+              style={styles.approveBtn}
+              onPress={handleApprove}
+              activeOpacity={0.7}
+            >
+              {/* <IconSymbol
+                ios_icon_name="checkmark.circle.fill"
+                android_material_icon_name="check-circle"
+                size={16}
+                color={colors.greenForeground}
+              /> */}
+              <Text style={styles.approveBtnText}>Approve Request</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.denyBtn}
+              onPress={handleDeny}
+              activeOpacity={0.7}
+            >
+              {/* <IconSymbol
+                ios_icon_name="xmark.circle.fill"
+                android_material_icon_name="cancel"
+                size={16}
+                color={colors.redForeground}
+              /> */}
+              <Text style={styles.denyBtnText}>Deny Request</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         <DropdownRow
           label="Priority"
           options={[
@@ -185,56 +216,25 @@ export default function SupplyDetailScreen() {
           onSelect={(value) => handlePriorityChange(value as TaskPriority)}
         />
 
-        {needsApproval && isManagerOrOwner && (
-          <View style={styles.approvalRow}>
-            <TouchableOpacity
-              style={styles.approveBtn}
-              onPress={handleApprove}
-              activeOpacity={0.7}
-            >
-              <IconSymbol
-                ios_icon_name="checkmark.circle.fill"
-                android_material_icon_name="check-circle"
-                size={20}
-                color={colors.greenForeground}
-              />
-              <Text style={styles.approveBtnText}>Approve</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.denyBtn}
-              onPress={handleDeny}
-              activeOpacity={0.7}
-            >
-              <IconSymbol
-                ios_icon_name="xmark.circle.fill"
-                android_material_icon_name="cancel"
-                size={20}
-                color={colors.redForeground}
-              />
-              <Text style={styles.denyBtnText}>Deny</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
         {isDenied ? (
           <View style={styles.statusRow}>
             <Text style={styles.statusLabel}>Status</Text>
             <View style={styles.deniedBadge}>
-              <Text style={styles.deniedBadgeText}>DENIED</Text>
+              <Text style={styles.deniedBadgeText}>Denied</Text>
             </View>
           </View>
         ) : needsApproval ? (
           <View style={styles.statusRow}>
             <Text style={styles.statusLabel}>Status</Text>
             <View style={styles.pendingBadge}>
-              <Text style={styles.pendingBadgeText}>PENDING APPROVAL</Text>
+              <Text style={styles.pendingBadgeText}>Pending</Text>
             </View>
           </View>
         ) : (
           <DropdownRow
             label="Status"
             options={[
-              { label: "Pending", value: "approved" },
+              { label: "Approved", value: "approved" },
               { label: "Ordered", value: "ordered" },
               { label: "Received", value: "received" },
             ]}
@@ -350,8 +350,6 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.borderSoft,
   },
   approveBtn: {
     flex: 1,
@@ -361,12 +359,12 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: colors.greenBackground,
+    backgroundColor: colors.greenForeground,
   },
   approveBtnText: {
     fontSize: 15,
     fontWeight: "600",
-    color: colors.greenForeground,
+    color: colors.container,
   },
   denyBtn: {
     flex: 1,
@@ -376,12 +374,12 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: colors.redBackground,
+    backgroundColor: colors.redForeground,
   },
   denyBtnText: {
     fontSize: 15,
     fontWeight: "600",
-    color: colors.redForeground,
+    color: colors.container,
   },
   statusRow: {
     flexDirection: "row",
