@@ -200,7 +200,7 @@ export default function MaintenanceScreen() {
     <View
       style={[
         indexScreenStyles.container,
-        { backgroundColor: colors.surfaceTwo },
+        { backgroundColor: colors.surfaceOne },
       ]}
     >
       <Stack.Screen

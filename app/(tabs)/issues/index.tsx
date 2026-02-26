@@ -177,7 +177,7 @@ export default function IssuesScreen() {
     <View
       style={[
         indexScreenStyles.container,
-        { backgroundColor: colors.surfaceTwo },
+        { backgroundColor: colors.surfaceOne },
       ]}
     >
       <Stack.Screen

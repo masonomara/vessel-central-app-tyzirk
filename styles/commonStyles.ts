@@ -190,13 +190,13 @@ export const buttonStyles = StyleSheet.create({
 
 export const commonStyles = StyleSheet.create({
   wrapper: {
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
     width: "100%",
     height: "100%",
   },
   container: {
     flex: 1,
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
     width: "100%",
     height: "100%",
   },
@@ -354,7 +354,7 @@ export const indexScreenStyles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
   },
   listHeaderComponent: {},
 
@@ -414,8 +414,6 @@ export const indexScreenStyles = StyleSheet.create({
     justifyContent: "space-between",
     height: 56,
     paddingHorizontal: 20,
-    borderTopWidth: 4,
-    borderColor: colors.surfaceOne,
   },
   sectionHeader: {
     fontSize: 18,

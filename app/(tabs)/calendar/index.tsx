@@ -186,7 +186,7 @@ export default function CalendarScreen() {
                   key={`indicator-${event.id}-${idx}`}
                   style={[
                     styles.eventIndicator,
-                    { backgroundColor: getEventColor(event.type) },
+                    { backgroundColor: isSelected ? colors.container : colors.text },
                   ]}
                 />
               ))}
@@ -208,12 +208,16 @@ export default function CalendarScreen() {
         onPress={() => handleEventPress(event)}
         isLast={index === array.length - 1}
         style={{ marginHorizontal: 0 }}
-        badge={{
-          label: formatEventDateRange(event.startDate, event.endDate, event.allDay),
+        badge={event.location ? {
+          label: event.location,
           fg: colors.textSecondary,
           bg: colors.surfaceThree,
-        }}
-        metaText={event.location || undefined}
+        } : undefined}
+        metaText={formatEventDateRange(
+          event.startDate,
+          event.endDate,
+          event.allDay,
+        )}
       />
     ),
     [handleEventPress],
@@ -425,18 +429,18 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     alignItems: "center",
     justifyContent: "center",
-    padding: 4,
+    height: 36,
   },
   todayCell: {
-    backgroundColor: colors.surfaceTwo,
-    borderRadius: 6,
+    backgroundColor: colors.surfaceThree,
+    borderRadius: 100,
   },
   selectedDayCell: {
-    backgroundColor: colors.surfaceThree,
-    borderRadius: 8,
+    backgroundColor: colors.text,
+    borderRadius: 100,
   },
   dayText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "500",
     color: colors.textSecondary,
   },

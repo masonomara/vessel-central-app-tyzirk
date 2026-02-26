@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   rowNoBorder: {
     borderTopWidth: 0,
     paddingTop: 0,
-    backgroundColor: colors.surfaceTwo,
+    backgroundColor: colors.surfaceOne,
   },
   rowInline: {
     flexDirection: "row",
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   label: { fontSize: 16, color: colors.text, fontWeight: "600" },
   valueRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   value: { fontSize: 15, color: colors.text, marginTop: 13 },
-  valueInline: { marginTop: 0, textAlign: "right"},
+  valueInline: { marginTop: 0, textAlign: "right" },
   valueLinked: { color: colors.accent },
   button: {
     paddingVertical: 10,

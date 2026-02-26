@@ -225,8 +225,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceTwo,
     borderColor: colors.borderSoft,
     flex: 1,
-    borderTopWidth: 1,
-    borderTopColor: colors.borderSoft,
   },
   commentCard: {
     flexDirection: "row",

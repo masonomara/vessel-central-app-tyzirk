@@ -160,7 +160,7 @@ export default function DocumentsScreen() {
     <View
       style={[
         indexScreenStyles.container,
-        { backgroundColor: colors.surfaceTwo },
+        { backgroundColor: colors.surfaceOne },
       ]}
     >
       <Stack.Screen

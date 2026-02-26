@@ -16,8 +16,14 @@ export default function VesselDetailScreen() {
   const topPadding = useTopPadding();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams();
-  const { vessels, maintenanceTasks, issues, supplyRequests, documents, calendarEvents } =
-    useData();
+  const {
+    vessels,
+    maintenanceTasks,
+    issues,
+    supplyRequests,
+    documents,
+    calendarEvents,
+  } = useData();
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
     new Set(),
   );
@@ -55,7 +61,9 @@ export default function VesselDetailScreen() {
 
   const activeTasks = vesselTasks.filter((t) => t.status !== "completed");
   const openIssues = vesselIssues.filter((i) => i.status !== "completed");
-  const pendingSupplies = vesselSupplies.filter((s) => s.status !== "received" && s.status !== "denied");
+  const pendingSupplies = vesselSupplies.filter(
+    (s) => s.status !== "received" && s.status !== "denied",
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
@@ -134,7 +142,9 @@ export default function VesselDetailScreen() {
                     }
                     isLast={index === openIssues.length - 1}
                     badge={{
-                      label: issue.priority.charAt(0).toUpperCase() + issue.priority.slice(1),
+                      label:
+                        issue.priority.charAt(0).toUpperCase() +
+                        issue.priority.slice(1),
                       fg: getPriorityBadgeColors(issue.priority).fg,
                       bg: getPriorityBadgeColors(issue.priority).bg,
                     }}
@@ -167,7 +177,11 @@ export default function VesselDetailScreen() {
                     }
                     isLast={index === vesselEvents.length - 1}
                     badge={{
-                      label: formatEventDateRange(event.startDate, event.endDate, event.allDay),
+                      label: formatEventDateRange(
+                        event.startDate,
+                        event.endDate,
+                        event.allDay,
+                      ),
                       fg: colors.textSecondary,
                       bg: colors.surfaceThree,
                     }}
@@ -200,7 +214,9 @@ export default function VesselDetailScreen() {
                     }
                     isLast={index === activeTasks.length - 1}
                     badge={{
-                      label: task.priority.charAt(0).toUpperCase() + task.priority.slice(1),
+                      label:
+                        task.priority.charAt(0).toUpperCase() +
+                        task.priority.slice(1),
                       fg: getPriorityBadgeColors(task.priority).fg,
                       bg: getPriorityBadgeColors(task.priority).bg,
                     }}
@@ -233,7 +249,9 @@ export default function VesselDetailScreen() {
                     }
                     isLast={index === pendingSupplies.length - 1}
                     badge={{
-                      label: req.priority.charAt(0).toUpperCase() + req.priority.slice(1),
+                      label:
+                        req.priority.charAt(0).toUpperCase() +
+                        req.priority.slice(1),
                       fg: getPriorityBadgeColors(req.priority).fg,
                       bg: getPriorityBadgeColors(req.priority).bg,
                     }}
@@ -283,8 +301,11 @@ const styles = StyleSheet.create({
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   errorText: { color: colors.textSecondary, fontSize: 16 },
   scrollContent: { paddingBottom: 0 },
-  titleSection: { alignItems: "center", marginBottom: 24, paddingHorizontal: 20 },
-  listArea: { backgroundColor: colors.surfaceTwo },
+  titleSection: {
+    alignItems: "center",
+    marginBottom: 24,
+    paddingHorizontal: 20,
+  },
   iconCircle: {
     width: 80,
     height: 80,

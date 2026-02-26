@@ -200,7 +200,7 @@ export default function SuppliesScreen() {
     <View
       style={[
         indexScreenStyles.container,
-        { backgroundColor: colors.surfaceTwo },
+        { backgroundColor: colors.surfaceOne },
       ]}
     >
       <Stack.Screen
