@@ -227,8 +227,8 @@ export default function DocumentDetailScreen() {
 const styles = StyleSheet.create({
   previewSection: {
     marginHorizontal: 20,
-    marginTop: 8,
-    marginBottom: 8,
+    marginTop: 0,
+    marginBottom: 16,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.borderSoft,

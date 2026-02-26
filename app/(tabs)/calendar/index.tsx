@@ -21,6 +21,7 @@ import {
   getFirstDayOfMonth,
   getMonthName,
   formatEventTime,
+  formatEventDateRange,
   getEventColor,
   getEventTypeLabel,
   sortEventsByDate,
@@ -208,6 +209,9 @@ export default function CalendarScreen() {
           <View style={styles.eventTopRow}>
             <Text style={styles.eventTitle} numberOfLines={2}>
               {event.title}
+            </Text>
+            <Text style={styles.dateBadge}>
+              {formatEventDateRange(event.startDate, event.endDate, event.allDay)}
             </Text>
           </View>
           <View style={styles.eventBottomRow}>
@@ -522,6 +526,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.textTertiary,
     lineHeight: 15,
+  },
+  dateBadge: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: colors.textSecondary,
+    backgroundColor: colors.surfaceThree,
+    borderRadius: 4,
+    padding: 4,
+    paddingVertical: 0,
+    lineHeight: 20,
+    height: 20,
   },
   eventMeta: {
     flexDirection: "row",

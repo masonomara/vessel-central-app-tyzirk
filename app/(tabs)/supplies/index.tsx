@@ -56,7 +56,7 @@ const SupplyRequestItem = React.memo(
       >
         <View style={styles.topRow}>
           <Text style={styles.requestTitle} numberOfLines={2}>
-            {request.itemName}
+            {request.itemName} - ${request.estimatedCost}
           </Text>
           <Text
             style={[

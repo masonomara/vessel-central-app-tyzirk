@@ -233,6 +233,53 @@ export default function OwnerDashboard() {
             <Text style={styles.roleText}>Owner</Text>
           </View>
         </View>
+        {pendingApprovals.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Pending Approvals</Text>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{pendingApprovals.length}</Text>
+              </View>
+            </View>
+            {pendingApprovals.slice(0, 2).map((approval, index) => (
+              <PressableCard
+                key={approval.id}
+                style={styles.approvalCard}
+                onPress={() =>
+                  router.push({
+                    pathname: "/supply-detail",
+                    params: { id: approval.id },
+                  })
+                }
+              >
+                <View style={styles.approvalHeader}>
+                  <View style={styles.approvalLeft}>
+                    <Text style={styles.approvalItem}>{approval.itemName}</Text>
+                    <Text style={styles.approvalVessel}>
+                      {approval.vesselName}
+                    </Text>
+                  </View>
+                  <Text style={styles.approvalAmount}>
+                    ${approval.estimatedCost}
+                  </Text>
+                </View>
+                <View style={styles.approvalFooter}>
+                  <LinearGradient
+                    colors={[colors.accent + "30", colors.accent + "10"]}
+                    style={styles.approvalCategory}
+                  >
+                    <Text style={styles.approvalCategoryText}>
+                      {approval.category}
+                    </Text>
+                  </LinearGradient>
+                  <Text style={styles.approvalQuantity}>
+                    {approval.quantity} {approval.unit}
+                  </Text>
+                </View>
+              </PressableCard>
+            ))}
+          </View>
+        )}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Recent Activity</Text>
           {myActivityLogs.length > 0 ? (
@@ -549,61 +596,6 @@ export default function OwnerDashboard() {
                 </LinearGradient>
               </View>
             </PressableCard>
-          </View>
-        )}
-
-        {pendingApprovals.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Pending Approvals</Text>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{pendingApprovals.length}</Text>
-              </View>
-            </View>
-            {pendingApprovals.slice(0, 2).map((approval, index) => (
-              <PressableCard
-                key={approval.id}
-                style={styles.approvalCard}
-                onPress={() =>
-                  router.push({
-                    pathname: "/supply-detail",
-                    params: { id: approval.id },
-                  })
-                }
-              >
-                <View style={styles.approvalHeader}>
-                  <View style={styles.approvalLeft}>
-                    <Text style={styles.approvalItem}>{approval.itemName}</Text>
-                    <Text style={styles.approvalVessel}>
-                      {approval.vesselName}
-                    </Text>
-                  </View>
-                  <Text style={styles.approvalAmount}>
-                    ${approval.estimatedCost}
-                  </Text>
-                </View>
-                <View style={styles.approvalFooter}>
-                  <LinearGradient
-                    colors={[colors.accent + "30", colors.accent + "10"]}
-                    style={styles.approvalCategory}
-                  >
-                    <Text style={styles.approvalCategoryText}>
-                      {approval.category}
-                    </Text>
-                  </LinearGradient>
-                  <Text style={styles.approvalQuantity}>
-                    {approval.quantity} {approval.unit}
-                  </Text>
-                </View>
-              </PressableCard>
-            ))}
-            <GradientButton
-              title="Review All Requests"
-              onPress={handleApproveRequests}
-              icon="checkmark.circle.fill"
-              androidIcon="check_circle"
-              style={styles.viewAllButton}
-            />
           </View>
         )}
       </ScrollView>

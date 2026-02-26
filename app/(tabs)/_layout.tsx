@@ -40,7 +40,7 @@ export default function TabLayout() {
       minimizeBehavior="onScrollDown"
       disableTransparentOnScrollEdge
       shadowColor="transparent"
-      backgroundColor={colors.surfaceOne}
+      backgroundColor={colors.surfaceThree}
       iconColor={{
         default: colors.textTertiary,
         selected: colors.text,

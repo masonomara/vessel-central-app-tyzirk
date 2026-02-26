@@ -75,7 +75,7 @@ const MaintenanceTaskItem = React.memo(
           </Pressable>
 
           <Text style={styles.taskTitle} numberOfLines={2}>
-            {task.title}
+            {task.title}{task.estimatedCost != null ? ` - $${task.estimatedCost}` : ""}
           </Text>
           <Text
             style={[
