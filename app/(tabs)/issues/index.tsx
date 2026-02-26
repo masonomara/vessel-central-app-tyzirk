@@ -23,12 +23,10 @@ const IssueItem = React.memo(
     issue,
     onPress,
     onComplete,
-    isFirst,
   }: {
     issue: Issue;
     onPress: (issue: Issue) => void;
     onComplete: (id: string) => void;
-    isFirst: boolean;
   }) => {
     const getPriorityColor = (priority: TaskPriority) => {
       switch (priority) {
@@ -108,6 +106,13 @@ const IssueItem = React.memo(
           <Text style={styles.issueDescription} numberOfLines={2}>
             {issue.description}
           </Text>
+        </View>
+        <View style={styles.taskMeta}>
+          <Text style={styles.metaText}>{issue.vesselName}</Text>
+
+          {issue.assignedToName && (
+            <Text style={styles.metaText}> • {issue.assignedToName}</Text>
+          )}
         </View>
       </TouchableOpacity>
     );
@@ -414,7 +419,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     lineHeight: 19,
 
-    marginTop: 11,
+    marginTop: 3,
   },
   bottomRow: {
     paddingLeft: 36,
@@ -423,6 +428,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     color: colors.textTertiary,
+  },
+  metaText: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.textSecondary,
   },
   priorityBadge: {
     fontSize: 15,
@@ -438,5 +448,15 @@ const styles = StyleSheet.create({
   },
   listHeaderComponent: {
     backgroundColor: colors.surfaceOne,
+  },
+  taskMeta: {
+    flexDirection: "row",
+    marginLeft: 34,
+    marginTop: 6,
+
+  },
+  metaItem: {
+    flexDirection: "row",
+    flex: 1,
   },
 });

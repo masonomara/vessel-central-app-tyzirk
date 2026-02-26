@@ -32,11 +32,8 @@ import { useTopPadding } from "../hooks/useTopPadding";
 export default function CalendarEventDetailScreen() {
   const topPadding = useTopPadding();
   const { eventId } = useLocalSearchParams();
-  const {
-    calendarEvents,
-    updateCalendarEvent,
-    addCalendarEventComment,
-  } = useData();
+  const { calendarEvents, updateCalendarEvent, addCalendarEventComment } =
+    useData();
   const { userRole, userId, userName } = useAuth();
   const [commentText, setCommentText] = useState("");
 
@@ -106,11 +103,11 @@ export default function CalendarEventDetailScreen() {
               },
             },
             {
-              label: "Created By",
-              value: event.createdByName,
+              label: "Location",
+              value: event.location || "—",
               icon: {
-                ios_icon_name: "person.fill",
-                android_material_icon_name: "person",
+                ios_icon_name: "mappin.circle.fill",
+                android_material_icon_name: "place",
               },
             },
           ]}
@@ -128,6 +125,7 @@ export default function CalendarEventDetailScreen() {
           onSelect={(value) => handleStatusChange(value as CalendarEventStatus)}
         />
         <DetailRow label="Type" inline value={getEventTypeLabel(event.type)} />
+        <DetailRow label="Created By" inline value={event.createdByName} />
         <DetailRow
           label="Date"
           inline
@@ -137,18 +135,13 @@ export default function CalendarEventDetailScreen() {
             event.allDay,
           )}
         />
-        {event.location && (
-          <DetailRow label="Location" inline value={event.location} />
-        )}
         {event.attendeeNames.length > 0 && (
           <DetailRow label="Attendees" value={event.attendeeNames.join(", ")} />
         )}
         {event.description && (
           <DetailRow label="Description" value={event.description} />
         )}
-        {event.notes && (
-          <DetailRow label="Notes" value={event.notes} />
-        )}
+        {event.notes && <DetailRow label="Notes" value={event.notes} />}
 
         <View style={styles.historySection}>
           <View style={styles.commentCard}>
