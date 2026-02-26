@@ -16,14 +16,14 @@ export const CollapsibleSectionHeader = React.memo(
       <IconSymbol
         ios_icon_name={collapsed ? "chevron.right" : "chevron.down"}
         android_material_icon_name={collapsed ? "chevron-right" : "expand-more"}
-        size={16}
-        color={colors.textSecondary}
+        size={22}
+        color={colors.text}
         style={indexScreenStyles.dropdown}
       />
       <Text style={indexScreenStyles.sectionHeader}>{title}</Text>
       <Text style={indexScreenStyles.sectionCount}>
         {" "}
-        {count} items
+        {count} {count > 1 ? "items" : "item" }
       </Text>
     </Pressable>
   ),

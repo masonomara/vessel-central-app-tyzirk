@@ -356,8 +356,7 @@ export const indexScreenStyles = StyleSheet.create({
   listContent: {
     backgroundColor: colors.surfaceTwo,
   },
-  listHeaderComponent: {
-  },
+  listHeaderComponent: {},
 
   // Search bar
   searchContainer: {
@@ -391,7 +390,7 @@ export const indexScreenStyles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 8,
- 
+
     borderWidth: 1,
     borderColor: colors.borderSoft,
   },
@@ -419,19 +418,19 @@ export const indexScreenStyles = StyleSheet.create({
     borderColor: colors.surfaceOne,
   },
   sectionHeader: {
-    fontSize: 16,
-    lineHeight: 21,
+    fontSize: 18,
+    lineHeight: 24,
     fontWeight: "600",
     color: colors.text,
     flex: 1,
   },
   sectionCount: {
-    fontSize: 14,
-    color: colors.textTertiary,
+    fontSize: 13,
+    color: colors.textSecondary,
   },
   dropdown: {
     padding: 0,
-    paddingRight: 3,
+    paddingRight: 2,
   },
 
   // Card base
