@@ -255,7 +255,10 @@ export default function IssuesScreen() {
 
   return (
     <View
-      style={[indexScreenStyles.container, { backgroundColor: colors.surfaceOne }]}
+      style={[
+        indexScreenStyles.container,
+        { backgroundColor: colors.surfaceTwo },
+      ]}
     >
       <Stack.Screen
         options={{
@@ -287,7 +290,6 @@ export default function IssuesScreen() {
         ListFooterComponent={
           <View
             style={{
-              backgroundColor: colors.surfaceOne,
               height: insets.bottom + 64,
             }}
           />

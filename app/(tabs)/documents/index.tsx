@@ -1,10 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
-import {
-  View,
-  Text,
-  SectionList,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, SectionList, TouchableOpacity } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { colors, indexScreenStyles } from "../../../styles/commonStyles";
@@ -27,7 +22,9 @@ export default function DocumentsScreen() {
   const { userRole } = useAuth();
   const [filterVessel, setFilterVessel] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
+    new Set(),
+  );
 
   const vesselNames = useMemo(() => {
     const names = new Set<string>();
@@ -74,7 +71,11 @@ export default function DocumentsScreen() {
       .map(([category, items]) => ({
         title: category.charAt(0).toUpperCase() + category.slice(1),
         count: items.length,
-        data: collapsedSections.has(category.charAt(0).toUpperCase() + category.slice(1)) ? [] : items,
+        data: collapsedSections.has(
+          category.charAt(0).toUpperCase() + category.slice(1),
+        )
+          ? []
+          : items,
       }));
   }, [documents, filterVessel, searchQuery, collapsedSections]);
 
@@ -86,10 +87,21 @@ export default function DocumentsScreen() {
   );
 
   const renderItem = useCallback(
-    ({ item: doc, index, section }: { item: Document; index: number; section: { data: Document[] } }) => (
+    ({
+      item: doc,
+      index,
+      section,
+    }: {
+      item: Document;
+      index: number;
+      section: { data: Document[] };
+    }) => (
       <TouchableOpacity
         key={doc.id}
-        style={[indexScreenStyles.card, index === section.data.length - 1 && indexScreenStyles.cardLast]}
+        style={[
+          indexScreenStyles.card,
+          index === section.data.length - 1 && indexScreenStyles.cardLast,
+        ]}
         onPress={() => handleDocumentPress(doc)}
       >
         <View style={indexScreenStyles.topRow}>
@@ -159,7 +171,10 @@ export default function DocumentsScreen() {
 
   return (
     <View
-      style={[indexScreenStyles.container, { backgroundColor: colors.surfaceOne }]}
+      style={[
+        indexScreenStyles.container,
+        { backgroundColor: colors.surfaceTwo },
+      ]}
     >
       <Stack.Screen
         options={{
@@ -193,7 +208,6 @@ export default function DocumentsScreen() {
         ListFooterComponent={
           <View
             style={{
-              backgroundColor: colors.surfaceOne,
               height: insets.bottom + 64,
             }}
           />

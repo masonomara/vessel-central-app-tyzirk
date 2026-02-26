@@ -122,7 +122,8 @@ export function DropdownRow({
               styles.selectorText,
               {
                 color: (valueColors[selectedValue] || defaultColor).fg,
-                backgroundColor: (valueColors[selectedValue] || defaultColor).bg,
+                backgroundColor: (valueColors[selectedValue] || defaultColor)
+                  .bg,
               },
             ]}
           >
@@ -148,6 +149,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderTopWidth: 1,
     borderTopColor: colors.borderSoft,
+    backgroundColor: colors.surfaceOne,
   },
   label: {
     fontSize: 16,

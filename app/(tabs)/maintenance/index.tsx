@@ -281,7 +281,7 @@ export default function MaintenanceScreen() {
     <View
       style={[
         indexScreenStyles.container,
-        { backgroundColor: colors.surfaceOne },
+        { backgroundColor: colors.surfaceTwo },
       ]}
     >
       <Stack.Screen
@@ -318,7 +318,6 @@ export default function MaintenanceScreen() {
         ListFooterComponent={
           <View
             style={{
-              backgroundColor: colors.surfaceOne,
               height: insets.bottom + 64,
             }}
           />

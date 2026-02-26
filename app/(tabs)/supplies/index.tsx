@@ -244,14 +244,21 @@ export default function SuppliesScreen() {
           size={64}
           color={colors.textSecondary}
         />
-        <Text style={indexScreenStyles.emptyStateText}>No supply requests found</Text>
+        <Text style={indexScreenStyles.emptyStateText}>
+          No supply requests found
+        </Text>
       </View>
     ),
     [],
   );
 
   return (
-    <View style={[indexScreenStyles.container, { backgroundColor: colors.surfaceOne }]}>
+    <View
+      style={[
+        indexScreenStyles.container,
+        { backgroundColor: colors.surfaceTwo },
+      ]}
+    >
       <Stack.Screen
         options={{
           title: "Supplies",
@@ -286,7 +293,6 @@ export default function SuppliesScreen() {
         ListFooterComponent={
           <View
             style={{
-              backgroundColor: colors.surfaceOne,
               height: insets.bottom + 64,
             }}
           />

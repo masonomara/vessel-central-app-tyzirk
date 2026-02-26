@@ -163,10 +163,12 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.borderSoft,
     paddingHorizontal: 20,
+    backgroundColor: colors.surfaceOne,
   },
   rowNoBorder: {
     borderTopWidth: 0,
     paddingTop: 0,
+    backgroundColor: colors.surfaceTwo,
   },
   rowInline: {
     flexDirection: "row",

@@ -190,13 +190,13 @@ export const buttonStyles = StyleSheet.create({
 
 export const commonStyles = StyleSheet.create({
   wrapper: {
-    backgroundColor: colors.surfaceOne,
+    backgroundColor: colors.surfaceTwo,
     width: "100%",
     height: "100%",
   },
   container: {
     flex: 1,
-    backgroundColor: colors.surfaceOne,
+    backgroundColor: colors.surfaceTwo,
     width: "100%",
     height: "100%",
   },
@@ -357,7 +357,6 @@ export const indexScreenStyles = StyleSheet.create({
     backgroundColor: colors.surfaceTwo,
   },
   listHeaderComponent: {
-    backgroundColor: colors.surfaceOne,
   },
 
   // Search bar
@@ -392,7 +391,7 @@ export const indexScreenStyles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 8,
-    backgroundColor: colors.surfaceOne,
+ 
     borderWidth: 1,
     borderColor: colors.borderSoft,
   },
