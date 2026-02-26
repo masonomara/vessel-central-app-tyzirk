@@ -15,7 +15,7 @@ export default function ManagerLayout() {
           backgroundColor:
             Platform.OS === "ios" && Number(Platform.Version) >= 26
               ? "transparent"
-              : colors.surfaceOne,
+              : colors.surfaceTwo,
         },
       }}
     />

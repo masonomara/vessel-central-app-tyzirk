@@ -11,9 +11,12 @@ export default function CalendarLayout() {
         headerTintColor: colors.text,
         headerTitleStyle: { fontWeight: "600" },
         headerShadowVisible: false,
-        headerStyle: { backgroundColor: Platform.OS === "ios" && Number(Platform.Version) >= 26
-            ? "transparent"
-            : colors.surfaceOne },
+        headerStyle: {
+          backgroundColor:
+            Platform.OS === "ios" && Number(Platform.Version) >= 26
+              ? "transparent"
+              : colors.surfaceTwo,
+        },
       }}
     />
   );
