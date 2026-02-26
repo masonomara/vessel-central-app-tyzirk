@@ -138,14 +138,14 @@ export default function SuppliesScreen() {
     });
 
     const needsApproval = filtered.filter((r) => r.status === "pending");
-    const pending = filtered.filter((r) => r.status === "approved");
+    const approved = filtered.filter((r) => r.status === "approved");
     const ordered = filtered.filter((r) => r.status === "ordered");
     const received = filtered.filter((r) => r.status === "received");
     const denied = filtered.filter((r) => r.status === "denied");
 
     const sectionDefs: { title: string; items: SupplyRequest[] }[] = [
       { title: "Needs Approval", items: needsApproval },
-      { title: "Pending", items: pending },
+      { title: "Approved", items: approved },
       { title: "Ordered", items: ordered },
       { title: "Received", items: received },
       { title: "Denied", items: denied },
