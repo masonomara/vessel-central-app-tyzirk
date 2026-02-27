@@ -107,6 +107,7 @@ export default function IssuesScreen() {
         description={item.description}
         vesselName={item.vesselName}
         onPress={() => handleIssuePress(item)}
+        isFirst={index === 0}
         isLast={index === section.data.length - 1}
         showCheckbox
         isCompleted={item.status === "completed"}

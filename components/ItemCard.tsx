@@ -16,6 +16,7 @@ interface ItemCardProps {
   vesselName: string;
   onPress: () => void;
 
+  isFirst?: boolean;
   isLast?: boolean;
   style?: ViewStyle;
 
@@ -40,6 +41,7 @@ export const ItemCard = React.memo(
     description,
     vesselName,
     onPress,
+    isFirst,
     isLast,
     style,
     showCheckbox,
@@ -57,6 +59,7 @@ export const ItemCard = React.memo(
       <TouchableOpacity
         style={[
           indexScreenStyles.card,
+          isFirst && indexScreenStyles.cardFirst,
           isLast && indexScreenStyles.cardLast,
           style,
         ]}

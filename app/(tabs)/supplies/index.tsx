@@ -121,6 +121,7 @@ export default function SuppliesScreen() {
         title={`${item.itemName} - $${item.estimatedCost}`}
         description={item.description}
         vesselName={item.vesselName}
+        isFirst={index === 0}
         onPress={() => handleRequestPress(item)}
         isLast={index === section.data.length - 1}
         badge={{

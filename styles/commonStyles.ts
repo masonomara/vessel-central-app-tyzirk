@@ -405,12 +405,10 @@ export const indexScreenStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    height: 36,
+    height: 56,
     paddingHorizontal: 20,
-    paddingTop: 12,
-    marginBottom: 12,
-    borderTopWidth: 2,
-    borderColor: colors.borderSoft,
+    borderTopWidth: 3.5,
+    borderColor: colors.surfaceTwo,
   },
   sectionHeader: {
     fontSize: 17,
@@ -425,7 +423,7 @@ export const indexScreenStyles = StyleSheet.create({
   },
   dropdown: {
     padding: 0,
-    paddingRight: 3,
+    paddingRight: 10,
   },
 
   // Card base
@@ -433,8 +431,11 @@ export const indexScreenStyles = StyleSheet.create({
     backgroundColor: colors.surfaceOne,
     marginLeft: 20,
     paddingRight: 20,
-    marginBottom: 12,
-    paddingTop: 12,
+    marginBottom: 16,
+  },
+  cardFirst: {
+    borderTopWidth: 0,
+    borderTopColor: colors.borderSoft,
   },
   cardLast: {
     marginBottom: 20,
@@ -444,36 +445,39 @@ export const indexScreenStyles = StyleSheet.create({
   topRow: {
     flexDirection: "row",
     gap: 16,
+    paddingTop: 16,
   },
   cardTitle: {
-    fontSize: 15,
-    lineHeight: 20,
+    fontSize: 17,
+    lineHeight: 22,
     fontWeight: "600",
     color: colors.text,
     flex: 1,
   },
   cardDescription: {
     fontSize: 15,
-    color: colors.textSecondary,
+    color: colors.text,
     lineHeight: 20,
-    marginTop: 8,
+    marginTop: 2,
   },
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginTop: 4,
+    marginTop: 0,
   },
   metaText: {
-    fontSize: 12,
-    color: colors.textTertiary,
-    lineHeight: 15,
+    fontSize: 13,
+    color: colors.textSecondary,
+    lineHeight: 17,
+    marginTop: 2,
   },
   priorityText: {
-    fontSize: 13,
-    color: colors.text,
+    fontSize: 15,
+    color: colors.textSecondary,
     fontWeight: "500",
     borderRadius: 4,
+    marginTop: 2,
     paddingHorizontal: 4,
     lineHeight: 20,
     height: 20,
@@ -483,6 +487,7 @@ export const indexScreenStyles = StyleSheet.create({
   completeButton: {
     height: 20,
     width: 20,
+    marginLeft: 4,
     borderRadius: 100,
     alignItems: "center",
     justifyContent: "center",
@@ -490,12 +495,12 @@ export const indexScreenStyles = StyleSheet.create({
 
   // Offset for rows under checkbox
   bottomRowWithCheckbox: {
-    paddingLeft: 36,
+    paddingLeft: 42,
   },
   metaRowWithCheckbox: {
     flexDirection: "row",
     alignItems: "center",
-    marginLeft: 36,
+    marginLeft: 42,
     gap: 8,
     marginTop: 4,
   },

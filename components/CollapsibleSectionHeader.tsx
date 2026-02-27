@@ -16,7 +16,7 @@ export const CollapsibleSectionHeader = React.memo(
       <IconSymbol
         ios_icon_name={collapsed ? "chevron.right" : "chevron.down"}
         android_material_icon_name={collapsed ? "chevron-right" : "expand-more"}
-        size={17}
+        size={22}
         color={colors.text}
         style={indexScreenStyles.dropdown}
       />

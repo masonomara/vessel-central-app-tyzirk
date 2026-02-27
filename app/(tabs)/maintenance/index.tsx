@@ -122,6 +122,7 @@ export default function MaintenanceScreen() {
         title={`${item.title}${item.estimatedCost != null ? ` - $${item.estimatedCost}` : ""}`}
         description={item.description}
         vesselName={item.vesselName}
+        isFirst={index === 0}
         onPress={() => handleTaskPress(item)}
         isLast={index === section.data.length - 1}
         showCheckbox

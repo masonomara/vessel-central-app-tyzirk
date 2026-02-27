@@ -205,6 +205,7 @@ export default function CalendarScreen() {
         description={event.description}
         vesselName={event.vesselName}
         onPress={() => handleEventPress(event)}
+        isFirst={index === 0}
         isLast={index === array.length - 1}
         style={{ marginHorizontal: 0 }}
         badge={event.location ? {

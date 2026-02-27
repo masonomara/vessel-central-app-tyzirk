@@ -100,6 +100,7 @@ export default function DocumentsScreen() {
         title={doc.title}
         description={doc.description}
         vesselName={doc.vesselName}
+        isFirst={index === 0}
         onPress={() => handleDocumentPress(doc)}
         isLast={index === section.data.length - 1}
         metaText={formatDate(doc.uploadedAt)}
