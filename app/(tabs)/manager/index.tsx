@@ -121,7 +121,7 @@ export default function ManagerDashboard() {
     <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
       <Stack.Screen
         options={{
-          title: "Dashboard",
+          title: "Manager Dashboard",
           headerRight: () => (
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
@@ -145,17 +145,14 @@ export default function ManagerDashboard() {
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.header, { paddingTop: topPadding }]}>
-          <Text style={styles.greeting}>Manager Portal</Text>
-          <Text style={commonStyles.title}>{userName}</Text>
-          <View style={styles.roleTag}>
-            <IconSymbol
-              ios_icon_name="chart.bar.fill"
-              android_material_icon_name="dashboard"
-              size={16}
-              color={colors.accent}
-            />
-            <Text style={styles.roleText}>Manager</Text>
-          </View>
+          <Text style={styles.greeting}>
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            })}
+          </Text>
+          <Text style={commonStyles.title}>Hello, {userName?.split(" ")[0]}</Text>
         </View>
         {pendingApprovals.length > 0 && (
           <View style={styles.section}>

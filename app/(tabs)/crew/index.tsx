@@ -74,7 +74,7 @@ export default function CrewDashboard() {
     <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
       <Stack.Screen
         options={{
-          title: "Tasks",
+          title: "Crew Dashboard",
           headerRight: () => <ProfileHeaderButton />,
         }}
       />
@@ -83,17 +83,16 @@ export default function CrewDashboard() {
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.header, { paddingTop: topPadding }]}>
-          <Text style={styles.greeting}>Crew Portal</Text>
-          <Text style={commonStyles.title}>{userName}</Text>
-          <View style={styles.roleTag}>
-            <IconSymbol
-              ios_icon_name="person.2.fill"
-              android_material_icon_name="groups"
-              size={16}
-              color={colors.success}
-            />
-            <Text style={styles.roleText}>Crew Member</Text>
-          </View>
+          <Text style={styles.greeting}>
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            })}
+          </Text>
+          <Text style={commonStyles.title}>
+            Hello, {userName?.split(" ")[0]}
+          </Text>
         </View>
 
         {/* <View style={styles.statsRow}>
@@ -314,12 +313,13 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   header: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   greeting: {
     fontSize: 16,
+    lineHeight: 21,
     color: colors.textSecondary,
-    marginBottom: 4,
+    marginBottom: 8,
   },
   roleTag: {
     flexDirection: "row",
@@ -337,13 +337,15 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: "600",
     color: colors.text,
-    marginBottom: 16,
+    height: 36,
+    marginBottom: 12,
+    marginTop: 12,
   },
   vesselCard: {
     flexDirection: "row",
@@ -397,7 +399,7 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 16,
+
     gap: 12,
   },
   badge: {

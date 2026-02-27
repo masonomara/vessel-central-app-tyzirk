@@ -94,7 +94,7 @@ export default function TabLayout() {
           sf="list.bullet"
           androidSrc={<VectorIcon family={MaterialIcons} name="list" />}
         />
-        <Label>Tasks</Label>
+        <Label>Dashboard</Label>
       </NativeTabs.Trigger>
 
       {/* Calendar (all roles) */}

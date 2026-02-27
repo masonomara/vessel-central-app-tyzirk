@@ -210,18 +210,16 @@ export const commonStyles = StyleSheet.create({
 
   // Typography
   title: {
-    fontSize: 32,
-    fontWeight: "800",
+    fontSize: 24,
+    lineHeight: 24,
+    fontWeight: "600",
     color: colors.text,
     marginBottom: spacing.md,
-    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: colors.text,
-    marginBottom: spacing.sm,
-    letterSpacing: -0.3,
+    fontSize: 17,
+    fontWeight: "400",
+    color: colors.textSecondary,
   },
   heading: {
     fontSize: 20,

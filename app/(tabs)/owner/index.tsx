@@ -192,7 +192,7 @@ export default function OwnerDashboard() {
     <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
       <Stack.Screen
         options={{
-          title: "Dashboard",
+          title: "Owner Dashboard",
           headerRight: () => (
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
@@ -221,17 +221,14 @@ export default function OwnerDashboard() {
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.header, { paddingTop: topPadding }]}>
-          <Text style={styles.greeting}>Welcome back,</Text>
-          <Text style={commonStyles.title}>{userName}</Text>
-          <View style={styles.roleTag}>
-            <IconSymbol
-              ios_icon_name="crown.fill"
-              android_material_icon_name="workspace-premium"
-              size={16}
-              color={colors.gold}
-            />
-            <Text style={styles.roleText}>Owner</Text>
-          </View>
+          <Text style={styles.greeting}>
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            })}
+          </Text>
+          <Text style={commonStyles.title}>Hello, {userName?.split(" ")[0]}</Text>
         </View>
         {pendingApprovals.length > 0 && (
           <View style={styles.section}>
