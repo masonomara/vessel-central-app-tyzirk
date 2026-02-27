@@ -2,27 +2,13 @@ import { Stack } from "expo-router";
 import { AuthProvider } from "../contexts/AuthContext";
 import { DataProvider } from "../contexts/DataContext";
 import { ErrorBoundary } from "../components/ErrorBoundary";
-import { View, StyleSheet, Platform } from "react-native";
-import { colors } from "../styles/commonStyles";
+import { View, StyleSheet } from "react-native";
+import { stackScreenOptions } from "../components/TabStackLayout";
 
 function RootLayoutContent() {
   return (
     <View style={styles.container}>
-      <Stack
-        screenOptions={{
-          headerTransparent:
-            Platform.OS === "ios" && Number(Platform.Version) >= 26,
-          headerTintColor: colors.text,
-          headerTitleStyle: { fontWeight: "600" },
-          headerShadowVisible: false,
-          headerStyle: {
-            backgroundColor:
-              Platform.OS === "ios" && Number(Platform.Version) >= 26
-                ? "transparent"
-                : colors.surfaceOne,
-          },
-        }}
-      >
+      <Stack screenOptions={stackScreenOptions}>
         {/* Auth screens — no header */}
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
