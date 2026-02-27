@@ -223,7 +223,7 @@ export const commonStyles = StyleSheet.create({
   },
   heading: {
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: "600",
     color: colors.text,
     marginBottom: spacing.sm,
     letterSpacing: -0.2,
@@ -295,7 +295,7 @@ export const commonStyles = StyleSheet.create({
   badgeText: {
     color: colors.text,
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "600",
   },
   pill: {
     paddingHorizontal: spacing.md,
@@ -536,8 +536,8 @@ export const detailScreenStyles = StyleSheet.create({
     marginBottom: 0,
   },
   title: {
-    fontSize: 27,
-    fontWeight: "700",
+    fontSize: 24,
+    fontWeight: "600",
     color: colors.text,
     flex: 1,
   },
@@ -554,7 +554,7 @@ export const detailScreenStyles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "600",
   },
   section: {
     marginBottom: 24,

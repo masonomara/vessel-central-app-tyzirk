@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
   },
   brandName: {
     fontSize: 34,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#FFFFFF",
     marginTop: 16,
     letterSpacing: -0.5,
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
   },
   signInButtonText: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#0A2540",
     letterSpacing: 0.3,
   },

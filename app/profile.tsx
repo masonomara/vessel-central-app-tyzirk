@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
   roleText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "600",
     letterSpacing: 0.5,
   },
   section: {

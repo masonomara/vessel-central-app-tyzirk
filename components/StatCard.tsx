@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   },
   trendText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "600",
   },
   trendTextUp: {
     color: colors.success,
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 28,
-    fontWeight: "800",
+    fontWeight: "600",
     color: colors.text,
     marginBottom: spacing.xs,
     letterSpacing: -0.5,

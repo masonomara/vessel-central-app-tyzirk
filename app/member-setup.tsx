@@ -184,7 +184,7 @@ export default function MemberSetupScreen() {
                     <Text
                       style={[
                         styles.roleLabel,
-                        active && { color: role.color, fontWeight: "700" },
+                        active && { color: role.color, fontWeight: "600" },
                       ]}
                     >
                       {role.label}
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: "800",
+    fontWeight: "600",
     color: colors.text,
     letterSpacing: -0.5,
     marginBottom: 6,
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#FFFFFF",
     letterSpacing: 0.3,
   },

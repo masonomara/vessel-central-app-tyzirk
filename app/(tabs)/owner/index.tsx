@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
   roleText: {
     color: colors.gold,
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "600",
     letterSpacing: 0.5,
   },
   section: {
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 16,
     letterSpacing: -0.3,
@@ -690,7 +690,7 @@ const styles = StyleSheet.create({
   },
   vesselName: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 4,
     letterSpacing: -0.2,
@@ -728,7 +728,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "600",
     color: colors.text,
     letterSpacing: 0.5,
   },
@@ -759,7 +759,7 @@ const styles = StyleSheet.create({
   },
   performanceValue: {
     fontSize: 24,
-    fontWeight: "800",
+    fontWeight: "600",
     color: colors.text,
     marginBottom: 4,
     letterSpacing: -0.5,
@@ -840,7 +840,7 @@ const styles = StyleSheet.create({
   },
   priorityText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "600",
     color: colors.text,
     letterSpacing: 0.5,
   },
@@ -856,7 +856,7 @@ const styles = StyleSheet.create({
   badgeText: {
     color: colors.text,
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "600",
   },
   approvalCard: {
     padding: 16,
@@ -884,7 +884,7 @@ const styles = StyleSheet.create({
   },
   approvalAmount: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "600",
     color: colors.text,
     letterSpacing: -0.5,
   },
