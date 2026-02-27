@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { ItemCard } from "../../../components/ItemCard";
+import { ListWrapper } from "../../../components/ListWrapper";
 import { PressableCard } from "../../../components/PressableCard";
 import { colors, commonStyles } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -136,58 +137,61 @@ export default function ManagerDashboard() {
               </Text>
             </View>
 
-            {pendingApprovals.slice(0, 3).map((approval, index) => {
-              const sliced = pendingApprovals.slice(0, 3);
-              return (
-                <ItemCard
-                  key={approval.id}
-                  title={`${approval.itemName} - $${approval.estimatedCost}`}
-                  description={approval.description}
-                  vesselName={approval.vesselName}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/supply-detail",
-                      params: { id: approval.id },
-                    })
-                  }
-                  isFirst={index === 0}
-                  isLast={index === sliced.length - 1}
-                  badge={{
-                    label: approval.category,
-                    fg: colors.accent,
-                    bg: colors.accent + "30",
-                  }}
-                  actions={
-                    <View style={styles.approvalActions}>
-                      <TouchableOpacity
-                        style={styles.approveButton}
-                        onPress={() => handleApprove(approval.id)}
-                      >
-                        <IconSymbol
-                          ios_icon_name="checkmark.circle.fill"
-                          android_material_icon_name="check-circle"
-                          size={20}
-                          color={colors.success}
-                        />
-                        <Text style={styles.approveButtonText}>Approve</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.rejectButton}
-                        onPress={() => handleReject(approval.id)}
-                      >
-                        <IconSymbol
-                          ios_icon_name="xmark.circle.fill"
-                          android_material_icon_name="cancel"
-                          size={20}
-                          color={colors.danger}
-                        />
-                        <Text style={styles.rejectButtonText}>Reject</Text>
-                      </TouchableOpacity>
-                    </View>
-                  }
-                />
-              );
-            })}
+            <ListWrapper>
+              {pendingApprovals.slice(0, 3).map((approval, index) => {
+                const sliced = pendingApprovals.slice(0, 3);
+                return (
+                  <ItemCard
+                    key={approval.id}
+                    title={`${approval.itemName} - $${approval.estimatedCost}`}
+                    description={approval.description}
+                    vesselName={approval.vesselName}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/supply-detail",
+                        params: { id: approval.id },
+                      })
+                    }
+                    isFirst={index === 0}
+                    isLast={index === sliced.length - 1}
+                    badge={{
+                      label: approval.category,
+                      fg: colors.accent,
+                      bg: colors.accent + "30",
+                    }}
+                    actions={
+                      <View style={styles.approvalActions}>
+                        <TouchableOpacity
+                          style={styles.approveButton}
+                          onPress={() => handleApprove(approval.id)}
+                        >
+                          <IconSymbol
+                            ios_icon_name="checkmark.circle.fill"
+                            android_material_icon_name="check-circle"
+                            size={20}
+                            color={colors.success}
+                          />
+                          <Text style={styles.approveButtonText}>Approve</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.rejectButton}
+                          onPress={() => handleReject(approval.id)}
+                        >
+                          <IconSymbol
+                            ios_icon_name="xmark.circle.fill"
+                            android_material_icon_name="cancel"
+                            size={20}
+                            color={colors.danger}
+                          />
+                          <Text style={styles.rejectButtonText}>Reject</Text>
+                        </TouchableOpacity>
+                      </View>
+                    }
+                    style={{ marginLeft: 0, backgroundColor: "transparent" }}
+                  />
+                );
+              })}
+            </ListWrapper>
             {pendingApprovals.length > 3 && (
               <TouchableOpacity
                 style={styles.viewAllButton}
@@ -358,31 +362,34 @@ export default function ManagerDashboard() {
             </Text>
           </View>
           {upcomingMaintenance.length > 0 ? (
-            upcomingMaintenance.map((item, index) => {
-              const priorityBadge = getPriorityBadgeColors(item.priority);
-              return (
-                <ItemCard
-                  key={item.id}
-                  title={item.title}
-                  description={item.vesselName}
-                  vesselName={item.vesselName}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/maintenance-detail",
-                      params: { id: item.id },
-                    })
-                  }
-                  isFirst={index === 0}
-                  isLast={index === upcomingMaintenance.length - 1}
-                  badge={{
-                    label: item.priority.charAt(0).toUpperCase() + item.priority.slice(1),
-                    fg: priorityBadge.fg,
-                    bg: priorityBadge.bg,
-                  }}
-                  metaText={formatDueDate(item.dueDate)}
-                />
-              );
-            })
+            <ListWrapper>
+              {upcomingMaintenance.map((item, index) => {
+                const priorityBadge = getPriorityBadgeColors(item.priority);
+                return (
+                  <ItemCard
+                    key={item.id}
+                    title={item.title}
+                    description={item.vesselName}
+                    vesselName={item.vesselName}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/maintenance-detail",
+                        params: { id: item.id },
+                      })
+                    }
+                    isFirst={index === 0}
+                    isLast={index === upcomingMaintenance.length - 1}
+                    badge={{
+                      label: item.priority.charAt(0).toUpperCase() + item.priority.slice(1),
+                      fg: priorityBadge.fg,
+                      bg: priorityBadge.bg,
+                    }}
+                    metaText={formatDueDate(item.dueDate)}
+                    style={{ marginLeft: 0, backgroundColor: "transparent" }}
+                  />
+                );
+              })}
+            </ListWrapper>
           ) : (
             <Text style={styles.emptyText}>No upcoming maintenance</Text>
           )}

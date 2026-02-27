@@ -15,6 +15,7 @@ import { IconSymbol } from "../../../components/IconSymbol";
 import { ProgressRing } from "../../../components/ProgressRing";
 import { MiniChart } from "../../../components/MiniChart";
 import { ItemCard } from "../../../components/ItemCard";
+import { ListWrapper } from "../../../components/ListWrapper";
 import { PressableCard } from "../../../components/PressableCard";
 import GlobalSearch from "../../../components/GlobalSearch";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
@@ -215,31 +216,34 @@ export default function OwnerDashboard() {
                 {pendingApprovals.length} {pendingApprovals.length === 1 ? "item" : "items"}
               </Text>
             </View>
-            {pendingApprovals.slice(0, 2).map((approval, index) => {
-              const sliced = pendingApprovals.slice(0, 2);
-              return (
-                <ItemCard
-                  key={approval.id}
-                  title={`${approval.itemName} - $${approval.estimatedCost}`}
-                  description={`${approval.quantity} ${approval.unit}`}
-                  vesselName={approval.vesselName}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/supply-detail",
-                      params: { id: approval.id },
-                    })
-                  }
-                  isFirst={index === 0}
-                  isLast={index === sliced.length - 1}
-                  badge={{
-                    label: approval.category,
-                    fg: colors.accent,
-                    bg: colors.accent + "30",
-                  }}
-                  metaText={formatDate(new Date(approval.createdAt))}
-                />
-              );
-            })}
+            <ListWrapper>
+              {pendingApprovals.slice(0, 2).map((approval, index) => {
+                const sliced = pendingApprovals.slice(0, 2);
+                return (
+                  <ItemCard
+                    key={approval.id}
+                    title={`${approval.itemName} - $${approval.estimatedCost}`}
+                    description={`${approval.quantity} ${approval.unit}`}
+                    vesselName={approval.vesselName}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/supply-detail",
+                        params: { id: approval.id },
+                      })
+                    }
+                    isFirst={index === 0}
+                    isLast={index === sliced.length - 1}
+                    badge={{
+                      label: approval.category,
+                      fg: colors.accent,
+                      bg: colors.accent + "30",
+                    }}
+                    metaText={formatDate(new Date(approval.createdAt))}
+                    style={{ marginLeft: 0, backgroundColor: "transparent" }}
+                  />
+                );
+              })}
+            </ListWrapper>
           </View>
         )}
         <View style={styles.section}>
@@ -250,41 +254,44 @@ export default function OwnerDashboard() {
             </Text>
           </View>
           {myActivityLogs.length > 0 ? (
-            myActivityLogs.map((log, index) => (
-              <ItemCard
-                key={log.id}
-                title={log.title}
-                description={log.description}
-                vesselName={log.vesselName || ""}
-                onPress={() => {
-                  switch (log.type) {
-                    case "maintenance":
-                    case "task":
-                      router.push({
-                        pathname: "/maintenance-detail",
-                        params: { id: log.relatedId },
-                      });
-                      break;
-                    case "issue":
-                      router.push({
-                        pathname: "/issue-detail",
-                        params: { id: log.relatedId },
-                      });
-                      break;
-                    case "supply":
-                      router.push({
-                        pathname: "/supply-detail",
-                        params: { id: log.relatedId },
-                      });
-                      break;
-                  }
-                }}
-                isFirst={index === 0}
-                isLast={index === myActivityLogs.length - 1}
-                badge={getActivityTypeBadge(log.type)}
-                metaText={formatDate(new Date(log.timestamp))}
-              />
-            ))
+            <ListWrapper>
+              {myActivityLogs.map((log, index) => (
+                <ItemCard
+                  key={log.id}
+                  title={log.title}
+                  description={log.description}
+                  vesselName={log.vesselName || ""}
+                  onPress={() => {
+                    switch (log.type) {
+                      case "maintenance":
+                      case "task":
+                        router.push({
+                          pathname: "/maintenance-detail",
+                          params: { id: log.relatedId },
+                        });
+                        break;
+                      case "issue":
+                        router.push({
+                          pathname: "/issue-detail",
+                          params: { id: log.relatedId },
+                        });
+                        break;
+                      case "supply":
+                        router.push({
+                          pathname: "/supply-detail",
+                          params: { id: log.relatedId },
+                        });
+                        break;
+                    }
+                  }}
+                  isFirst={index === 0}
+                  isLast={index === myActivityLogs.length - 1}
+                  badge={getActivityTypeBadge(log.type)}
+                  metaText={formatDate(new Date(log.timestamp))}
+                  style={{ marginLeft: 0, backgroundColor: "transparent" }}
+                />
+              ))}
+            </ListWrapper>
           ) : (
             <Text style={styles.emptyText}>No recent activity</Text>
           )}
@@ -421,30 +428,33 @@ export default function OwnerDashboard() {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Next Maintenance</Text>
             </View>
-            {(() => {
-              const priorityBadge = getPriorityBadgeColors(upcomingMaintenance.priority);
-              return (
-                <ItemCard
-                  title={upcomingMaintenance.title}
-                  description={upcomingMaintenance.vesselName}
-                  vesselName={upcomingMaintenance.vesselName}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/maintenance-detail",
-                      params: { id: upcomingMaintenance.id },
-                    })
-                  }
-                  isFirst
-                  isLast
-                  badge={{
-                    label: upcomingMaintenance.priority.charAt(0).toUpperCase() + upcomingMaintenance.priority.slice(1),
-                    fg: priorityBadge.fg,
-                    bg: priorityBadge.bg,
-                  }}
-                  metaText={formatDueDate(upcomingMaintenance.dueDate)}
-                />
-              );
-            })()}
+            <ListWrapper>
+              {(() => {
+                const priorityBadge = getPriorityBadgeColors(upcomingMaintenance.priority);
+                return (
+                  <ItemCard
+                    title={upcomingMaintenance.title}
+                    description={upcomingMaintenance.vesselName}
+                    vesselName={upcomingMaintenance.vesselName}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/maintenance-detail",
+                        params: { id: upcomingMaintenance.id },
+                      })
+                    }
+                    isFirst
+                    isLast
+                    badge={{
+                      label: upcomingMaintenance.priority.charAt(0).toUpperCase() + upcomingMaintenance.priority.slice(1),
+                      fg: priorityBadge.fg,
+                      bg: priorityBadge.bg,
+                    }}
+                    metaText={formatDueDate(upcomingMaintenance.dueDate)}
+                    style={{ marginLeft: 0, backgroundColor: "transparent" }}
+                  />
+                );
+              })()}
+            </ListWrapper>
           </View>
         )}
       </ScrollView>

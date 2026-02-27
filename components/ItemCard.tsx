@@ -66,6 +66,16 @@ export const ItemCard = React.memo(
         ]}
         onPress={onPress}
       >
+        {!isFirst && (
+          <View
+            style={{
+              height: 1,
+              backgroundColor: colors.borderSoft,
+              marginLeft: showCheckbox ? 40 : 0,
+              marginRight: -20,
+            }}
+          />
+        )}
         <View style={indexScreenStyles.topRow}>
           {showCheckbox && (
             <Pressable
@@ -112,7 +122,9 @@ export const ItemCard = React.memo(
         </View>
 
         <View
-          style={showCheckbox ? indexScreenStyles.bottomRowWithCheckbox : undefined}
+          style={
+            showCheckbox ? indexScreenStyles.bottomRowWithCheckbox : undefined
+          }
         >
           <Text style={indexScreenStyles.cardDescription} numberOfLines={2}>
             {description}

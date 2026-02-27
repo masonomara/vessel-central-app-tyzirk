@@ -6,6 +6,7 @@ import {
   ScrollView,
 } from "react-native";
 import { ItemCard } from "../../../components/ItemCard";
+import { ListWrapper } from "../../../components/ListWrapper";
 import { PressableCard } from "../../../components/PressableCard";
 import { colors, commonStyles } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -101,38 +102,41 @@ export default function CrewDashboard() {
           </View>
 
           {myTasks.length > 0 ? (
-            myTasks.map((task, index) => {
-              const priorityBadge = getPriorityBadgeColors(task.priority);
-              return (
-                <ItemCard
-                  key={task.id}
-                  title={task.title}
-                  description={task.description}
-                  vesselName={task.vesselName}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/maintenance-detail",
-                      params: { id: task.id },
-                    })
-                  }
-                  isFirst={index === 0}
-                  isLast={index === myTasks.length - 1}
-                  showCheckbox
-                  isCompleted={task.status === "completed"}
-                  onComplete={() => toggleTaskCompletion(task.id)}
-                  badge={{
-                    label: task.priority.charAt(0).toUpperCase() + task.priority.slice(1),
-                    fg: priorityBadge.fg,
-                    bg: priorityBadge.bg,
-                  }}
-                  metaText={
-                    task.status === "completed"
-                      ? "Completed"
-                      : formatDueDate(task.dueDate)
-                  }
-                />
-              );
-            })
+            <ListWrapper>
+              {myTasks.map((task, index) => {
+                const priorityBadge = getPriorityBadgeColors(task.priority);
+                return (
+                  <ItemCard
+                    key={task.id}
+                    title={task.title}
+                    description={task.description}
+                    vesselName={task.vesselName}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/maintenance-detail",
+                        params: { id: task.id },
+                      })
+                    }
+                    isFirst={index === 0}
+                    isLast={index === myTasks.length - 1}
+                    showCheckbox
+                    isCompleted={task.status === "completed"}
+                    onComplete={() => toggleTaskCompletion(task.id)}
+                    badge={{
+                      label: task.priority.charAt(0).toUpperCase() + task.priority.slice(1),
+                      fg: priorityBadge.fg,
+                      bg: priorityBadge.bg,
+                    }}
+                    metaText={
+                      task.status === "completed"
+                        ? "Completed"
+                        : formatDueDate(task.dueDate)
+                    }
+                    style={{ marginLeft: 0, backgroundColor: "transparent" }}
+                  />
+                );
+              })}
+            </ListWrapper>
           ) : (
             <Text style={styles.emptyText}>No tasks assigned</Text>
           )}
@@ -146,24 +150,27 @@ export default function CrewDashboard() {
             </Text>
           </View>
           {mySupplyRequests.length > 0 ? (
-            mySupplyRequests.map((request, index) => (
-              <ItemCard
-                key={request.id}
-                title={`${request.itemName} - $${request.estimatedCost}`}
-                description={`${request.quantity} ${request.unit}`}
-                vesselName={request.vesselName}
-                onPress={() =>
-                  router.push({
-                    pathname: "/supply-detail",
-                    params: { id: request.id },
-                  })
-                }
-                isFirst={index === 0}
-                isLast={index === mySupplyRequests.length - 1}
-                badge={getSupplyStatusBadge(request.status)}
-                metaText={formatDate(request.createdAt)}
-              />
-            ))
+            <ListWrapper>
+              {mySupplyRequests.map((request, index) => (
+                <ItemCard
+                  key={request.id}
+                  title={`${request.itemName} - $${request.estimatedCost}`}
+                  description={`${request.quantity} ${request.unit}`}
+                  vesselName={request.vesselName}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/supply-detail",
+                      params: { id: request.id },
+                    })
+                  }
+                  isFirst={index === 0}
+                  isLast={index === mySupplyRequests.length - 1}
+                  badge={getSupplyStatusBadge(request.status)}
+                  metaText={formatDate(request.createdAt)}
+                  style={{ marginLeft: 0, backgroundColor: "transparent" }}
+                />
+              ))}
+            </ListWrapper>
           ) : (
             <Text style={styles.emptyText}>No supply requests</Text>
           )}
