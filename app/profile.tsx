@@ -13,10 +13,9 @@ import { useTheme } from "@react-navigation/native";
 import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "expo-router";
 import { colors } from "../styles/commonStyles";
-import { useTopPadding } from "../hooks/useTopPadding";
+import { scrollProps } from "../hooks/useTopPadding";
 
 export default function ProfileScreen() {
-  const topPadding = useTopPadding();
   const theme = useTheme();
   const { signOut, userName, userRole } = useAuth();
   const router = useRouter();
@@ -57,7 +56,8 @@ export default function ProfileScreen() {
     <View style={[styles.safeArea, { backgroundColor: colors.surfaceOne }]}>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={[styles.contentContainer, { paddingTop: topPadding }]}
+        contentContainerStyle={styles.contentContainer}
+        {...scrollProps}
       >
         <GlassView
           style={[

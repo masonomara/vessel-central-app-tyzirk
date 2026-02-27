@@ -26,7 +26,7 @@ import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, formatDueDate, isOverdue } from "../utils/dateUtils";
 import { formatLabel } from "../utils/formatLabel";
 import { TaskStatus, TaskPriority } from "../types";
-import { useTopPadding } from "../hooks/useTopPadding";
+import { scrollProps } from "../hooks/useTopPadding";
 
 const MOCK_USERS: Record<string, string> = {
   manager1: "Sarah Johnson",
@@ -40,7 +40,6 @@ const MOCK_USERS: Record<string, string> = {
 };
 
 export default function MaintenanceDetailScreen() {
-  const topPadding = useTopPadding();
   const { id } = useLocalSearchParams();
   const {
     maintenanceTasks,
@@ -195,9 +194,10 @@ export default function MaintenanceDetailScreen() {
       <ScrollView
         contentContainerStyle={[
           ds.scrollContent,
-          { paddingTop: topPadding, flexGrow: 1 },
+          { flexGrow: 1 },
         ]}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
         <View style={ds.titleSection}>
           <Text style={ds.title}>{task.title}</Text>

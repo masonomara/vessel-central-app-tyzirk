@@ -30,22 +30,21 @@ export const colors = {
   purpleForeground: "#7a2ca8",
   purpleBackground: "#e7d8ef",
 
-  // Backgrounds - DARKER for better text contrast
-  surfaceOne: "#fbf8f7", // Almost black (darker)
-  surfaceTwo: "#f7f2ef", // Almost black (darker)
-  surfaceThree: "#efe4dd", // Almost black (darker)
-  container: "#ffffff", // Card background (darker)
+  // Backgrounds
+  surfaceOne: "#fbf8f7",
+  surfaceTwo: "#f7f2ef",
+  surfaceThree: "#efe4dd",
+  container: "#ffffff",
 
-  // Text - Higher contrast
-  text: "rgba(0, 0, 0, .92)", // Pure white for maximum contrast
-  textSecondary: "rgba(0, 0, 0, .76)", // Lighter gray for better visibility
-  textTertiary: "rgba(0, 0, 0, .38)", // Medium gray
+  // Text
+  text: "rgba(0, 0, 0, .92)",
+  textSecondary: "rgba(0, 0, 0, .76)",
+  textTertiary: "rgba(0, 0, 0, .38)",
 
   // Borders & Dividers
-  border: "rgba(0, 0, 0, .28)", // Subtle border
-  borderSoft: "rgba(0, 0, 0, .11)", // Subtle border
-
-  divider: "#1f1e1d4d", // Divider line
+  border: "rgba(0, 0, 0, .28)",
+  borderSoft: "rgba(0, 0, 0, .11)",
+  divider: "#1f1e1d4d",
 
   // Gradients (for use in LinearGradient)
   gradientStart: "#0A2540",
@@ -190,28 +189,24 @@ export const buttonStyles = StyleSheet.create({
 
 export const commonStyles = StyleSheet.create({
   wrapper: {
+    flex: 1,
     backgroundColor: colors.surfaceOne,
-    width: "100%",
-    height: "100%",
   },
   container: {
     flex: 1,
     backgroundColor: colors.surfaceOne,
-    width: "100%",
-    height: "100%",
   },
   content: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     maxWidth: 800,
-    width: "100%",
   },
 
   // Typography
   title: {
     fontSize: 24,
-    lineHeight: 24,
+    lineHeight: 30,
     fontWeight: "600",
     color: colors.text,
     marginBottom: spacing.md,
@@ -354,7 +349,7 @@ export const indexScreenStyles = StyleSheet.create({
   listContent: {
     backgroundColor: colors.surfaceOne,
   },
-  listHeaderComponent: {},
+  listHeaderComponent: {marginBottom: 20,},
 
   // Search bar
   searchContainer: {
@@ -365,7 +360,7 @@ export const indexScreenStyles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginHorizontal: 20,
-    gap: 10,
+    gap: 8,
     borderWidth: 1,
     borderColor: colors.borderSoft,
   },
@@ -377,7 +372,7 @@ export const indexScreenStyles = StyleSheet.create({
 
   // Filter chips
   filterContainer: {
-    marginBottom: 20,
+    marginBottom: 10,
   },
   filterContent: {
     paddingHorizontal: 20,
@@ -410,19 +405,21 @@ export const indexScreenStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    height: 56,
+    height: 36,
     paddingHorizontal: 20,
+    marginTop: 12,
+    marginBottom: 12,
   },
   sectionHeader: {
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: 17,
+    lineHeight: 22,
     fontWeight: "600",
     color: colors.text,
     flex: 1,
   },
   sectionCount: {
-    fontSize: 13,
-    color: colors.textSecondary,
+    fontSize: 15,
+    color: colors.textTertiary,
   },
   dropdown: {
     padding: 0,
@@ -440,7 +437,7 @@ export const indexScreenStyles = StyleSheet.create({
     marginBottom: 10,
   },
   cardLast: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
 
   // Card internals
@@ -451,15 +448,15 @@ export const indexScreenStyles = StyleSheet.create({
   cardTitle: {
     fontSize: 15,
     lineHeight: 20,
-    fontWeight: "500",
+    fontWeight: "600",
     color: colors.text,
     flex: 1,
   },
   cardDescription: {
-    fontSize: 14,
+    fontSize: 15,
     color: colors.textSecondary,
-    lineHeight: 19,
-    marginTop: 4,
+    lineHeight: 20,
+    marginTop: 8,
   },
   metaRow: {
     flexDirection: "row",
@@ -477,8 +474,7 @@ export const indexScreenStyles = StyleSheet.create({
     color: colors.text,
     fontWeight: "500",
     borderRadius: 4,
-    padding: 4,
-    paddingVertical: 0,
+    paddingHorizontal: 4,
     lineHeight: 20,
     height: 20,
   },
@@ -522,18 +518,15 @@ export const indexScreenStyles = StyleSheet.create({
 });
 
 export const detailScreenStyles = StyleSheet.create({
-  scrollContent: {
-    paddingHorizontal: 0,
-  },
+  scrollContent: {},
   titleSection: {
-    marginBottom: 0,
     paddingHorizontal: 20,
+    marginTop: 20,
   },
   titleRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    marginBottom: 0,
   },
   title: {
     fontSize: 24,

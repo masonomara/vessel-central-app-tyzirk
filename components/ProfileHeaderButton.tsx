@@ -6,7 +6,7 @@ import { colors } from "../styles/commonStyles";
 export function ProfileHeaderButton() {
   const router = useRouter();
   return (
-    <TouchableOpacity onPress={() => router.push("/profile")}>
+    <TouchableOpacity onPress={() => router.push("/profile")} hitSlop={8}>
       <IconSymbol
         android_material_icon_name="account-circle"
         size={28}

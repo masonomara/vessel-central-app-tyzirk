@@ -76,7 +76,6 @@ export function PriorityDetailRow({ items }: PriorityDetailRowProps) {
 const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
-    paddingVertical: 0,
     paddingHorizontal: 20,
     gap: 20,
     paddingBottom: 24,

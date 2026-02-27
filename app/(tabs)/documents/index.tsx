@@ -9,14 +9,13 @@ import { IconSymbol } from "../../../components/IconSymbol";
 import { ItemCard } from "../../../components/ItemCard";
 import { Document } from "../../../types";
 import { formatDate } from "../../../utils/dateUtils";
-import { useTopPadding } from "../../../hooks/useTopPadding";
+import { scrollProps } from "../../../hooks/useTopPadding";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SearchBar } from "../../../components/SearchBar";
 import { FilterRow } from "../../../components/FilterRow";
 import { CollapsibleSectionHeader } from "../../../components/CollapsibleSectionHeader";
 
 export default function DocumentsScreen() {
-  const topPadding = useTopPadding();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { documents } = useData();
@@ -200,12 +199,10 @@ export default function DocumentsScreen() {
           />
         }
         ListEmptyComponent={ListEmptyComponent}
-        contentContainerStyle={[
-          indexScreenStyles.listContent,
-          { marginTop: topPadding },
-        ]}
+        contentContainerStyle={indexScreenStyles.listContent}
         showsVerticalScrollIndicator={false}
         stickySectionHeadersEnabled={false}
+        {...scrollProps}
       />
     </View>
   );

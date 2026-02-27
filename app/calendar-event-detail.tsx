@@ -27,10 +27,9 @@ import {
 import { formatDate } from "../utils/dateUtils";
 import { formatLabel } from "../utils/formatLabel";
 import { CalendarEventStatus } from "../types";
-import { useTopPadding } from "../hooks/useTopPadding";
+import { scrollProps } from "../hooks/useTopPadding";
 
 export default function CalendarEventDetailScreen() {
-  const topPadding = useTopPadding();
   const { eventId } = useLocalSearchParams();
   const { calendarEvents, updateCalendarEvent, addCalendarEventComment } =
     useData();
@@ -80,9 +79,10 @@ export default function CalendarEventDetailScreen() {
       <ScrollView
         contentContainerStyle={[
           ds.scrollContent,
-          { paddingTop: topPadding, flexGrow: 1 },
+          { flexGrow: 1 },
         ]}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
         <View style={ds.titleSection}>
           <Text style={ds.title}>{event.title}</Text>

@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { useTopPadding } from "../../../hooks/useTopPadding";
+import { scrollProps } from "../../../hooks/useTopPadding";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { colors, commonStyles, shadows } from "../../../styles/commonStyles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -34,7 +34,6 @@ export default function CalendarScreen() {
   const { userId, userRole } = useAuth();
   const { calendarEvents, getCalendarEventsForUser } = useData();
 
-  const topPadding = useTopPadding();
   const insets = useSafeAreaInsets();
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -252,8 +251,9 @@ export default function CalendarScreen() {
           { paddingBottom: insets.bottom + 64 },
         ]}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
-        <View style={[styles.header, { paddingTop: topPadding }]}>
+        <View style={styles.header}>
           <View style={styles.monthNavigation}>
             <TouchableOpacity
               style={styles.navButton}

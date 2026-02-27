@@ -13,10 +13,9 @@ import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { Stack, router } from "expo-router";
-import { useTopPadding } from "../../../hooks/useTopPadding";
+import { scrollProps } from "../../../hooks/useTopPadding";
 
 export default function CrewDashboard() {
-  const topPadding = useTopPadding();
   const { userName, userId, userRole } = useAuth();
   const {
     getVesselsForUser,
@@ -81,8 +80,9 @@ export default function CrewDashboard() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
-        <View style={[styles.header, { paddingTop: topPadding }]}>
+        <View style={styles.header}>
           <Text style={styles.greeting}>
             {new Date().toLocaleDateString("en-US", {
               weekday: "long",

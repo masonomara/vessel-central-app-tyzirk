@@ -28,7 +28,8 @@ import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate } from "../utils/dateUtils";
 import { formatLabel } from "../utils/formatLabel";
 import { TaskStatus, TaskPriority } from "../types";
-import { useTopPadding } from "../hooks/useTopPadding";
+import { scrollProps } from "../hooks/useTopPadding";
+
 
 const MOCK_USERS: Record<string, string> = {
   manager1: "Sarah Johnson",
@@ -42,7 +43,6 @@ const MOCK_USERS: Record<string, string> = {
 };
 
 export default function IssueDetailScreen() {
-  const topPadding = useTopPadding();
   const { id } = useLocalSearchParams();
   const { issues, vessels, updateIssue, addIssueComment } = useData();
   const { userRole, userId, userName } = useAuth();
@@ -145,9 +145,10 @@ export default function IssueDetailScreen() {
       <ScrollView
         contentContainerStyle={[
           ds.scrollContent,
-          { paddingTop: topPadding, flexGrow: 1 },
+          { flexGrow: 1 },
         ]}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
         <View style={ds.titleSection}>
           <Text style={ds.title}>{issue.title}</Text>
@@ -219,7 +220,7 @@ export default function IssueDetailScreen() {
             <Text style={ds.sectionTitle}>
               Attachments ({issue.attachments.length})
             </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} directionalLockEnabled>
               <View style={styles.attachmentRow}>
                 {issue.attachments.map((att) => (
                   <View key={att.id} style={styles.attachmentThumb}>

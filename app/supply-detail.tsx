@@ -24,10 +24,9 @@ import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate } from "../utils/dateUtils";
 import { formatLabel } from "../utils/formatLabel";
 import { TaskPriority, SupplyRequestStatus } from "../types";
-import { useTopPadding } from "../hooks/useTopPadding";
+import { scrollProps } from "../hooks/useTopPadding";
 
 export default function SupplyDetailScreen() {
-  const topPadding = useTopPadding();
   const { id } = useLocalSearchParams();
   const {
     supplyRequests,
@@ -140,9 +139,10 @@ export default function SupplyDetailScreen() {
       <ScrollView
         contentContainerStyle={[
           ds.scrollContent,
-          { paddingTop: topPadding, flexGrow: 1 },
+          { flexGrow: 1 },
         ]}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
         <View style={ds.titleSection}>
           <Text style={ds.title}>{request.itemName}</Text>

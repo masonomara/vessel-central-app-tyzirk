@@ -9,7 +9,7 @@ import { MaintenanceTask } from "../../../types";
 import { formatDueDate, isOverdue } from "../../../utils/dateUtils";
 import { Stack, router } from "expo-router";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
-import { useTopPadding } from "../../../hooks/useTopPadding";
+import { scrollProps } from "../../../hooks/useTopPadding";
 import { getPriorityBadgeColors } from "../../../utils/colorUtils";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SearchBar } from "../../../components/SearchBar";
@@ -17,7 +17,6 @@ import { FilterRow } from "../../../components/FilterRow";
 import { CollapsibleSectionHeader } from "../../../components/CollapsibleSectionHeader";
 
 export default function MaintenanceScreen() {
-  const topPadding = useTopPadding();
   const insets = useSafeAreaInsets();
   const { maintenanceTasks, updateMaintenanceTask } = useData();
   const { userRole } = useAuth();
@@ -242,12 +241,10 @@ export default function MaintenanceScreen() {
           />
         }
         ListEmptyComponent={ListEmptyComponent}
-        contentContainerStyle={[
-          indexScreenStyles.listContent,
-          { marginTop: topPadding },
-        ]}
+        contentContainerStyle={indexScreenStyles.listContent}
         showsVerticalScrollIndicator={false}
         stickySectionHeadersEnabled={false}
+        {...scrollProps}
       />
     </View>
   );

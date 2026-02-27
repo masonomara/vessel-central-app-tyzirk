@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from "react";
 import { View, Text, SectionList, TouchableOpacity } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
-import { useTopPadding } from "../../../hooks/useTopPadding";
+import { scrollProps } from "../../../hooks/useTopPadding";
 import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
@@ -16,7 +16,6 @@ import { FilterRow } from "../../../components/FilterRow";
 import { CollapsibleSectionHeader } from "../../../components/CollapsibleSectionHeader";
 
 export default function IssuesScreen() {
-  const topPadding = useTopPadding();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { issues, updateIssue } = useData();
@@ -140,15 +139,15 @@ export default function IssuesScreen() {
   const ListHeaderComponent = useCallback(
     () => (
       <View style={indexScreenStyles.listHeaderComponent}>
-        <SearchBar
-          placeholder="Search issues..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
         <FilterRow
           options={["all", ...vesselNames]}
           selected={filterVessel}
           onSelect={setFilterVessel}
+        />
+        <SearchBar
+          placeholder="Search issues..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
       </View>
     ),
@@ -215,12 +214,10 @@ export default function IssuesScreen() {
           />
         }
         ListEmptyComponent={ListEmptyComponent}
-        contentContainerStyle={[
-          indexScreenStyles.listContent,
-          { marginTop: topPadding },
-        ]}
+        contentContainerStyle={indexScreenStyles.listContent}
         showsVerticalScrollIndicator={false}
         stickySectionHeadersEnabled={false}
+        {...scrollProps}
       />
     </View>
   );

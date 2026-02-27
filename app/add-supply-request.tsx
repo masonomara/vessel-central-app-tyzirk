@@ -16,7 +16,7 @@ import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { TaskPriority } from '../types';
-import { useTopPadding } from '../hooks/useTopPadding';
+import { scrollProps } from '../hooks/useTopPadding';
 
 const SUPPLY_CATEGORIES = [
   'Cleaning',
@@ -48,7 +48,6 @@ const UNIT_OPTIONS = [
 ];
 
 export default function AddSupplyRequestScreen() {
-  const topPadding = useTopPadding();
   const router = useRouter();
   const { addSupplyRequest, vessels, getVesselsForUser } = useData();
   const { userId, userName, userRole } = useAuth();
@@ -184,7 +183,8 @@ export default function AddSupplyRequestScreen() {
       />
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingTop: topPadding }]}
+        contentContainerStyle={styles.scrollContent}
+        {...scrollProps}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>

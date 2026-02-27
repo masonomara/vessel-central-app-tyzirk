@@ -6,14 +6,13 @@ import { useData } from "../contexts/DataContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { ItemCard } from "../components/ItemCard";
 import { CollapsibleSectionHeader } from "../components/CollapsibleSectionHeader";
-import { useTopPadding } from "../hooks/useTopPadding";
+import { scrollProps } from "../hooks/useTopPadding";
 import { formatDate, formatDueDate } from "../utils/dateUtils";
 import { formatEventDateRange } from "../utils/calendarUtils";
 import { getPriorityBadgeColors } from "../utils/colorUtils";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function VesselDetailScreen() {
-  const topPadding = useTopPadding();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams();
   const {
@@ -70,10 +69,8 @@ export default function VesselDetailScreen() {
       <Stack.Screen options={{ title: vessel.name }} />
 
       <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingTop: topPadding },
-        ]}
+        contentContainerStyle={styles.scrollContent}
+        {...scrollProps}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.titleSection}>

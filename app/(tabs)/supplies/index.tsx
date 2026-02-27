@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
-import { useTopPadding } from "../../../hooks/useTopPadding";
+import { scrollProps } from "../../../hooks/useTopPadding";
 import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -23,7 +23,6 @@ import { FilterRow } from "../../../components/FilterRow";
 import { CollapsibleSectionHeader } from "../../../components/CollapsibleSectionHeader";
 
 export default function SuppliesScreen() {
-  const topPadding = useTopPadding();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { supplyRequests, approveSupplyRequest, denySupplyRequest } = useData();
@@ -242,12 +241,10 @@ export default function SuppliesScreen() {
           />
         }
         ListEmptyComponent={ListEmptyComponent}
-        contentContainerStyle={[
-          indexScreenStyles.listContent,
-          { marginTop: topPadding },
-        ]}
+        contentContainerStyle={indexScreenStyles.listContent}
         showsVerticalScrollIndicator={false}
         stickySectionHeadersEnabled={false}
+        {...scrollProps}
       />
     </View>
   );

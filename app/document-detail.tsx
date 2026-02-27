@@ -23,10 +23,9 @@ import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, isOverdue } from "../utils/dateUtils";
 import { formatLabel } from "../utils/formatLabel";
 import { formatFileSize } from "../utils/fileUtils";
-import { useTopPadding } from "../hooks/useTopPadding";
+import { scrollProps } from "../hooks/useTopPadding";
 
 export default function DocumentDetailScreen() {
-  const topPadding = useTopPadding();
   const { id } = useLocalSearchParams();
   const { documents, addDocumentComment } = useData();
   const { userId, userName, userRole } = useAuth();
@@ -67,9 +66,10 @@ export default function DocumentDetailScreen() {
       <ScrollView
         contentContainerStyle={[
           ds.scrollContent,
-          { paddingTop: topPadding, flexGrow: 1 },
+          { flexGrow: 1 },
         ]}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
         <View style={ds.titleSection}>
           <Text style={ds.title}>{doc.title}</Text>

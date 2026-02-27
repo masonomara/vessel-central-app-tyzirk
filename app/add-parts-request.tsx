@@ -20,7 +20,7 @@ import { TaskPriority } from '../types';
 import { validateRequired, validatePositiveNumber } from '../utils/validation';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
-import { useTopPadding } from '../hooks/useTopPadding';
+import { scrollProps } from '../hooks/useTopPadding';
 
 const URGENCY_LEVELS: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
 
@@ -59,7 +59,6 @@ const PART_CATEGORIES = [
 ];
 
 export default function AddPartsRequestScreen() {
-  const topPadding = useTopPadding();
   const router = useRouter();
   const { addSupplyRequest, vessels, getVesselsForUser } = useData();
   const { userId, userName, userRole } = useAuth();
@@ -260,7 +259,8 @@ export default function AddPartsRequestScreen() {
       />
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingTop: topPadding }]}
+        contentContainerStyle={styles.scrollContent}
+        {...scrollProps}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.infoCard}>

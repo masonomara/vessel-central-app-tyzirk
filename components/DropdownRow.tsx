@@ -161,15 +161,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    marginRight: -10,
   },
   selectorText: {
     fontSize: 15,
     color: colors.text,
     fontWeight: "500",
     borderRadius: 4,
-    padding: 6,
-    paddingVertical: 0,
+    paddingHorizontal: 6,
     lineHeight: 24,
   },
 });

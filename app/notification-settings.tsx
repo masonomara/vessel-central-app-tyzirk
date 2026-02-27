@@ -14,7 +14,7 @@ import { Stack } from 'expo-router';
 import { colors } from '../styles/commonStyles';
 import { IconSymbol } from '../components/IconSymbol';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { useTopPadding } from '../hooks/useTopPadding';
+import { scrollProps } from '../hooks/useTopPadding';
 
 type NotificationCategory =
   | 'maintenance'
@@ -100,7 +100,6 @@ const CATEGORY_INFO: Record<NotificationCategory, { title: string; description: 
 const CATEGORIES = Object.keys(CATEGORY_INFO) as NotificationCategory[];
 
 export default function NotificationSettingsScreen() {
-  const topPadding = useTopPadding();
   const [preferences, setPreferences] = useState<NotificationPreferences>(DEFAULT_PREFERENCES);
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
@@ -206,7 +205,7 @@ export default function NotificationSettingsScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Notification Settings' }} />
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent, { paddingTop: topPadding }]}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} {...scrollProps}>
         <View style={styles.section}>
           <View style={styles.masterToggle}>
             <View style={styles.masterToggleContent}>

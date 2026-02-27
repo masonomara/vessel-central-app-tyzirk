@@ -17,11 +17,10 @@ import GlobalSearch from "../../../components/GlobalSearch";
 import { RealtimeFeed } from "../../../components/RealtimeFeed";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { Stack, router } from "expo-router";
-import { useTopPadding } from "../../../hooks/useTopPadding";
+import { scrollProps } from "../../../hooks/useTopPadding";
 
 export default function ManagerDashboard() {
   const { userName, userId, userRole } = useAuth();
-  const topPadding = useTopPadding();
   const [showSearch, setShowSearch] = useState(false);
   const {
     getVesselsForUser,
@@ -143,8 +142,9 @@ export default function ManagerDashboard() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
-        <View style={[styles.header, { paddingTop: topPadding }]}>
+        <View style={styles.header}>
           <Text style={styles.greeting}>
             {new Date().toLocaleDateString("en-US", {
               weekday: "long",
