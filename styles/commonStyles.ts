@@ -349,7 +349,7 @@ export const indexScreenStyles = StyleSheet.create({
   listContent: {
     backgroundColor: colors.surfaceOne,
   },
-  listHeaderComponent: {marginBottom: 20,},
+  listHeaderComponent: { marginBottom: 20 },
 
   // Search bar
   searchContainer: {
@@ -372,12 +372,12 @@ export const indexScreenStyles = StyleSheet.create({
 
   // Filter chips
   filterContainer: {
-    marginBottom: 10,
+    marginBottom: 0,
   },
   filterContent: {
     paddingHorizontal: 20,
     gap: 10,
-    marginTop: 16,
+    marginTop: 10,
   },
   filterChip: {
     paddingHorizontal: 10,
@@ -407,8 +407,10 @@ export const indexScreenStyles = StyleSheet.create({
     justifyContent: "space-between",
     height: 36,
     paddingHorizontal: 20,
-    marginTop: 12,
+    paddingTop: 12,
     marginBottom: 12,
+    borderTopWidth: 2,
+    borderColor: colors.borderSoft,
   },
   sectionHeader: {
     fontSize: 17,
@@ -423,18 +425,16 @@ export const indexScreenStyles = StyleSheet.create({
   },
   dropdown: {
     padding: 0,
-    paddingRight: 2,
+    paddingRight: 3,
   },
 
   // Card base
   card: {
-    borderWidth: 1,
-    borderColor: colors.borderSoft,
-    borderRadius: 16,
-    padding: 16,
     backgroundColor: colors.surfaceOne,
-    marginHorizontal: 20,
-    marginBottom: 10,
+    marginLeft: 20,
+    paddingRight: 20,
+    marginBottom: 12,
+    paddingTop: 12,
   },
   cardLast: {
     marginBottom: 20,

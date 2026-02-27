@@ -139,15 +139,15 @@ export default function IssuesScreen() {
   const ListHeaderComponent = useCallback(
     () => (
       <View style={indexScreenStyles.listHeaderComponent}>
-        <FilterRow
-          options={["all", ...vesselNames]}
-          selected={filterVessel}
-          onSelect={setFilterVessel}
-        />
         <SearchBar
           placeholder="Search issues..."
           value={searchQuery}
           onChangeText={setSearchQuery}
+        />
+        <FilterRow
+          options={["all", ...vesselNames]}
+          selected={filterVessel}
+          onSelect={setFilterVessel}
         />
       </View>
     ),
