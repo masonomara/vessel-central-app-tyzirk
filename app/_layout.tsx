@@ -26,6 +26,7 @@ function RootLayoutContent() {
         {/* Auth screens — no header */}
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="member-setup" options={{ headerShown: false }} />
 
         {/* Tabs — header handled by NativeTabs */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

@@ -110,7 +110,7 @@ export default function LoginScreen() {
     }
   };
 
-  const handleEmailLogin = async () => {
+  const handleEmailLogin = () => {
     setError("");
     Keyboard.dismiss();
 
@@ -121,20 +121,10 @@ export default function LoginScreen() {
 
     setIsLoading(true);
 
-    setTimeout(async () => {
-      const user = MOCK_USERS.find(
-        (u) =>
-          u.email.toLowerCase() === email.toLowerCase() &&
-          u.password === password,
-      );
-
-      if (user) {
-        await handleMockLogin(user);
-      } else {
-        setIsLoading(false);
-        setError("Invalid email or password");
-      }
-    }, 800);
+    setTimeout(() => {
+      setIsLoading(false);
+      router.push({ pathname: "/member-setup", params: { email: email.trim() } });
+    }, 400);
   };
 
   const toggleEmailLogin = () => {
