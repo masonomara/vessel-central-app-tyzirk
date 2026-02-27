@@ -234,9 +234,9 @@ export default function OwnerDashboard() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Pending Approvals</Text>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{pendingApprovals.length}</Text>
-              </View>
+              <Text style={styles.sectionCount}>
+                {pendingApprovals.length} {pendingApprovals.length === 1 ? "item" : "items"}
+              </Text>
             </View>
             {pendingApprovals.slice(0, 2).map((approval, index) => (
               <PressableCard
@@ -278,7 +278,12 @@ export default function OwnerDashboard() {
           </View>
         )}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Recent Activity</Text>
+            <Text style={styles.sectionCount}>
+              {myActivityLogs.length} {myActivityLogs.length === 1 ? "item" : "items"}
+            </Text>
+          </View>
           {myActivityLogs.length > 0 ? (
             myActivityLogs.map((log, index) => (
               <PressableCard
@@ -359,7 +364,12 @@ export default function OwnerDashboard() {
           )}
         </View>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Fleet Overview</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Fleet Overview</Text>
+            <Text style={styles.sectionCount}>
+              {myVessels.length} {myVessels.length === 1 ? "item" : "items"}
+            </Text>
+          </View>
           <View style={styles.fleetGrid}>
             {myVessels.map((vessel, index) => (
               <PressableCard
@@ -477,7 +487,9 @@ export default function OwnerDashboard() {
         </View> */}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Performance</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Performance</Text>
+          </View>
 
           <PressableCard
             style={styles.performanceCard}
@@ -531,7 +543,9 @@ export default function OwnerDashboard() {
 
         {upcomingMaintenance && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Next Maintenance</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Next Maintenance</Text>
+            </View>
             <PressableCard
               style={styles.maintenanceCard}
               onPress={() =>
@@ -642,15 +656,19 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 16,
-    gap: 12,
+    justifyContent: "space-between",
+    height: 56,
+    paddingHorizontal: 20,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 17,
+    lineHeight: 22,
     fontWeight: "600",
     color: colors.text,
-    marginBottom: 16,
-    letterSpacing: -0.3,
+  },
+  sectionCount: {
+    fontSize: 15,
+    color: colors.textTertiary,
   },
   fleetGrid: {
     flexDirection: "row",
@@ -843,20 +861,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: colors.text,
     letterSpacing: 0.5,
-  },
-  badge: {
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    minWidth: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.warning,
-  },
-  badgeText: {
-    color: colors.text,
-    fontSize: 12,
-    fontWeight: "600",
   },
   approvalCard: {
     padding: 16,

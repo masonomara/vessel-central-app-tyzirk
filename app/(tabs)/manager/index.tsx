@@ -158,13 +158,9 @@ export default function ManagerDashboard() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Pending Approvals</Text>
-              {pendingApprovals.length > 0 && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>
-                    {pendingApprovals.length}
-                  </Text>
-                </View>
-              )}
+              <Text style={styles.sectionCount}>
+                {pendingApprovals.length} {pendingApprovals.length === 1 ? "item" : "items"}
+              </Text>
             </View>
 
             {pendingApprovals.slice(0, 3).map((approval, index) => (
@@ -301,7 +297,12 @@ export default function ManagerDashboard() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Fleet Status</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Fleet Status</Text>
+            <Text style={styles.sectionCount}>
+              {myVessels.length} {myVessels.length === 1 ? "item" : "items"}
+            </Text>
+          </View>
           {myVessels.map((vessel, index) => {
             const vesselTasks = myMaintenanceTasks.filter(
               (t) => t.vesselId === vessel.id && t.status !== "completed",
@@ -416,7 +417,12 @@ export default function ManagerDashboard() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Upcoming Maintenance</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Upcoming Maintenance</Text>
+            <Text style={styles.sectionCount}>
+              {upcomingMaintenance.length} {upcomingMaintenance.length === 1 ? "item" : "items"}
+            </Text>
+          </View>
           {upcomingMaintenance.length > 0 ? (
             upcomingMaintenance.map((item, index) => (
               <PressableCard
@@ -530,33 +536,24 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 16,
-    gap: 12,
+    justifyContent: "space-between",
+    height: 56,
+    paddingHorizontal: 20,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 17,
+    lineHeight: 22,
     fontWeight: "600",
     color: colors.text,
-    marginBottom: 16,
+  },
+  sectionCount: {
+    fontSize: 15,
+    color: colors.textTertiary,
   },
   statsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
-  },
-  badge: {
-    backgroundColor: colors.danger,
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    minWidth: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  badgeText: {
-    color: colors.text,
-    fontSize: 12,
-    fontWeight: "600",
   },
   vesselCard: {
     backgroundColor: colors.surfaceOne,

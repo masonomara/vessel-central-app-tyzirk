@@ -469,19 +469,19 @@ const styles = StyleSheet.create({
   },
   eventsSectionHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    justifyContent: "space-between",
+    height: 56,
   },
   eventsSectionTitle: {
-    fontSize: 18,
+    fontSize: 17,
+    lineHeight: 22,
     fontWeight: "600",
     color: colors.text,
   },
   eventsCount: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: colors.textSecondary,
+    fontSize: 15,
+    color: colors.textTertiary,
   },
   eventsList: {
     gap: 8,

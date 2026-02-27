@@ -39,8 +39,7 @@ export default function TabLayout() {
     <NativeTabs
       minimizeBehavior="onScrollDown"
       disableTransparentOnScrollEdge
-      shadowColor="transparent"
-      backgroundColor={colors.surfaceThree}
+      backgroundColor={colors.surfaceTwo}
       iconColor={{
         default: colors.textTertiary,
         selected: colors.text,

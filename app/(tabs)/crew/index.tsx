@@ -109,11 +109,9 @@ export default function CrewDashboard() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My Tasks</Text>
-            {pendingTasks.length > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{pendingTasks.length}</Text>
-              </View>
-            )}
+            <Text style={styles.sectionCount}>
+              {myTasks.length} {myTasks.length === 1 ? "item" : "items"}
+            </Text>
           </View>
 
           {myTasks.length > 0 ? (
@@ -212,7 +210,12 @@ export default function CrewDashboard() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Supply Requests</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Supply Requests</Text>
+            <Text style={styles.sectionCount}>
+              {mySupplyRequests.length} {mySupplyRequests.length === 1 ? "item" : "items"}
+            </Text>
+          </View>
           {mySupplyRequests.length > 0 ? (
             mySupplyRequests.map((request) => (
               <PressableCard
@@ -274,7 +277,12 @@ export default function CrewDashboard() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>My Vessels</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>My Vessels</Text>
+            <Text style={styles.sectionCount}>
+              {myVessels.length} {myVessels.length === 1 ? "item" : "items"}
+            </Text>
+          </View>
           {myVessels.map((vessel) => (
             <PressableCard
               key={vessel.id}
@@ -309,7 +317,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     paddingBottom: 20,
   },
   header: {
@@ -338,14 +346,6 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    color: colors.text,
-    height: 36,
-    marginBottom: 12,
-    marginTop: 12,
   },
   vesselCard: {
     flexDirection: "row",
@@ -399,22 +399,19 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-
-    gap: 12,
+    justifyContent: "space-between",
+    height: 56,
+    paddingHorizontal: 20,
   },
-  badge: {
-    backgroundColor: colors.warning,
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    minWidth: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  badgeText: {
-    color: colors.text,
-    fontSize: 12,
+  sectionTitle: {
+    fontSize: 17,
+    lineHeight: 22,
     fontWeight: "600",
+    color: colors.text,
+  },
+  sectionCount: {
+    fontSize: 15,
+    color: colors.textTertiary,
   },
   taskCard: {
     flexDirection: "row",
