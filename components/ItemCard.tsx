@@ -59,6 +59,7 @@ export const ItemCard = React.memo(
       <TouchableOpacity
         style={[
           indexScreenStyles.card,
+          !showCheckbox && { paddingLeft: 40 },
           isFirst && indexScreenStyles.cardFirst,
           isLast && indexScreenStyles.cardLast,
           style,

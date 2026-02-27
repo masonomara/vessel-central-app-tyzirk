@@ -1,17 +1,19 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import {
   StyleSheet,
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
 } from "react-native";
+import { ItemCard } from "../../../components/ItemCard";
 import { PressableCard } from "../../../components/PressableCard";
 import { colors, commonStyles } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
+import { getPriorityBadgeColors } from "../../../utils/colorUtils";
+import { formatDueDate, formatDate } from "../../../utils/dateUtils";
 import { Stack, router } from "expo-router";
 import { scrollProps } from "../../../hooks/useTopPadding";
 
@@ -53,20 +55,15 @@ export default function CrewDashboard() {
     }
   };
 
-  const pendingTasks = useMemo(() => {
-    return myTasks.filter((t) => t.status !== "completed");
-  }, [myTasks]);
-
-  const completedTasks = useMemo(() => {
-    return myTasks.filter((t) => t.status === "completed");
-  }, [myTasks]);
-
-  const formatTime = (date: Date) => {
-    return new Date(date).toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
+  const getSupplyStatusBadge = (status: string) => {
+    switch (status) {
+      case "approved":
+        return { label: "Approved", fg: colors.greenForeground, bg: colors.greenBackground };
+      case "denied":
+        return { label: "Denied", fg: colors.redForeground, bg: colors.redBackground };
+      default:
+        return { label: status.charAt(0).toUpperCase() + status.slice(1), fg: colors.orangeForeground, bg: colors.orangeBackground };
+    }
   };
 
   return (
@@ -95,17 +92,6 @@ export default function CrewDashboard() {
           </Text>
         </View>
 
-        {/* <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{pendingTasks.length}</Text>
-            <Text style={styles.statLabel}>Pending Tasks</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{completedTasks.length}</Text>
-            <Text style={styles.statLabel}>Completed</Text>
-          </View>
-        </View> */}
-
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My Tasks</Text>
@@ -115,95 +101,38 @@ export default function CrewDashboard() {
           </View>
 
           {myTasks.length > 0 ? (
-            myTasks.map((task) => (
-              <View
-                key={task.id}
-                style={[
-                  styles.taskCard,
-                  task.status === "completed" && styles.taskCardCompleted,
-                ]}
-              >
-                <TouchableOpacity
-                  style={styles.taskCheckbox}
-                  onPress={() => toggleTaskCompletion(task.id)}
-                >
-                  {task.status === "completed" ? (
-                    <IconSymbol
-                      ios_icon_name="checkmark.circle.fill"
-                      android_material_icon_name="check-circle"
-                      size={28}
-                      color={colors.success}
-                    />
-                  ) : (
-                    <IconSymbol
-                      ios_icon_name="circle"
-                      android_material_icon_name="radio-button-unchecked"
-                      size={28}
-                      color={colors.textSecondary}
-                    />
-                  )}
-                </TouchableOpacity>
-                <PressableCard
-                  variant="ghost"
-                  style={styles.taskContent}
+            myTasks.map((task, index) => {
+              const priorityBadge = getPriorityBadgeColors(task.priority);
+              return (
+                <ItemCard
+                  key={task.id}
+                  title={task.title}
+                  description={task.description}
+                  vesselName={task.vesselName}
                   onPress={() =>
                     router.push({
                       pathname: "/maintenance-detail",
                       params: { id: task.id },
                     })
                   }
-                >
-                  <View style={styles.taskHeader}>
-                    <Text
-                      style={[
-                        styles.taskTitle,
-                        task.status === "completed" &&
-                          styles.taskTitleCompleted,
-                      ]}
-                    >
-                      {task.title}
-                    </Text>
-                    <View
-                      style={[
-                        styles.priorityBadge,
-                        task.priority === "high" || task.priority === "urgent"
-                          ? styles.priorityHigh
-                          : task.priority === "medium"
-                            ? styles.priorityMedium
-                            : styles.priorityLow,
-                      ]}
-                    >
-                      <Text style={styles.priorityText}>
-                        {task.priority.toUpperCase()}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text
-                    style={[
-                      styles.taskDescription,
-                      task.status === "completed" &&
-                        styles.taskDescriptionCompleted,
-                    ]}
-                  >
-                    {task.description}
-                  </Text>
-                  <Text style={styles.taskVessel}>{task.vesselName}</Text>
-                  <View style={styles.taskFooter}>
-                    <IconSymbol
-                      ios_icon_name="clock"
-                      android_material_icon_name="schedule"
-                      size={16}
-                      color={colors.textSecondary}
-                    />
-                    <Text style={styles.taskTime}>
-                      {task.status === "completed"
-                        ? "Completed"
-                        : `Due: ${formatTime(task.dueDate)}`}
-                    </Text>
-                  </View>
-                </PressableCard>
-              </View>
-            ))
+                  isFirst={index === 0}
+                  isLast={index === myTasks.length - 1}
+                  showCheckbox
+                  isCompleted={task.status === "completed"}
+                  onComplete={() => toggleTaskCompletion(task.id)}
+                  badge={{
+                    label: task.priority.charAt(0).toUpperCase() + task.priority.slice(1),
+                    fg: priorityBadge.fg,
+                    bg: priorityBadge.bg,
+                  }}
+                  metaText={
+                    task.status === "completed"
+                      ? "Completed"
+                      : formatDueDate(task.dueDate)
+                  }
+                />
+              );
+            })
           ) : (
             <Text style={styles.emptyText}>No tasks assigned</Text>
           )}
@@ -217,59 +146,23 @@ export default function CrewDashboard() {
             </Text>
           </View>
           {mySupplyRequests.length > 0 ? (
-            mySupplyRequests.map((request) => (
-              <PressableCard
+            mySupplyRequests.map((request, index) => (
+              <ItemCard
                 key={request.id}
-                style={styles.supplyCard}
+                title={`${request.itemName} - $${request.estimatedCost}`}
+                description={`${request.quantity} ${request.unit}`}
+                vesselName={request.vesselName}
                 onPress={() =>
                   router.push({
                     pathname: "/supply-detail",
                     params: { id: request.id },
                   })
                 }
-              >
-                <View style={styles.supplyHeader}>
-                  <IconSymbol
-                    ios_icon_name="shippingbox.fill"
-                    android_material_icon_name="inventory-2"
-                    size={24}
-                    color={colors.accent}
-                  />
-                  <View style={styles.supplyInfo}>
-                    <Text style={styles.supplyItem}>{request.itemName}</Text>
-                    <Text style={styles.supplyQuantity}>
-                      {request.quantity} {request.unit} - $
-                      {request.estimatedCost}
-                    </Text>
-                    <Text style={styles.supplyVessel}>
-                      {request.vesselName}
-                    </Text>
-                  </View>
-                </View>
-                <View
-                  style={[
-                    styles.supplyStatus,
-                    request.status === "approved"
-                      ? styles.supplyStatusApproved
-                      : request.status === "denied"
-                        ? styles.supplyStatusDenied
-                        : styles.supplyStatusPending,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.supplyStatusText,
-                      request.status === "approved"
-                        ? styles.supplyStatusTextApproved
-                        : request.status === "denied"
-                          ? styles.supplyStatusTextDenied
-                          : styles.supplyStatusTextPending,
-                    ]}
-                  >
-                    {request.status.toUpperCase()}
-                  </Text>
-                </View>
-              </PressableCard>
+                isFirst={index === 0}
+                isLast={index === mySupplyRequests.length - 1}
+                badge={getSupplyStatusBadge(request.status)}
+                metaText={formatDate(request.createdAt)}
+              />
             ))
           ) : (
             <Text style={styles.emptyText}>No supply requests</Text>
@@ -329,23 +222,25 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginBottom: 8,
   },
-  roleTag: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.surfaceOne,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    alignSelf: "flex-start",
-    gap: 6,
-  },
-  roleText: {
-    color: colors.success,
-    fontSize: 14,
-    fontWeight: "600",
-  },
   section: {
     marginBottom: 20,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    height: 56,
+    paddingHorizontal: 20,
+  },
+  sectionTitle: {
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  sectionCount: {
+    fontSize: 15,
+    color: colors.textTertiary,
   },
   vesselCard: {
     flexDirection: "row",
@@ -371,212 +266,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
   },
-  statsRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 24,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    padding: 20,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  statNumber: {
-    fontSize: 32,
-    fontWeight: "600",
-    color: colors.accent,
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    textAlign: "center",
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    height: 56,
-    paddingHorizontal: 20,
-  },
-  sectionTitle: {
-    fontSize: 17,
-    lineHeight: 22,
-    fontWeight: "600",
-    color: colors.text,
-  },
-  sectionCount: {
-    fontSize: 15,
-    color: colors.textTertiary,
-  },
-  taskCard: {
-    flexDirection: "row",
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  taskCardCompleted: {
-    opacity: 0.6,
-    borderColor: colors.success,
-  },
-  taskCheckbox: {
-    marginRight: 12,
-    paddingTop: 2,
-  },
-  taskContent: {
-    flex: 1,
-  },
-  taskHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 6,
-  },
-  taskTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    flex: 1,
-    marginRight: 8,
-  },
-  taskTitleCompleted: {
-    textDecorationLine: "line-through",
-    color: colors.textSecondary,
-  },
-  taskDescription: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: 4,
-    lineHeight: 20,
-  },
-  taskDescriptionCompleted: {
-    textDecorationLine: "line-through",
-  },
-  taskVessel: {
-    fontSize: 13,
-    color: colors.accent,
-    marginBottom: 8,
-    fontWeight: "500",
-  },
-  taskFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  taskTime: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  priorityBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  priorityHigh: {
-    backgroundColor: colors.danger + "30",
-  },
-  priorityMedium: {
-    backgroundColor: colors.warning + "30",
-  },
-  priorityLow: {
-    backgroundColor: colors.success + "30",
-  },
-  priorityText: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: colors.text,
-  },
-  supplyCard: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  supplyHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-  },
-  supplyInfo: {
-    flex: 1,
-  },
-  supplyItem: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 2,
-  },
-  supplyQuantity: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: 2,
-  },
-  supplyVessel: {
-    fontSize: 13,
-    color: colors.accent,
-    fontWeight: "500",
-  },
-  supplyStatus: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  supplyStatusApproved: {
-    backgroundColor: colors.success + "30",
-  },
-  supplyStatusPending: {
-    backgroundColor: colors.warning + "30",
-  },
-  supplyStatusDenied: {
-    backgroundColor: colors.danger + "30",
-  },
-  supplyStatusText: {
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  supplyStatusTextApproved: {
-    color: colors.success,
-  },
-  supplyStatusTextPending: {
-    color: colors.warning,
-  },
-  supplyStatusTextDenied: {
-    color: colors.danger,
-  },
   emptyText: {
     fontSize: 14,
     color: colors.textSecondary,
     textAlign: "center",
     padding: 20,
-  },
-  quickActions: {
-    gap: 12,
-    marginBottom: 24,
-  },
-  actionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    padding: 16,
-    gap: 12,
-  },
-  actionButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
   },
 });

@@ -5,7 +5,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
@@ -13,13 +12,14 @@ import { colors, commonStyles } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { StatCard } from "../../../components/StatCard";
 import { ProgressRing } from "../../../components/ProgressRing";
 import { MiniChart } from "../../../components/MiniChart";
+import { ItemCard } from "../../../components/ItemCard";
 import { PressableCard } from "../../../components/PressableCard";
-import { GradientButton } from "../../../components/GradientButton";
 import GlobalSearch from "../../../components/GlobalSearch";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
+import { getPriorityBadgeColors } from "../../../utils/colorUtils";
+import { formatDueDate, formatDate } from "../../../utils/dateUtils";
 
 import { Stack, router } from "expo-router";
 import { scrollProps } from "../../../hooks/useTopPadding";
@@ -110,23 +110,6 @@ export default function OwnerDashboard() {
       .reduce((sum, exp) => sum + exp.amount, 0);
   }, [myExpenses]);
 
-  const expenseTrend = useMemo(() => {
-    if (lastMonthExpenses === 0) {
-      return { direction: "neutral" as const, value: "0%" };
-    }
-    const change =
-      ((totalMonthlyExpenses - lastMonthExpenses) / lastMonthExpenses) * 100;
-    return {
-      direction:
-        change > 0
-          ? ("up" as const)
-          : change < 0
-            ? ("down" as const)
-            : ("neutral" as const),
-      value: `${Math.abs(Math.round(change))}%`,
-    };
-  }, [totalMonthlyExpenses, lastMonthExpenses]);
-
   const last6MonthsExpenses = useMemo(() => {
     const data: number[] = [];
     const now = new Date();
@@ -166,25 +149,19 @@ export default function OwnerDashboard() {
     return (completed / myMaintenanceTasks.length) * 100;
   }, [myMaintenanceTasks]);
 
-  const openIssuesCount = useMemo(() => {
-    return myIssues.filter((i) => i.status !== "completed").length;
-  }, [myIssues]);
-
-  const getDaysUntil = (date: Date) => {
-    const now = new Date();
-    const diff = new Date(date).getTime() - now.getTime();
-    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    return days;
-  };
-
-  const handleApproveRequests = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/(tabs)/supplies");
-  };
-
-  const handleViewAnalytics = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/analytics");
+  const getActivityTypeBadge = (type: string) => {
+    switch (type) {
+      case "maintenance":
+        return { label: "Maintenance", fg: colors.greenForeground, bg: colors.greenBackground };
+      case "task":
+        return { label: "Task", fg: colors.greenForeground, bg: colors.greenBackground };
+      case "issue":
+        return { label: "Issue", fg: colors.redForeground, bg: colors.redBackground };
+      case "supply":
+        return { label: "Supply", fg: colors.accent, bg: colors.accent + "30" };
+      default:
+        return { label: type.charAt(0).toUpperCase() + type.slice(1), fg: colors.accent, bg: colors.accent + "30" };
+    }
   };
 
   return (
@@ -238,43 +215,31 @@ export default function OwnerDashboard() {
                 {pendingApprovals.length} {pendingApprovals.length === 1 ? "item" : "items"}
               </Text>
             </View>
-            {pendingApprovals.slice(0, 2).map((approval, index) => (
-              <PressableCard
-                key={approval.id}
-                style={styles.approvalCard}
-                onPress={() =>
-                  router.push({
-                    pathname: "/supply-detail",
-                    params: { id: approval.id },
-                  })
-                }
-              >
-                <View style={styles.approvalHeader}>
-                  <View style={styles.approvalLeft}>
-                    <Text style={styles.approvalItem}>{approval.itemName}</Text>
-                    <Text style={styles.approvalVessel}>
-                      {approval.vesselName}
-                    </Text>
-                  </View>
-                  <Text style={styles.approvalAmount}>
-                    ${approval.estimatedCost}
-                  </Text>
-                </View>
-                <View style={styles.approvalFooter}>
-                  <LinearGradient
-                    colors={[colors.accent + "30", colors.accent + "10"]}
-                    style={styles.approvalCategory}
-                  >
-                    <Text style={styles.approvalCategoryText}>
-                      {approval.category}
-                    </Text>
-                  </LinearGradient>
-                  <Text style={styles.approvalQuantity}>
-                    {approval.quantity} {approval.unit}
-                  </Text>
-                </View>
-              </PressableCard>
-            ))}
+            {pendingApprovals.slice(0, 2).map((approval, index) => {
+              const sliced = pendingApprovals.slice(0, 2);
+              return (
+                <ItemCard
+                  key={approval.id}
+                  title={`${approval.itemName} - $${approval.estimatedCost}`}
+                  description={`${approval.quantity} ${approval.unit}`}
+                  vesselName={approval.vesselName}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/supply-detail",
+                      params: { id: approval.id },
+                    })
+                  }
+                  isFirst={index === 0}
+                  isLast={index === sliced.length - 1}
+                  badge={{
+                    label: approval.category,
+                    fg: colors.accent,
+                    bg: colors.accent + "30",
+                  }}
+                  metaText={formatDate(new Date(approval.createdAt))}
+                />
+              );
+            })}
           </View>
         )}
         <View style={styles.section}>
@@ -286,9 +251,11 @@ export default function OwnerDashboard() {
           </View>
           {myActivityLogs.length > 0 ? (
             myActivityLogs.map((log, index) => (
-              <PressableCard
+              <ItemCard
                 key={log.id}
-                style={styles.activityCard}
+                title={log.title}
+                description={log.description}
+                vesselName={log.vesselName || ""}
                 onPress={() => {
                   switch (log.type) {
                     case "maintenance":
@@ -312,52 +279,11 @@ export default function OwnerDashboard() {
                       break;
                   }
                 }}
-              >
-                <LinearGradient
-                  colors={
-                    log.type === "maintenance" || log.type === "task"
-                      ? [colors.success + "30", colors.success + "10"]
-                      : log.type === "issue"
-                        ? [colors.danger + "30", colors.danger + "10"]
-                        : [colors.accent + "30", colors.accent + "10"]
-                  }
-                  style={styles.activityIcon}
-                >
-                  <IconSymbol
-                    ios_icon_name={
-                      log.type === "maintenance" || log.type === "task"
-                        ? "checkmark.circle.fill"
-                        : log.type === "issue"
-                          ? "exclamationmark.triangle.fill"
-                          : "info.circle.fill"
-                    }
-                    android_material_icon_name={
-                      log.type === "maintenance" || log.type === "task"
-                        ? "check-circle"
-                        : log.type === "issue"
-                          ? "warning"
-                          : "info"
-                    }
-                    size={20}
-                    color={
-                      log.type === "maintenance" || log.type === "task"
-                        ? colors.success
-                        : log.type === "issue"
-                          ? colors.danger
-                          : colors.accent
-                    }
-                  />
-                </LinearGradient>
-                <View style={styles.activityContent}>
-                  <Text style={styles.activityTitle}>{log.title}</Text>
-                  <Text style={styles.activityDescription}>
-                    {log.description}
-                  </Text>
-                  <Text style={styles.activityTime}>
-                    {new Date(log.timestamp).toLocaleString()}
-                  </Text>
-                </View>
-              </PressableCard>
+                isFirst={index === 0}
+                isLast={index === myActivityLogs.length - 1}
+                badge={getActivityTypeBadge(log.type)}
+                metaText={formatDate(new Date(log.timestamp))}
+              />
             ))
           ) : (
             <Text style={styles.emptyText}>No recent activity</Text>
@@ -435,57 +361,6 @@ export default function OwnerDashboard() {
           </View>
         </View>
 
-        {/* <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Key Metrics</Text>
-
-          <View style={styles.statsGrid}>
-            <StatCard
-              icon="dollarsign.circle.fill"
-              androidIcon="payments"
-              iconColor={colors.success}
-              label="Monthly Expenses"
-              value={`$${totalMonthlyExpenses.toLocaleString()}`}
-              subtext="Current month"
-              trend={expenseTrend.direction}
-              trendValue={expenseTrend.value}
-              onPress={handleViewAnalytics}
-            />
-
-            <StatCard
-              icon="wrench.and.screwdriver.fill"
-              androidIcon="build"
-              iconColor={colors.warning}
-              label="Active Tasks"
-              value={
-                myMaintenanceTasks.filter((t) => t.status !== "completed")
-                  .length
-              }
-              subtext={`${myMaintenanceTasks.length} total`}
-              onPress={() => router.push("/(tabs)/maintenance")}
-            />
-
-            <StatCard
-              icon="exclamationmark.triangle.fill"
-              androidIcon="warning"
-              iconColor={colors.danger}
-              label="Open Issues"
-              value={openIssuesCount}
-              subtext={openIssuesCount > 0 ? "Needs attention" : "All clear"}
-              onPress={() => router.push("/(tabs)/issues")}
-            />
-
-            <StatCard
-              icon="shippingbox.fill"
-              androidIcon="inventory_2"
-              iconColor={colors.accent}
-              label="Pending Approvals"
-              value={pendingApprovals.length}
-              subtext="Supply requests"
-              onPress={handleApproveRequests}
-            />
-          </View>
-        </View> */}
-
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Performance</Text>
@@ -546,67 +421,30 @@ export default function OwnerDashboard() {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Next Maintenance</Text>
             </View>
-            <PressableCard
-              style={styles.maintenanceCard}
-              onPress={() =>
-                router.push({
-                  pathname: "/maintenance-detail",
-                  params: { id: upcomingMaintenance.id },
-                })
-              }
-            >
-              <View style={styles.maintenanceHeader}>
-                <LinearGradient
-                  colors={[colors.warning + "30", colors.warning + "10"]}
-                  style={styles.iconCircle}
-                >
-                  <IconSymbol
-                    ios_icon_name="wrench.and.screwdriver.fill"
-                    android_material_icon_name="build"
-                    size={24}
-                    color={colors.warning}
-                  />
-                </LinearGradient>
-                <View style={styles.maintenanceInfo}>
-                  <Text style={styles.maintenanceTitle}>
-                    {upcomingMaintenance.title}
-                  </Text>
-                  <Text style={styles.maintenanceVessel}>
-                    {upcomingMaintenance.vesselName}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.maintenanceFooter}>
-                <View style={styles.maintenanceDue}>
-                  <IconSymbol
-                    ios_icon_name="clock.fill"
-                    android_material_icon_name="schedule"
-                    size={16}
-                    color={colors.textSecondary}
-                  />
-                  <Text style={styles.maintenanceDueText}>
-                    Due in {getDaysUntil(upcomingMaintenance.dueDate)} days
-                  </Text>
-                </View>
-                <LinearGradient
-                  colors={
-                    upcomingMaintenance.priority === "high" ||
-                    upcomingMaintenance.priority === "urgent"
-                      ? [colors.danger + "40", colors.danger + "20"]
-                      : upcomingMaintenance.priority === "medium"
-                        ? [colors.warning + "40", colors.warning + "20"]
-                        : [colors.success + "40", colors.success + "20"]
+            {(() => {
+              const priorityBadge = getPriorityBadgeColors(upcomingMaintenance.priority);
+              return (
+                <ItemCard
+                  title={upcomingMaintenance.title}
+                  description={upcomingMaintenance.vesselName}
+                  vesselName={upcomingMaintenance.vesselName}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/maintenance-detail",
+                      params: { id: upcomingMaintenance.id },
+                    })
                   }
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.priorityBadge}
-                >
-                  <Text style={styles.priorityText}>
-                    {upcomingMaintenance.priority.toUpperCase()}
-                  </Text>
-                </LinearGradient>
-              </View>
-            </PressableCard>
+                  isFirst
+                  isLast
+                  badge={{
+                    label: upcomingMaintenance.priority.charAt(0).toUpperCase() + upcomingMaintenance.priority.slice(1),
+                    fg: priorityBadge.fg,
+                    bg: priorityBadge.bg,
+                  }}
+                  metaText={formatDueDate(upcomingMaintenance.dueDate)}
+                />
+              );
+            })()}
           </View>
         )}
       </ScrollView>
@@ -619,36 +457,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     paddingBottom: 20,
   },
   header: {
     marginBottom: 24,
+    paddingHorizontal: 20,
   },
   greeting: {
     fontSize: 16,
     color: colors.textSecondary,
     marginBottom: 4,
     fontWeight: "500",
-  },
-  roleTag: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 24,
-    alignSelf: "flex-start",
-    gap: 8,
-    borderWidth: 1,
-    borderColor: colors.gold + "30",
-
-    elevation: 4,
-  },
-  roleText: {
-    color: colors.gold,
-    fontSize: 14,
-    fontWeight: "600",
-    letterSpacing: 0.5,
   },
   section: {
     marginBottom: 24,
@@ -670,10 +490,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.textTertiary,
   },
+  // Fleet Overview styles (kept — too specialized for ItemCard)
   fleetGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
+    paddingHorizontal: 20,
   },
   vesselCard: {
     flex: 1,
@@ -690,14 +512,12 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
-
     elevation: 4,
   },
   statusDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
-
     elevation: 2,
   },
   statusDotActive: {
@@ -750,13 +570,10 @@ const styles = StyleSheet.create({
     color: colors.text,
     letterSpacing: 0.5,
   },
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-  },
+  // Performance styles (kept — not list items)
   performanceCard: {
     marginBottom: 12,
+    marginHorizontal: 20,
   },
   performanceContent: {
     flexDirection: "row",
@@ -786,14 +603,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textSecondary,
   },
+  // Expense chart styles (kept — not list items)
   expenseChartCard: {
     borderRadius: 16,
     overflow: "hidden",
-
+    marginHorizontal: 20,
     elevation: 5,
-  },
-  expenseChartGradient: {
-    padding: 20,
   },
   expenseChartHeader: {
     marginBottom: 16,
@@ -808,152 +623,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textSecondary,
   },
-  maintenanceCard: {
-    padding: 16,
-  },
-  maintenanceHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-    gap: 12,
-  },
-  iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  maintenanceInfo: {
-    flex: 1,
-  },
-  maintenanceTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 2,
-  },
-  maintenanceVessel: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  maintenanceFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  maintenanceDue: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  maintenanceDueText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  priorityBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  priorityText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: colors.text,
-    letterSpacing: 0.5,
-  },
-  approvalCard: {
-    padding: 16,
-    marginBottom: 12,
-  },
-  approvalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 12,
-  },
-  approvalLeft: {
-    flex: 1,
-    marginRight: 12,
-  },
-  approvalItem: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 2,
-  },
-  approvalVessel: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  approvalAmount: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: colors.text,
-    letterSpacing: -0.5,
-  },
-  approvalFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  approvalCategory: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  approvalCategoryText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: colors.accent,
-  },
-  approvalQuantity: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  viewAllButton: {
-    marginTop: 8,
-  },
-  activityCard: {
-    flexDirection: "row",
-    padding: 16,
-    marginBottom: 12,
-  },
-  activityIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  activityContent: {
-    flex: 1,
-  },
-  activityTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 4,
-  },
-  activityDescription: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: 4,
-    lineHeight: 20,
-  },
-  activityTime: {
-    fontSize: 12,
-    color: colors.textTertiary,
-  },
   emptyText: {
     fontSize: 14,
     color: colors.textSecondary,
     textAlign: "center",
     padding: 20,
-  },
-  actionsSection: {
-    gap: 12,
-    marginBottom: 24,
   },
 });
