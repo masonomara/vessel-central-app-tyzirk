@@ -15,7 +15,10 @@ function RootLayoutContent() {
         <Stack.Screen name="member-setup" options={{ headerShown: false }} />
 
         {/* Tabs — header handled by NativeTabs */}
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(tabs)"
+          options={{ headerShown: false, headerBackTitle: "Back" }}
+        />
 
         {/* Add-form modals */}
         <Stack.Screen
@@ -88,14 +91,13 @@ function RootLayoutContent() {
         />
 
         {/* Profile — pushed from headerRight button */}
-        <Stack.Screen name="profile" options={{ title: "Profile" }} />
+        <Stack.Screen
+          name="profile"
+          options={{ title: "Profile", headerBackTitle: "Back" }}
+        />
 
         {/* Utility screens */}
         <Stack.Screen name="assign-boats" options={{ title: "Assign Boats" }} />
-        <Stack.Screen
-          name="notification-settings"
-          options={{ title: "Notification Settings" }}
-        />
         <Stack.Screen name="analytics" options={{ title: "Analytics" }} />
       </Stack>
     </View>
