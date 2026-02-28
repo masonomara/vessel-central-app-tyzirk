@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { StyleSheet, View, Text, ScrollView } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
 import { colors } from "../styles/commonStyles";
@@ -8,8 +8,12 @@ import { ItemCard } from "../components/ItemCard";
 import { CollapsibleSectionHeader } from "../components/CollapsibleSectionHeader";
 import { scrollProps } from "../hooks/useTopPadding";
 import { formatDate, formatDueDate } from "../utils/dateUtils";
-import { formatEventDateRange } from "../utils/calendarUtils";
+import {
+  formatEventDateRange,
+  getEventTypeLabel,
+} from "../utils/calendarUtils";
 import { getPriorityBadgeColors } from "../utils/colorUtils";
+import { formatLabel } from "../utils/formatLabel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function VesselDetailScreen() {
@@ -138,6 +142,10 @@ export default function VesselDetailScreen() {
                       })
                     }
                     isLast={index === openIssues.length - 1}
+                    icon={{
+                      iosName: "exclamationmark.triangle.fill",
+                      androidName: "report-problem",
+                    }}
                     badge={{
                       label:
                         issue.priority.charAt(0).toUpperCase() +
@@ -173,16 +181,18 @@ export default function VesselDetailScreen() {
                       })
                     }
                     isLast={index === vesselEvents.length - 1}
+                    icon={{ iosName: "calendar", androidName: "event" }}
                     badge={{
-                      label: formatEventDateRange(
-                        event.startDate,
-                        event.endDate,
-                        event.allDay,
-                      ),
+                      label: getEventTypeLabel(event.type),
                       fg: colors.textSecondary,
                       bg: colors.surfaceThree,
                     }}
-                    metaText={event.location || undefined}
+                    metaText={formatEventDateRange(
+                      event.startDate,
+                      event.endDate,
+                      event.allDay,
+                    )}
+                    secondaryMetaText={event.location || undefined}
                   />
                 ))}
             </View>
@@ -210,6 +220,10 @@ export default function VesselDetailScreen() {
                       })
                     }
                     isLast={index === activeTasks.length - 1}
+                    icon={{
+                      iosName: "wrench.and.screwdriver.fill",
+                      androidName: "build",
+                    }}
                     badge={{
                       label:
                         task.priority.charAt(0).toUpperCase() +
@@ -245,6 +259,10 @@ export default function VesselDetailScreen() {
                       })
                     }
                     isLast={index === pendingSupplies.length - 1}
+                    icon={{
+                      iosName: "shippingbox",
+                      androidName: "inventory-2",
+                    }}
                     badge={{
                       label:
                         req.priority.charAt(0).toUpperCase() +
@@ -280,6 +298,15 @@ export default function VesselDetailScreen() {
                       })
                     }
                     isLast={index === vesselDocs.length - 1}
+                    icon={{
+                      iosName: "doc.text.fill",
+                      androidName: "description",
+                    }}
+                    badge={{
+                      label: formatLabel(doc.category),
+                      fg: colors.textSecondary,
+                      bg: colors.surfaceThree,
+                    }}
                     metaText={formatDate(doc.uploadedAt)}
                   />
                 ))}
@@ -326,4 +353,5 @@ const styles = StyleSheet.create({
   statusBadge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
   statusText: { fontSize: 12, fontWeight: "600" },
   statsRow: { flexDirection: "row", gap: 12, marginBottom: 24 },
+  listArea: {},
 });

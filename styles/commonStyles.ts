@@ -429,7 +429,7 @@ export const indexScreenStyles = StyleSheet.create({
   // Card base
   card: {
     backgroundColor: colors.surfaceOne,
-    marginLeft: 20,
+    marginLeft: 0,
     paddingRight: 20,
     marginBottom: 16,
   },
@@ -487,20 +487,28 @@ export const indexScreenStyles = StyleSheet.create({
   completeButton: {
     height: 20,
     width: 20,
-    marginLeft: 4,
+    marginLeft: 24,
+    marginTop: 2,
     borderRadius: 100,
     alignItems: "center",
     justifyContent: "center",
   },
 
+  iconHolder: {
+    height: 20,
+    width: 20,
+    marginLeft: 24,
+    marginTop: 2,
+  },
+
   // Offset for rows under checkbox
   bottomRowWithCheckbox: {
-    paddingLeft: 42,
+    paddingLeft: 60,
   },
   metaRowWithCheckbox: {
     flexDirection: "row",
     alignItems: "center",
-    marginLeft: 42,
+    marginLeft: 60,
     gap: 8,
     marginTop: 4,
   },
@@ -540,9 +548,9 @@ export const detailScreenStyles = StyleSheet.create({
     flex: 1,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 17,
     color: colors.textSecondary,
-    marginTop: 6,
+    marginBottom: 6,
   },
 
   badge: {

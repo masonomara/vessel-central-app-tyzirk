@@ -24,6 +24,11 @@ interface ItemCardProps {
   isCompleted?: boolean;
   onComplete?: () => void;
 
+  icon?: {
+    iosName: string;
+    androidName: string;
+  };
+
   badge?: {
     label: string;
     fg: string;
@@ -31,6 +36,8 @@ interface ItemCardProps {
   };
 
   metaText?: string;
+  secondaryMetaText?: string;
+  bordered?: boolean;
 
   actions?: React.ReactNode;
 }
@@ -47,8 +54,11 @@ export const ItemCard = React.memo(
     showCheckbox,
     isCompleted,
     onComplete,
+    icon,
     badge,
     metaText,
+    secondaryMetaText,
+    bordered,
     actions,
   }: ItemCardProps) => {
     const handleComplete = useCallback(() => {
@@ -59,20 +69,30 @@ export const ItemCard = React.memo(
       <TouchableOpacity
         style={[
           indexScreenStyles.card,
-          !showCheckbox && { paddingLeft: 40 },
+          !showCheckbox && !icon && { paddingLeft: 20 },
           isFirst && indexScreenStyles.cardFirst,
           isLast && indexScreenStyles.cardLast,
+          bordered && {
+            borderWidth: 1,
+            borderColor: colors.borderSoft,
+            borderRadius: 12,
+            marginHorizontal: 20,
+            marginLeft: 20,
+            paddingLeft: 16,
+            paddingRight: 16,
+            paddingBottom: 12,
+          },
           style,
         ]}
         onPress={onPress}
       >
-        {!isFirst && (
+        {!isFirst && !bordered && (
           <View
             style={{
               height: 1,
               backgroundColor: colors.borderSoft,
-              marginLeft: showCheckbox ? 40 : 0,
-              marginRight: -20,
+              marginLeft: showCheckbox || icon ? 60 : 0,
+              marginRight: -60,
             }}
           />
         )}
@@ -105,6 +125,17 @@ export const ItemCard = React.memo(
             </Pressable>
           )}
 
+          {!showCheckbox && icon && (
+            <View style={indexScreenStyles.iconHolder}>
+              <IconSymbol
+                ios_icon_name={icon.iosName}
+                android_material_icon_name={icon.androidName}
+                size={20}
+                color={colors.textTertiary}
+              />
+            </View>
+          )}
+
           <Text style={indexScreenStyles.cardTitle} numberOfLines={2}>
             {title}
           </Text>
@@ -123,7 +154,9 @@ export const ItemCard = React.memo(
 
         <View
           style={
-            showCheckbox ? indexScreenStyles.bottomRowWithCheckbox : undefined
+            showCheckbox || icon
+              ? indexScreenStyles.bottomRowWithCheckbox
+              : undefined
           }
         >
           <Text style={indexScreenStyles.cardDescription} numberOfLines={2}>
@@ -133,7 +166,7 @@ export const ItemCard = React.memo(
 
         <View
           style={
-            showCheckbox
+            showCheckbox || icon
               ? indexScreenStyles.metaRowWithCheckbox
               : indexScreenStyles.metaRow
           }
@@ -143,6 +176,20 @@ export const ItemCard = React.memo(
             {metaText ? ` \u2022 ${metaText}` : ""}
           </Text>
         </View>
+
+        {secondaryMetaText ? (
+          <View
+            style={
+              showCheckbox || icon
+                ? indexScreenStyles.metaRowWithCheckbox
+                : indexScreenStyles.metaRow
+            }
+          >
+            <Text style={[indexScreenStyles.metaText, { marginTop: 0 }]}>
+              {secondaryMetaText}
+            </Text>
+          </View>
+        ) : null}
 
         {actions}
       </TouchableOpacity>

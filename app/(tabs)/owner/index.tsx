@@ -150,19 +150,44 @@ export default function OwnerDashboard() {
     return (completed / myMaintenanceTasks.length) * 100;
   }, [myMaintenanceTasks]);
 
-  const getActivityTypeBadge = (type: string) => {
+  const getActivityTypeIcon = (type: string) => {
     switch (type) {
       case "maintenance":
-        return { label: "Maintenance", fg: colors.greenForeground, bg: colors.greenBackground };
       case "task":
-        return { label: "Task", fg: colors.greenForeground, bg: colors.greenBackground };
+        return { iosName: "wrench.and.screwdriver.fill", androidName: "build" };
       case "issue":
-        return { label: "Issue", fg: colors.redForeground, bg: colors.redBackground };
+        return { iosName: "exclamationmark.triangle.fill", androidName: "report-problem" };
       case "supply":
-        return { label: "Supply", fg: colors.accent, bg: colors.accent + "30" };
+        return { iosName: "shippingbox", androidName: "inventory-2" };
       default:
-        return { label: type.charAt(0).toUpperCase() + type.slice(1), fg: colors.accent, bg: colors.accent + "30" };
+        return { iosName: "doc.text.fill", androidName: "description" };
     }
+  };
+
+  const getActivityPriorityBadge = (log: { type: string; relatedId?: string }) => {
+    let priority: string | undefined;
+
+    if (log.relatedId) {
+      if (log.type === "issue") {
+        const issue = myIssues.find((i) => i.id === log.relatedId);
+        priority = issue?.priority;
+      } else if (log.type === "maintenance" || log.type === "task") {
+        const task = myMaintenanceTasks.find((t) => t.id === log.relatedId);
+        priority = task?.priority;
+      } else if (log.type === "supply") {
+        const req = mySupplyRequests.find((r) => r.id === log.relatedId);
+        priority = req?.priority;
+      }
+    }
+
+    if (!priority) return undefined;
+
+    const badge = getPriorityBadgeColors(priority);
+    return {
+      label: priority.charAt(0).toUpperCase() + priority.slice(1),
+      fg: badge.fg,
+      bg: badge.bg,
+    };
   };
 
   return (
@@ -233,10 +258,11 @@ export default function OwnerDashboard() {
                     }
                     isFirst={index === 0}
                     isLast={index === sliced.length - 1}
+                    icon={{ iosName: "shippingbox", androidName: "inventory-2" }}
                     badge={{
-                      label: approval.category,
-                      fg: colors.accent,
-                      bg: colors.accent + "30",
+                      label: approval.priority.charAt(0).toUpperCase() + approval.priority.slice(1),
+                      fg: getPriorityBadgeColors(approval.priority).fg,
+                      bg: getPriorityBadgeColors(approval.priority).bg,
                     }}
                     metaText={formatDate(new Date(approval.createdAt))}
                     style={{ marginLeft: 0, backgroundColor: "transparent" }}
@@ -286,7 +312,8 @@ export default function OwnerDashboard() {
                   }}
                   isFirst={index === 0}
                   isLast={index === myActivityLogs.length - 1}
-                  badge={getActivityTypeBadge(log.type)}
+                  icon={getActivityTypeIcon(log.type)}
+                  badge={getActivityPriorityBadge(log)}
                   metaText={formatDate(new Date(log.timestamp))}
                   style={{ marginLeft: 0, backgroundColor: "transparent" }}
                 />
@@ -444,6 +471,7 @@ export default function OwnerDashboard() {
                     }
                     isFirst
                     isLast
+                    icon={{ iosName: "wrench.and.screwdriver.fill", androidName: "build" }}
                     badge={{
                       label: upcomingMaintenance.priority.charAt(0).toUpperCase() + upcomingMaintenance.priority.slice(1),
                       fg: priorityBadge.fg,

@@ -9,6 +9,7 @@ import { IconSymbol } from "../../../components/IconSymbol";
 import { ItemCard } from "../../../components/ItemCard";
 import { Document } from "../../../types";
 import { formatDate } from "../../../utils/dateUtils";
+import { formatLabel } from "../../../utils/formatLabel";
 import { scrollProps } from "../../../hooks/useTopPadding";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SearchBar } from "../../../components/SearchBar";
@@ -103,6 +104,12 @@ export default function DocumentsScreen() {
         isFirst={index === 0}
         onPress={() => handleDocumentPress(doc)}
         isLast={index === section.data.length - 1}
+        icon={{ iosName: "doc.text.fill", androidName: "description" }}
+        badge={{
+          label: formatLabel(doc.category),
+          fg: colors.textSecondary,
+          bg: colors.surfaceThree,
+        }}
         metaText={formatDate(doc.uploadedAt)}
       />
     ),

@@ -154,10 +154,11 @@ export default function ManagerDashboard() {
                     }
                     isFirst={index === 0}
                     isLast={index === sliced.length - 1}
+                    icon={{ iosName: "shippingbox", androidName: "inventory-2" }}
                     badge={{
-                      label: approval.category,
-                      fg: colors.accent,
-                      bg: colors.accent + "30",
+                      label: approval.priority.charAt(0).toUpperCase() + approval.priority.slice(1),
+                      fg: getPriorityBadgeColors(approval.priority).fg,
+                      bg: getPriorityBadgeColors(approval.priority).bg,
                     }}
                     actions={
                       <View style={styles.approvalActions}>
@@ -379,6 +380,7 @@ export default function ManagerDashboard() {
                     }
                     isFirst={index === 0}
                     isLast={index === upcomingMaintenance.length - 1}
+                    icon={{ iosName: "wrench.and.screwdriver.fill", androidName: "build" }}
                     badge={{
                       label: item.priority.charAt(0).toUpperCase() + item.priority.slice(1),
                       fg: priorityBadge.fg,

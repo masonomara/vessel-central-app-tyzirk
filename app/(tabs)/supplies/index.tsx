@@ -124,6 +124,7 @@ export default function SuppliesScreen() {
         isFirst={index === 0}
         onPress={() => handleRequestPress(item)}
         isLast={index === section.data.length - 1}
+        icon={{ iosName: "shippingbox", androidName: "inventory-2" }}
         badge={{
           label: item.priority.charAt(0).toUpperCase() + item.priority.slice(1),
           fg: getPriorityBadgeColors(item.priority).fg,

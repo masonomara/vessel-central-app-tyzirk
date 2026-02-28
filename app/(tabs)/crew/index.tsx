@@ -1,10 +1,5 @@
 import { useMemo } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-} from "react-native";
+import { StyleSheet, View, Text, ScrollView } from "react-native";
 import { ItemCard } from "../../../components/ItemCard";
 import { ListWrapper } from "../../../components/ListWrapper";
 import { PressableCard } from "../../../components/PressableCard";
@@ -53,17 +48,6 @@ export default function CrewDashboard() {
     if (task) {
       const newStatus = task.status === "completed" ? "open" : "completed";
       updateMaintenanceTask(taskId, { status: newStatus });
-    }
-  };
-
-  const getSupplyStatusBadge = (status: string) => {
-    switch (status) {
-      case "approved":
-        return { label: "Approved", fg: colors.greenForeground, bg: colors.greenBackground };
-      case "denied":
-        return { label: "Denied", fg: colors.redForeground, bg: colors.redBackground };
-      default:
-        return { label: status.charAt(0).toUpperCase() + status.slice(1), fg: colors.orangeForeground, bg: colors.orangeBackground };
     }
   };
 
@@ -123,7 +107,9 @@ export default function CrewDashboard() {
                     isCompleted={task.status === "completed"}
                     onComplete={() => toggleTaskCompletion(task.id)}
                     badge={{
-                      label: task.priority.charAt(0).toUpperCase() + task.priority.slice(1),
+                      label:
+                        task.priority.charAt(0).toUpperCase() +
+                        task.priority.slice(1),
                       fg: priorityBadge.fg,
                       bg: priorityBadge.bg,
                     }}
@@ -146,7 +132,8 @@ export default function CrewDashboard() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Supply Requests</Text>
             <Text style={styles.sectionCount}>
-              {mySupplyRequests.length} {mySupplyRequests.length === 1 ? "item" : "items"}
+              {mySupplyRequests.length}{" "}
+              {mySupplyRequests.length === 1 ? "item" : "items"}
             </Text>
           </View>
           {mySupplyRequests.length > 0 ? (
@@ -165,7 +152,14 @@ export default function CrewDashboard() {
                   }
                   isFirst={index === 0}
                   isLast={index === mySupplyRequests.length - 1}
-                  badge={getSupplyStatusBadge(request.status)}
+                  icon={{ iosName: "shippingbox", androidName: "inventory-2" }}
+                  badge={{
+                    label:
+                      request.priority.charAt(0).toUpperCase() +
+                      request.priority.slice(1),
+                    fg: getPriorityBadgeColors(request.priority).fg,
+                    bg: getPriorityBadgeColors(request.priority).bg,
+                  }}
                   metaText={formatDate(request.createdAt)}
                   style={{ marginLeft: 0, backgroundColor: "transparent" }}
                 />
@@ -227,7 +221,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 21,
     color: colors.textSecondary,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   section: {
     marginBottom: 20,
