@@ -7,11 +7,6 @@
     "icon": "./public/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./public/icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0A1628"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.vesselcentral.app",
@@ -40,6 +35,14 @@
       "expo-font",
       "expo-router",
       "expo-web-browser",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0A1628",
+          "image": "./public/splash.png",
+          "imageWidth": 200
+        }
+      ],
       [
         "expo-notifications",
         {
