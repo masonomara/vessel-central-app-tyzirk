@@ -4,6 +4,9 @@ import { DataProvider } from "../contexts/DataContext";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { View, StyleSheet } from "react-native";
 import { stackScreenOptions } from "../components/TabStackLayout";
+import * as SplashScreen from "expo-splash-screen";
+
+SplashScreen.preventAutoHideAsync();
 
 function RootLayoutContent() {
   return (
