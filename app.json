@@ -1,31 +1,26 @@
 {
   "expo": {
-    "name": "Vessel Central",
-    "slug": "Vessel Central",
+    "name": "Vessel & Co. Yacht Management",
+    "slug": "vessel-and-co",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/natively-dark.png",
+    "icon": "./public/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/natively-dark.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#000000"
-    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.Natively",
+      "bundleIdentifier": "com.vesselcentral.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/natively-dark.png",
-        "backgroundColor": "#000000"
+        "foregroundImage": "./public/adaptive-icon.png",
+        "backgroundColor": "#0A1628"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.Natively",
+      "package": "com.vesselcentral.app",
       "permissions": [
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.SCHEDULE_EXACT_ALARM",
@@ -33,7 +28,7 @@
       ]
     },
     "web": {
-      "favicon": "./assets/images/final_quest_240x240.png",
+      "favicon": "./public/icon.png",
       "bundler": "metro"
     },
     "plugins": [
@@ -41,22 +36,29 @@
       "expo-router",
       "expo-web-browser",
       [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0A1628",
+          "image": "./public/splash.png",
+          "imageWidth": 200
+        }
+      ],
+      [
         "expo-notifications",
         {
-          "icon": "./assets/images/natively-dark.png",
-          "color": "#000000",
+          "icon": "./public/icon.png",
+          "color": "#C9A84C",
           "defaultChannel": "default",
           "sounds": []
         }
       ]
     ],
-    "scheme": "natively",
+    "scheme": "vesselcentral",
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
       "router": {}
     }
-  },
-  "scheme": "Vessel Central"
+  }
 }

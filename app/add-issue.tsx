@@ -12,15 +12,15 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useTheme } from '@react-navigation/native';
+import { Stack, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { colors } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { TaskPriority, Attachment } from '@/types';
-import { optimizeImage, formatFileSize, validateImage } from '@/utils/imageUtils';
+import { colors } from '../styles/commonStyles';
+import { useData } from '../contexts/DataContext';
+import { useAuth } from '../contexts/AuthContext';
+import { IconSymbol } from '../components/IconSymbol';
+import { TaskPriority, Attachment } from '../types';
+import { optimizeImage, formatFileSize, validateImage } from '../utils/imageUtils';
+import { scrollProps } from '../hooks/useTopPadding';
 
 const ISSUE_CATEGORIES = [
   'Structural',
@@ -39,7 +39,6 @@ const PRIORITY_OPTIONS: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
 
 export default function AddIssueScreen() {
   const router = useRouter();
-  const theme = useTheme();
   const { addIssue, vessels, getVesselsForUser } = useData();
   const { userId, userName, userRole } = useAuth();
 
@@ -118,9 +117,7 @@ export default function AddIssueScreen() {
                 mimeType: 'image/jpeg',
               });
 
-              console.log(`Image optimized: ${formatFileSize(optimized.originalSize || 0)} → ${formatFileSize(optimized.size || 0)}`);
-            } catch (error) {
-              console.error('Error optimizing image:', error);
+            } catch {
               // Fall back to original image if optimization fails
               newAttachments.push({
                 id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -194,9 +191,7 @@ export default function AddIssueScreen() {
           };
 
           setAttachments([...attachments, newAttachment]);
-          console.log(`Photo optimized: ${formatFileSize(optimized.originalSize || 0)} → ${formatFileSize(optimized.size || 0)}`);
-        } catch (error) {
-          console.error('Error optimizing photo:', error);
+        } catch {
           // Fall back to original image if optimization fails
           const newAttachment: Attachment = {
             id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -302,20 +297,37 @@ export default function AddIssueScreen() {
     }
   };
 
-  return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <IconSymbol
-            ios_icon_name="chevron.left"
-            android_material_icon_name="arrow_back"
-            size={24}
-            color={colors.text}
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Report Issue</Text>
-        <View style={styles.headerSpacer} />
+  if (userVessels.length === 0) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+        <Stack.Screen options={{ title: 'Report Issue' }} />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 }}>
+          <IconSymbol ios_icon_name="sailboat" android_material_icon_name="sailing" size={48} color={colors.textTertiary} />
+          <Text style={{ fontSize: 16, color: colors.textSecondary, textAlign: 'center', marginTop: 16 }}>
+            No vessels assigned to your account. Contact your manager.
+          </Text>
+        </View>
       </View>
+    );
+  }
+
+  return (
+    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+      <Stack.Screen
+        options={{
+          title: 'Report Issue',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
+              <Text style={[styles.saveText, isSubmitting && { opacity: 0.5 }]}>Submit</Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
 
       {isOptimizing && (
         <View style={styles.optimizingOverlay}>
@@ -333,6 +345,7 @@ export default function AddIssueScreen() {
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
+        {...scrollProps}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>
@@ -473,7 +486,7 @@ export default function AddIssueScreen() {
             >
               <IconSymbol
                 ios_icon_name="camera.fill"
-                android_material_icon_name="photo_camera"
+                android_material_icon_name="photo-camera"
                 size={24}
                 color={isOptimizing ? colors.textSecondary : colors.accent}
               />
@@ -492,7 +505,7 @@ export default function AddIssueScreen() {
             >
               <IconSymbol
                 ios_icon_name="photo.fill"
-                android_material_icon_name="photo_library"
+                android_material_icon_name="photo-library"
                 size={24}
                 color={isOptimizing ? colors.textSecondary : colors.accent}
               />
@@ -515,7 +528,7 @@ export default function AddIssueScreen() {
                     <View style={styles.videoPlaceholder}>
                       <IconSymbol
                         ios_icon_name="play.circle.fill"
-                        android_material_icon_name="play_circle"
+                        android_material_icon_name="play-circle"
                         size={32}
                         color={colors.text}
                       />
@@ -561,26 +574,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 48 : 60,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+  cancelText: {
+    fontSize: 16,
+    color: colors.textSecondary,
   },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  headerSpacer: {
-    width: 40,
+  saveText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.accent,
   },
   optimizingOverlay: {
     position: 'absolute',
@@ -594,7 +595,7 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   optimizingCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 16,
     padding: 32,
     alignItems: 'center',
@@ -624,7 +625,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -644,7 +645,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -670,7 +671,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     paddingVertical: 16,
     borderWidth: 1,
@@ -704,7 +705,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 12,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -727,7 +728,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -8,
     right: -8,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
   },
   submitButton: {
@@ -743,7 +744,7 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
 });

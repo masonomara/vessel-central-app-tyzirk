@@ -1,9 +1,6 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { cacheManager, CACHE_KEYS, CACHE_EXPIRATION, cacheHelpers } from '@/utils/cacheManager';
-import { offlineManager } from '@/utils/offlineManager';
-import { realtimeManager } from '@/utils/realtimeManager';
 import {
   MaintenanceTask,
   Issue,
@@ -17,7 +14,7 @@ import {
   Attachment,
   Comment,
   CalendarEvent,
-} from '@/types';
+} from '../types';
 
 interface DataContextType {
   vessels: Vessel[];
@@ -50,7 +47,8 @@ interface DataContextType {
   updateMaintenanceTask: (id: string, updates: Partial<MaintenanceTask>) => Promise<void>;
   deleteMaintenanceTask: (id: string) => void;
   completeMaintenanceTask: (id: string, record: Omit<CompletionRecord, 'id' | 'taskId'>) => void;
-  
+  addMaintenanceComment: (taskId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
+
   addIssue: (issue: Omit<Issue, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateIssue: (id: string, updates: Partial<Issue>) => void;
   addIssueComment: (issueId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
@@ -59,10 +57,12 @@ interface DataContextType {
   updateSupplyRequest: (id: string, updates: Partial<SupplyRequest>) => void;
   approveSupplyRequest: (id: string, approvedBy: string, approvedByName: string) => void;
   denySupplyRequest: (id: string, reason: string) => void;
-  
+  addSupplyComment: (requestId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
+
   addDocument: (document: Omit<Document, 'id' | 'uploadedAt'>) => void;
   updateDocument: (id: string, updates: Partial<Document>) => void;
   deleteDocument: (id: string) => void;
+  addDocumentComment: (docId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
   
   addActivityLog: (log: Omit<ActivityLog, 'id' | 'timestamp'>) => void;
   
@@ -76,6 +76,7 @@ interface DataContextType {
   addCalendarEvent: (event: Omit<CalendarEvent, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateCalendarEvent: (id: string, updates: Partial<CalendarEvent>) => void;
   deleteCalendarEvent: (id: string) => void;
+  addCalendarEventComment: (eventId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
   
   loadData: () => Promise<void>;
   saveData: () => Promise<void>;
@@ -84,6 +85,7 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 const STORAGE_KEY = '@vessel_co_data';
+const DATA_VERSION = 2;
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [vessels, setVessels] = useState<Vessel[]>([
@@ -139,7 +141,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(),
       updatedAt: new Date(),
       attachments: [],
+      comments: [],
       completionHistory: [],
+      category: 'Mechanical',
       estimatedCost: 2500,
       notes: 'Use synthetic oil only',
     },
@@ -162,7 +166,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
       updatedAt: new Date(),
       attachments: [],
+      comments: [],
       completionHistory: [],
+      category: 'Safety',
       estimatedCost: 500,
       notes: 'Check expiry dates on all equipment',
     },
@@ -183,7 +189,179 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(),
       updatedAt: new Date(),
       attachments: [],
+      comments: [],
       completionHistory: [],
+      category: 'Cleaning',
+      notes: '',
+    },
+    {
+      id: '4',
+      title: 'Hull Inspection',
+      description: 'Underwater hull inspection and cleaning. Check for barnacles, osmotic blistering, and antifouling paint condition.',
+      vesselId: '1',
+      vesselName: 'Azure Dream',
+      assignedTo: 'crew2',
+      assignedToName: 'Sarah Williams',
+      assignedToType: 'crew',
+      status: 'completed',
+      priority: 'high',
+      dueDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      completedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      isRecurring: true,
+      frequency: 'quarterly',
+      frequencyValue: 1,
+      createdBy: 'manager1',
+      createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      attachments: [],
+      comments: [],
+      completionHistory: [
+        {
+          id: 'ch1',
+          taskId: '4',
+          completedBy: 'crew2',
+          completedByName: 'Sarah Williams',
+          completedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+          notes: 'Hull in good condition. Minor barnacle buildup removed. Antifouling paint holding well.',
+          attachments: [],
+          cost: 1200,
+        },
+      ],
+      estimatedCost: 1500,
+      category: 'Structural',
+      actualCost: 1200,
+      notes: 'Coordinate with dive team',
+    },
+    {
+      id: '5',
+      title: 'Generator Maintenance',
+      description: 'Scheduled generator service — check belts, coolant levels, and battery connections.',
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      assignedTo: 'crew3',
+      assignedToName: 'Jane Smith',
+      assignedToType: 'crew',
+      status: 'waiting_on_parts',
+      priority: 'medium',
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      isRecurring: true,
+      frequency: 'monthly',
+      frequencyValue: 6,
+      createdBy: 'manager2',
+      createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      attachments: [],
+      comments: [],
+      completionHistory: [],
+      category: 'Electrical',
+      estimatedCost: 3500,
+      notes: 'Waiting on replacement belt from supplier',
+    },
+    {
+      id: '6',
+      title: 'Bilge Pump Test',
+      description: 'Test all bilge pumps and float switches. Verify automatic activation.',
+      vesselId: '3',
+      vesselName: 'Sea Breeze',
+      assignedTo: 'crew1',
+      assignedToName: 'Mike Davis',
+      assignedToType: 'crew',
+      status: 'open',
+      priority: 'medium',
+      dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+      isRecurring: true,
+      frequency: 'monthly',
+      frequencyValue: 1,
+      createdBy: 'manager1',
+      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      attachments: [],
+      comments: [],
+      completionHistory: [],
+      category: 'Plumbing',
+      notes: '',
+    },
+    {
+      id: '7',
+      title: 'HVAC Filter Replacement',
+      description: 'Replace all cabin and salon HVAC filters. Check refrigerant levels.',
+      vesselId: '1',
+      vesselName: 'Azure Dream',
+      assignedTo: 'crew1',
+      assignedToName: 'Mike Davis',
+      assignedToType: 'crew',
+      status: 'in_progress',
+      priority: 'low',
+      dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+      isRecurring: true,
+      frequency: 'quarterly',
+      frequencyValue: 1,
+      createdBy: 'manager1',
+      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      attachments: [],
+      comments: [],
+      completionHistory: [],
+      category: 'Mechanical',
+      estimatedCost: 400,
+      notes: 'Filters ordered and received',
+    },
+    {
+      id: '8',
+      title: 'Watermaker Service',
+      description: 'Service reverse osmosis watermaker. Replace pre-filters and check membrane condition.',
+      vesselId: '3',
+      vesselName: 'Sea Breeze',
+      assignedTo: null,
+      assignedToName: null,
+      assignedToType: null,
+      status: 'open',
+      priority: 'high',
+      dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      isRecurring: true,
+      frequency: 'yearly',
+      frequencyValue: 1,
+      createdBy: 'manager1',
+      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      attachments: [],
+      comments: [],
+      completionHistory: [],
+      category: 'Plumbing',
+      estimatedCost: 2800,
+      notes: 'Overdue — needs scheduling ASAP',
+    },
+    {
+      id: '9',
+      title: 'Anchor Windlass Inspection',
+      description: 'Inspect anchor windlass, chain, and rode. Lubricate gypsy and test operation.',
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      assignedTo: 'crew3',
+      assignedToName: 'Jane Smith',
+      assignedToType: 'crew',
+      status: 'completed',
+      priority: 'medium',
+      dueDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      completedDate: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+      isRecurring: false,
+      createdBy: 'manager2',
+      createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+      attachments: [],
+      comments: [],
+      completionHistory: [
+        {
+          id: 'ch2',
+          taskId: '9',
+          completedBy: 'crew3',
+          completedByName: 'Jane Smith',
+          completedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+          notes: 'Windlass operating smoothly. Chain marked at 50m intervals.',
+          attachments: [],
+        },
+      ],
+      category: 'Mechanical',
       notes: '',
     },
   ]);
@@ -206,7 +384,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
       updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
       attachments: [],
-      comments: [],
+      comments: [
+        {
+          id: 'c1',
+          userId: 'manager1',
+          userName: 'Sarah Johnson',
+          userRole: 'manager',
+          text: 'Inspected the area. Will need to schedule a repair crew for next week.',
+          attachments: [],
+          createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000),
+        },
+      ],
     },
     {
       id: '2',
@@ -225,7 +413,104 @@ export function DataProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
       updatedAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
       attachments: [],
+      comments: [
+        {
+          id: 'c2',
+          userId: 'crew3',
+          userName: 'Jane Smith',
+          userRole: 'crew',
+          text: 'Checked the bulb — it\'s burned out. Replacement LED unit needed, part #NL-4420.',
+          attachments: [],
+          createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
+        },
+        {
+          id: 'c3',
+          userId: 'manager2',
+          userName: 'Tom Wilson',
+          userRole: 'manager',
+          text: 'Ordered the replacement. Should arrive by Thursday.',
+          attachments: [],
+          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+        },
+      ],
+    },
+    {
+      id: '3',
+      title: 'Engine Room Ventilation Fan Noise',
+      description: 'Unusual grinding noise from the starboard engine room ventilation fan. Gets louder at higher RPM.',
+      vesselId: '1',
+      vesselName: 'Azure Dream',
+      reportedBy: 'crew2',
+      reportedByName: 'Sarah Williams',
+      assignedTo: 'crew1',
+      assignedToName: 'Mike Davis',
+      status: 'in_progress',
+      priority: 'medium',
+      category: 'Mechanical',
+      location: 'Engine Room',
+      createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
+      attachments: [],
+      comments: [
+        {
+          id: 'c4',
+          userId: 'crew1',
+          userName: 'Mike Davis',
+          userRole: 'crew',
+          text: 'Bearing appears worn. Going to lubricate and monitor. May need full replacement.',
+          attachments: [],
+          createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
+        },
+      ],
+    },
+    {
+      id: '4',
+      title: 'Guest Cabin A/C Not Cooling',
+      description: 'Air conditioning unit in guest cabin 2 is running but not producing cold air. Thermostat reads 28°C.',
+      vesselId: '3',
+      vesselName: 'Sea Breeze',
+      reportedBy: 'crew1',
+      reportedByName: 'Mike Davis',
+      assignedTo: null,
+      assignedToName: null,
+      status: 'open',
+      priority: 'high',
+      category: 'Mechanical',
+      location: 'Guest Cabin 2',
+      createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
+      attachments: [],
       comments: [],
+    },
+    {
+      id: '5',
+      title: 'Galley Faucet Drip',
+      description: 'Slow drip from the galley hot water faucet. Washer likely needs replacement.',
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      reportedBy: 'crew3',
+      reportedByName: 'Jane Smith',
+      assignedTo: 'crew3',
+      assignedToName: 'Jane Smith',
+      status: 'completed',
+      priority: 'low',
+      category: 'Plumbing',
+      location: 'Galley',
+      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      resolvedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      attachments: [],
+      comments: [
+        {
+          id: 'c5',
+          userId: 'crew3',
+          userName: 'Jane Smith',
+          userRole: 'crew',
+          text: 'Replaced the washer and O-ring. No more drip.',
+          attachments: [],
+          createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        },
+      ],
     },
   ]);
 
@@ -248,6 +533,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
       notes: 'Running low on supplies',
       attachments: [],
+      comments: [],
     },
     {
       id: '2',
@@ -270,6 +556,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
       notes: 'For upcoming engine service',
       attachments: [],
+      comments: [],
     },
     {
       id: '3',
@@ -289,6 +576,78 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
       notes: 'Urgent replacement needed',
       attachments: [],
+      comments: [],
+    },
+    {
+      id: '4',
+      itemName: 'Teak Oil',
+      description: 'Marine-grade teak oil for deck maintenance. UV-resistant formula.',
+      quantity: 10,
+      unit: 'liters',
+      estimatedCost: 450,
+      actualCost: 420,
+      vesselId: '1',
+      vesselName: 'Azure Dream',
+      requestedBy: 'crew1',
+      requestedByName: 'Mike Davis',
+      status: 'ordered',
+      priority: 'low',
+      category: 'Maintenance',
+      approvedBy: 'manager1',
+      approvedByName: 'Sarah Johnson',
+      approvedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      vendor: 'West Marine',
+      notes: 'Semco brand preferred',
+      attachments: [],
+      comments: [],
+    },
+    {
+      id: '5',
+      itemName: 'Dock Lines',
+      description: '3/4" double-braid nylon dock lines, 30ft.',
+      quantity: 4,
+      unit: 'pieces',
+      estimatedCost: 320,
+      actualCost: 310,
+      vesselId: '3',
+      vesselName: 'Sea Breeze',
+      requestedBy: 'crew1',
+      requestedByName: 'Mike Davis',
+      status: 'received',
+      priority: 'medium',
+      category: 'Safety',
+      approvedBy: 'manager1',
+      approvedByName: 'Sarah Johnson',
+      approvedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      receivedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      notes: 'Old lines showing chafe damage',
+      attachments: [],
+      comments: [],
+    },
+    {
+      id: '6',
+      itemName: 'Radar Reflector',
+      description: 'Passive radar reflector for improved visibility.',
+      quantity: 1,
+      unit: 'units',
+      estimatedCost: 180,
+      vesselId: '3',
+      vesselName: 'Sea Breeze',
+      requestedBy: 'crew2',
+      requestedByName: 'Sarah Williams',
+      status: 'denied',
+      priority: 'low',
+      category: 'Safety',
+      deniedReason: 'Active radar transponder already installed. Passive reflector not needed.',
+      createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000),
+      notes: '',
+      attachments: [],
+      comments: [],
     },
   ]);
 
@@ -310,6 +669,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       fileType: 'application/pdf',
       tags: ['legal', 'required'],
       isImportant: true,
+      comments: [],
     },
     {
       id: '2',
@@ -328,6 +688,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       fileType: 'application/pdf',
       tags: ['insurance', 'required'],
       isImportant: true,
+      comments: [],
     },
     {
       id: '3',
@@ -345,6 +706,80 @@ export function DataProvider({ children }: { children: ReactNode }) {
       fileType: 'application/pdf',
       tags: ['safety', 'manual'],
       isImportant: true,
+      comments: [],
+    },
+    {
+      id: '4',
+      title: 'Engine Warranty Certificate',
+      description: 'Extended warranty certificate for twin Caterpillar C32 engines.',
+      category: 'warranty',
+      vesselId: '1',
+      vesselName: 'Azure Dream',
+      uploadedBy: 'manager1',
+      uploadedByName: 'Sarah Johnson',
+      uploadedAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000),
+      expiryDate: new Date(Date.now() + 600 * 24 * 60 * 60 * 1000),
+      fileUri: 'file://documents/engine_warranty.pdf',
+      fileName: 'engine_warranty.pdf',
+      fileSize: 1572864,
+      fileType: 'application/pdf',
+      tags: ['warranty', 'maintenance'],
+      isImportant: true,
+      comments: [],
+    },
+    {
+      id: '5',
+      title: 'Crew Operations Manual',
+      description: 'Standard operating procedures for crew members.',
+      category: 'manual',
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      uploadedBy: 'manager2',
+      uploadedByName: 'Tom Wilson',
+      uploadedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
+      fileUri: 'file://documents/crew_ops_manual.pdf',
+      fileName: 'crew_operations_manual.pdf',
+      fileSize: 8388608,
+      fileType: 'application/pdf',
+      tags: ['crew', 'manual', 'required'],
+      isImportant: false,
+      comments: [],
+    },
+    {
+      id: '6',
+      title: 'Marina Invoice - February',
+      description: 'Monthly docking and marina services invoice.',
+      category: 'invoice',
+      vesselId: '3',
+      vesselName: 'Sea Breeze',
+      uploadedBy: 'manager1',
+      uploadedByName: 'Sarah Johnson',
+      uploadedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      fileUri: 'file://documents/marina_invoice_feb.pdf',
+      fileName: 'marina_invoice_feb_2026.pdf',
+      fileSize: 524288,
+      fileType: 'application/pdf',
+      tags: ['financial', 'invoice'],
+      isImportant: false,
+      comments: [],
+    },
+    {
+      id: '7',
+      title: 'Hull Survey Report',
+      description: 'Annual hull condition survey performed by certified marine surveyor.',
+      category: 'other',
+      vesselId: '1',
+      vesselName: 'Azure Dream',
+      uploadedBy: 'manager1',
+      uploadedByName: 'Sarah Johnson',
+      uploadedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+      fileUri: 'file://documents/hull_survey.pdf',
+      fileName: 'hull_survey_2026.pdf',
+      fileSize: 4194304,
+      fileType: 'application/pdf',
+      tags: ['maintenance', 'required'],
+      isImportant: true,
+      comments: [],
     },
   ]);
 
@@ -469,6 +904,86 @@ export function DataProvider({ children }: { children: ReactNode }) {
       status: 'paid',
       attachments: [],
     },
+    {
+      id: '3',
+      title: 'Docking Fees - February',
+      description: 'Monthly marina berth and docking services',
+      amount: 4200,
+      category: 'Docking',
+      vesselId: '1',
+      vesselName: 'Azure Dream',
+      date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      paidBy: 'manager1',
+      paidByName: 'Sarah Johnson',
+      approvedBy: 'owner1',
+      approvedByName: 'John Smith',
+      status: 'paid',
+      attachments: [],
+    },
+    {
+      id: '4',
+      title: 'Hull Insurance Premium',
+      description: 'Quarterly hull and machinery insurance premium',
+      amount: 12500,
+      category: 'Insurance',
+      vesselId: '1',
+      vesselName: 'Azure Dream',
+      date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+      paidBy: 'manager1',
+      paidByName: 'Sarah Johnson',
+      approvedBy: 'owner1',
+      approvedByName: 'John Smith',
+      status: 'paid',
+      attachments: [],
+    },
+    {
+      id: '5',
+      title: 'Engine Repair Parts',
+      description: 'Replacement impeller and gaskets for port engine',
+      amount: 2850,
+      category: 'Repairs',
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      paidBy: 'manager2',
+      paidByName: 'Tom Wilson',
+      approvedBy: 'owner2',
+      approvedByName: 'Emily Brown',
+      status: 'approved',
+      attachments: [],
+    },
+    {
+      id: '6',
+      title: 'Crew Training Course',
+      description: 'STCW refresher course for two crew members',
+      amount: 1800,
+      category: 'Crew',
+      vesselId: '3',
+      vesselName: 'Sea Breeze',
+      date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
+      paidBy: 'manager1',
+      paidByName: 'Sarah Johnson',
+      approvedBy: 'owner1',
+      approvedByName: 'John Smith',
+      status: 'paid',
+      attachments: [],
+    },
+    {
+      id: '7',
+      title: 'Fuel Purchase - Caribbean Marina',
+      description: 'Diesel refueling for Sea Breeze',
+      amount: 5600,
+      category: 'Fuel',
+      vesselId: '3',
+      vesselName: 'Sea Breeze',
+      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      paidBy: 'manager1',
+      paidByName: 'Sarah Johnson',
+      approvedBy: 'owner1',
+      approvedByName: 'John Smith',
+      status: 'pending',
+      attachments: [],
+    },
   ]);
 
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([
@@ -496,6 +1011,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         { id: '2', minutes: 60, method: 'notification' },
       ],
       relatedTaskId: '1',
+      comments: [],
     },
     {
       id: '2',
@@ -520,6 +1036,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         { id: '3', minutes: 10080, method: 'notification' },
         { id: '4', minutes: 2880, method: 'notification' },
       ],
+      comments: [],
     },
     {
       id: '3',
@@ -544,6 +1061,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         { id: '5', minutes: 1440, method: 'notification' },
       ],
       relatedTaskId: '2',
+      comments: [],
     },
     {
       id: '4',
@@ -567,6 +1085,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       reminders: [
         { id: '6', minutes: 1440, method: 'notification' },
       ],
+      comments: [],
     },
     {
       id: '5',
@@ -590,236 +1109,125 @@ export function DataProvider({ children }: { children: ReactNode }) {
       reminders: [
         { id: '7', minutes: 720, method: 'notification' },
       ],
+      comments: [],
     },
   ]);
 
   // Use ref to track if data has been loaded
   const hasLoadedData = useRef(false);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadData = useCallback(async () => {
     if (hasLoadedData.current) {
-      console.log('Data already loaded, skipping...');
       return;
     }
-    
+
     try {
-      console.log('Loading data from cache...');
-      
-      // Try to load from new cache system first
-      const cachedVessels = await cacheManager.get<Vessel[]>(CACHE_KEYS.VESSELS);
-      const cachedMaintenanceTasks = await cacheManager.get<MaintenanceTask[]>(CACHE_KEYS.MAINTENANCE_TASKS);
-      const cachedIssues = await cacheManager.get<Issue[]>(CACHE_KEYS.ISSUES);
-      const cachedSupplyRequests = await cacheManager.get<SupplyRequest[]>(CACHE_KEYS.SUPPLY_REQUESTS);
-      const cachedDocuments = await cacheManager.get<Document[]>(CACHE_KEYS.DOCUMENTS);
-      const cachedActivityLogs = await cacheManager.get<ActivityLog[]>(CACHE_KEYS.ACTIVITY_LOGS);
-      const cachedNotifications = await cacheManager.get<Notification[]>(CACHE_KEYS.NOTIFICATIONS);
-      const cachedExpenses = await cacheManager.get<Expense[]>(CACHE_KEYS.EXPENSES);
-      const cachedCalendarEvents = await cacheManager.get<CalendarEvent[]>(CACHE_KEYS.CALENDAR_EVENTS);
+      const data = await AsyncStorage.getItem(STORAGE_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
 
-      // If cache exists, use it
-      if (cachedVessels) {
-        console.log('Using cached vessels');
-        setVessels(cachedVessels);
-      }
-      
-      if (cachedMaintenanceTasks) {
-        console.log('Using cached maintenance tasks');
-        setMaintenanceTasks(cachedMaintenanceTasks.map((task: MaintenanceTask) => ({
-          ...task,
-          dueDate: new Date(task.dueDate),
-          createdAt: new Date(task.createdAt),
-          updatedAt: new Date(task.updatedAt),
-          completedDate: task.completedDate ? new Date(task.completedDate) : undefined,
-          nextDueDate: task.nextDueDate ? new Date(task.nextDueDate) : undefined,
-        })));
-      }
-      
-      if (cachedIssues) {
-        console.log('Using cached issues');
-        setIssues(cachedIssues.map((issue: Issue) => ({
-          ...issue,
-          createdAt: new Date(issue.createdAt),
-          updatedAt: new Date(issue.updatedAt),
-          resolvedAt: issue.resolvedAt ? new Date(issue.resolvedAt) : undefined,
-        })));
-      }
-      
-      if (cachedSupplyRequests) {
-        console.log('Using cached supply requests');
-        setSupplyRequests(cachedSupplyRequests.map((req: SupplyRequest) => ({
-          ...req,
-          createdAt: new Date(req.createdAt),
-          updatedAt: new Date(req.updatedAt),
-          approvedAt: req.approvedAt ? new Date(req.approvedAt) : undefined,
-          receivedAt: req.receivedAt ? new Date(req.receivedAt) : undefined,
-        })));
-      }
-      
-      if (cachedDocuments) {
-        console.log('Using cached documents');
-        setDocuments(cachedDocuments.map((doc: Document) => ({
-          ...doc,
-          uploadedAt: new Date(doc.uploadedAt),
-          expiryDate: doc.expiryDate ? new Date(doc.expiryDate) : undefined,
-        })));
-      }
-      
-      if (cachedActivityLogs) {
-        console.log('Using cached activity logs');
-        setActivityLogs(cachedActivityLogs.map((log: ActivityLog) => ({
-          ...log,
-          timestamp: new Date(log.timestamp),
-        })));
-      }
-      
-      if (cachedNotifications) {
-        console.log('Using cached notifications');
-        setNotifications(cachedNotifications.map((notif: Notification) => ({
-          ...notif,
-          createdAt: new Date(notif.createdAt),
-        })));
-      }
-      
-      if (cachedExpenses) {
-        console.log('Using cached expenses');
-        setExpenses(cachedExpenses.map((exp: Expense) => ({
-          ...exp,
-          date: new Date(exp.date),
-        })));
-      }
+        if (!parsed._version || parsed._version < DATA_VERSION) {
+          await AsyncStorage.removeItem(STORAGE_KEY);
+          hasLoadedData.current = true;
+          return;
+        }
 
-      if (cachedCalendarEvents) {
-        console.log('Using cached calendar events');
-        setCalendarEvents(cachedCalendarEvents.map((event: CalendarEvent) => ({
-          ...event,
-          startDate: new Date(event.startDate),
-          endDate: new Date(event.endDate),
-          createdAt: new Date(event.createdAt),
-          updatedAt: new Date(event.updatedAt),
-        })));
-      }
+        if (parsed.vessels) {
+          setVessels(parsed.vessels);
+        }
 
-      // If no cache exists, try legacy storage
-      if (!cachedVessels && !cachedMaintenanceTasks) {
-        console.log('No cache found, trying legacy storage...');
-        const data = await AsyncStorage.getItem(STORAGE_KEY);
-        if (data) {
-          const parsed = JSON.parse(data);
-          console.log('Data loaded from legacy storage');
-          
-          if (parsed.vessels) {
-            setVessels(parsed.vessels);
-          }
-          
-          if (parsed.maintenanceTasks) {
-            setMaintenanceTasks(parsed.maintenanceTasks.map((task: MaintenanceTask) => ({
-              ...task,
-              dueDate: new Date(task.dueDate),
-              createdAt: new Date(task.createdAt),
-              updatedAt: new Date(task.updatedAt),
-              completedDate: task.completedDate ? new Date(task.completedDate) : undefined,
-              nextDueDate: task.nextDueDate ? new Date(task.nextDueDate) : undefined,
-            })));
-          }
-          
-          if (parsed.issues) {
-            setIssues(parsed.issues.map((issue: Issue) => ({
-              ...issue,
-              createdAt: new Date(issue.createdAt),
-              updatedAt: new Date(issue.updatedAt),
-              resolvedAt: issue.resolvedAt ? new Date(issue.resolvedAt) : undefined,
-            })));
-          }
-          
-          if (parsed.supplyRequests) {
-            setSupplyRequests(parsed.supplyRequests.map((req: SupplyRequest) => ({
-              ...req,
-              createdAt: new Date(req.createdAt),
-              updatedAt: new Date(req.updatedAt),
-              approvedAt: req.approvedAt ? new Date(req.approvedAt) : undefined,
-              receivedAt: req.receivedAt ? new Date(req.receivedAt) : undefined,
-            })));
-          }
-          
-          if (parsed.documents) {
-            setDocuments(parsed.documents.map((doc: Document) => ({
-              ...doc,
-              uploadedAt: new Date(doc.uploadedAt),
-              expiryDate: doc.expiryDate ? new Date(doc.expiryDate) : undefined,
-            })));
-          }
-          
-          if (parsed.activityLogs) {
-            setActivityLogs(parsed.activityLogs.map((log: ActivityLog) => ({
-              ...log,
-              timestamp: new Date(log.timestamp),
-            })));
-          }
-          
-          if (parsed.notifications) {
-            setNotifications(parsed.notifications.map((notif: Notification) => ({
-              ...notif,
-              createdAt: new Date(notif.createdAt),
-            })));
-          }
-          
-          if (parsed.expenses) {
-            setExpenses(parsed.expenses.map((exp: Expense) => ({
-              ...exp,
-              date: new Date(exp.date),
-            })));
-          }
+        if (parsed.maintenanceTasks) {
+          setMaintenanceTasks(parsed.maintenanceTasks.map((task: MaintenanceTask) => ({
+            ...task,
+            category: task.category || '',
+            dueDate: new Date(task.dueDate),
+            createdAt: new Date(task.createdAt),
+            updatedAt: new Date(task.updatedAt),
+            completedDate: task.completedDate ? new Date(task.completedDate) : undefined,
+            nextDueDate: task.nextDueDate ? new Date(task.nextDueDate) : undefined,
+          })));
+        }
 
-          if (parsed.calendarEvents) {
-            setCalendarEvents(parsed.calendarEvents.map((event: CalendarEvent) => ({
-              ...event,
-              startDate: new Date(event.startDate),
-              endDate: new Date(event.endDate),
-              createdAt: new Date(event.createdAt),
-              updatedAt: new Date(event.updatedAt),
-            })));
-          }
+        if (parsed.issues) {
+          setIssues(parsed.issues.map((issue: Issue) => ({
+            ...issue,
+            createdAt: new Date(issue.createdAt),
+            updatedAt: new Date(issue.updatedAt),
+            resolvedAt: issue.resolvedAt ? new Date(issue.resolvedAt) : undefined,
+          })));
+        }
+
+        if (parsed.supplyRequests) {
+          setSupplyRequests(parsed.supplyRequests.map((req: SupplyRequest) => ({
+            ...req,
+            createdAt: new Date(req.createdAt),
+            updatedAt: new Date(req.updatedAt),
+            approvedAt: req.approvedAt ? new Date(req.approvedAt) : undefined,
+            receivedAt: req.receivedAt ? new Date(req.receivedAt) : undefined,
+          })));
+        }
+
+        if (parsed.documents) {
+          setDocuments(parsed.documents.map((doc: Document) => ({
+            ...doc,
+            uploadedAt: new Date(doc.uploadedAt),
+            expiryDate: doc.expiryDate ? new Date(doc.expiryDate) : undefined,
+          })));
+        }
+
+        if (parsed.activityLogs) {
+          setActivityLogs(parsed.activityLogs.map((log: ActivityLog) => ({
+            ...log,
+            timestamp: new Date(log.timestamp),
+          })));
+        }
+
+        if (parsed.notifications) {
+          setNotifications(parsed.notifications.map((notif: Notification) => ({
+            ...notif,
+            createdAt: new Date(notif.createdAt),
+          })));
+        }
+
+        if (parsed.expenses) {
+          setExpenses(parsed.expenses.map((exp: Expense) => ({
+            ...exp,
+            date: new Date(exp.date),
+          })));
+        }
+
+        if (parsed.calendarEvents) {
+          setCalendarEvents(parsed.calendarEvents.map((event: CalendarEvent) => ({
+            ...event,
+            comments: event.comments || [],
+            startDate: new Date(event.startDate),
+            endDate: new Date(event.endDate),
+            createdAt: new Date(event.createdAt),
+            updatedAt: new Date(event.updatedAt),
+          })));
         }
       }
-      
+
       hasLoadedData.current = true;
-      console.log('Data loading completed');
     } catch (error) {
       console.error('Error loading data:', error);
     }
   }, []);
 
   const saveData = useCallback(async () => {
-    // Only save if data has been loaded
     if (!hasLoadedData.current) {
       return;
     }
 
-    // Debounce saves to prevent excessive writes
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
-    
+
     saveTimeoutRef.current = setTimeout(async () => {
       try {
-        console.log('Saving data to cache...');
-        
-        // Save to new cache system with appropriate expiration times
-        await cacheManager.setMultiple([
-          { key: CACHE_KEYS.VESSELS, data: vessels, expiration: CACHE_EXPIRATION.LONG },
-          { key: CACHE_KEYS.MAINTENANCE_TASKS, data: maintenanceTasks, expiration: CACHE_EXPIRATION.MEDIUM },
-          { key: CACHE_KEYS.ISSUES, data: issues, expiration: CACHE_EXPIRATION.MEDIUM },
-          { key: CACHE_KEYS.SUPPLY_REQUESTS, data: supplyRequests, expiration: CACHE_EXPIRATION.MEDIUM },
-          { key: CACHE_KEYS.DOCUMENTS, data: documents, expiration: CACHE_EXPIRATION.LONG },
-          { key: CACHE_KEYS.ACTIVITY_LOGS, data: activityLogs, expiration: CACHE_EXPIRATION.SHORT },
-          { key: CACHE_KEYS.NOTIFICATIONS, data: notifications, expiration: CACHE_EXPIRATION.SHORT },
-          { key: CACHE_KEYS.EXPENSES, data: expenses, expiration: CACHE_EXPIRATION.MEDIUM },
-          { key: CACHE_KEYS.CALENDAR_EVENTS, data: calendarEvents, expiration: CACHE_EXPIRATION.MEDIUM },
-        ]);
-        
-        // Also save to legacy storage for backward compatibility
         const data = {
+          _version: DATA_VERSION,
           vessels,
           maintenanceTasks,
           issues,
@@ -831,13 +1239,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
           calendarEvents,
         };
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        
-        console.log('Data saved successfully');
       } catch (error) {
         console.error('Error saving data:', error);
       }
-    }, 1000); // Save after 1 second of inactivity
-  }, [vessels, maintenanceTasks, issues, supplyRequests, documents, activityLogs, notifications, expenses]);
+    }, 1000);
+  }, [vessels, maintenanceTasks, issues, supplyRequests, documents, activityLogs, notifications, expenses, calendarEvents]);
 
   // Load data from storage on mount only
   useEffect(() => {
@@ -855,7 +1261,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // Filtering functions based on user role and vessel access
   const getVesselsForUser = (userId: string, userRole: 'owner' | 'manager' | 'crew'): Vessel[] => {
-    console.log('Getting vessels for user:', userId, userRole);
     if (userRole === 'owner') {
       return vessels.filter(v => v.ownerId === userId);
     } else if (userRole === 'manager') {
@@ -950,25 +1355,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date(),
     };
     setMaintenanceTasks([...maintenanceTasks, newTask]);
-    
-    // Invalidate cache
-    await cacheHelpers.invalidateCache('MAINTENANCE_TASKS');
-    
-    // Add to offline queue if offline
-    if (!(await offlineManager.getNetworkStatus())) {
-      await offlineManager.addToOfflineQueue({
-        type: 'create',
-        entity: 'maintenance',
-        data: newTask,
-      });
-    }
-    
-    // Publish realtime event
-    await realtimeManager.publishEvent('task_assigned', {
-      title: task.title,
-      vesselName: task.vesselName,
-    }, task.assignedTo, task.vesselId);
-    
+
     addActivityLog({
       type: 'maintenance',
       title: 'Maintenance Task Created',
@@ -984,36 +1371,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   const updateMaintenanceTask = async (id: string, updates: Partial<MaintenanceTask>) => {
-    const task = maintenanceTasks.find(t => t.id === id);
-    
-    setMaintenanceTasks(maintenanceTasks.map(task =>
+    setMaintenanceTasks(prev => prev.map(task =>
       task.id === id ? { ...task, ...updates, updatedAt: new Date() } : task
     ));
-    
-    // Invalidate cache
-    await cacheHelpers.invalidateCache('MAINTENANCE_TASKS');
-    
-    // Add to offline queue if offline
-    if (!(await offlineManager.getNetworkStatus())) {
-      await offlineManager.addToOfflineQueue({
-        type: 'update',
-        entity: 'maintenance',
-        data: { id, updates },
-      });
-    }
-    
-    // Publish realtime event
-    if (task && updates.status === 'completed') {
-      await realtimeManager.publishEvent('task_completed', {
-        title: task.title,
-        vesselName: task.vesselName,
-      }, task.assignedTo, task.vesselId);
-    } else if (task) {
-      await realtimeManager.publishEvent('maintenance_updated', {
-        title: task.title,
-        vesselName: task.vesselName,
-      }, task.assignedTo, task.vesselId);
-    }
   };
 
   const deleteMaintenanceTask = (id: string) => {
@@ -1023,7 +1383,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const completeMaintenanceTask = (id: string, record: Omit<CompletionRecord, 'id' | 'taskId'>) => {
     const task = maintenanceTasks.find(t => t.id === id);
     if (!task) {
-      console.log('Task not found');
       return;
     }
 
@@ -1059,7 +1418,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           nextDate.setFullYear(nextDate.getFullYear() + task.frequencyValue);
           break;
         default:
-          console.log('Unknown frequency');
+          break;
       }
       updates.nextDueDate = nextDate;
       updates.status = 'open';
@@ -1067,8 +1426,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updates.completedDate = undefined;
     }
 
+    const costText = record.cost ? ` — Cost: $${record.cost.toLocaleString()}` : '';
+    const completionComment: Comment = {
+      id: generateId(),
+      userId: record.completedBy,
+      userName: record.completedByName,
+      userRole: 'crew',
+      text: `${record.completedByName} completed this task${costText}`,
+      isSystemComment: true,
+      attachments: [],
+      createdAt: new Date(),
+    };
+    updates.comments = [...(task.comments || []), completionComment];
+
     updateMaintenanceTask(id, updates);
-    
+
     addActivityLog({
       type: 'maintenance',
       title: 'Maintenance Task Completed',
@@ -1083,6 +1455,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const addMaintenanceComment = (taskId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
+    const newComment: Comment = {
+      ...comment,
+      id: generateId(),
+      createdAt: new Date(),
+    };
+
+    setMaintenanceTasks(prev => prev.map(task =>
+      task.id === taskId
+        ? { ...task, comments: [...(task.comments || []), newComment], updatedAt: new Date() }
+        : task
+    ));
+  };
+
   // Issue functions
   const addIssue = async (issue: Omit<Issue, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newIssue: Issue = {
@@ -1092,29 +1478,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updatedAt: new Date(),
     };
     setIssues([...issues, newIssue]);
-    
-    // Invalidate cache
-    await cacheHelpers.invalidateCache('ISSUES');
-    
-    // Add to offline queue if offline
-    if (!(await offlineManager.getNetworkStatus())) {
-      await offlineManager.addToOfflineQueue({
-        type: 'create',
-        entity: 'issue',
-        data: newIssue,
-      });
-    }
-    
-    // Publish realtime event
-    const vessel = vessels.find(v => v.id === issue.vesselId);
-    if (vessel) {
-      await realtimeManager.publishEvent('issue_created', {
-        title: issue.title,
-        vesselName: issue.vesselName,
-        priority: issue.priority,
-      }, vessel.managerId, issue.vesselId);
-    }
-    
+
     addActivityLog({
       type: 'issue',
       title: 'Issue Reported',
@@ -1127,40 +1491,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
       relatedId: newIssue.id,
       relatedType: 'issue',
     });
-    
-    if (vessel) {
-      addNotification({
-        type: 'issue',
-        title: 'New Issue Reported',
-        message: `${issue.title} on ${issue.vesselName}`,
-        userId: vessel.managerId,
-        priority: issue.priority === 'high' || issue.priority === 'urgent' ? 'high' : 'medium',
-      });
-    }
   };
 
   const updateIssue = (id: string, updates: Partial<Issue>) => {
-    setIssues(issues.map(issue =>
+    setIssues(prev => prev.map(issue =>
       issue.id === id ? { ...issue, ...updates, updatedAt: new Date() } : issue
     ));
   };
 
   const addIssueComment = (issueId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
-    const issue = issues.find(i => i.id === issueId);
-    if (!issue) {
-      console.log('Issue not found');
-      return;
-    }
-
     const newComment: Comment = {
       ...comment,
       id: generateId(),
       createdAt: new Date(),
     };
 
-    updateIssue(issueId, {
-      comments: [...issue.comments, newComment],
-    });
+    setIssues(prev => prev.map(issue =>
+      issue.id === issueId
+        ? { ...issue, comments: [...(issue.comments || []), newComment], updatedAt: new Date() }
+        : issue
+    ));
   };
 
   // Supply Request functions
@@ -1186,20 +1536,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       relatedType: 'supply',
     });
     
-    const vessel = vessels.find(v => v.id === request.vesselId);
-    if (vessel) {
-      addNotification({
-        type: 'supply',
-        title: 'New Supply Request',
-        message: `${request.itemName} requested for ${request.vesselName}`,
-        userId: vessel.managerId,
-        priority: request.priority === 'high' || request.priority === 'urgent' ? 'high' : 'medium',
-      });
-    }
   };
 
   const updateSupplyRequest = (id: string, updates: Partial<SupplyRequest>) => {
-    setSupplyRequests(supplyRequests.map(request =>
+    setSupplyRequests(prev => prev.map(request =>
       request.id === id ? { ...request, ...updates, updatedAt: new Date() } : request
     ));
   };
@@ -1214,12 +1554,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
     
     const request = supplyRequests.find(r => r.id === id);
     if (request) {
-      // Publish realtime event
-      await realtimeManager.publishEvent('supply_approved', {
-        itemName: request.itemName,
-        vesselName: request.vesselName,
-      }, request.requestedBy, request.vesselId);
-      
       addActivityLog({
         type: 'approval',
         title: 'Supply Request Approved',
@@ -1232,14 +1566,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
         relatedId: id,
         relatedType: 'supply',
       });
-      
-      addNotification({
-        type: 'approval',
-        title: 'Supply Request Approved',
-        message: `Your request for ${request.itemName} has been approved`,
-        userId: request.requestedBy,
-        priority: 'medium',
-      });
     }
   };
 
@@ -1248,24 +1574,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
       status: 'denied',
       deniedReason: reason,
     });
-    
-    const request = supplyRequests.find(r => r.id === id);
-    if (request) {
-      // Publish realtime event
-      await realtimeManager.publishEvent('supply_denied', {
-        itemName: request.itemName,
-        vesselName: request.vesselName,
-        reason,
-      }, request.requestedBy, request.vesselId);
-      
-      addNotification({
-        type: 'approval',
-        title: 'Supply Request Denied',
-        message: `Your request for ${request.itemName} was denied: ${reason}`,
-        userId: request.requestedBy,
-        priority: 'medium',
-      });
-    }
+  };
+
+  const addSupplyComment = (requestId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
+    const newComment: Comment = {
+      ...comment,
+      id: generateId(),
+      createdAt: new Date(),
+    };
+
+    setSupplyRequests(prev => prev.map(request =>
+      request.id === requestId
+        ? { ...request, comments: [...(request.comments || []), newComment], updatedAt: new Date() }
+        : request
+    ));
   };
 
   // Document functions
@@ -1292,13 +1614,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   const updateDocument = (id: string, updates: Partial<Document>) => {
-    setDocuments(documents.map(doc =>
+    setDocuments(prev => prev.map(doc =>
       doc.id === id ? { ...doc, ...updates } : doc
     ));
   };
 
   const deleteDocument = (id: string) => {
     setDocuments(documents.filter(doc => doc.id !== id));
+  };
+
+  const addDocumentComment = (docId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
+    const newComment: Comment = {
+      ...comment,
+      id: generateId(),
+      createdAt: new Date(),
+    };
+
+    setDocuments(prev => prev.map(doc =>
+      doc.id === docId
+        ? { ...doc, comments: [...(doc.comments || []), newComment] }
+        : doc
+    ));
   };
 
   // Activity Log functions
@@ -1383,26 +1719,29 @@ export function DataProvider({ children }: { children: ReactNode }) {
       relatedType: 'calendar',
     });
 
-    // Notify attendees
-    event.attendees.forEach((attendeeId, index) => {
-      addNotification({
-        type: 'reminder',
-        title: 'New Calendar Event',
-        message: `${event.title} on ${event.startDate.toLocaleDateString()}`,
-        userId: attendeeId,
-        priority: 'medium',
-      });
-    });
   };
 
   const updateCalendarEvent = (id: string, updates: Partial<CalendarEvent>) => {
-    setCalendarEvents(calendarEvents.map(event =>
+    setCalendarEvents(prev => prev.map(event =>
       event.id === id ? { ...event, ...updates, updatedAt: new Date() } : event
     ));
   };
 
   const deleteCalendarEvent = (id: string) => {
-    setCalendarEvents(calendarEvents.filter(event => event.id !== id));
+    setCalendarEvents(prev => prev.filter(event => event.id !== id));
+  };
+
+  const addCalendarEventComment = (eventId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
+    const newComment: Comment = {
+      ...comment,
+      id: generateId(),
+      createdAt: new Date(),
+    };
+    setCalendarEvents(prev => prev.map(event =>
+      event.id === eventId
+        ? { ...event, comments: [...(event.comments || []), newComment], updatedAt: new Date() }
+        : event
+    ));
   };
 
   // Vessel assignment functions
@@ -1415,7 +1754,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const assignOwnerToVessel = (vesselId: string, ownerId: string, ownerName: string) => {
     const vessel = vessels.find(v => v.id === vesselId);
     if (!vessel) {
-      console.log('Vessel not found');
       return;
     }
 
@@ -1436,7 +1774,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const removeOwnerFromVessel = (vesselId: string) => {
     const vessel = vessels.find(v => v.id === vesselId);
     if (!vessel) {
-      console.log('Vessel not found');
       return;
     }
 
@@ -1457,13 +1794,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const assignCrewToVessel = (vesselId: string, crewId: string, crewName: string) => {
     const vessel = vessels.find(v => v.id === vesselId);
     if (!vessel) {
-      console.log('Vessel not found');
       return;
     }
 
     const currentCrewIds = vessel.crewIds || [];
     if (currentCrewIds.includes(crewId)) {
-      console.log('Crew member already assigned to this vessel');
       return;
     }
 
@@ -1482,20 +1817,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
       vesselId: vessel.id,
       vesselName: vessel.name,
     });
-
-    addNotification({
-      type: 'alert',
-      title: 'Vessel Assignment',
-      message: `You have been assigned to ${vessel.name}`,
-      userId: crewId,
-      priority: 'medium',
-    });
   };
 
   const removeCrewFromVessel = (vesselId: string, crewId: string) => {
     const vessel = vessels.find(v => v.id === vesselId);
     if (!vessel) {
-      console.log('Vessel not found');
       return;
     }
 
@@ -1549,6 +1875,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         updateMaintenanceTask,
         deleteMaintenanceTask,
         completeMaintenanceTask,
+        addMaintenanceComment,
         addIssue,
         updateIssue,
         addIssueComment,
@@ -1556,9 +1883,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
         updateSupplyRequest,
         approveSupplyRequest,
         denySupplyRequest,
+        addSupplyComment,
         addDocument,
         updateDocument,
         deleteDocument,
+        addDocumentComment,
         addActivityLog,
         addNotification,
         markNotificationAsRead,
@@ -1568,6 +1897,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addCalendarEvent,
         updateCalendarEvent,
         deleteCalendarEvent,
+        addCalendarEventComment,
         loadData,
         saveData,
       }}

@@ -1,28 +1,43 @@
+export {
+  CalendarEvent,
+  CalendarEventType,
+  CalendarEventStatus,
+  CalendarFilter,
+  EventReminder,
+} from './calendar';
 
-export type UserRole = 'owner' | 'manager' | 'crew' | null;
-
-export type TaskStatus = 'open' | 'in_progress' | 'waiting_on_parts' | 'completed';
+// Shared enums
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
-export type MaintenanceFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly' | 'custom';
+export type TaskStatus = 'open' | 'in_progress' | 'completed' | 'waiting_on_parts';
 
-export type DocumentCategory = 'manual' | 'insurance' | 'registration' | 'safety' | 'warranty' | 'invoice' | 'receipt' | 'other';
+export type SupplyRequestStatus = 'pending' | 'approved' | 'ordered' | 'received' | 'denied';
 
-export type SupplyRequestStatus = 'pending' | 'approved' | 'denied' | 'ordered' | 'received';
+export type DocumentCategory =
+  | 'manual'
+  | 'insurance'
+  | 'registration'
+  | 'safety'
+  | 'warranty'
+  | 'invoice'
+  | 'receipt'
+  | 'other';
 
-export interface User {
-  id: string;
-  name: string;
-  role: UserRole;
-  email: string;
-  avatar?: string;
-}
+export type MaintenanceFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+
+export type NotificationType = 'issue' | 'supply' | 'maintenance' | 'document' | 'system';
+
+export type NotificationPriority = 'low' | 'medium' | 'high';
+
+export type ActivityLogType = 'issue' | 'supply' | 'maintenance' | 'approval' | 'document' | 'system' | 'task';
+
+// Core entities
 
 export interface Vessel {
   id: string;
   name: string;
-  status: 'active' | 'maintenance' | 'charter' | 'docked';
+  status: 'active' | 'maintenance' | 'inactive';
   location: string;
   crewCount: number;
   ownerId: string;
@@ -30,31 +45,15 @@ export interface Vessel {
   crewIds?: string[];
 }
 
-export interface MaintenanceTask {
+export interface Attachment {
   id: string;
-  title: string;
-  description: string;
-  vesselId: string;
-  vesselName: string;
-  assignedTo: string | null;
-  assignedToName: string | null;
-  assignedToType: 'crew' | 'vendor' | null;
-  status: TaskStatus;
-  priority: TaskPriority;
-  dueDate: Date;
-  completedDate?: Date;
-  isRecurring: boolean;
-  frequency?: MaintenanceFrequency;
-  frequencyValue?: number;
-  nextDueDate?: Date;
-  createdBy: string;
-  createdAt: Date;
-  updatedAt: Date;
-  attachments: Attachment[];
-  completionHistory: CompletionRecord[];
-  estimatedCost?: number;
-  actualCost?: number;
-  notes: string;
+  name: string;
+  uri: string;
+  type: 'image' | 'video' | 'document' | 'pdf';
+  size: number;
+  uploadedBy: string;
+  uploadedAt: Date;
+  mimeType?: string;
 }
 
 export interface CompletionRecord {
@@ -66,6 +65,46 @@ export interface CompletionRecord {
   notes: string;
   attachments: Attachment[];
   cost?: number;
+}
+
+export interface MaintenanceTask {
+  id: string;
+  title: string;
+  description: string;
+  vesselId: string;
+  vesselName: string;
+  assignedTo: string | null;
+  assignedToName: string | null;
+  assignedToType: 'crew' | 'manager' | null;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate: Date;
+  isRecurring: boolean;
+  frequency?: MaintenanceFrequency;
+  frequencyValue?: number;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  attachments: Attachment[];
+  comments: Comment[];
+  completionHistory: CompletionRecord[];
+  estimatedCost?: number;
+  actualCost?: number;
+  completedDate?: Date;
+  nextDueDate?: Date;
+  category: string;
+  notes: string;
+}
+
+export interface Comment {
+  id: string;
+  userId: string | null;
+  userName: string | null;
+  userRole: string | null;
+  text: string;
+  isSystemComment?: boolean;
+  attachments: Attachment[];
+  createdAt: Date;
 }
 
 export interface Issue {
@@ -84,30 +123,9 @@ export interface Issue {
   location: string;
   createdAt: Date;
   updatedAt: Date;
-  resolvedAt?: Date;
   attachments: Attachment[];
   comments: Comment[];
-}
-
-export interface Comment {
-  id: string;
-  userId: string;
-  userName: string;
-  userRole: UserRole;
-  text: string;
-  createdAt: Date;
-  attachments: Attachment[];
-}
-
-export interface Attachment {
-  id: string;
-  name: string;
-  uri: string;
-  type: 'image' | 'video' | 'document' | 'pdf';
-  size: number;
-  uploadedBy: string;
-  uploadedAt: Date;
-  mimeType?: string;
+  resolvedAt?: Date;
 }
 
 export interface SupplyRequest {
@@ -125,16 +143,17 @@ export interface SupplyRequest {
   status: SupplyRequestStatus;
   priority: TaskPriority;
   category: string;
-  vendor?: string;
   createdAt: Date;
   updatedAt: Date;
+  notes: string;
+  attachments: Attachment[];
+  comments: Comment[];
   approvedBy?: string;
   approvedByName?: string;
   approvedAt?: Date;
-  deniedReason?: string;
   receivedAt?: Date;
-  notes: string;
-  attachments: Attachment[];
+  deniedReason?: string;
+  vendor?: string;
 }
 
 export interface Document {
@@ -154,34 +173,33 @@ export interface Document {
   fileType: string;
   tags: string[];
   isImportant: boolean;
+  comments: Comment[];
 }
 
 export interface ActivityLog {
   id: string;
-  type: 'task' | 'issue' | 'supply' | 'document' | 'maintenance' | 'approval' | 'comment' | 'system';
+  type: ActivityLogType;
   title: string;
   description: string;
   userId: string;
   userName: string;
-  userRole: UserRole;
-  vesselId?: string;
-  vesselName?: string;
+  userRole: string;
+  vesselId: string;
+  vesselName: string;
   relatedId?: string;
   relatedType?: string;
   timestamp: Date;
-  metadata?: Record<string, unknown>;
 }
 
 export interface Notification {
   id: string;
-  type: 'task' | 'issue' | 'supply' | 'maintenance' | 'approval' | 'reminder' | 'alert';
+  type: NotificationType;
   title: string;
   message: string;
   userId: string;
   read: boolean;
-  actionUrl?: string;
   createdAt: Date;
-  priority: 'low' | 'medium' | 'high';
+  priority: NotificationPriority;
 }
 
 export interface Expense {
@@ -195,16 +213,8 @@ export interface Expense {
   date: Date;
   paidBy: string;
   paidByName: string;
-  approvedBy?: string;
-  approvedByName?: string;
+  approvedBy: string;
+  approvedByName: string;
   status: 'pending' | 'approved' | 'paid' | 'rejected';
   attachments: Attachment[];
-  relatedTaskId?: string;
-  relatedSupplyId?: string;
 }
-
-// Re-export notification types
-export type { NotificationCategory, NotificationPreferences } from './notifications';
-
-// Re-export calendar types
-export type { CalendarEvent, CalendarEventType, CalendarEventStatus, EventReminder, CalendarFilter } from './calendar';

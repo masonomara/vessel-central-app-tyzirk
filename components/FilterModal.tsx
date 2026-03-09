@@ -1,9 +1,9 @@
 
 import React, { useState, memo, useCallback } from 'react';
 import { StyleSheet, View, Text, Modal, TouchableOpacity, ScrollView } from 'react-native';
-import { colors } from '@/styles/commonStyles';
-import { IconSymbol } from '@/components/IconSymbol';
-import { TaskStatus, TaskPriority, SupplyRequestStatus } from '@/types';
+import { colors } from '../styles/commonStyles';
+import { IconSymbol } from '../components/IconSymbol';
+import { TaskStatus, TaskPriority, SupplyRequestStatus } from '../types';
 
 interface FilterModalProps {
   visible: boolean;
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceOne,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '80%',
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   closeButton: {
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     flex: 1,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',

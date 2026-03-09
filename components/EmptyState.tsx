@@ -1,30 +1,25 @@
-
-import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors } from '@/styles/commonStyles';
+import { colors } from '../styles/commonStyles';
 import { IconSymbol } from './IconSymbol';
 
 interface EmptyStateProps {
-  icon?: string;
+  ios_icon_name: string;
+  android_material_icon_name: string;
   title: string;
-  message: string;
-  action?: React.ReactNode;
+  subtitle: string;
 }
 
-export default function EmptyState({ icon, title, message, action }: EmptyStateProps) {
+export function EmptyState({ ios_icon_name, android_material_icon_name, title, subtitle }: EmptyStateProps) {
   return (
     <View style={styles.container}>
-      {icon && (
-        <IconSymbol
-          ios_icon_name={icon as any}
-          android_material_icon_name={icon}
-          size={64}
-          color={colors.textSecondary}
-        />
-      )}
+      <IconSymbol
+        ios_icon_name={ios_icon_name}
+        android_material_icon_name={android_material_icon_name}
+        size={48}
+        color={colors.textTertiary}
+      />
       <Text style={styles.title}>{title}</Text>
-      <Text style={styles.message}>{message}</Text>
-      {action && <View style={styles.actionContainer}>{action}</View>}
+      <Text style={styles.subtitle}>{subtitle}</Text>
     </View>
   );
 }
@@ -34,25 +29,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background,
-    padding: 32,
+    padding: 40,
+    minHeight: 300,
   },
   title: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: '600',
     color: colors.text,
     marginTop: 16,
-    marginBottom: 8,
     textAlign: 'center',
   },
-  message: {
-    fontSize: 16,
+  subtitle: {
+    fontSize: 14,
     color: colors.textSecondary,
+    marginTop: 8,
     textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 24,
-  },
-  actionContainer: {
-    marginTop: 16,
+    lineHeight: 20,
   },
 });

@@ -1,6 +1,6 @@
 {
-  "name": "Natively",
-  "short_name": "Natively",
+  "name": "Vessel & Co. Yacht Management",
+  "short_name": "Vessel & Co.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +20,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#d6d6d6",
-  "background_color": "#242424"
+  "theme_color": "#0A1628",
+  "background_color": "#0A1628"
 }

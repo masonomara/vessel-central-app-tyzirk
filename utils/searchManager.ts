@@ -1,6 +1,6 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MaintenanceTask, Issue, SupplyRequest, Document, Vessel } from '@/types';
+import { MaintenanceTask, Issue, SupplyRequest, Document, Vessel } from '../types';
 
 export interface SearchResult {
   id: string;

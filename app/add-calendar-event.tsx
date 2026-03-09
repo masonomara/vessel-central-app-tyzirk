@@ -1,5 +1,4 @@
-
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -10,72 +9,110 @@ import {
   Switch,
   Platform,
   Alert,
-} from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { colors, commonStyles, shadows } from '@/styles/commonStyles';
-import { useAuth } from '@/contexts/AuthContext';
-import { useData } from '@/contexts/DataContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { CalendarEventType } from '@/types/calendar';
-import { EVENT_TYPE_LABELS, getEventColor } from '@/utils/calendarUtils';
+} from "react-native";
+import { Stack, useRouter, useLocalSearchParams } from "expo-router";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { colors, commonStyles, shadows } from "../styles/commonStyles";
+import { useAuth } from "../contexts/AuthContext";
+import { useData } from "../contexts/DataContext";
+import { IconSymbol } from "../components/IconSymbol";
+import { CalendarEventType } from "../types/calendar";
+import { EVENT_TYPE_LABELS, getEventColor } from "../utils/calendarUtils";
+import { scrollProps } from "../hooks/useTopPadding";
 
 export default function AddCalendarEventScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { user, userRole } = useAuth();
+  const { userId, userName, userRole } = useAuth();
   const { vessels, getVesselsForUser, addCalendarEvent } = useData();
 
-  const initialDate = params.date ? new Date(params.date as string) : new Date();
+  const initialDate = params.date
+    ? new Date(params.date as string)
+    : new Date();
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [eventType, setEventType] = useState<CalendarEventType>('meeting');
-  const [selectedVesselId, setSelectedVesselId] = useState('');
-  const [location, setLocation] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [eventType, setEventType] = useState<CalendarEventType>("meeting");
+  const [selectedVesselId, setSelectedVesselId] = useState("");
+  const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState(initialDate);
-  const [endDate, setEndDate] = useState(new Date(initialDate.getTime() + 60 * 60 * 1000));
+  const [endDate, setEndDate] = useState(
+    new Date(initialDate.getTime() + 60 * 60 * 1000),
+  );
   const [allDay, setAllDay] = useState(false);
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState("");
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
   const userVessels = useMemo(() => {
-    if (!user || !userRole) return [];
-    return getVesselsForUser(user.id, userRole);
-  }, [user, userRole, vessels, getVesselsForUser]);
+    if (!userId || !userRole) return [];
+    return getVesselsForUser(userId, userRole);
+  }, [userId, userRole, vessels, getVesselsForUser]);
+
+  if (userVessels.length === 0) {
+    return (
+      <View style={commonStyles.container}>
+        <Stack.Screen options={{ title: "New Event" }} />
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 40,
+          }}
+        >
+          <IconSymbol
+            ios_icon_name="sailboat"
+            android_material_icon_name="sailing"
+            size={48}
+            color={colors.textTertiary}
+          />
+          <Text
+            style={{
+              fontSize: 16,
+              color: colors.textSecondary,
+              textAlign: "center",
+              marginTop: 16,
+            }}
+          >
+            No vessels assigned to your account. Contact your manager.
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   const eventTypes: CalendarEventType[] = [
-    'maintenance',
-    'charter',
-    'inspection',
-    'crew_change',
-    'provisioning',
-    'meeting',
-    'other',
+    "maintenance",
+    "charter",
+    "inspection",
+    "crew_change",
+    "provisioning",
+    "meeting",
+    "other",
   ];
 
   const handleSave = () => {
     if (!title.trim()) {
-      Alert.alert('Error', 'Please enter an event title');
+      Alert.alert("Error", "Please enter an event title");
       return;
     }
 
     if (!selectedVesselId) {
-      Alert.alert('Error', 'Please select a vessel');
+      Alert.alert("Error", "Please select a vessel");
       return;
     }
 
     if (endDate <= startDate) {
-      Alert.alert('Error', 'End date must be after start date');
+      Alert.alert("Error", "End date must be after start date");
       return;
     }
 
-    const selectedVessel = vessels.find(v => v.id === selectedVesselId);
+    const selectedVessel = vessels.find((v) => v.id === selectedVesselId);
     if (!selectedVessel) {
-      Alert.alert('Error', 'Selected vessel not found');
+      Alert.alert("Error", "Selected vessel not found");
       return;
     }
 
@@ -83,25 +120,26 @@ export default function AddCalendarEventScreen() {
       title: title.trim(),
       description: description.trim(),
       type: eventType,
-      status: 'scheduled',
+      status: "scheduled",
       startDate,
       endDate,
       allDay,
       vesselId: selectedVesselId,
       vesselName: selectedVessel.name,
       location: location.trim(),
-      attendees: [user?.id || ''],
-      attendeeNames: [user?.name || ''],
-      createdBy: user?.id || '',
-      createdByName: user?.name || '',
+      attendees: [userId],
+      attendeeNames: [userName],
+      createdBy: userId,
+      createdByName: userName,
       notes: notes.trim(),
       reminders: [
-        { id: Date.now().toString(), minutes: 1440, method: 'notification' },
+        { id: Date.now().toString(), minutes: 1440, method: "notification" },
       ],
+      comments: [],
     });
 
-    Alert.alert('Success', 'Calendar event created successfully', [
-      { text: 'OK', onPress: () => router.back() },
+    Alert.alert("Success", "Calendar event created successfully", [
+      { text: "OK", onPress: () => router.back() },
     ]);
   };
 
@@ -149,34 +187,28 @@ export default function AddCalendarEventScreen() {
 
   return (
     <View style={commonStyles.container}>
+      <Stack.Screen
+        options={{
+          title: "New Event",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity onPress={handleSave}>
+              <Text style={styles.saveText}>Save</Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        {...scrollProps}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <IconSymbol
-              ios_icon_name="chevron.left"
-              android_material_icon_name="arrow_back"
-              size={24}
-              color={colors.text}
-            />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>New Event</Text>
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSave}
-          >
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Form */}
         <View style={styles.form}>
           {/* Title */}
           <View style={styles.formGroup}>
@@ -241,7 +273,8 @@ export default function AddCalendarEventScreen() {
                   <Text
                     style={[
                       styles.vesselChipText,
-                      selectedVesselId === vessel.id && styles.vesselChipTextSelected,
+                      selectedVesselId === vessel.id &&
+                        styles.vesselChipTextSelected,
                     ]}
                   >
                     {vessel.name}
@@ -282,7 +315,7 @@ export default function AddCalendarEventScreen() {
                   {startDate.toLocaleDateString()}
                 </Text>
               </TouchableOpacity>
-              
+
               {!allDay && (
                 <TouchableOpacity
                   style={styles.dateTimeButton}
@@ -295,7 +328,10 @@ export default function AddCalendarEventScreen() {
                     color={colors.textSecondary}
                   />
                   <Text style={styles.dateTimeText}>
-                    {startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {startDate.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -320,7 +356,7 @@ export default function AddCalendarEventScreen() {
                   {endDate.toLocaleDateString()}
                 </Text>
               </TouchableOpacity>
-              
+
               {!allDay && (
                 <TouchableOpacity
                   style={styles.dateTimeButton}
@@ -333,7 +369,10 @@ export default function AddCalendarEventScreen() {
                     color={colors.textSecondary}
                   />
                   <Text style={styles.dateTimeText}>
-                    {endDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {endDate.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -380,9 +419,6 @@ export default function AddCalendarEventScreen() {
             />
           </View>
         </View>
-
-        {/* Bottom Padding */}
-        <View style={{ height: 100 }} />
       </ScrollView>
 
       {/* Date/Time Pickers */}
@@ -427,38 +463,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: Platform.OS === 'android' ? 48 : 0,
+    paddingBottom: 120,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 20,
-    paddingBottom: 20,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
+  cancelText: {
+    fontSize: 16,
     color: colors.text,
   },
-  saveButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: colors.accent,
-  },
-  saveButtonText: {
+  saveText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   form: {
@@ -469,12 +482,12 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.textSecondary,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.container,
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
@@ -484,7 +497,7 @@ const styles = StyleSheet.create({
   },
   textArea: {
     minHeight: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   typeScroll: {
     marginTop: 8,
@@ -493,17 +506,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 2,
     borderColor: colors.border,
     marginRight: 8,
   },
   typeChipSelected: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
   },
   typeChipText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.textSecondary,
   },
   vesselScroll: {
@@ -513,38 +526,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
     marginRight: 8,
   },
   vesselChipSelected: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
+    backgroundColor: colors.surfaceOne,
+    borderColor: colors.text,
   },
   vesselChipText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.textSecondary,
   },
   vesselChipTextSelected: {
     color: colors.text,
   },
   switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   dateTimeRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   dateTimeButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
@@ -553,6 +566,6 @@ const styles = StyleSheet.create({
   dateTimeText: {
     fontSize: 16,
     color: colors.text,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });

@@ -1,197 +1,173 @@
+import { useMemo } from "react";
+import { Platform } from "react-native";
+import {
+  NativeTabs,
+  Icon,
+  Label,
+  Badge,
+  VectorIcon,
+} from "expo-router/unstable-native-tabs";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useAuth } from "../../contexts/AuthContext";
+import { useData } from "../../contexts/DataContext";
+import { colors } from "../../styles/commonStyles";
 
-import React, { useEffect, useCallback, useRef } from 'react';
-import { Stack, useRouter, useSegments } from 'expo-router';
-import FloatingTabBar, { TabBarItem } from '@/components/FloatingTabBar';
-import { useAuth } from '@/contexts/AuthContext';
-import { useData } from '@/contexts/DataContext';
+const isIOS26 = Platform.OS === "ios" && Number(Platform.Version) >= 26;
 
 export default function TabLayout() {
-  const { userRole } = useAuth();
-  const { notifications } = useData();
-  const router = useRouter();
-  const segments = useSegments();
-  const hasRedirected = useRef(false);
+  const { userRole, userId } = useAuth();
+  const { getIssuesForUser, getMaintenanceTasksForUser } = useData();
 
-  const handleRoleRedirect = useCallback(() => {
-    console.log('Current role:', userRole);
-    console.log('Current segments:', segments);
+  const openIssueCount = useMemo(() => {
+    if (!userId || !userRole) return 0;
+    const issues = getIssuesForUser(userId, userRole);
+    return issues.filter((i) => i.status === "open").length;
+  }, [userId, userRole, getIssuesForUser]);
 
-    // Only redirect once when role is set and we're on home
-    if (userRole && segments[1] === '(home)' && !hasRedirected.current) {
-      hasRedirected.current = true;
-      // Redirect to appropriate dashboard based on role
-      if (userRole === 'owner') {
-        router.replace('/(tabs)/owner');
-      } else if (userRole === 'manager') {
-        router.replace('/(tabs)/manager');
-      } else if (userRole === 'crew') {
-        router.replace('/(tabs)/crew');
-      }
-    }
-  }, [userRole, segments, router]);
+  const urgentMaintenanceCount = useMemo(() => {
+    if (!userId || !userRole) return 0;
+    const tasks = getMaintenanceTasksForUser(userId, userRole);
+    return tasks.filter((t) => t.priority === "high" || t.priority === "urgent")
+      .length;
+  }, [userId, userRole, getMaintenanceTasksForUser]);
 
-  useEffect(() => {
-    handleRoleRedirect();
-  }, [handleRoleRedirect]);
-
-  // Reset redirect flag when role changes
-  useEffect(() => {
-    hasRedirected.current = false;
-  }, [userRole]);
-
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  // Define the tabs configuration based on role
-  const getTabsForRole = (): TabBarItem[] => {
-    const baseTabs: TabBarItem[] = [
-      {
-        name: '(home)',
-        route: '/(tabs)/(home)/',
-        icon: 'home',
-        label: 'Home',
-      },
-    ];
-
-    if (userRole === 'owner') {
-      return [
-        {
-          name: 'owner',
-          route: '/(tabs)/owner',
-          icon: 'dashboard',
-          label: 'Dashboard',
-        },
-        {
-          name: 'calendar',
-          route: '/(tabs)/calendar',
-          icon: 'event',
-          label: 'Calendar',
-        },
-        {
-          name: 'maintenance',
-          route: '/(tabs)/maintenance',
-          icon: 'build',
-          label: 'Maintenance',
-        },
-        {
-          name: 'documents',
-          route: '/(tabs)/documents',
-          icon: 'description',
-          label: 'Documents',
-        },
-        {
-          name: 'profile',
-          route: '/(tabs)/profile',
-          icon: 'person',
-          label: 'Profile',
-        },
-      ];
-    } else if (userRole === 'manager') {
-      return [
-        {
-          name: 'manager',
-          route: '/(tabs)/manager',
-          icon: 'dashboard',
-          label: 'Dashboard',
-        },
-        {
-          name: 'calendar',
-          route: '/(tabs)/calendar',
-          icon: 'event',
-          label: 'Calendar',
-        },
-        {
-          name: 'maintenance',
-          route: '/(tabs)/maintenance',
-          icon: 'build',
-          label: 'Maintenance',
-        },
-        {
-          name: 'issues',
-          route: '/(tabs)/issues',
-          icon: 'report_problem',
-          label: 'Issues',
-        },
-        {
-          name: 'supplies',
-          route: '/(tabs)/supplies',
-          icon: 'inventory_2',
-          label: 'Supplies',
-        },
-        {
-          name: 'profile',
-          route: '/(tabs)/profile',
-          icon: 'person',
-          label: 'Profile',
-        },
-      ];
-    } else if (userRole === 'crew') {
-      return [
-        {
-          name: 'crew',
-          route: '/(tabs)/crew',
-          icon: 'list',
-          label: 'Tasks',
-        },
-        {
-          name: 'calendar',
-          route: '/(tabs)/calendar',
-          icon: 'event',
-          label: 'Calendar',
-        },
-        {
-          name: 'issues',
-          route: '/(tabs)/issues',
-          icon: 'report_problem',
-          label: 'Issues',
-        },
-        {
-          name: 'supplies',
-          route: '/(tabs)/supplies',
-          icon: 'inventory_2',
-          label: 'Supplies',
-        },
-        {
-          name: 'profile',
-          route: '/(tabs)/profile',
-          icon: 'person',
-          label: 'Profile',
-        },
-      ];
-    }
-
-    return baseTabs.concat([
-      {
-        name: 'profile',
-        route: '/(tabs)/profile',
-        icon: 'person',
-        label: 'Profile',
-      },
-    ]);
+  const sharedTriggerProps = {
+    disablePopToTop: Platform.OS === "android",
   };
 
-  const tabs = getTabsForRole();
-
-  // For Android and Web, use Stack navigation with custom floating tab bar
   return (
-    <>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: 'none',
-        }}
+    <NativeTabs
+      minimizeBehavior="onScrollDown"
+      disableTransparentOnScrollEdge
+      backgroundColor={colors.surfaceTwo}
+      iconColor={{
+        default: colors.textTertiary,
+        selected: colors.text,
+      }}
+      labelStyle={{
+        default: {
+          fontSize: 10,
+          fontWeight: "500" as const,
+          color: colors.textTertiary,
+        },
+        selected: {
+          fontSize: 10,
+          fontWeight: "500" as const,
+          color: colors.text,
+        },
+      }}
+    >
+      {/* Owner Dashboard */}
+      <NativeTabs.Trigger
+        name="owner"
+        hidden={userRole !== "owner"}
+        {...sharedTriggerProps}
       >
-        <Stack.Screen key="home" name="(home)" />
-        <Stack.Screen key="owner" name="owner" />
-        <Stack.Screen key="manager" name="manager" />
-        <Stack.Screen key="crew" name="crew" />
-        <Stack.Screen key="calendar" name="calendar" />
-        <Stack.Screen key="maintenance" name="maintenance" />
-        <Stack.Screen key="issues" name="issues" />
-        <Stack.Screen key="supplies" name="supplies" />
-        <Stack.Screen key="documents" name="documents" />
-        <Stack.Screen key="profile" name="profile" />
-      </Stack>
-      <FloatingTabBar tabs={tabs} />
-    </>
+        <Icon
+          sf={{ default: "square.grid.2x2", selected: "square.grid.2x2.fill" }}
+          androidSrc={<VectorIcon family={MaterialIcons} name="dashboard" />}
+        />
+        <Label>Dashboard</Label>
+      </NativeTabs.Trigger>
+
+      {/* Manager Dashboard */}
+      <NativeTabs.Trigger
+        name="manager"
+        hidden={userRole !== "manager"}
+        {...sharedTriggerProps}
+      >
+        <Icon
+          sf={{ default: "square.grid.2x2", selected: "square.grid.2x2.fill" }}
+          androidSrc={<VectorIcon family={MaterialIcons} name="dashboard" />}
+        />
+        <Label>Dashboard</Label>
+      </NativeTabs.Trigger>
+
+      {/* Crew Tasks */}
+      <NativeTabs.Trigger
+        name="crew"
+        hidden={userRole !== "crew"}
+        {...sharedTriggerProps}
+      >
+        <Icon
+          sf="list.bullet"
+          androidSrc={<VectorIcon family={MaterialIcons} name="list" />}
+        />
+        <Label>Dashboard</Label>
+      </NativeTabs.Trigger>
+
+      {/* Calendar (all roles) */}
+      <NativeTabs.Trigger name="calendar" {...sharedTriggerProps}>
+        <Icon
+          sf="calendar"
+          androidSrc={<VectorIcon family={MaterialIcons} name="event" />}
+        />
+        <Label>Calendar</Label>
+      </NativeTabs.Trigger>
+
+      {/* Maintenance (owner + manager) */}
+      <NativeTabs.Trigger
+        name="maintenance"
+        hidden={userRole === "crew"}
+        {...sharedTriggerProps}
+      >
+        <Icon
+          sf={{
+            default: "wrench.and.screwdriver",
+            selected: "wrench.and.screwdriver.fill",
+          }}
+          androidSrc={<VectorIcon family={MaterialIcons} name="build" />}
+        />
+        <Label>Maintenance</Label>
+        <Badge hidden={urgentMaintenanceCount === 0}>
+          {String(urgentMaintenanceCount)}
+        </Badge>
+      </NativeTabs.Trigger>
+
+      {/* Issues (manager + crew) */}
+      <NativeTabs.Trigger
+        name="issues"
+        hidden={userRole === "owner"}
+        {...sharedTriggerProps}
+      >
+        <Icon
+          sf={{
+            default: "exclamationmark.triangle",
+            selected: "exclamationmark.triangle.fill",
+          }}
+          androidSrc={
+            <VectorIcon family={MaterialIcons} name="report-problem" />
+          }
+        />
+        <Label>Issues</Label>
+        <Badge hidden={openIssueCount === 0}>{String(openIssueCount)}</Badge>
+      </NativeTabs.Trigger>
+
+      {/* Supplies (manager + crew) */}
+      <NativeTabs.Trigger
+        name="supplies"
+        hidden={userRole === "owner"}
+        {...sharedTriggerProps}
+      >
+        <Icon
+          sf={{ default: "shippingbox", selected: "shippingbox.fill" }}
+          androidSrc={<VectorIcon family={MaterialIcons} name="inventory-2" />}
+        />
+        <Label>Supplies</Label>
+      </NativeTabs.Trigger>
+
+      {/* Documents (owner only) */}
+      <NativeTabs.Trigger
+        name="documents"
+        hidden={userRole !== "owner"}
+        {...sharedTriggerProps}
+      >
+        <Icon
+          sf={{ default: "doc.text", selected: "doc.text.fill" }}
+          androidSrc={<VectorIcon family={MaterialIcons} name="description" />}
+        />
+        <Label>Documents</Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }

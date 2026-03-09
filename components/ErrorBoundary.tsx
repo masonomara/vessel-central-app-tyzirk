@@ -1,7 +1,7 @@
 
 import React, { Component, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { colors } from '@/styles/commonStyles';
+import { colors } from '../styles/commonStyles';
 import { IconSymbol } from './IconSymbol';
 
 interface Props {
@@ -103,7 +103,7 @@ export class ErrorBoundary extends Component<Props, State> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceOne,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginTop: 24,
     marginBottom: 12,
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   errorDetails: {
     marginTop: 32,
     padding: 16,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     maxHeight: 200,
     width: '100%',

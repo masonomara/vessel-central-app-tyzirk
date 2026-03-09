@@ -1,448 +1,277 @@
-
-import React, { useMemo } from 'react';
+import React, { useState } from "react";
 import {
+  StyleSheet,
   View,
   Text,
-  StyleSheet,
   ScrollView,
+  TextInput,
   TouchableOpacity,
-  Platform,
-  Alert,
-} from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { colors, commonStyles, shadows } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { IconSymbol } from '@/components/IconSymbol';
+} from "react-native";
+import { Stack, useLocalSearchParams } from "expo-router";
+import {
+  commonStyles,
+  colors,
+  detailScreenStyles as ds,
+} from "../styles/commonStyles";
+import { useData } from "../contexts/DataContext";
+import { useAuth } from "../contexts/AuthContext";
+import { IconSymbol } from "../components/IconSymbol";
+import { DetailRow } from "../components/DetailRow";
+import { DropdownRow } from "../components/DropdownRow";
+import { PriorityDetailRow } from "../components/PriorityDetailRow";
+import { DetailNotFound } from "../components/DetailNotFound";
 import {
   formatEventDateRange,
-  getEventColor,
   getEventTypeLabel,
-} from '@/utils/calendarUtils';
+} from "../utils/calendarUtils";
+import { formatDate } from "../utils/dateUtils";
+import { formatLabel } from "../utils/formatLabel";
+import { CalendarEventStatus } from "../types";
+import { scrollProps } from "../hooks/useTopPadding";
 
 export default function CalendarEventDetailScreen() {
-  const router = useRouter();
-  const params = useLocalSearchParams();
-  const { calendarEvents, deleteCalendarEvent, updateCalendarEvent } = useData();
+  const { eventId } = useLocalSearchParams();
+  const { calendarEvents, updateCalendarEvent, addCalendarEventComment } =
+    useData();
+  const { userRole, userId, userName } = useAuth();
+  const [commentText, setCommentText] = useState("");
 
-  const eventId = params.eventId as string;
-
-  const event = useMemo(() => {
-    return calendarEvents.find(e => e.id === eventId);
-  }, [calendarEvents, eventId]);
+  const event = calendarEvents.find((e) => e.id === eventId);
 
   if (!event) {
-    return (
-      <View style={commonStyles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <IconSymbol
-              ios_icon_name="chevron.left"
-              android_material_icon_name="arrow_back"
-              size={24}
-              color={colors.text}
-            />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Event Details</Text>
-          <View style={{ width: 40 }} />
-        </View>
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyStateText}>Event not found</Text>
-        </View>
-      </View>
-    );
+    return <DetailNotFound title="Event Not Found" />;
   }
 
-  const eventColor = getEventColor(event.type);
-  const eventTypeLabel = getEventTypeLabel(event.type);
-
-  const handleDelete = () => {
-    Alert.alert(
-      'Delete Event',
-      'Are you sure you want to delete this event?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            deleteCalendarEvent(event.id);
-            router.back();
-          },
-        },
-      ]
-    );
+  const handleStatusChange = (value: CalendarEventStatus) => {
+    updateCalendarEvent(event.id, { status: value });
+    addCalendarEventComment(event.id, {
+      userId,
+      userName,
+      userRole,
+      text: `${userName} changed status to ${formatLabel(value)}`,
+      isSystemComment: true,
+      attachments: [],
+    });
   };
 
-  const handleMarkComplete = () => {
-    updateCalendarEvent(event.id, { status: 'completed' });
-    Alert.alert('Success', 'Event marked as completed');
-  };
-
-  const handleMarkCancelled = () => {
-    updateCalendarEvent(event.id, { status: 'cancelled' });
-    Alert.alert('Success', 'Event marked as cancelled');
+  const handleAddComment = () => {
+    if (!commentText.trim()) return;
+    if (!userId || !userName) return;
+    addCalendarEventComment(event.id, {
+      userId,
+      userName,
+      userRole,
+      text: commentText.trim(),
+      attachments: [],
+    });
+    setCommentText("");
   };
 
   return (
     <View style={commonStyles.container}>
+      <Stack.Screen
+        options={{
+          title: "Event Details",
+          headerBackTitle: "Back",
+        }}
+      />
+
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          ds.scrollContent,
+          { flexGrow: 1 },
+        ]}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <IconSymbol
-              ios_icon_name="chevron.left"
-              android_material_icon_name="arrow_back"
-              size={24}
-              color={colors.text}
-            />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Event Details</Text>
-          <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={handleDelete}
-          >
-            <IconSymbol
-              ios_icon_name="trash"
-              android_material_icon_name="delete"
-              size={20}
-              color={colors.danger}
-            />
-          </TouchableOpacity>
+        <View style={ds.titleSection}>
+          <Text style={ds.title}>{event.title}</Text>
         </View>
 
-        {/* Event Card */}
-        <View style={styles.eventCard}>
-          <View style={[styles.eventColorBar, { backgroundColor: eventColor }]} />
-          
-          <View style={styles.eventContent}>
-            {/* Title and Type */}
-            <View style={styles.titleRow}>
-              <Text style={styles.eventTitle}>{event.title}</Text>
-              <View style={[styles.typeBadge, { backgroundColor: eventColor + '20' }]}>
-                <Text style={[styles.typeBadgeText, { color: eventColor }]}>
-                  {eventTypeLabel}
-                </Text>
-              </View>
-            </View>
+        <PriorityDetailRow
+          items={[
+            {
+              label: "Vessel",
+              value: event.vesselName,
+              icon: {
+                ios_icon_name: "sailboat.fill",
+                android_material_icon_name: "directions-boat",
+              },
+              linkTo: {
+                pathname: "/vessel-detail",
+                params: { id: event.vesselId },
+              },
+            },
+            {
+              label: "Location",
+              value: event.location || "—",
+              icon: {
+                ios_icon_name: "mappin.circle.fill",
+                android_material_icon_name: "place",
+              },
+            },
+          ]}
+        />
 
-            {/* Status */}
-            <View style={styles.statusRow}>
-              <View
-                style={[
-                  styles.statusBadge,
-                  event.status === 'completed' && styles.statusCompleted,
-                  event.status === 'cancelled' && styles.statusCancelled,
-                  event.status === 'in_progress' && styles.statusInProgress,
-                ]}
-              >
-                <Text style={styles.statusText}>
-                  {event.status.replace('_', ' ').toUpperCase()}
-                </Text>
-              </View>
-            </View>
-
-            {/* Date/Time */}
-            <View style={styles.detailRow}>
-              <IconSymbol
-                ios_icon_name="calendar"
-                android_material_icon_name="event"
-                size={20}
-                color={colors.textSecondary}
-              />
-              <Text style={styles.detailText}>
-                {formatEventDateRange(event.startDate, event.endDate, event.allDay)}
-              </Text>
-            </View>
-
-            {/* Vessel */}
-            <View style={styles.detailRow}>
-              <IconSymbol
-                ios_icon_name="sailboat.fill"
-                android_material_icon_name="directions_boat"
-                size={20}
-                color={colors.textSecondary}
-              />
-              <Text style={styles.detailText}>{event.vesselName}</Text>
-            </View>
-
-            {/* Location */}
-            {event.location && (
-              <View style={styles.detailRow}>
-                <IconSymbol
-                  ios_icon_name="location.fill"
-                  android_material_icon_name="location_on"
-                  size={20}
-                  color={colors.textSecondary}
-                />
-                <Text style={styles.detailText}>{event.location}</Text>
-              </View>
-            )}
-
-            {/* Attendees */}
-            {event.attendeeNames.length > 0 && (
-              <View style={styles.detailRow}>
-                <IconSymbol
-                  ios_icon_name="person.2.fill"
-                  android_material_icon_name="group"
-                  size={20}
-                  color={colors.textSecondary}
-                />
-                <Text style={styles.detailText}>
-                  {event.attendeeNames.join(', ')}
-                </Text>
-              </View>
-            )}
-
-            {/* Description */}
-            {event.description && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Description</Text>
-                <Text style={styles.sectionText}>{event.description}</Text>
-              </View>
-            )}
-
-            {/* Notes */}
-            {event.notes && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Notes</Text>
-                <Text style={styles.sectionText}>{event.notes}</Text>
-              </View>
-            )}
-
-            {/* Created By */}
-            <View style={styles.metaRow}>
-              <Text style={styles.metaText}>
-                Created by {event.createdByName}
-              </Text>
-              <Text style={styles.metaText}>
-                {event.createdAt.toLocaleDateString()}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Actions */}
-        {event.status === 'scheduled' && (
-          <View style={styles.actions}>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.completeButton]}
-              onPress={handleMarkComplete}
-            >
-              <IconSymbol
-                ios_icon_name="checkmark.circle.fill"
-                android_material_icon_name="check_circle"
-                size={20}
-                color={colors.text}
-              />
-              <Text style={styles.actionButtonText}>Mark Complete</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.actionButton, styles.cancelButton]}
-              onPress={handleMarkCancelled}
-            >
-              <IconSymbol
-                ios_icon_name="xmark.circle.fill"
-                android_material_icon_name="cancel"
-                size={20}
-                color={colors.text}
-              />
-              <Text style={styles.actionButtonText}>Cancel Event</Text>
-            </TouchableOpacity>
-          </View>
+        <DropdownRow
+          label="Status"
+          options={[
+            { label: "Scheduled", value: "scheduled" },
+            { label: "In Progress", value: "in_progress" },
+            { label: "Completed", value: "completed" },
+            { label: "Cancelled", value: "cancelled" },
+          ]}
+          selectedValue={event.status}
+          onSelect={(value) => handleStatusChange(value as CalendarEventStatus)}
+        />
+        <DetailRow label="Type" inline value={getEventTypeLabel(event.type)} />
+        <DetailRow label="Created By" inline value={event.createdByName} />
+        <DetailRow
+          label="Date"
+          inline
+          value={formatEventDateRange(
+            event.startDate,
+            event.endDate,
+            event.allDay,
+          )}
+        />
+        {event.attendeeNames.length > 0 && (
+          <DetailRow label="Attendees" value={event.attendeeNames.join(", ")} />
         )}
+        {event.description && (
+          <DetailRow label="Description" value={event.description} />
+        )}
+        {event.notes && <DetailRow label="Notes" value={event.notes} />}
 
-        {/* Bottom Padding */}
-        <View style={{ height: 100 }} />
+        <View style={styles.historySection}>
+          <View style={styles.commentCard}>
+            <View style={styles.commentIcon}>
+              <IconSymbol
+                ios_icon_name="person.fill"
+                android_material_icon_name="person"
+                size={15}
+                color={colors.text}
+              />
+            </View>
+            <View style={styles.commentContent}>
+              <Text style={styles.commentAuthor}>
+                {event.createdByName} created this event
+              </Text>
+              <Text style={styles.commentDate}>
+                {formatDate(new Date(event.createdAt))}
+              </Text>
+            </View>
+          </View>
+
+          {(event.comments || []).map((comment) => (
+            <View key={comment.id} style={styles.commentCard}>
+              <View style={styles.commentIcon}>
+                <IconSymbol
+                  ios_icon_name="person.fill"
+                  android_material_icon_name="person"
+                  size={15}
+                  color={colors.text}
+                />
+              </View>
+              <View style={styles.commentContent}>
+                <Text style={styles.commentAuthor}>
+                  {comment.isSystemComment ? comment.text : comment.userName}
+                </Text>
+                <Text style={styles.commentDate}>
+                  {formatDate(new Date(comment.createdAt))}
+                </Text>
+                {!comment.isSystemComment && (
+                  <Text style={styles.commentBody}>{comment.text}</Text>
+                )}
+              </View>
+            </View>
+          ))}
+
+          <View style={styles.commentInput}>
+            <TextInput
+              style={styles.input}
+              placeholder="Add a comment..."
+              placeholderTextColor={colors.textTertiary}
+              value={commentText}
+              onChangeText={setCommentText}
+            />
+            <TouchableOpacity
+              style={[
+                styles.sendButton,
+                !commentText.trim() && styles.sendButtonDisabled,
+              ]}
+              onPress={handleAddComment}
+              disabled={!commentText.trim()}
+            >
+              <IconSymbol
+                ios_icon_name="arrow.up.circle.fill"
+                android_material_icon_name="send"
+                size={20}
+                color={colors.container}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingTop: Platform.OS === 'android' ? 48 : 0,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  historySection: {
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 20,
-    paddingBottom: 20,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  deleteButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  eventCard: {
-    flexDirection: 'row',
-    marginHorizontal: 20,
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...shadows.card,
-  },
-  eventColorBar: {
-    width: 6,
-  },
-  eventContent: {
+    paddingTop: 20,
+    paddingBottom: 16,
+    backgroundColor: colors.surfaceTwo,
+    borderColor: colors.borderSoft,
     flex: 1,
-    padding: 20,
   },
-  titleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  eventTitle: {
-    flex: 1,
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.text,
-    marginRight: 12,
-  },
-  typeBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  typeBadgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  statusRow: {
-    marginBottom: 16,
-  },
-  statusBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: colors.accent + '20',
-  },
-  statusCompleted: {
-    backgroundColor: colors.success + '20',
-  },
-  statusCancelled: {
-    backgroundColor: colors.danger + '20',
-  },
-  statusInProgress: {
-    backgroundColor: colors.warning + '20',
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 12,
-  },
-  detailText: {
-    flex: 1,
-    fontSize: 15,
-    color: colors.text,
-  },
-  section: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    marginBottom: 8,
-  },
-  sectionText: {
-    fontSize: 15,
-    color: colors.text,
-    lineHeight: 22,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  metaText: {
-    fontSize: 12,
-    color: colors.textTertiary,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 20,
-    marginTop: 20,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+  commentCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
     gap: 8,
-    paddingVertical: 14,
-    borderRadius: 12,
-    ...shadows.small,
+    marginBottom: 24,
   },
-  completeButton: {
-    backgroundColor: colors.success,
+  commentIcon: {
+    padding: 6,
+    marginTop: 4.5,
+    backgroundColor: colors.surfaceThree,
+    borderRadius: 100,
   },
-  cancelButton: {
-    backgroundColor: colors.danger,
+  commentContent: {
+    flex: 1,
   },
-  actionButtonText: {
+  commentAuthor: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: "500",
+    color: colors.text,
+    lineHeight: 20,
+  },
+  commentDate: { fontSize: 12, color: colors.textTertiary, lineHeight: 15 },
+  commentBody: {
+    fontSize: 14,
+    color: colors.text,
+    lineHeight: 19,
+    marginTop: 4,
+  },
+  commentInput: {
+    flexDirection: "row",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    height: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    marginBottom: 20,
+    marginTop: "auto",
+    backgroundColor: colors.container,
+  },
+  input: {
+    flex: 1,
+    fontSize: 14,
     color: colors.text,
   },
-  emptyState: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 40,
-  },
-  emptyStateText: {
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
+  sendButton: { padding: 6, backgroundColor: colors.text, borderRadius: 8 },
+  sendButtonDisabled: { opacity: 0.5 },
 });

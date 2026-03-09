@@ -39,6 +39,13 @@ module.exports = {
     "react/display-name": "off",
     "no-var": "off"
   },
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx']
+      }
+    }
+  },
   overrides: [
     {
       files: ['metro.config.js'],

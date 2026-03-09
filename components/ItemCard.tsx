@@ -1,0 +1,198 @@
+import React, { useCallback } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Pressable,
+  ViewStyle,
+} from "react-native";
+import { indexScreenStyles } from "../styles/commonStyles";
+import { colors } from "../styles/commonStyles";
+import { IconSymbol } from "./IconSymbol";
+
+interface ItemCardProps {
+  title: string;
+  description: string;
+  vesselName: string;
+  onPress: () => void;
+
+  isFirst?: boolean;
+  isLast?: boolean;
+  style?: ViewStyle;
+
+  showCheckbox?: boolean;
+  isCompleted?: boolean;
+  onComplete?: () => void;
+
+  icon?: {
+    iosName: string;
+    androidName: string;
+  };
+
+  badge?: {
+    label: string;
+    fg: string;
+    bg: string;
+  };
+
+  metaText?: string;
+  secondaryMetaText?: string;
+  bordered?: boolean;
+
+  actions?: React.ReactNode;
+}
+
+export const ItemCard = React.memo(
+  ({
+    title,
+    description,
+    vesselName,
+    onPress,
+    isFirst,
+    isLast,
+    style,
+    showCheckbox,
+    isCompleted,
+    onComplete,
+    icon,
+    badge,
+    metaText,
+    secondaryMetaText,
+    bordered,
+    actions,
+  }: ItemCardProps) => {
+    const handleComplete = useCallback(() => {
+      onComplete?.();
+    }, [onComplete]);
+
+    return (
+      <TouchableOpacity
+        style={[
+          indexScreenStyles.card,
+          !showCheckbox && !icon && { paddingLeft: 20 },
+          isFirst && indexScreenStyles.cardFirst,
+          isLast && indexScreenStyles.cardLast,
+          bordered && {
+            borderWidth: 1,
+            borderColor: colors.borderSoft,
+            borderRadius: 12,
+            marginHorizontal: 20,
+            marginLeft: 20,
+            paddingLeft: 16,
+            paddingRight: 16,
+            paddingBottom: 12,
+          },
+          style,
+        ]}
+        onPress={onPress}
+      >
+        {!isFirst && !bordered && (
+          <View
+            style={{
+              height: 1,
+              backgroundColor: colors.borderSoft,
+              marginLeft: showCheckbox || icon ? 60 : 0,
+              marginRight: -60,
+            }}
+          />
+        )}
+        <View style={indexScreenStyles.topRow}>
+          {showCheckbox && (
+            <Pressable
+              style={[
+                indexScreenStyles.completeButton,
+                {
+                  backgroundColor: isCompleted
+                    ? colors.greenBackground
+                    : "transparent",
+                  borderColor: isCompleted
+                    ? colors.greenBackground
+                    : colors.border,
+                  borderWidth: 1,
+                },
+              ]}
+              onPress={handleComplete}
+              hitSlop={8}
+            >
+              {isCompleted && (
+                <IconSymbol
+                  ios_icon_name="checkmark.circle.fill"
+                  android_material_icon_name="check"
+                  size={16}
+                  color={colors.greenForeground}
+                />
+              )}
+            </Pressable>
+          )}
+
+          {!showCheckbox && icon && (
+            <View style={indexScreenStyles.iconHolder}>
+              <IconSymbol
+                ios_icon_name={icon.iosName}
+                android_material_icon_name={icon.androidName}
+                size={20}
+                color={colors.textTertiary}
+              />
+            </View>
+          )}
+
+          <Text style={indexScreenStyles.cardTitle} numberOfLines={2}>
+            {title}
+          </Text>
+
+          {badge && (
+            <Text
+              style={[
+                indexScreenStyles.priorityText,
+                { color: badge.fg, backgroundColor: badge.bg },
+              ]}
+            >
+              {badge.label}
+            </Text>
+          )}
+        </View>
+
+        <View
+          style={
+            showCheckbox || icon
+              ? indexScreenStyles.bottomRowWithCheckbox
+              : undefined
+          }
+        >
+          <Text style={indexScreenStyles.cardDescription} numberOfLines={2}>
+            {description}
+          </Text>
+        </View>
+
+        <View
+          style={
+            showCheckbox || icon
+              ? indexScreenStyles.metaRowWithCheckbox
+              : indexScreenStyles.metaRow
+          }
+        >
+          <Text style={indexScreenStyles.metaText}>
+            {vesselName}
+            {metaText ? ` \u2022 ${metaText}` : ""}
+          </Text>
+        </View>
+
+        {secondaryMetaText ? (
+          <View
+            style={
+              showCheckbox || icon
+                ? indexScreenStyles.metaRowWithCheckbox
+                : indexScreenStyles.metaRow
+            }
+          >
+            <Text style={[indexScreenStyles.metaText, { marginTop: 0 }]}>
+              {secondaryMetaText}
+            </Text>
+          </View>
+        ) : null}
+
+        {actions}
+      </TouchableOpacity>
+    );
+  },
+);

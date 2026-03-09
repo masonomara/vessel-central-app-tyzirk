@@ -10,13 +10,13 @@ import {
   Alert,
   Platform,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useTheme } from '@react-navigation/native';
-import { colors } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { TaskPriority } from '@/types';
+import { Stack, useRouter } from 'expo-router';
+import { colors } from '../styles/commonStyles';
+import { useData } from '../contexts/DataContext';
+import { useAuth } from '../contexts/AuthContext';
+import { IconSymbol } from '../components/IconSymbol';
+import { TaskPriority } from '../types';
+import { scrollProps } from '../hooks/useTopPadding';
 
 const SUPPLY_CATEGORIES = [
   'Cleaning',
@@ -49,7 +49,6 @@ const UNIT_OPTIONS = [
 
 export default function AddSupplyRequestScreen() {
   const router = useRouter();
-  const theme = useTheme();
   const { addSupplyRequest, vessels, getVesselsForUser } = useData();
   const { userId, userName, userRole } = useAuth();
 
@@ -67,6 +66,20 @@ export default function AddSupplyRequestScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedVessel = vessels.find(v => v.id === selectedVesselId);
+
+  if (userVessels.length === 0) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+        <Stack.Screen options={{ title: 'Request Supplies' }} />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 }}>
+          <IconSymbol ios_icon_name="sailboat" android_material_icon_name="sailing" size={48} color={colors.textTertiary} />
+          <Text style={{ fontSize: 16, color: colors.textSecondary, textAlign: 'center', marginTop: 16 }}>
+            No vessels assigned to your account. Contact your manager.
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   const validateForm = (): boolean => {
     if (!itemName.trim()) {
@@ -120,6 +133,7 @@ export default function AddSupplyRequestScreen() {
         category,
         notes: notes.trim(),
         attachments: [],
+        comments: [],
       });
 
       Alert.alert(
@@ -151,22 +165,26 @@ export default function AddSupplyRequestScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <IconSymbol
-            ios_icon_name="chevron.left"
-            android_material_icon_name="arrow_back"
-            size={24}
-            color={colors.text}
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Request Supplies</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+      <Stack.Screen
+        options={{
+          title: 'Request Supplies',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
+              <Text style={[styles.saveText, isSubmitting && { opacity: 0.5 }]}>Submit</Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
+        {...scrollProps}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>
@@ -404,26 +422,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 48 : 60,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+  cancelText: {
+    fontSize: 16,
+    color: colors.textSecondary,
   },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  headerSpacer: {
-    width: 40,
+  saveText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.accent,
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -447,7 +453,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -463,7 +469,7 @@ const styles = StyleSheet.create({
   costInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.border,
@@ -490,7 +496,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -510,7 +516,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 16,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -539,7 +545,7 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
 });

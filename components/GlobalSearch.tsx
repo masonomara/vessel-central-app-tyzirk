@@ -1,10 +1,10 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Modal } from 'react-native';
-import { colors } from '@/styles/commonStyles';
-import { IconSymbol } from '@/components/IconSymbol';
-import { searchManager, SearchResult } from '@/utils/searchManager';
-import { useData } from '@/contexts/DataContext';
+import { colors } from '../styles/commonStyles';
+import { IconSymbol } from '../components/IconSymbol';
+import { searchManager, SearchResult } from '../utils/searchManager';
+import { useData } from '../contexts/DataContext';
 import { router } from 'expo-router';
 
 interface GlobalSearchProps {
@@ -58,16 +58,16 @@ export default function GlobalSearch({ visible, onClose }: GlobalSearchProps) {
         });
         break;
       case 'issue':
-        router.push('/(tabs)/issues');
+        router.push({ pathname: '/issue-detail', params: { id: result.id } });
         break;
       case 'supply':
-        router.push('/(tabs)/supplies');
+        router.push({ pathname: '/supply-detail', params: { id: result.id } });
         break;
       case 'document':
-        router.push('/(tabs)/documents');
+        router.push({ pathname: '/document-detail', params: { id: result.id } });
         break;
       case 'vessel':
-        router.push('/(tabs)/owner');
+        router.push({ pathname: '/vessel-detail', params: { id: result.id } });
         break;
       default:
         console.log('Unknown result type');
@@ -120,7 +120,7 @@ export default function GlobalSearch({ visible, onClose }: GlobalSearchProps) {
           <TouchableOpacity onPress={onClose} style={styles.backButton}>
             <IconSymbol 
               ios_icon_name="chevron.left" 
-              android_material_icon_name="arrow_back" 
+              android_material_icon_name="arrow-back" 
               size={24} 
               color={colors.text} 
             />
@@ -236,7 +236,7 @@ export default function GlobalSearch({ visible, onClose }: GlobalSearchProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceOne,
     paddingTop: 48,
   },
   header: {
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   clearText: {
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   resultItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
   },
   resultBadgeText: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.accent,
   },
   emptyState: {
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginTop: 16,
     marginBottom: 8,

@@ -1,519 +1,431 @@
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  Alert,
+  TextInput,
+  TouchableOpacity,
+  ActionSheetIOS,
+  Platform,
+} from "react-native";
+import { useLocalSearchParams, Stack } from "expo-router";
+import {
+  commonStyles,
+  colors,
+  detailScreenStyles as ds,
+} from "../styles/commonStyles";
+import { useData } from "../contexts/DataContext";
+import { useAuth } from "../contexts/AuthContext";
+import { IconSymbol } from "../components/IconSymbol";
+import { DetailRow } from "../components/DetailRow";
+import { DropdownRow } from "../components/DropdownRow";
+import { PriorityDetailRow } from "../components/PriorityDetailRow";
+import { DetailNotFound } from "../components/DetailNotFound";
+import { formatDate, formatDueDate, isOverdue } from "../utils/dateUtils";
+import { formatLabel } from "../utils/formatLabel";
+import { TaskStatus, TaskPriority } from "../types";
+import { scrollProps } from "../hooks/useTopPadding";
 
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
-import { useTheme } from '@react-navigation/native';
-import { colors } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { formatDate, formatDueDate, isOverdue } from '@/utils/dateUtils';
-import { TaskStatus, TaskPriority } from '@/types';
+const MOCK_USERS: Record<string, string> = {
+  manager1: "Sarah Johnson",
+  manager2: "Tom Wilson",
+  manager3: "Alex Martinez",
+  crew1: "Mike Davis",
+  crew2: "Sarah Williams",
+  crew3: "Jane Smith",
+  crew4: "Tom Anderson",
+  crew5: "Lisa Martinez",
+};
 
 export default function MaintenanceDetailScreen() {
   const { id } = useLocalSearchParams();
-  const theme = useTheme();
-  const { maintenanceTasks, updateMaintenanceTask, completeMaintenanceTask } = useData();
+  const {
+    maintenanceTasks,
+    vessels,
+    updateMaintenanceTask,
+    completeMaintenanceTask,
+    addMaintenanceComment,
+  } = useData();
   const { userRole, userId, userName } = useAuth();
-  const [notes, setNotes] = useState('');
-  const [cost, setCost] = useState('');
+  const [commentText, setCommentText] = useState("");
 
-  const task = maintenanceTasks.find(t => t.id === id);
+  const task = maintenanceTasks.find((t) => t.id === id);
 
   if (!task) {
-    return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <Text style={styles.errorText}>Task not found</Text>
-      </View>
-    );
+    return <DetailNotFound title="Task Not Found" />;
   }
 
-  const getPriorityColor = (priority: TaskPriority) => {
-    switch (priority) {
-      case 'urgent': return colors.danger;
-      case 'high': return colors.warning;
-      case 'medium': return colors.accent;
-      case 'low': return colors.success;
-      default: return colors.grey;
-    }
-  };
-
-  const getStatusColor = (status: TaskStatus) => {
-    switch (status) {
-      case 'completed': return colors.success;
-      case 'in_progress': return colors.accent;
-      case 'waiting_on_parts': return colors.warning;
-      case 'open': return colors.grey;
-      default: return colors.grey;
-    }
-  };
-
   const handleStatusChange = (newStatus: TaskStatus) => {
-    updateMaintenanceTask(task.id, { status: newStatus });
-    Alert.alert('Success', `Task status updated to ${newStatus}`);
-  };
-
-  const handleComplete = () => {
-    if (!userId || !userName) {
-      Alert.alert('Error', 'User not authenticated');
+    if (newStatus === "completed") {
+      if (!userId || !userName) return;
+      if (Platform.OS === "ios") {
+        Alert.prompt(
+          "Complete Task",
+          "Enter actual cost (optional):",
+          [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Complete",
+              onPress: (costInput?: string) => {
+                completeMaintenanceTask(task.id, {
+                  completedBy: userId,
+                  completedByName: userName,
+                  completedAt: new Date(),
+                  notes: "Task completed",
+                  attachments: [],
+                  cost: costInput ? parseFloat(costInput) : undefined,
+                });
+              },
+            },
+          ],
+          "plain-text",
+          "",
+          "numeric",
+        );
+      } else {
+        Alert.alert("Complete Task", "Mark this task as completed?", [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Complete",
+            onPress: () => {
+              completeMaintenanceTask(task.id, {
+                completedBy: userId,
+                completedByName: userName,
+                completedAt: new Date(),
+                notes: "Task completed",
+                attachments: [],
+              });
+            },
+          },
+        ]);
+      }
       return;
     }
 
-    Alert.alert(
-      'Complete Task',
-      'Mark this task as completed?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Complete',
-          onPress: () => {
-            completeMaintenanceTask(task.id, {
-              completedBy: userId,
-              completedByName: userName,
-              completedAt: new Date(),
-              notes: notes || 'Task completed',
-              attachments: [],
-              cost: cost ? parseFloat(cost) : undefined,
-            });
-            Alert.alert('Success', 'Task completed successfully');
-            router.back();
-          },
-        },
-      ]
+    updateMaintenanceTask(task.id, { status: newStatus });
+    addMaintenanceComment(task.id, {
+      userId,
+      userName,
+      userRole,
+      text: `${userName} changed status to ${formatLabel(newStatus)}`,
+      isSystemComment: true,
+      attachments: [],
+    });
+  };
+
+  const handlePriorityChange = (value: TaskPriority) => {
+    updateMaintenanceTask(task.id, { priority: value });
+    addMaintenanceComment(task.id, {
+      userId,
+      userName,
+      userRole,
+      text: `${userName} updated priority to ${formatLabel(value)}`,
+      isSystemComment: true,
+      attachments: [],
+    });
+  };
+
+  const handleAssign = () => {
+    const vessel = vessels.find((v) => v.id === task.vesselId);
+    if (!vessel) return;
+
+    const assignableIds = [vessel.managerId, ...(vessel.crewIds || [])].filter(
+      Boolean,
     );
+
+    const assignable = assignableIds
+      .map((id) => ({ id, name: MOCK_USERS[id] }))
+      .filter((u) => u.name);
+
+    if (assignable.length === 0) {
+      Alert.alert("No Crew", "No assignable crew for this vessel.");
+      return;
+    }
+
+    if (Platform.OS === "ios") {
+      const labels = [...assignable.map((u) => u.name), "Cancel"];
+      ActionSheetIOS.showActionSheetWithOptions(
+        { options: labels, cancelButtonIndex: labels.length - 1 },
+        (index) => {
+          if (index < assignable.length) {
+            const picked = assignable[index];
+            updateMaintenanceTask(task.id, {
+              assignedTo: picked.id,
+              assignedToName: picked.name,
+            });
+            addMaintenanceComment(task.id, {
+              userId,
+              userName,
+              userRole,
+              text: `${userName} assigned to ${picked.name}`,
+              isSystemComment: true,
+              attachments: [],
+            });
+          }
+        },
+      );
+    }
+  };
+
+  const handleAddComment = () => {
+    if (!commentText.trim()) return;
+    if (!userId || !userName) return;
+    addMaintenanceComment(task.id, {
+      userId,
+      userName,
+      userRole,
+      text: commentText.trim(),
+      attachments: [],
+    });
+    setCommentText("");
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <IconSymbol 
-            ios_icon_name="chevron.left" 
-            android_material_icon_name="arrow_back" 
-            size={24} 
-            color={colors.text} 
+    <View style={commonStyles.container}>
+      <Stack.Screen
+        options={{
+          title: "Maintenance Details",
+          headerBackTitle: "Back",
+        }}
+      />
+
+      <ScrollView
+        contentContainerStyle={[
+          ds.scrollContent,
+          { flexGrow: 1 },
+        ]}
+        showsVerticalScrollIndicator={false}
+        {...scrollProps}
+      >
+        <View style={ds.titleSection}>
+          <Text style={ds.title}>{task.title}</Text>
+        </View>
+
+        <PriorityDetailRow
+          items={[
+            {
+              label: "Vessel",
+              value: task.vesselName,
+              icon: {
+                ios_icon_name: "sailboat.fill",
+                android_material_icon_name: "directions-boat",
+              },
+              linkTo: {
+                pathname: "/vessel-detail",
+                params: { id: task.vesselId },
+              },
+            },
+            {
+              label: "Assigned To",
+              value: task.assignedToName || "Unassigned",
+              icon: {
+                ios_icon_name: "person.fill",
+                android_material_icon_name: "person",
+              },
+            },
+          ]}
+        />
+
+        {!task.assignedToName &&
+          task.status !== "completed" &&
+          userRole !== "owner" && (
+            <DetailRow
+              button={{
+                label: "Assign to Crew",
+                onPress: handleAssign,
+                color: colors.text,
+              }}
+            />
+          )}
+
+        <DropdownRow
+          label="Priority"
+          options={[
+            { label: "Urgent", value: "urgent" },
+            { label: "High", value: "high" },
+            { label: "Medium", value: "medium" },
+            { label: "Low", value: "low" },
+          ]}
+          selectedValue={task.priority}
+          onSelect={(value) => handlePriorityChange(value as TaskPriority)}
+        />
+        <DropdownRow
+          label="Status"
+          options={[
+            { label: "Open", value: "open" },
+            { label: "In Progress", value: "in_progress" },
+            { label: "Waiting on Parts", value: "waiting_on_parts" },
+            { label: "Completed", value: "completed" },
+          ]}
+          selectedValue={task.status}
+          onSelect={(value) => handleStatusChange(value as TaskStatus)}
+        />
+
+        <DetailRow
+          label="Due Date"
+          inline
+          value={formatDueDate(task.dueDate)}
+          valueColor={
+            isOverdue(task.dueDate) && task.status !== "completed"
+              ? colors.danger
+              : undefined
+          }
+        />
+        {task.isRecurring && (
+          <DetailRow
+            label="Frequency"
+            inline
+            value={`Every ${task.frequencyValue} ${task.frequency}`}
           />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Task Details</Text>
-        <View style={{ width: 40 }} />
-      </View>
+        )}
+        {task.estimatedCost && (
+          <DetailRow
+            label="Estimated Cost"
+            inline
+            value={`$${task.estimatedCost.toLocaleString()}`}
+          />
+        )}
+        {task.actualCost && (
+          <DetailRow
+            label="Actual Cost"
+            inline
+            value={`$${task.actualCost.toLocaleString()}`}
+          />
+        )}
+        <DetailRow label="Description" value={task.description} />
+        {task.notes && <DetailRow label="Notes" value={task.notes} />}
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.titleSection}>
-          <Text style={styles.title}>{task.title}</Text>
-          <View style={styles.badges}>
-            <View style={[styles.priorityBadge, { backgroundColor: getPriorityColor(task.priority) + '30' }]}>
-              <Text style={[styles.priorityText, { color: getPriorityColor(task.priority) }]}>
-                {task.priority.toUpperCase()}
-              </Text>
+        <View style={styles.historySection}>
+          <View style={styles.commentCard}>
+            <View style={styles.commentIcon}>
+              <IconSymbol
+                ios_icon_name="person.fill"
+                android_material_icon_name="person"
+                size={15}
+                color={colors.text}
+              />
             </View>
-            <View style={[styles.statusBadge, { backgroundColor: getStatusColor(task.status) + '30' }]}>
-              <Text style={[styles.statusText, { color: getStatusColor(task.status) }]}>
-                {task.status.replace('_', ' ').toUpperCase()}
+            <View style={styles.commentContent}>
+              <Text style={styles.commentAuthor}>
+                {MOCK_USERS[task.createdBy] || "Unknown"} created this task
+              </Text>
+              <Text style={styles.commentDate}>
+                {formatDate(new Date(task.createdAt))}
               </Text>
             </View>
           </View>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Description</Text>
-          <Text style={styles.description}>{task.description}</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Details</Text>
-          <View style={styles.detailsGrid}>
-            <View style={styles.detailItem}>
-              <IconSymbol 
-                ios_icon_name="sailboat.fill" 
-                android_material_icon_name="sailing" 
-                size={20} 
-                color={colors.accent} 
-              />
-              <View style={styles.detailContent}>
-                <Text style={styles.detailLabel}>Vessel</Text>
-                <Text style={styles.detailValue}>{task.vesselName}</Text>
+          {(task.comments || []).map((comment) => (
+            <View key={comment.id} style={styles.commentCard}>
+              <View style={styles.commentIcon}>
+                <IconSymbol
+                  ios_icon_name="person.fill"
+                  android_material_icon_name="person"
+                  size={15}
+                  color={colors.text}
+                />
               </View>
-            </View>
-
-            <View style={styles.detailItem}>
-              <IconSymbol 
-                ios_icon_name="calendar" 
-                android_material_icon_name="event" 
-                size={20} 
-                color={isOverdue(task.dueDate) && task.status !== 'completed' ? colors.danger : colors.accent} 
-              />
-              <View style={styles.detailContent}>
-                <Text style={styles.detailLabel}>Due Date</Text>
-                <Text style={[
-                  styles.detailValue,
-                  isOverdue(task.dueDate) && task.status !== 'completed' && styles.overdueText
-                ]}>
-                  {formatDueDate(task.dueDate)}
+              <View style={styles.commentContent}>
+                <Text style={styles.commentAuthor}>
+                  {comment.isSystemComment ? comment.text : comment.userName}
                 </Text>
-              </View>
-            </View>
-
-            {task.assignedToName && (
-              <View style={styles.detailItem}>
-                <IconSymbol 
-                  ios_icon_name="person.fill" 
-                  android_material_icon_name="person" 
-                  size={20} 
-                  color={colors.accent} 
-                />
-                <View style={styles.detailContent}>
-                  <Text style={styles.detailLabel}>Assigned To</Text>
-                  <Text style={styles.detailValue}>{task.assignedToName}</Text>
-                </View>
-              </View>
-            )}
-
-            {task.isRecurring && (
-              <View style={styles.detailItem}>
-                <IconSymbol 
-                  ios_icon_name="arrow.clockwise" 
-                  android_material_icon_name="repeat" 
-                  size={20} 
-                  color={colors.accent} 
-                />
-                <View style={styles.detailContent}>
-                  <Text style={styles.detailLabel}>Frequency</Text>
-                  <Text style={styles.detailValue}>
-                    Every {task.frequencyValue} {task.frequency}
-                  </Text>
-                </View>
-              </View>
-            )}
-
-            {task.estimatedCost && (
-              <View style={styles.detailItem}>
-                <IconSymbol 
-                  ios_icon_name="dollarsign.circle" 
-                  android_material_icon_name="attach_money" 
-                  size={20} 
-                  color={colors.success} 
-                />
-                <View style={styles.detailContent}>
-                  <Text style={styles.detailLabel}>Estimated Cost</Text>
-                  <Text style={styles.detailValue}>${task.estimatedCost.toLocaleString()}</Text>
-                </View>
-              </View>
-            )}
-
-            {task.actualCost && (
-              <View style={styles.detailItem}>
-                <IconSymbol 
-                  ios_icon_name="dollarsign.circle.fill" 
-                  android_material_icon_name="payments" 
-                  size={20} 
-                  color={colors.success} 
-                />
-                <View style={styles.detailContent}>
-                  <Text style={styles.detailLabel}>Actual Cost</Text>
-                  <Text style={styles.detailValue}>${task.actualCost.toLocaleString()}</Text>
-                </View>
-              </View>
-            )}
-          </View>
-        </View>
-
-        {task.notes && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Notes</Text>
-            <Text style={styles.notesText}>{task.notes}</Text>
-          </View>
-        )}
-
-        {task.completionHistory.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Completion History</Text>
-            {task.completionHistory.map((record, index) => (
-              <View key={record.id} style={styles.historyCard}>
-                <View style={styles.historyHeader}>
-                  <IconSymbol 
-                    ios_icon_name="checkmark.circle.fill" 
-                    android_material_icon_name="check_circle" 
-                    size={24} 
-                    color={colors.success} 
-                  />
-                  <View style={styles.historyInfo}>
-                    <Text style={styles.historyName}>{record.completedByName}</Text>
-                    <Text style={styles.historyDate}>{formatDate(record.completedAt)}</Text>
-                  </View>
-                </View>
-                {record.notes && (
-                  <Text style={styles.historyNotes}>{record.notes}</Text>
-                )}
-                {record.cost && (
-                  <Text style={styles.historyCost}>Cost: ${record.cost.toLocaleString()}</Text>
+                <Text style={styles.commentDate}>
+                  {formatDate(new Date(comment.createdAt))}
+                </Text>
+                {!comment.isSystemComment && (
+                  <Text style={styles.commentBody}>{comment.text}</Text>
                 )}
               </View>
-            ))}
-          </View>
-        )}
-
-        {userRole !== 'owner' && task.status !== 'completed' && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Update Status</Text>
-            <View style={styles.statusButtons}>
-              {['open', 'in_progress', 'waiting_on_parts'].map((status) => (
-                <TouchableOpacity
-                  key={status}
-                  style={[
-                    styles.statusButton,
-                    task.status === status && styles.statusButtonActive,
-                  ]}
-                  onPress={() => handleStatusChange(status as TaskStatus)}
-                >
-                  <Text style={[
-                    styles.statusButtonText,
-                    task.status === status && styles.statusButtonTextActive,
-                  ]}>
-                    {status.replace('_', ' ').toUpperCase()}
-                  </Text>
-                </TouchableOpacity>
-              ))}
             </View>
-          </View>
-        )}
+          ))}
 
-        {userRole !== 'owner' && task.status !== 'completed' && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Complete Task</Text>
+          <View style={styles.commentInput}>
             <TextInput
               style={styles.input}
-              placeholder="Completion notes..."
-              placeholderTextColor={colors.textSecondary}
-              value={notes}
-              onChangeText={setNotes}
-              multiline
-              numberOfLines={3}
+              placeholder="Add a comment..."
+              placeholderTextColor={colors.textTertiary}
+              value={commentText}
+              onChangeText={setCommentText}
             />
-            <TextInput
-              style={styles.input}
-              placeholder="Actual cost (optional)"
-              placeholderTextColor={colors.textSecondary}
-              value={cost}
-              onChangeText={setCost}
-              keyboardType="numeric"
-            />
-            <TouchableOpacity style={styles.completeButton} onPress={handleComplete}>
-              <IconSymbol 
-                ios_icon_name="checkmark.circle.fill" 
-                android_material_icon_name="check_circle" 
-                size={24} 
-                color={colors.text} 
+            <TouchableOpacity
+              style={[
+                styles.sendButton,
+                !commentText.trim() && styles.sendButtonDisabled,
+              ]}
+              onPress={handleAddComment}
+              disabled={!commentText.trim()}
+            >
+              <IconSymbol
+                ios_icon_name="arrow.up.circle.fill"
+                android_material_icon_name="send"
+                size={20}
+                color={colors.container}
               />
-              <Text style={styles.completeButtonText}>Mark as Complete</Text>
             </TouchableOpacity>
           </View>
-        )}
+        </View>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  historySection: {
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 20,
     paddingBottom: 16,
+    backgroundColor: colors.surfaceTwo,
+    borderColor: colors.borderSoft,
+    flex: 1,
   },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  titleSection: {
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 12,
-  },
-  badges: {
-    flexDirection: 'row',
+  commentCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
     gap: 8,
-  },
-  priorityBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  priorityText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  section: {
     marginBottom: 24,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 12,
+  commentIcon: {
+    padding: 6,
+    marginTop: 4.5,
+    backgroundColor: colors.surfaceThree,
+    borderRadius: 100,
   },
-  description: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    lineHeight: 24,
-  },
-  detailsGrid: {
-    gap: 16,
-  },
-  detailItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    backgroundColor: colors.card,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  detailContent: {
+  commentContent: {
     flex: 1,
   },
-  detailLabel: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    marginBottom: 4,
-  },
-  detailValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  overdueText: {
-    color: colors.danger,
-  },
-  notesText: {
+  commentAuthor: {
     fontSize: 15,
-    color: colors.textSecondary,
-    lineHeight: 22,
-    backgroundColor: colors.card,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  historyCard: {
-    backgroundColor: colors.card,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  historyHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 8,
-  },
-  historyInfo: {
-    flex: 1,
-  },
-  historyName: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "500",
     color: colors.text,
-  },
-  historyDate: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-  historyNotes: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginTop: 8,
     lineHeight: 20,
   },
-  historyCost: {
+  commentDate: { fontSize: 12, color: colors.textTertiary, lineHeight: 15 },
+  commentBody: {
     fontSize: 14,
-    fontWeight: '600',
-    color: colors.success,
-    marginTop: 8,
-  },
-  statusButtons: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  statusButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  statusButtonActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  statusButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  statusButtonTextActive: {
     color: colors.text,
+    lineHeight: 19,
+    marginTop: 4,
+  },
+  commentInput: {
+    flexDirection: "row",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    height: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    marginBottom: 20,
+    marginTop: "auto",
+    backgroundColor: colors.container,
   },
   input: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 12,
-  },
-  completeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.success,
-    borderRadius: 12,
-    padding: 16,
-    gap: 8,
-  },
-  completeButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+    flex: 1,
+    fontSize: 14,
     color: colors.text,
   },
-  errorText: {
-    fontSize: 16,
-    color: colors.danger,
-    textAlign: 'center',
-    marginTop: 100,
-  },
+  sendButton: { padding: 6, backgroundColor: colors.text, borderRadius: 8 },
+  sendButtonDisabled: { opacity: 0.5 },
 });

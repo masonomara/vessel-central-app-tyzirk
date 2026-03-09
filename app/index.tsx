@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { View, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { colors } from '@/styles/commonStyles';
+import { colors } from '../styles/commonStyles';
 
 export default function Index() {
   const router = useRouter();
@@ -12,26 +12,24 @@ export default function Index() {
   useEffect(() => {
     // Only check once
     if (hasChecked.current) {
-      console.log('Already checked auth, skipping...');
       return;
     }
-    
+
     hasChecked.current = true;
-    console.log('Checking initial authentication...');
-    
+
     const checkAuthAndRedirect = async () => {
       try {
         const authToken = await AsyncStorage.getItem('authToken');
-        
-        if (authToken) {
-          console.log('User is authenticated, redirecting to home');
-          router.replace('/(tabs)/(home)');
-        } else {
-          console.log('User is not authenticated, redirecting to login');
+        if (!authToken) {
           router.replace('/login');
+          return;
         }
-      } catch (error) {
-        console.error('Error checking authentication:', error);
+        const userRole = await AsyncStorage.getItem('userRole');
+        if (userRole === 'owner') router.replace('/(tabs)/owner');
+        else if (userRole === 'manager') router.replace('/(tabs)/manager');
+        else if (userRole === 'crew') router.replace('/(tabs)/crew');
+        else router.replace('/login');
+      } catch {
         router.replace('/login');
       }
     };
@@ -40,7 +38,7 @@ export default function Index() {
   }, []); // Empty dependency array - only run once on mount
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.surfaceOne }}>
       <ActivityIndicator size="large" color={colors.gold} />
     </View>
   );

@@ -10,14 +10,14 @@ import {
   Alert,
   Platform,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useTheme } from '@react-navigation/native';
+import { Stack, useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
-import { colors } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { DocumentCategory } from '@/types';
+import { colors } from '../styles/commonStyles';
+import { useData } from '../contexts/DataContext';
+import { useAuth } from '../contexts/AuthContext';
+import { IconSymbol } from '../components/IconSymbol';
+import { DocumentCategory } from '../types';
+import { scrollProps } from '../hooks/useTopPadding';
 
 const DOCUMENT_CATEGORIES: DocumentCategory[] = [
   'manual',
@@ -45,7 +45,6 @@ const COMMON_TAGS = [
 
 export default function AddDocumentScreen() {
   const router = useRouter();
-  const theme = useTheme();
   const { addDocument, vessels, getVesselsForUser } = useData();
   const { userId, userName, userRole } = useAuth();
 
@@ -63,6 +62,20 @@ export default function AddDocumentScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedVessel = vessels.find(v => v.id === selectedVesselId);
+
+  if (userVessels.length === 0) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+        <Stack.Screen options={{ title: 'Upload Document' }} />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 }}>
+          <IconSymbol ios_icon_name="sailboat" android_material_icon_name="sailing" size={48} color={colors.textTertiary} />
+          <Text style={{ fontSize: 16, color: colors.textSecondary, textAlign: 'center', marginTop: 16 }}>
+            No vessels assigned to your account. Contact your manager.
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   const handlePickDocument = async () => {
     try {
@@ -148,6 +161,7 @@ export default function AddDocumentScreen() {
     if (!validateForm()) {
       return;
     }
+    if (!selectedDocument) return;
 
     setIsSubmitting(true);
 
@@ -161,12 +175,13 @@ export default function AddDocumentScreen() {
         uploadedBy: userId,
         uploadedByName: userName,
         expiryDate: expiryDate.trim() ? new Date(expiryDate) : undefined,
-        fileUri: selectedDocument!.uri,
-        fileName: selectedDocument!.name,
-        fileSize: selectedDocument!.size || 0,
-        fileType: selectedDocument!.mimeType || 'application/octet-stream',
+        fileUri: selectedDocument.uri,
+        fileName: selectedDocument.name,
+        fileSize: selectedDocument.size || 0,
+        fileType: selectedDocument.mimeType || 'application/octet-stream',
         tags: selectedTags,
         isImportant,
+        comments: [],
       });
 
       Alert.alert(
@@ -198,22 +213,26 @@ export default function AddDocumentScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <IconSymbol
-            ios_icon_name="chevron.left"
-            android_material_icon_name="arrow_back"
-            size={24}
-            color={colors.text}
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Upload Document</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+      <Stack.Screen
+        options={{
+          title: 'Upload Document',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
+              <Text style={[styles.saveText, isSubmitting && { opacity: 0.5 }]}>Upload</Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
+        {...scrollProps}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>
@@ -221,7 +240,7 @@ export default function AddDocumentScreen() {
           <TouchableOpacity style={styles.documentPickerButton} onPress={handlePickDocument}>
             <IconSymbol
               ios_icon_name="doc.fill"
-              android_material_icon_name="insert_drive_file"
+              android_material_icon_name="insert-drive-file"
               size={32}
               color={selectedDocument ? colors.success : colors.accent}
             />
@@ -237,7 +256,7 @@ export default function AddDocumentScreen() {
             </View>
             <IconSymbol
               ios_icon_name="chevron.right"
-              android_material_icon_name="chevron_right"
+              android_material_icon_name="chevron-right"
               size={24}
               color={colors.textSecondary}
             />
@@ -408,7 +427,7 @@ export default function AddDocumentScreen() {
             >
               <IconSymbol
                 ios_icon_name="plus.circle.fill"
-                android_material_icon_name="add_circle"
+                android_material_icon_name="add-circle"
                 size={24}
                 color={customTag.trim() ? colors.accent : colors.textSecondary}
               />
@@ -424,7 +443,7 @@ export default function AddDocumentScreen() {
             <View style={styles.importantToggleLeft}>
               <IconSymbol
                 ios_icon_name={isImportant ? 'star.fill' : 'star'}
-                android_material_icon_name={isImportant ? 'star' : 'star_border'}
+                android_material_icon_name={isImportant ? 'star' : 'star-border'}
                 size={24}
                 color={isImportant ? colors.gold : colors.textSecondary}
               />
@@ -464,26 +483,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 48 : 60,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+  cancelText: {
+    fontSize: 16,
+    color: colors.textSecondary,
   },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  headerSpacer: {
-    width: 40,
+  saveText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.accent,
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -500,7 +507,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -521,7 +528,7 @@ const styles = StyleSheet.create({
   documentPickerButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
@@ -548,7 +555,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -568,7 +575,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 16,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -628,7 +635,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
@@ -677,7 +684,7 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
 });

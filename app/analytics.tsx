@@ -1,18 +1,18 @@
 
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { router } from 'expo-router';
-import { useTheme } from '@react-navigation/native';
-import { colors } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { IconSymbol } from '@/components/IconSymbol';
+import { StyleSheet, View, Text, ScrollView, Dimensions } from 'react-native';
+import { Stack, router } from 'expo-router';
+import { colors } from '../styles/commonStyles';
+import { useData } from '../contexts/DataContext';
+import { useAuth } from '../contexts/AuthContext';
+import { IconSymbol } from '../components/IconSymbol';
+import { PressableCard } from '../components/PressableCard';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+import { scrollProps } from '../hooks/useTopPadding';
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function AnalyticsScreen() {
-  const theme = useTheme();
   const { userId, userRole } = useAuth();
   const { 
     getExpensesForUser, 
@@ -147,6 +147,16 @@ export default function AnalyticsScreen() {
     return expenses.reduce((sum, exp) => sum + exp.amount, 0);
   }, [expenses]);
 
+  const avgResponseTime = useMemo(() => {
+    const resolved = issues.filter((i): i is typeof i & { resolvedAt: Date } => i.resolvedAt != null);
+    if (resolved.length === 0) return '\u2014';
+    const totalDays = resolved.reduce((sum, i) => {
+      const diff = new Date(i.resolvedAt).getTime() - new Date(i.createdAt).getTime();
+      return sum + diff / (1000 * 60 * 60 * 24);
+    }, 0);
+    return (totalDays / resolved.length).toFixed(1) + ' days';
+  }, [issues]);
+
   const avgMonthlyExpense = useMemo(() => {
     if (expensesByMonth.datasets[0].data.length === 0) {
       return 0;
@@ -156,9 +166,9 @@ export default function AnalyticsScreen() {
   }, [expensesByMonth]);
 
   const chartConfig = {
-    backgroundColor: colors.card,
-    backgroundGradientFrom: colors.card,
-    backgroundGradientTo: colors.card,
+    backgroundColor: colors.surfaceOne,
+    backgroundGradientFrom: colors.surfaceOne,
+    backgroundGradientTo: colors.surfaceOne,
     decimalPlaces: 0,
     color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
     labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`,
@@ -173,21 +183,10 @@ export default function AnalyticsScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <IconSymbol 
-            ios_icon_name="chevron.left" 
-            android_material_icon_name="arrow_back" 
-            size={24} 
-            color={colors.text} 
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Analytics</Text>
-        <View style={{ width: 40 }} />
-      </View>
+    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+      <Stack.Screen options={{ title: 'Analytics' }} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} {...scrollProps}>
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <IconSymbol 
@@ -203,7 +202,7 @@ export default function AnalyticsScreen() {
           <View style={styles.statCard}>
             <IconSymbol 
               ios_icon_name="chart.line.uptrend.xyaxis" 
-              android_material_icon_name="trending_up" 
+              android_material_icon_name="trending-up" 
               size={32} 
               color={colors.accent} 
             />
@@ -211,37 +210,45 @@ export default function AnalyticsScreen() {
             <Text style={styles.statValue}>${Math.round(avgMonthlyExpense).toLocaleString()}</Text>
           </View>
 
-          <View style={styles.statCard}>
-            <IconSymbol 
-              ios_icon_name="wrench.and.screwdriver.fill" 
-              android_material_icon_name="build" 
-              size={32} 
-              color={colors.warning} 
+          <PressableCard
+            variant="ghost"
+            style={styles.statCard}
+            onPress={() => router.push('/(tabs)/maintenance')}
+          >
+            <IconSymbol
+              ios_icon_name="wrench.and.screwdriver.fill"
+              android_material_icon_name="build"
+              size={32}
+              color={colors.warning}
             />
             <Text style={styles.statLabel}>Active Tasks</Text>
             <Text style={styles.statValue}>
               {maintenanceTasks.filter(t => t.status !== 'completed').length}
             </Text>
-          </View>
+          </PressableCard>
 
-          <View style={styles.statCard}>
-            <IconSymbol 
-              ios_icon_name="exclamationmark.triangle.fill" 
-              android_material_icon_name="warning" 
-              size={32} 
-              color={colors.danger} 
+          <PressableCard
+            variant="ghost"
+            style={styles.statCard}
+            onPress={() => router.push('/(tabs)/issues')}
+          >
+            <IconSymbol
+              ios_icon_name="exclamationmark.triangle.fill"
+              android_material_icon_name="warning"
+              size={32}
+              color={colors.danger}
             />
             <Text style={styles.statLabel}>Open Issues</Text>
             <Text style={styles.statValue}>
               {issues.filter(i => i.status !== 'completed').length}
             </Text>
-          </View>
+          </PressableCard>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Expense Trends</Text>
           <View style={styles.chartCard}>
-            {expensesByMonth.datasets[0].data.length > 0 ? (
+            {expensesByMonth.datasets[0].data.some(v => v > 0) ? (
               <LineChart
                 data={expensesByMonth}
                 width={screenWidth - 60}
@@ -264,7 +271,7 @@ export default function AnalyticsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Expenses by Category</Text>
           <View style={styles.chartCard}>
-            {expensesByCategory.datasets[0].data.length > 0 ? (
+            {expensesByCategory.datasets[0].data.some(v => v > 0) ? (
               <BarChart
                 data={expensesByCategory}
                 width={screenWidth - 60}
@@ -306,25 +313,29 @@ export default function AnalyticsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Key Metrics</Text>
           
-          <View style={styles.metricCard}>
+          <PressableCard
+            variant="ghost"
+            style={styles.metricCard}
+            onPress={() => router.push('/(tabs)/maintenance')}
+          >
             <View style={styles.metricHeader}>
-              <IconSymbol 
-                ios_icon_name="checkmark.circle.fill" 
-                android_material_icon_name="check_circle" 
-                size={24} 
-                color={colors.success} 
+              <IconSymbol
+                ios_icon_name="checkmark.circle.fill"
+                android_material_icon_name="check-circle"
+                size={24}
+                color={colors.success}
               />
               <Text style={styles.metricTitle}>Completion Rate</Text>
             </View>
             <Text style={styles.metricValue}>
-              {maintenanceTasks.length > 0 
+              {maintenanceTasks.length > 0
                 ? Math.round((maintenanceTasks.filter(t => t.status === 'completed').length / maintenanceTasks.length) * 100)
                 : 0}%
             </Text>
             <Text style={styles.metricSubtext}>
               {maintenanceTasks.filter(t => t.status === 'completed').length} of {maintenanceTasks.length} tasks completed
             </Text>
-          </View>
+          </PressableCard>
 
           <View style={styles.metricCard}>
             <View style={styles.metricHeader}>
@@ -336,17 +347,21 @@ export default function AnalyticsScreen() {
               />
               <Text style={styles.metricTitle}>Average Response Time</Text>
             </View>
-            <Text style={styles.metricValue}>2.3 days</Text>
+            <Text style={styles.metricValue}>{avgResponseTime}</Text>
             <Text style={styles.metricSubtext}>From issue report to resolution</Text>
           </View>
 
-          <View style={styles.metricCard}>
+          <PressableCard
+            variant="ghost"
+            style={styles.metricCard}
+            onPress={() => router.push('/(tabs)/supplies')}
+          >
             <View style={styles.metricHeader}>
-              <IconSymbol 
-                ios_icon_name="shippingbox.fill" 
-                android_material_icon_name="inventory_2" 
-                size={24} 
-                color={colors.accent} 
+              <IconSymbol
+                ios_icon_name="shippingbox.fill"
+                android_material_icon_name="inventory-2"
+                size={24}
+                color={colors.accent}
               />
               <Text style={styles.metricTitle}>Supply Requests</Text>
             </View>
@@ -354,7 +369,7 @@ export default function AnalyticsScreen() {
             <Text style={styles.metricSubtext}>
               {supplyRequests.filter(r => r.status === 'pending').length} pending approval
             </Text>
-          </View>
+          </PressableCard>
         </View>
       </ScrollView>
     </View>
@@ -364,22 +379,6 @@ export default function AnalyticsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 16,
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -394,7 +393,7 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     minWidth: '47%',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
@@ -409,7 +408,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   section: {
@@ -417,12 +416,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginBottom: 16,
   },
   chartCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -439,7 +438,7 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   metricCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -459,7 +458,7 @@ const styles = StyleSheet.create({
   },
   metricValue: {
     fontSize: 32,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginBottom: 4,
   },

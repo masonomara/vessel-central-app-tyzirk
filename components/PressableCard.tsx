@@ -1,31 +1,30 @@
-
-import React, { useState } from 'react';
-import { StyleSheet, Pressable, ViewStyle } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState } from "react";
+import { StyleSheet, Pressable, ViewStyle } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-} from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
-import { colors, gradients, spacing } from '@/styles/commonStyles';
+} from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
+import { colors, spacing } from "../styles/commonStyles";
 
 interface PressableCardProps {
   children: React.ReactNode;
   onPress?: () => void;
   style?: ViewStyle;
   hapticFeedback?: boolean;
-  useGradient?: boolean;
+  variant?: "card" | "ghost";
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function PressableCard({ 
-  children, 
-  onPress, 
+export function PressableCard({
+  children,
+  onPress,
   style,
   hapticFeedback = true,
-  useGradient = true,
+  variant = "card",
 }: PressableCardProps) {
   const scale = useSharedValue(1);
   const [isPressed, setIsPressed] = useState(false);
@@ -35,10 +34,6 @@ export function PressableCard({
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.97, {
-      damping: 15,
-      stiffness: 300,
-    });
     setIsPressed(true);
     if (hapticFeedback) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -58,20 +53,9 @@ export function PressableCard({
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[styles.container, animatedStyle, style]}
+      style={[variant !== "ghost" && styles.container, animatedStyle, style]}
     >
-      {useGradient ? (
-        <LinearGradient
-          colors={gradients.card}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.gradient}
-        >
-          {children}
-        </LinearGradient>
-      ) : (
-        children
-      )}
+      {children}
     </AnimatedPressable>
   );
 }
@@ -79,14 +63,11 @@ export function PressableCard({
 const styles = StyleSheet.create({
   container: {
     borderRadius: 16,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 1,
-    borderColor: colors.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
+    padding: 16,
+    borderColor: colors.borderSoft,
+    backgroundColor: colors.surfaceOne,
   },
   gradient: {
     padding: spacing.lg,

@@ -12,10 +12,11 @@ import {
 } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { useTheme } from '@react-navigation/native';
-import { colors } from '@/styles/commonStyles';
-import { useData } from '@/contexts/DataContext';
-import { IconSymbol } from '@/components/IconSymbol';
-import { Vessel } from '@/types';
+import { colors } from '../styles/commonStyles';
+import { useData } from '../contexts/DataContext';
+import { IconSymbol } from '../components/IconSymbol';
+import { Vessel } from '../types';
+import { scrollProps } from '../hooks/useTopPadding';
 
 type AssignmentType = 'owner' | 'crew';
 
@@ -167,16 +168,8 @@ export default function AssignBoatsScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: 'Assign Boats',
-          headerStyle: {
-            backgroundColor: theme.colors.card,
-          },
-          headerTintColor: colors.text,
-        }}
-      />
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <Stack.Screen options={{ title: 'Assign Boats' }} />
+      <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
         <View style={styles.searchContainer}>
           <IconSymbol
             ios_icon_name="magnifyingglass"
@@ -264,7 +257,7 @@ export default function AssignBoatsScreen() {
                     >
                       <IconSymbol
                         ios_icon_name="plus.circle.fill"
-                        android_material_icon_name="add_circle"
+                        android_material_icon_name="add-circle"
                         size={20}
                         color={colors.accent}
                       />
@@ -304,7 +297,7 @@ export default function AssignBoatsScreen() {
                     >
                       <IconSymbol
                         ios_icon_name="plus.circle.fill"
-                        android_material_icon_name="add_circle"
+                        android_material_icon_name="add-circle"
                         size={20}
                         color={colors.accent}
                       />
@@ -342,7 +335,7 @@ export default function AssignBoatsScreen() {
           onRequestClose={() => setShowAssignModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
+            <View style={[styles.modalContent, { backgroundColor: colors.surfaceOne }]}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>
                   Assign {assignmentType === 'owner' ? 'Owner' : 'Crew Member'}
@@ -397,7 +390,7 @@ export default function AssignBoatsScreen() {
                     {userId === user.id && (
                       <IconSymbol
                         ios_icon_name="checkmark.circle.fill"
-                        android_material_icon_name="check_circle"
+                        android_material_icon_name="check-circle"
                         size={24}
                         color={colors.success}
                       />
@@ -444,7 +437,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -468,7 +461,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginBottom: 8,
   },
@@ -477,7 +470,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   vesselCard: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -511,7 +504,7 @@ const styles = StyleSheet.create({
   },
   vesselName: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
     marginBottom: 4,
   },
@@ -532,7 +525,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   statusTextActive: {
     color: colors.success,
@@ -566,7 +559,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
@@ -601,7 +594,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.text,
   },
   vesselPreview: {
@@ -632,7 +625,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceOne,
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
@@ -657,7 +650,7 @@ const styles = StyleSheet.create({
   },
   userAvatarText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.accent,
   },
   userItemName: {
@@ -677,7 +670,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cancelButton: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surfaceOne,
     borderWidth: 1,
     borderColor: colors.border,
   },
