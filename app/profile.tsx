@@ -119,7 +119,6 @@ export default function ProfileScreen() {
             <Switch
               value={notificationsEnabled}
               onValueChange={setNotificationsEnabled}
-              trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor={colors.surfaceOne}
             />
           </View>
@@ -130,7 +129,6 @@ export default function ProfileScreen() {
                 <Switch
                   value={categoryEnabled[cat.key]}
                   onValueChange={(v) => toggleCategory(cat.key, v)}
-                  trackColor={{ false: colors.border, true: colors.primary }}
                   thumbColor={colors.surfaceOne}
                 />
               </View>

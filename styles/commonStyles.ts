@@ -1,9 +1,6 @@
 import { StyleSheet } from "react-native";
 
 export const colors = {
-  // Primary Navy/Charcoal Palette
-  primary: "#0A2540", // Deep Navy (primary brand color)
-  secondary: "#1E3A5F", // Medium Navy
 
   // Accent Colors
   accent: "#3B82F6", // Bright Blue (operational)
@@ -128,7 +125,7 @@ export const spacing = {
 
 export const buttonStyles = StyleSheet.create({
   primaryButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.text,
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.xl,
     borderRadius: 12,
@@ -137,7 +134,6 @@ export const buttonStyles = StyleSheet.create({
     ...shadows.medium,
   },
   secondaryButton: {
-    backgroundColor: colors.secondary,
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.xl,
     borderRadius: 12,

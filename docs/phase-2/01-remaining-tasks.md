@@ -6,6 +6,10 @@
 - Create proper splash screen
 - Take App Store screenshots across required device sizes
 
+## UI Polish
+
+- The "Add Event", "Add Task" etc screens need to be deeply improved. The create a profile page is pretty good, use that as a framework for the rest.
+
 ## Document Viewer
 
 - Fix document viewer -- references fake file URIs (`file://documents/*.pdf`), shows "No File Available" alert on tap

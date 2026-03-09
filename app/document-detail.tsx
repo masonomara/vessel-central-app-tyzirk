@@ -265,7 +265,6 @@ const styles = StyleSheet.create({
   },
   tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   tag: {
-    backgroundColor: colors.secondary + "40",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,

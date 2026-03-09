@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceOne,
   },
   submitButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.text,
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: "center",
