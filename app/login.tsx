@@ -11,6 +11,7 @@ import {
   Animated,
   Keyboard,
   ImageBackground,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -185,14 +186,11 @@ export default function LoginScreen() {
         >
           {/* Center brand */}
           <View style={styles.brandSection}>
-          <IconSymbol
-            ios_icon_name="sailboat.fill"
-            android_material_icon_name="sailing"
-            size={56}
-            color={colors.gold}
+          <Image
+            source={require("../public/login.png")}
+            style={styles.wordmark}
+            resizeMode="contain"
           />
-          <Text style={styles.brandName}>Vessel & Co.</Text>
-          <Text style={styles.brandTagline}>Yacht Management</Text>
         </View>
 
         {/* Bottom actions */}
@@ -261,7 +259,7 @@ export default function LoginScreen() {
                 activeOpacity={0.8}
               >
                 {isLoading ? (
-                  <ActivityIndicator color="#0A2540" size="small" />
+                  <ActivityIndicator color="#0A1628" size="small" />
                 ) : (
                   <Text style={styles.signInButtonText}>Sign In</Text>
                 )}
@@ -375,20 +373,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingBottom: 40,
   },
-  brandName: {
-    fontSize: 34,
-    fontWeight: "600",
-    color: "#FFFFFF",
-    marginTop: 16,
-    letterSpacing: -0.5,
-  },
-  brandTagline: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "rgba(255,255,255,0.5)",
-    marginTop: 6,
-    letterSpacing: 1,
-    textTransform: "uppercase",
+  wordmark: {
+    height: 256,
   },
   bottomSection: {
     paddingHorizontal: 24,
@@ -430,7 +416,7 @@ const styles = StyleSheet.create({
   signInButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#0A2540",
+    color: "#0A1628",
     letterSpacing: 0.3,
   },
   emailButton: {
@@ -492,7 +478,7 @@ const styles = StyleSheet.create({
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(10,37,64,0.6)",
+    backgroundColor: "rgba(10,22,40,0.6)",
     alignItems: "center",
     justifyContent: "center",
   },

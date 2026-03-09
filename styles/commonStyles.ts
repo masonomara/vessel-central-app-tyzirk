@@ -4,7 +4,7 @@ export const colors = {
 
   // Accent Colors
   accent: "#3B82F6", // Bright Blue (operational)
-  gold: "#D4AF37", // Subtle Gold (premium accent)
+  gold: "#C9A84C", // Gold (premium accent)
 
   // Status Colors
   success: "#10B981", // Green for completed/active
@@ -44,12 +44,12 @@ export const colors = {
   divider: "#1f1e1d4d",
 
   // Gradients (for use in LinearGradient)
-  gradientStart: "#0A2540",
+  gradientStart: "#0A1628",
   gradientEnd: "#1E3A5F",
   gradientAccentStart: "#3B82F6",
   gradientAccentEnd: "#1E40AF",
-  gradientGoldStart: "#D4AF37",
-  gradientGoldEnd: "#B8941F",
+  gradientGoldStart: "#C9A84C",
+  gradientGoldEnd: "#A8893D",
   gradientSuccessStart: "#10B981",
   gradientSuccessEnd: "#059669",
   gradientWarningStart: "#F59E0B",
@@ -104,7 +104,7 @@ export const shadows = {
     elevation: 6,
   },
   glowGold: {
-    shadowColor: "#D4AF37",
+    shadowColor: "#C9A84C",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 12,

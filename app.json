@@ -4,13 +4,13 @@
     "slug": "vessel-and-co",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./public/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/icon.png",
+      "image": "./public/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#fbf8f7"
+      "backgroundColor": "#0A1628"
     },
     "ios": {
       "supportsTablet": true,
@@ -21,8 +21,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#333333"
+        "foregroundImage": "./public/adaptive-icon.png",
+        "backgroundColor": "#0A1628"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.vesselcentral.app",
@@ -33,7 +33,7 @@
       ]
     },
     "web": {
-      "favicon": "./assets/images/icon.png",
+      "favicon": "./public/icon.png",
       "bundler": "metro"
     },
     "plugins": [
@@ -43,8 +43,8 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/icon.png",
-          "color": "#333333",
+          "icon": "./public/icon.png",
+          "color": "#C9A84C",
           "defaultChannel": "default",
           "sounds": []
         }
