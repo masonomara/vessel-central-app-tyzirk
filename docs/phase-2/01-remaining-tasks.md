@@ -1,18 +1,22 @@
 # Remaining Tasks
 
-## Branding & Assets
+## Demo Data
 
-- Create proper app icon (currently same image used for icon and splash)
-- Create proper splash screen
-- Take App Store screenshots across required device sizes
-
-## UI Polish
-
-- The "Add Event", "Add Task" etc screens need to be deeply improved. The create a profile page is pretty good, use that as a framework for the rest.
-
-## Document Viewer
-
+- Replace hardcoded profile data -- email is `user@example.com`, phone is `+1 (555) 123-4567`, location is `San Francisco, CA`
+- Replace mock vessel names or confirm they're acceptable demo names ("Azure Dream", "Ocean Pearl", "Sea Breeze")
+- Replace mock crew/user names across login and assign-boats screens (John Smith, Emily Brown, etc.)
+- Replace `+1 (555) 123-4567` placeholder in member-setup phone field
+- Make maintenance task mock data use realistic maritime terminology and dates
 - Fix document viewer -- references fake file URIs (`file://documents/*.pdf`), shows "No File Available" alert on tap
+  - Bundle the PDFs as app assets
+  - Update fileUri values in DataContext.tsx to point to the
+    bundled assets
+  - Replace the alert handler with actual file-opening logic
+    (e.g., expo-sharing, expo-file-system, or
+    react-native-pdf-light)
+- Make supply request mock data realistic
+- Make issue mock data realistic
+- Make activity log entries realistic
 
 ## Login & Auth
 
@@ -21,17 +25,6 @@
 - Confirm notification placeholder behavior doesn't crash
 - Ensure profile notification preferences actually persist (currently UI-only)
 
-## Demo Data
-
-- Replace hardcoded profile data -- email is `user@example.com`, phone is `+1 (555) 123-4567`, location is `San Francisco, CA`
-- Replace mock vessel names or confirm they're acceptable demo names ("Azure Dream", "Ocean Pearl", "Sea Breeze")
-- Replace mock crew/user names across login and assign-boats screens (John Smith, Emily Brown, etc.)
-- Replace `+1 (555) 123-4567` placeholder in member-setup phone field
-- Make maintenance task mock data use realistic maritime terminology and dates
-- Make supply request mock data realistic
-- Make issue mock data realistic
-- Make activity log entries realistic
-
 ## Legal & Metadata
 
 - Write a privacy policy
@@ -39,6 +32,13 @@
 - Write Google Play Store metadata
 - Bundle ID review -- `com.vesselcentral.app` may need updating
 - App version bump from 1.0.0 if needed
+
+## UI Polish
+
+- The "Add Event", "Add Task" etc screens need to be deeply improved. The create a profile page is pretty good, use that as a framework for the rest.
+- the analystics cards need to be aligned witht he colors of the rest of the app, and the style of the rest of the app.
+- the login screen also needs to be better aligned with the rest of the app.
+- run MAUNUAL_WALKTHROUGH and steamroll little style ficxes
 
 ## Crash Fixes & Stability
 
@@ -49,6 +49,7 @@
 
 ## Submission
 
+- Take App Store screenshots across required device sizes
 - Submit to Apple App Store
 - Submit to Google Play Store
 - Handle first round of review rejection feedback if needed
