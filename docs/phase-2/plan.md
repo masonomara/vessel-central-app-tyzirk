@@ -35,27 +35,56 @@ Vessel & Co. is a yacht fleet management app (Expo 54 / React Native) at version
 - Add `"versionCode": 1` under `android` block
 - Keep `version: "1.0.0"`
 
-### Step 3: Write Privacy Policy
+### Step 3: Generate Privacy Policy
 
-**Create:** `docs/legal/privacy-policy.md`
+**Approach:** Use a reputable free privacy policy generator rather than writing from scratch. Recommended options ranked by fit:
 
-Full privacy policy for Vessel and Co Yacht Management L.L.C. covering:
+1. **TermsFeed** (recommended) -- free generator, outputs HTML/Markdown/DOCX, hosts it for free with a permanent URL. Covers GDPR, CCPA, CalOPPA. Good fit because it handles mobile apps specifically and gives you a hosted link immediately.
+2. **App Privacy Policy Generator** (open source) -- completely free, GitHub-hosted. Simpler output, good for straightforward apps.
+3. **Termly** -- free tier available, auto-updates when laws change. More robust but may push toward paid tier.
 
-- Data collected: user-provided info (names, contacts, vessel data, documents, photos), all stored locally on-device
-- No server transmission, no analytics, no tracking, no ads
-- Third-party SDKs: Google Maps SDK (Android) collects approximate location and device identifiers; APNs/FCM receive push tokens
-- Storage: local AsyncStorage, not encrypted at rest
-- Retention: until uninstall or manual data clear
-- Children: not directed at children under 13
-- User rights: delete all data via uninstall or clear app data; GDPR rights (access, rectify, delete)
+**Generator inputs to provide:**
+- App name: Vessel & Co.
+- Company: Vessel and Co Yacht Management L.L.C.
+- Address: 7901 4th St N STE 300, St. Petersburg, FL 33702, US
 - Contact: hello@vesselandco.yachts
-- Effective date: 2026-03-10
+- Platform: iOS and Android mobile app
+- Data collected: names, email, phone, photos, documents, calendar events (all local-only)
+- Third-party services: Google Maps SDK, Apple Push Notifications, Firebase Cloud Messaging
+- Analytics/tracking: none
+- Ads: none
+- Children under 13: no
+- GDPR: yes (maritime industry is global)
+- CCPA: yes (Florida LLC, may have California users)
 
-To be hosted at `https://www.vesselandco.yachts/privacy`
+**Output:** `docs/legal/privacy-policy.md` -- the generated policy text, to be hosted at `https://www.vesselandco.yachts/privacy`
 
-<!-- can we find a standard one of these online that is reputable rather than tryign to make our own? -->
+### Step 3b: Write Support Page Content
 
-<!-- what about the /supprt page info? -->
+**Create:** `docs/legal/support-page.md`
+
+Content for the `/support` page on vesselandco.yachts. Both stores require a support URL.
+
+Content to include:
+- App name and brief description
+- Contact email: hello@vesselandco.yachts
+- FAQ section covering: how to get started, how to switch roles, how data is stored, how to delete data, how to report a bug
+- Link to privacy policy
+- App version info
+
+To be hosted at `https://www.vesselandco.yachts/support`
+
+### Step 3c: Webmaster Deployment Instructions
+
+**Create:** `docs/legal/webmaster-instructions.md`
+
+Instructions for the Vessel & Co. webmaster to deploy the legal pages. Contents:
+
+- **Privacy Policy page**: Create `/privacy` route on vesselandco.yachts. Copy content from `docs/legal/privacy-policy.md`. Must be publicly accessible (no login wall). Required before app store submission.
+- **Support page**: Create `/support` route. Copy content from `docs/legal/support-page.md`. Must be publicly accessible.
+- **Timeline**: Both pages must be live before submitting to either store. Apple and Google verify these URLs during review.
+- **Format**: Plain HTML is fine. No special framework needed. Must be mobile-responsive (reviewers check on devices).
+- **Updates**: When the privacy policy changes, update the page and add a "Last updated" date at the top.
 
 <!-- need instructiosn to give to vessel and co webmaster -->
 
@@ -139,9 +168,7 @@ Replace generic descriptions with specific ones:
 
 **Create:** `docs/legal/asset-checklist.md`
 
-Document required screenshot/graphic assets with specs and current status for both stores.
-
-<!-- so this is somethign I do later, correct? -->
+Document required screenshot/graphic assets with specs and current status for both stores. This is a reference checklist only -- the actual screenshots and graphics are captured later during the Submission phase (after UI polish is complete). The checklist ensures nothing is missed when that time comes.
 
 ### Step 11: Restyle Quick Login as "Try Demo"
 
@@ -155,23 +182,6 @@ Restyle the Quick Login section:
 
 ---
 
-## Files Modified (Summary)
-
-| File                                | Action                                               |
-| ----------------------------------- | ---------------------------------------------------- |
-| `app.json`                          | Update name, add buildNumber/versionCode             |
-| `eas.json`                          | Add submit config block                              |
-| `ios/.../Info.plist`                | Update display name, rewrite permission descriptions |
-| `android/.../AndroidManifest.xml`   | Audit only (no changes expected)                     |
-| `app/login.tsx`                     | Restyle Quick Login as "Try Demo"                    |
-| `store.config.json`                 | Create                                               |
-| `docs/legal/privacy-policy.md`      | Create                                               |
-| `docs/legal/app-store-metadata.md`  | Create                                               |
-| `docs/legal/play-store-metadata.md` | Create                                               |
-| `docs/legal/asset-checklist.md`     | Create                                               |
-
----
-
 ## Verification
 
 1. Run `npx expo config --type public` -- confirm name=Vessel & Co., version=1.0.0, bundleIdentifier and package unchanged
@@ -180,3 +190,79 @@ Restyle the Quick Login section:
 4. Confirm privacy policy accurately reflects actual data practices (local-only, no backend)
 5. Confirm store.config.json structure is valid for `eas metadata:push`
 6. Confirm icon assets meet store dimension/format specs
+
+---
+
+## Task List
+
+Legend: `[CLAUDE]` = done by Claude Code, `[HUMAN]` = requires your action, `[BOTH]` = Claude drafts, you review/finalize
+
+### Phase 1: Config & Identity Updates
+
+- [ ] `[CLAUDE]` Update app name to "Vessel & Co." in `app.json`
+- [ ] `[CLAUDE]` Update `CFBundleDisplayName` in `Info.plist`
+- [ ] `[CLAUDE]` Add `buildNumber: "1"` and `versionCode: 1` to `app.json`
+- [ ] `[CLAUDE]` Add `submit` block with placeholders to `eas.json`
+- [ ] `[HUMAN]` Fill in Apple Developer credentials in `eas.json` (appleId, ascAppId, appleTeamId)
+- [ ] `[HUMAN]` Fill in Google Play service account key path in `eas.json`
+
+### Phase 2: Privacy Policy & Legal Pages
+
+- [ ] `[HUMAN]` Go to TermsFeed (or chosen generator), input app details from Step 3, generate policy
+- [ ] `[CLAUDE]` Save generated policy to `docs/legal/privacy-policy.md`
+- [ ] `[CLAUDE]` Write support page content (`docs/legal/support-page.md`)
+- [ ] `[CLAUDE]` Write webmaster deployment instructions (`docs/legal/webmaster-instructions.md`)
+- [ ] `[HUMAN]` Review generated privacy policy for accuracy
+- [ ] `[HUMAN]` Send `privacy-policy.md`, `support-page.md`, and `webmaster-instructions.md` to webmaster
+- [ ] `[HUMAN]` Webmaster deploys privacy policy to `https://www.vesselandco.yachts/privacy`
+- [ ] `[HUMAN]` Webmaster deploys support page to `https://www.vesselandco.yachts/support`
+- [ ] `[HUMAN]` Verify both URLs are live and publicly accessible
+
+### Phase 3: App Store Metadata (iOS)
+
+- [ ] `[CLAUDE]` Write full App Store description (up to 4000 chars)
+- [ ] `[CLAUDE]` Write subtitle, promotional text, keywords
+- [ ] `[CLAUDE]` Write all metadata fields to `docs/legal/app-store-metadata.md`
+- [ ] `[CLAUDE]` Create `store.config.json` with all iOS metadata populated
+- [ ] `[HUMAN]` Review and approve all App Store copy
+- [ ] `[HUMAN]` Verify keyword strategy (search for competitors, check for conflicts)
+
+### Phase 4: Google Play Store Metadata
+
+- [ ] `[CLAUDE]` Write short description (80 chars)
+- [ ] `[CLAUDE]` Write full description (4000 chars, keyword-optimized for Play Store)
+- [ ] `[CLAUDE]` Document Data Safety Section declarations in `docs/legal/play-store-metadata.md`
+- [ ] `[HUMAN]` Review and approve all Play Store copy
+- [ ] `[HUMAN]` Complete IARC content rating questionnaire in Play Console (answers documented in metadata file)
+- [ ] `[HUMAN]` Fill out Data Safety form in Play Console using documented declarations
+
+### Phase 5: Native Config Cleanup
+
+- [ ] `[CLAUDE]` Rewrite all iOS permission descriptions in `Info.plist` to be specific
+- [ ] `[CLAUDE]` Audit Android permissions in `AndroidManifest.xml`
+- [ ] `[CLAUDE]` Verify `PrivacyInfo.xcprivacy` is accurate
+- [ ] `[HUMAN]` Run `eas build --profile production --platform ios` and verify permission strings in output
+- [ ] `[HUMAN]` Run `eas build --profile production --platform android` and verify `SYSTEM_ALERT_WINDOW` is stripped
+
+### Phase 6: Login Screen Update
+
+- [ ] `[CLAUDE]` Restyle Quick Login section in `app/login.tsx` -- change "Quick Login" to "Try Demo"
+- [ ] `[HUMAN]` Review on physical device to confirm it looks intentional, not like test UI
+- [ ] `[HUMAN]` Prepare App Review notes: "Tap any demo role button on the login screen to access the app with sample data."
+
+### Phase 7: Asset Checklist (Reference for Later)
+
+- [ ] `[CLAUDE]` Create `docs/legal/asset-checklist.md` with all required assets, specs, and status
+- [ ] `[HUMAN]` Verify `public/icon.png` is 1024x1024, no alpha channel
+- [ ] `[HUMAN]` Verify `public/adaptive-icon.png` meets Android adaptive icon spec
+- [ ] `[HUMAN]` Export 512x512 hi-res icon for Play Store
+- [ ] `[HUMAN]` Create 1024x500 feature graphic for Play Store
+- [ ] `[HUMAN]` Capture screenshots across all required device sizes (deferred until UI polish is complete)
+
+### Phase 8: Final Verification
+
+- [ ] `[CLAUDE]` Run `npx expo config --type public` and verify output
+- [ ] `[CLAUDE]` Validate all character counts in metadata files
+- [ ] `[HUMAN]` Confirm privacy policy and support URLs are live
+- [ ] `[HUMAN]` Confirm Apple Developer and Google Play Console accounts are active
+- [ ] `[HUMAN]` Do a final read-through of all legal and metadata documents
