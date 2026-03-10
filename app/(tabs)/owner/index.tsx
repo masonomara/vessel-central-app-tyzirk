@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { colors, commonStyles } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -17,10 +16,12 @@ import { MiniChart } from "../../../components/MiniChart";
 import { ItemCard } from "../../../components/ItemCard";
 import { ListWrapper } from "../../../components/ListWrapper";
 import { PressableCard } from "../../../components/PressableCard";
+import { VesselCard } from "../../../components/VesselCard";
 import GlobalSearch from "../../../components/GlobalSearch";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { getPriorityBadgeColors } from "../../../utils/colorUtils";
 import { formatDueDate, formatDate } from "../../../utils/dateUtils";
+import type { TaskPriority } from "../../../types";
 
 import { Stack, router } from "expo-router";
 import { scrollProps } from "../../../hooks/useTopPadding";
@@ -165,7 +166,7 @@ export default function OwnerDashboard() {
   };
 
   const getActivityPriorityBadge = (log: { type: string; relatedId?: string }) => {
-    let priority: string | undefined;
+    let priority: TaskPriority | undefined;
 
     if (log.relatedId) {
       if (log.type === "issue") {
@@ -330,69 +331,18 @@ export default function OwnerDashboard() {
               {myVessels.length} {myVessels.length === 1 ? "item" : "items"}
             </Text>
           </View>
-          <View style={styles.fleetGrid}>
-            {myVessels.map((vessel, index) => (
-              <PressableCard
-                key={vessel.id}
-                style={styles.vesselCard}
-                onPress={() =>
-                  router.push({
-                    pathname: "/vessel-detail",
-                    params: { id: vessel.id },
-                  })
-                }
-              >
-                <View style={styles.vesselHeader}>
-                  <LinearGradient
-                    colors={[colors.accent + "30", colors.accent + "10"]}
-                    style={styles.vesselIconCircle}
-                  >
-                    <IconSymbol
-                      ios_icon_name="sailboat.fill"
-                      android_material_icon_name="sailing"
-                      size={28}
-                      color={colors.accent}
-                    />
-                  </LinearGradient>
-                  <View
-                    style={[
-                      styles.statusDot,
-                      vessel.status === "active"
-                        ? styles.statusDotActive
-                        : styles.statusDotMaintenance,
-                    ]}
-                  />
-                </View>
-                <Text style={styles.vesselName}>{vessel.name}</Text>
-                <Text style={styles.vesselLocation}>{vessel.location}</Text>
-                <View style={styles.vesselFooter}>
-                  <View style={styles.vesselStat}>
-                    <IconSymbol
-                      ios_icon_name="person.2.fill"
-                      android_material_icon_name="groups"
-                      size={14}
-                      color={colors.textSecondary}
-                    />
-                    <Text style={styles.vesselStatText}>
-                      {vessel.crewCount}
-                    </Text>
-                  </View>
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      vessel.status === "active"
-                        ? styles.statusActive
-                        : styles.statusMaintenance,
-                    ]}
-                  >
-                    <Text style={styles.statusText}>
-                      {vessel.status.toUpperCase()}
-                    </Text>
-                  </View>
-                </View>
-              </PressableCard>
-            ))}
-          </View>
+          {myVessels.map((vessel) => (
+            <VesselCard
+              key={vessel.id}
+              vessel={vessel}
+              onPress={() =>
+                router.push({
+                  pathname: "/vessel-detail",
+                  params: { id: vessel.id },
+                })
+              }
+            />
+          ))}
         </View>
 
         <View style={styles.section}>
@@ -527,86 +477,6 @@ const styles = StyleSheet.create({
   sectionCount: {
     fontSize: 15,
     color: colors.textTertiary,
-  },
-  // Fleet Overview styles (kept — too specialized for ItemCard)
-  fleetGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-    paddingHorizontal: 20,
-  },
-  vesselCard: {
-    flex: 1,
-  },
-  vesselHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  vesselIconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 4,
-  },
-  statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    elevation: 2,
-  },
-  statusDotActive: {
-    backgroundColor: colors.success,
-  },
-  statusDotMaintenance: {
-    backgroundColor: colors.warning,
-  },
-  vesselName: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 4,
-    letterSpacing: -0.2,
-  },
-  vesselLocation: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: 12,
-  },
-  vesselFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  vesselStat: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  vesselStatText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    fontWeight: "600",
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-  },
-  statusActive: {
-    backgroundColor: colors.success + "30",
-  },
-  statusMaintenance: {
-    backgroundColor: colors.warning + "30",
-  },
-  statusText: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: colors.text,
-    letterSpacing: 0.5,
   },
   // Performance styles (kept — not list items)
   performanceCard: {

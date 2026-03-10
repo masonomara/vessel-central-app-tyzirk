@@ -8,12 +8,11 @@ import {
 } from "react-native";
 import { ItemCard } from "../../../components/ItemCard";
 import { ListWrapper } from "../../../components/ListWrapper";
-import { PressableCard } from "../../../components/PressableCard";
+import { VesselCard } from "../../../components/VesselCard";
 import { colors, commonStyles } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ProgressRing } from "../../../components/ProgressRing";
 import GlobalSearch from "../../../components/GlobalSearch";
 import { RealtimeFeed } from "../../../components/RealtimeFeed";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
@@ -242,117 +241,18 @@ export default function ManagerDashboard() {
               {myVessels.length} {myVessels.length === 1 ? "item" : "items"}
             </Text>
           </View>
-          {myVessels.map((vessel, index) => {
-            const vesselTasks = myMaintenanceTasks.filter(
-              (t) => t.vesselId === vessel.id && t.status !== "completed",
-            );
-            const vesselIssues = myIssues.filter(
-              (i) => i.vesselId === vessel.id && i.status !== "completed",
-            );
-            const vesselCompletion =
-              myMaintenanceTasks.filter((t) => t.vesselId === vessel.id)
-                .length > 0
-                ? (myMaintenanceTasks.filter(
-                    (t) => t.vesselId === vessel.id && t.status === "completed",
-                  ).length /
-                    myMaintenanceTasks.filter((t) => t.vesselId === vessel.id)
-                      .length) *
-                  100
-                : 0;
-
-            return (
-              <PressableCard
-                key={vessel.id}
-                style={styles.vesselCard}
-                onPress={() =>
-                  router.push({
-                    pathname: "/vessel-detail",
-                    params: { id: vessel.id },
-                  })
-                }
-              >
-                <View style={styles.vesselHeader}>
-                  <View style={styles.vesselLeft}>
-                    <View
-                      style={[
-                        styles.iconCircle,
-                        { backgroundColor: colors.accent + "20" },
-                      ]}
-                    >
-                      <IconSymbol
-                        ios_icon_name="sailboat.fill"
-                        android_material_icon_name="sailing"
-                        size={24}
-                        color={colors.accent}
-                      />
-                    </View>
-                    <View style={styles.vesselInfo}>
-                      <Text style={styles.vesselName}>{vessel.name}</Text>
-                      <View
-                        style={[
-                          styles.statusBadge,
-                          vessel.status === "active"
-                            ? styles.statusActive
-                            : styles.statusMaintenance,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.statusText,
-                            vessel.status === "active"
-                              ? styles.statusTextActive
-                              : styles.statusTextMaintenance,
-                          ]}
-                        >
-                          {vessel.status.toUpperCase()}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                  <ProgressRing
-                    progress={vesselCompletion}
-                    size={60}
-                    strokeWidth={6}
-                    color={colors.success}
-                    showPercentage={false}
-                  />
-                </View>
-                <View style={styles.vesselStats}>
-                  <View style={styles.statItem}>
-                    <IconSymbol
-                      ios_icon_name="person.2.fill"
-                      android_material_icon_name="groups"
-                      size={16}
-                      color={colors.textSecondary}
-                    />
-                    <Text style={styles.statText}>{vessel.crewCount} Crew</Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <IconSymbol
-                      ios_icon_name="list.bullet"
-                      android_material_icon_name="list"
-                      size={16}
-                      color={colors.warning}
-                    />
-                    <Text style={styles.statText}>
-                      {vesselTasks.length} Tasks
-                    </Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <IconSymbol
-                      ios_icon_name="exclamationmark.triangle"
-                      android_material_icon_name="warning"
-                      size={16}
-                      color={colors.danger}
-                    />
-                    <Text style={styles.statText}>
-                      {vesselIssues.length} Issues
-                    </Text>
-                  </View>
-                </View>
-              </PressableCard>
-            );
-          })}
+          {myVessels.map((vessel) => (
+            <VesselCard
+              key={vessel.id}
+              vessel={vessel}
+              onPress={() =>
+                router.push({
+                  pathname: "/vessel-detail",
+                  params: { id: vessel.id },
+                })
+              }
+            />
+          ))}
         </View>
 
         <View style={styles.section}>
@@ -437,80 +337,6 @@ const styles = StyleSheet.create({
   sectionCount: {
     fontSize: 15,
     color: colors.textTertiary,
-  },
-  // Fleet Status vessel card styles (kept — too specialized for ItemCard)
-  vesselCard: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    marginHorizontal: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  vesselHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  vesselLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-  },
-  iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  vesselInfo: {
-    flex: 1,
-  },
-  vesselName: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 4,
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    alignSelf: "flex-start",
-  },
-  statusActive: {
-    backgroundColor: colors.success + "30",
-  },
-  statusMaintenance: {
-    backgroundColor: colors.warning + "30",
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  statusTextActive: {
-    color: colors.success,
-  },
-  statusTextMaintenance: {
-    color: colors.warning,
-  },
-  vesselStats: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  statItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  statText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    fontWeight: "500",
   },
   // Approval action buttons
   approvalActions: {

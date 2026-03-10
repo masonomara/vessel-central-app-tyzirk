@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, useWindowDimensions } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { colors } from '../styles/commonStyles';
 import { useData } from '../contexts/DataContext';
@@ -10,9 +10,8 @@ import { PressableCard } from '../components/PressableCard';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 import { scrollProps } from '../hooks/useTopPadding';
 
-const screenWidth = Dimensions.get('window').width;
-
 export default function AnalyticsScreen() {
+  const { width: screenWidth } = useWindowDimensions();
   const { userId, userRole } = useAuth();
   const { 
     getExpensesForUser, 
@@ -251,7 +250,7 @@ export default function AnalyticsScreen() {
             {expensesByMonth.datasets[0].data.some(v => v > 0) ? (
               <LineChart
                 data={expensesByMonth}
-                width={screenWidth - 60}
+                width={screenWidth - 72}
                 height={220}
                 chartConfig={chartConfig}
                 bezier
@@ -274,7 +273,7 @@ export default function AnalyticsScreen() {
             {expensesByCategory.datasets[0].data.some(v => v > 0) ? (
               <BarChart
                 data={expensesByCategory}
-                width={screenWidth - 60}
+                width={screenWidth - 72}
                 height={220}
                 chartConfig={chartConfig}
                 style={styles.chart}
@@ -295,7 +294,7 @@ export default function AnalyticsScreen() {
             {tasksByStatus.some(s => s.count > 0) ? (
               <PieChart
                 data={tasksByStatus}
-                width={screenWidth - 60}
+                width={screenWidth - 72}
                 height={220}
                 chartConfig={chartConfig}
                 accessor="count"

@@ -124,10 +124,9 @@ export default function TabLayout() {
         </Badge>
       </NativeTabs.Trigger>
 
-      {/* Issues (manager + crew) */}
+      {/* Issues (all roles) */}
       <NativeTabs.Trigger
         name="issues"
-        hidden={userRole === "owner"}
         {...sharedTriggerProps}
       >
         <Icon
@@ -143,10 +142,9 @@ export default function TabLayout() {
         <Badge hidden={openIssueCount === 0}>{String(openIssueCount)}</Badge>
       </NativeTabs.Trigger>
 
-      {/* Supplies (manager + crew) */}
+      {/* Supplies (all roles) */}
       <NativeTabs.Trigger
         name="supplies"
-        hidden={userRole === "owner"}
         {...sharedTriggerProps}
       >
         <Icon

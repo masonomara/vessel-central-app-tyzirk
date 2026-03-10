@@ -121,6 +121,7 @@ export default function AddMaintenanceTaskScreen() {
       comments: [],
       completionHistory: [],
       estimatedCost: estimatedCost ? parseFloat(estimatedCost) : undefined,
+      category: 'general',
       notes: notes.trim(),
     };
 
@@ -483,6 +484,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
+    paddingBottom: 40,
   },
   section: {
     marginBottom: 24,

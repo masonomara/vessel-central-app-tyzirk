@@ -2,11 +2,10 @@ import { useMemo } from "react";
 import { StyleSheet, View, Text, ScrollView } from "react-native";
 import { ItemCard } from "../../../components/ItemCard";
 import { ListWrapper } from "../../../components/ListWrapper";
-import { PressableCard } from "../../../components/PressableCard";
+import { VesselCard } from "../../../components/VesselCard";
 import { colors, commonStyles } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
-import { IconSymbol } from "../../../components/IconSymbol";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { getPriorityBadgeColors } from "../../../utils/colorUtils";
 import { formatDueDate, formatDate } from "../../../utils/dateUtils";
@@ -178,27 +177,16 @@ export default function CrewDashboard() {
             </Text>
           </View>
           {myVessels.map((vessel) => (
-            <PressableCard
+            <VesselCard
               key={vessel.id}
-              style={styles.vesselCard}
+              vessel={vessel}
               onPress={() =>
                 router.push({
                   pathname: "/vessel-detail",
                   params: { id: vessel.id },
                 })
               }
-            >
-              <IconSymbol
-                ios_icon_name="sailboat.fill"
-                android_material_icon_name="sailing"
-                size={24}
-                color={colors.accent}
-              />
-              <View style={styles.vesselInfo}>
-                <Text style={styles.vesselName}>{vessel.name}</Text>
-                <Text style={styles.vesselLocation}>{vessel.location}</Text>
-              </View>
-            </PressableCard>
+            />
           ))}
         </View>
       </ScrollView>
@@ -216,6 +204,7 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 20,
+    paddingHorizontal: 20,
   },
   greeting: {
     fontSize: 16,
@@ -242,30 +231,6 @@ const styles = StyleSheet.create({
   sectionCount: {
     fontSize: 15,
     color: colors.textTertiary,
-  },
-  vesselCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 12,
-  },
-  vesselInfo: {
-    flex: 1,
-  },
-  vesselName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 2,
-  },
-  vesselLocation: {
-    fontSize: 14,
-    color: colors.textSecondary,
   },
   emptyText: {
     fontSize: 14,
