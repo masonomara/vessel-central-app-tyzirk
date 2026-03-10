@@ -19,20 +19,19 @@
 
 ### Phase 2: Privacy Policy & Legal Pages
 
-- [ ] `[HUMAN]` Review generated privacy policy for accuracy
-- [ ] `[HUMAN]` Send `privacy-policy.md`, `support-page.md`, and `webmaster-instructions.md` to webmaster
+- [x] `[HUMAN]` Send `privacy-policy.md`, `support-page.md`, and `webmaster-instructions.md` to webmaster
 - [ ] `[HUMAN]` Webmaster deploys privacy policy to `https://www.vesselandco.yachts/privacy`
 - [ ] `[HUMAN]` Webmaster deploys support page to `https://www.vesselandco.yachts/support`
 - [ ] `[HUMAN]` Verify both URLs are live and publicly accessible
 
 ### Phase 3: App Store Metadata (iOS)
 
-- [ ] `[HUMAN]` Review and approve all App Store copy
-- [ ] `[HUMAN]` Verify keyword strategy (search for competitors, check for conflicts)
+- [x] `[HUMAN]` Review and approve all App Store copy
+- [x] `[HUMAN]` Verify keyword strategy (search for competitors, check for conflicts)
 
 ### Phase 4: Google Play Store Metadata
 
-- [ ] `[HUMAN]` Review and approve all Play Store copy
+- [x] `[HUMAN]` Review and approve all Play Store copy
 - [ ] `[HUMAN]` Complete IARC content rating questionnaire in Play Console (answers documented in metadata file)
 - [ ] `[HUMAN]` Fill out Data Safety form in Play Console using documented declarations
 
@@ -48,8 +47,8 @@
 
 ### Phase 7: Asset Checklist (Reference for Later)
 
-- [ ] `[HUMAN]` Verify `public/icon.png` is 1024x1024, no alpha channel
-- [ ] `[HUMAN]` Verify `public/adaptive-icon.png` meets Android adaptive icon spec
+- [x] `[HUMAN]` Verify `public/icon.png` is 1024x1024, no alpha channel
+- [x] `[HUMAN]` Verify `public/adaptive-icon.png` meets Android adaptive icon spec
 - [ ] `[HUMAN]` Export 512x512 hi-res icon for Play Store
 - [ ] `[HUMAN]` Create 1024x500 feature graphic for Play Store
 - [ ] `[HUMAN]` Capture screenshots across all required device sizes (deferred until UI polish is complete)
