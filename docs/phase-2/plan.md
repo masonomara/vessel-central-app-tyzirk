@@ -199,19 +199,18 @@ Legend: `[CLAUDE]` = done by Claude Code, `[HUMAN]` = requires your action, `[BO
 
 ### Phase 1: Config & Identity Updates
 
-- [ ] `[CLAUDE]` Update app name to "Vessel & Co." in `app.json`
-- [ ] `[CLAUDE]` Update `CFBundleDisplayName` in `Info.plist`
-- [ ] `[CLAUDE]` Add `buildNumber: "1"` and `versionCode: 1` to `app.json`
-- [ ] `[CLAUDE]` Add `submit` block with placeholders to `eas.json`
+- [x] `[CLAUDE]` Update app name to "Vessel & Co." in `app.json`
+- [x] `[CLAUDE]` Update `CFBundleDisplayName` in `Info.plist`
+- [x] `[CLAUDE]` Add `buildNumber: "1"` and `versionCode: 1` to `app.json`
+- [x] `[CLAUDE]` Add `submit` block with placeholders to `eas.json`
 - [ ] `[HUMAN]` Fill in Apple Developer credentials in `eas.json` (appleId, ascAppId, appleTeamId)
 - [ ] `[HUMAN]` Fill in Google Play service account key path in `eas.json`
 
 ### Phase 2: Privacy Policy & Legal Pages
 
-- [ ] `[HUMAN]` Go to TermsFeed (or chosen generator), input app details from Step 3, generate policy
-- [ ] `[CLAUDE]` Save generated policy to `docs/legal/privacy-policy.md`
-- [ ] `[CLAUDE]` Write support page content (`docs/legal/support-page.md`)
-- [ ] `[CLAUDE]` Write webmaster deployment instructions (`docs/legal/webmaster-instructions.md`)
+- [x] `[CLAUDE]` Write privacy policy to `docs/legal/privacy-policy.md` (written directly, covers GDPR/CCPA/local-only data)
+- [x] `[CLAUDE]` Write support page content (`docs/legal/support-page.md`)
+- [x] `[CLAUDE]` Write webmaster deployment instructions (`docs/legal/webmaster-instructions.md`)
 - [ ] `[HUMAN]` Review generated privacy policy for accuracy
 - [ ] `[HUMAN]` Send `privacy-policy.md`, `support-page.md`, and `webmaster-instructions.md` to webmaster
 - [ ] `[HUMAN]` Webmaster deploys privacy policy to `https://www.vesselandco.yachts/privacy`
@@ -220,39 +219,39 @@ Legend: `[CLAUDE]` = done by Claude Code, `[HUMAN]` = requires your action, `[BO
 
 ### Phase 3: App Store Metadata (iOS)
 
-- [ ] `[CLAUDE]` Write full App Store description (up to 4000 chars)
-- [ ] `[CLAUDE]` Write subtitle, promotional text, keywords
-- [ ] `[CLAUDE]` Write all metadata fields to `docs/legal/app-store-metadata.md`
-- [ ] `[CLAUDE]` Create `store.config.json` with all iOS metadata populated
+- [x] `[CLAUDE]` Write full App Store description (up to 4000 chars)
+- [x] `[CLAUDE]` Write subtitle, promotional text, keywords
+- [x] `[CLAUDE]` Write all metadata fields to `docs/legal/app-store-metadata.md`
+- [x] `[CLAUDE]` Create `store.config.json` with all iOS metadata populated
 - [ ] `[HUMAN]` Review and approve all App Store copy
 - [ ] `[HUMAN]` Verify keyword strategy (search for competitors, check for conflicts)
 
 ### Phase 4: Google Play Store Metadata
 
-- [ ] `[CLAUDE]` Write short description (80 chars)
-- [ ] `[CLAUDE]` Write full description (4000 chars, keyword-optimized for Play Store)
-- [ ] `[CLAUDE]` Document Data Safety Section declarations in `docs/legal/play-store-metadata.md`
+- [x] `[CLAUDE]` Write short description (80 chars)
+- [x] `[CLAUDE]` Write full description (4000 chars, keyword-optimized for Play Store)
+- [x] `[CLAUDE]` Document Data Safety Section declarations in `docs/legal/play-store-metadata.md`
 - [ ] `[HUMAN]` Review and approve all Play Store copy
 - [ ] `[HUMAN]` Complete IARC content rating questionnaire in Play Console (answers documented in metadata file)
 - [ ] `[HUMAN]` Fill out Data Safety form in Play Console using documented declarations
 
 ### Phase 5: Native Config Cleanup
 
-- [ ] `[CLAUDE]` Rewrite all iOS permission descriptions in `Info.plist` to be specific
-- [ ] `[CLAUDE]` Audit Android permissions in `AndroidManifest.xml`
-- [ ] `[CLAUDE]` Verify `PrivacyInfo.xcprivacy` is accurate
+- [x] `[CLAUDE]` Rewrite all iOS permission descriptions in `Info.plist` to be specific
+- [x] `[CLAUDE]` Audit Android permissions in `AndroidManifest.xml`
+- [x] `[CLAUDE]` Verify `PrivacyInfo.xcprivacy` is accurate
 - [ ] `[HUMAN]` Run `eas build --profile production --platform ios` and verify permission strings in output
 - [ ] `[HUMAN]` Run `eas build --profile production --platform android` and verify `SYSTEM_ALERT_WINDOW` is stripped
 
 ### Phase 6: Login Screen Update
 
-- [ ] `[CLAUDE]` Restyle Quick Login section in `app/login.tsx` -- change "Quick Login" to "Try Demo"
+- [x] `[CLAUDE]` Restyle Quick Login section in `app/login.tsx` -- change "Quick Login" to "Try Demo"
 - [ ] `[HUMAN]` Review on physical device to confirm it looks intentional, not like test UI
 - [ ] `[HUMAN]` Prepare App Review notes: "Tap any demo role button on the login screen to access the app with sample data."
 
 ### Phase 7: Asset Checklist (Reference for Later)
 
-- [ ] `[CLAUDE]` Create `docs/legal/asset-checklist.md` with all required assets, specs, and status
+- [x] `[CLAUDE]` Create `docs/legal/asset-checklist.md` with all required assets, specs, and status
 - [ ] `[HUMAN]` Verify `public/icon.png` is 1024x1024, no alpha channel
 - [ ] `[HUMAN]` Verify `public/adaptive-icon.png` meets Android adaptive icon spec
 - [ ] `[HUMAN]` Export 512x512 hi-res icon for Play Store
@@ -261,8 +260,8 @@ Legend: `[CLAUDE]` = done by Claude Code, `[HUMAN]` = requires your action, `[BO
 
 ### Phase 8: Final Verification
 
-- [ ] `[CLAUDE]` Run `npx expo config --type public` and verify output
-- [ ] `[CLAUDE]` Validate all character counts in metadata files
+- [x] `[CLAUDE]` Run `npx expo config --type public` and verify output
+- [x] `[CLAUDE]` Validate all character counts in metadata files
 - [ ] `[HUMAN]` Confirm privacy policy and support URLs are live
 - [ ] `[HUMAN]` Confirm Apple Developer and Google Play Console accounts are active
 - [ ] `[HUMAN]` Do a final read-through of all legal and metadata documents

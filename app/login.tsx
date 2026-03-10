@@ -277,7 +277,7 @@ export default function LoginScreen() {
             <View style={styles.quickLoginSection}>
               <View style={styles.dividerRow}>
                 <View style={styles.divider} />
-                <Text style={styles.dividerText}>Quick Login</Text>
+                <Text style={styles.dividerText}>Try Demo</Text>
                 <View style={styles.divider} />
               </View>
               <View style={styles.quickLoginButtonRow}>

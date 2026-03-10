@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Vessel & Co. Yacht Management",
+    "name": "Vessel & Co.",
     "slug": "vessel-and-co",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,6 +10,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.vesselcentral.app",
+      "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -21,6 +22,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.vesselcentral.app",
+      "versionCode": 1,
       "permissions": [
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.SCHEDULE_EXACT_ALARM",
