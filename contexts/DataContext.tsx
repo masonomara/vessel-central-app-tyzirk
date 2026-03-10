@@ -14,6 +14,11 @@ import {
   Attachment,
   Comment,
   CalendarEvent,
+  EngineHourLog,
+  Contact,
+  CrewCertification,
+  CharterLog,
+  Equipment,
 } from '../types';
 
 interface DataContextType {
@@ -77,7 +82,37 @@ interface DataContextType {
   updateCalendarEvent: (id: string, updates: Partial<CalendarEvent>) => void;
   deleteCalendarEvent: (id: string) => void;
   addCalendarEventComment: (eventId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
-  
+
+  engineHourLogs: EngineHourLog[];
+  getEngineHourLogsForVessel: (vesselId: string) => EngineHourLog[];
+  updateEngineHours: (vesselId: string, newHours: number, userId: string, userName: string, userRole: string, notes: string) => void;
+
+  contacts: Contact[];
+  getContactsForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => Contact[];
+  addContact: (contact: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateContact: (id: string, updates: Partial<Contact>) => void;
+  deleteContact: (id: string) => void;
+
+  certifications: CrewCertification[];
+  getCertificationsForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => CrewCertification[];
+  addCertification: (cert: Omit<CrewCertification, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateCertification: (id: string, updates: Partial<CrewCertification>) => void;
+  deleteCertification: (id: string) => void;
+
+  charterLogs: CharterLog[];
+  getCharterLogsForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => CharterLog[];
+  addCharterLog: (log: Omit<CharterLog, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateCharterLog: (id: string, updates: Partial<CharterLog>) => void;
+  deleteCharterLog: (id: string) => void;
+  addCharterLogComment: (logId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
+
+  equipment: Equipment[];
+  getEquipmentForUser: (userId: string, userRole: 'owner' | 'manager' | 'crew') => Equipment[];
+  addEquipment: (item: Omit<Equipment, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateEquipment: (id: string, updates: Partial<Equipment>) => void;
+  deleteEquipment: (id: string) => void;
+  addEquipmentComment: (equipmentId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
+
   loadData: () => Promise<void>;
   saveData: () => Promise<void>;
 }
@@ -85,7 +120,7 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 const STORAGE_KEY = '@vessel_co_data';
-const DATA_VERSION = 3;
+const DATA_VERSION = 4;
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [vessels, setVessels] = useState<Vessel[]>([
@@ -98,6 +133,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       ownerId: 'owner1',
       managerId: 'manager1',
       crewIds: ['crew1', 'crew2'],
+      engineHours: 1247,
+      image: require('../assets/vessels/yacht-1.jpg'),
     },
     {
       id: '2',
@@ -108,6 +145,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       ownerId: 'owner1',
       managerId: 'manager1',
       crewIds: ['crew1'],
+      engineHours: 892,
+      image: require('../assets/vessels/yacht-2.jpg'),
     },
     {
       id: '3',
@@ -118,6 +157,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       ownerId: 'owner1',
       managerId: 'manager1',
       crewIds: ['crew2'],
+      engineHours: 2034,
+      image: require('../assets/vessels/yacht-3.webp'),
     },
   ]);
 
@@ -1138,6 +1179,500 @@ export function DataProvider({ children }: { children: ReactNode }) {
     },
   ]);
 
+  const [engineHourLogs, setEngineHourLogs] = useState<EngineHourLog[]>([
+    {
+      id: 'eh1',
+      vesselId: '1',
+      vesselName: 'Purely Blu',
+      previousHours: 1200,
+      newHours: 1247,
+      updatedBy: 'crew1',
+      updatedByName: 'Marcus Rivera',
+      notes: 'Post-charter check',
+      timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'eh2',
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      previousHours: 870,
+      newHours: 892,
+      updatedBy: 'crew1',
+      updatedByName: 'Marcus Rivera',
+      notes: 'After Tortola run',
+      timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    },
+  ]);
+
+  const [contacts, setContacts] = useState<Contact[]>([
+    {
+      id: 'c1',
+      name: 'Marcus Rivera',
+      role: 'Deckhand / Engineer',
+      contactType: 'crew',
+      phone: '+1 340-555-0101',
+      email: 'marcus@vesselco.com',
+      vesselIds: ['1', '2'],
+      vesselNames: ['Purely Blu', 'Ocean Pearl'],
+      notes: 'Primary crew on Purely Blu',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'c2',
+      name: 'Tanya Brooks',
+      role: 'Stewardess / Cook',
+      contactType: 'crew',
+      phone: '+1 340-555-0102',
+      email: 'tanya@vesselco.com',
+      vesselIds: ['1', '3'],
+      vesselNames: ['Purely Blu', 'Sea Breeze'],
+      notes: 'Level 2 food hygiene certified',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'c3',
+      name: 'Island Marine Services',
+      role: 'Marine Mechanic',
+      contactType: 'vendor',
+      phone: '+1 340-555-0200',
+      email: 'service@islandmarine.vi',
+      company: 'Island Marine Services LLC',
+      vesselIds: ['1', '2', '3'],
+      vesselNames: ['Purely Blu', 'Ocean Pearl', 'Sea Breeze'],
+      notes: 'Primary vendor for engine and saildrive work',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'c4',
+      name: 'Crown Bay Marina',
+      role: 'Dockmaster',
+      contactType: 'marina',
+      phone: '+1 340-555-0300',
+      email: 'dock@crownbay.vi',
+      company: 'Crown Bay Marina',
+      vesselIds: ['1'],
+      vesselNames: ['Purely Blu'],
+      notes: 'Slip B-14. Monthly rate negotiated through Dec 2026.',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'c5',
+      name: 'VISAR',
+      role: 'Search & Rescue',
+      contactType: 'emergency',
+      phone: '+1 340-555-0911',
+      email: 'ops@visar.vi',
+      vesselIds: ['1', '2', '3'],
+      vesselNames: ['Purely Blu', 'Ocean Pearl', 'Sea Breeze'],
+      notes: 'Virgin Islands Search and Rescue. VHF Ch 16.',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000),
+    },
+  ]);
+
+  const [certifications, setCertifications] = useState<CrewCertification[]>([
+    {
+      id: 'cert1',
+      crewId: 'crew1',
+      crewName: 'Marcus Rivera',
+      certType: 'STCW Basic Safety',
+      issuingAuthority: 'USCG',
+      certificateNumber: 'STCW-2024-4471',
+      issueDate: new Date('2024-06-15'),
+      expiryDate: new Date('2029-06-15'),
+      vesselId: '1',
+      vesselName: 'Purely Blu',
+      notes: '',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'cert2',
+      crewId: 'crew1',
+      crewName: 'Marcus Rivera',
+      certType: 'Powerboat Level 2',
+      issuingAuthority: 'RYA',
+      certificateNumber: 'PB2-2023-1189',
+      issueDate: new Date('2023-03-10'),
+      expiryDate: new Date('2027-03-10'),
+      vesselId: '1',
+      vesselName: 'Purely Blu',
+      notes: '',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'cert3',
+      crewId: 'crew1',
+      crewName: 'Marcus Rivera',
+      certType: 'First Aid / CPR',
+      issuingAuthority: 'Red Cross',
+      issueDate: new Date('2024-08-01'),
+      expiryDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
+      vesselId: '1',
+      vesselName: 'Purely Blu',
+      notes: 'Renewal scheduled',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'cert4',
+      crewId: 'crew2',
+      crewName: 'Tanya Brooks',
+      certType: 'STCW Basic Safety',
+      issuingAuthority: 'USCG',
+      certificateNumber: 'STCW-2024-5512',
+      issueDate: new Date('2024-04-01'),
+      expiryDate: new Date('2029-04-01'),
+      vesselId: '1',
+      vesselName: 'Purely Blu',
+      notes: '',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'cert5',
+      crewId: 'crew2',
+      crewName: 'Tanya Brooks',
+      certType: 'ENG1 Medical',
+      issuingAuthority: 'MCA',
+      issueDate: new Date('2023-09-15'),
+      expiryDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+      vesselId: '1',
+      vesselName: 'Purely Blu',
+      notes: 'EXPIRED - renewal overdue',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'cert6',
+      crewId: 'crew2',
+      crewName: 'Tanya Brooks',
+      certType: 'Food Hygiene Level 2',
+      issuingAuthority: 'Highfield',
+      issueDate: new Date('2025-01-10'),
+      expiryDate: new Date('2028-01-10'),
+      vesselId: '1',
+      vesselName: 'Purely Blu',
+      notes: '',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    },
+  ]);
+
+  const [charterLogs, setCharterLogs] = useState<CharterLog[]>([
+    {
+      id: 'ch1',
+      title: 'BVI Island Hop',
+      vesselId: '1',
+      vesselName: 'Purely Blu',
+      startDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      status: 'completed',
+      guestCount: 6,
+      guestNames: 'Johnson family',
+      itinerary: 'St. Thomas > Jost Van Dyke > Norman Island > Virgin Gorda > St. Thomas',
+      departurePort: 'Red Hook, St. Thomas',
+      arrivalPort: 'Red Hook, St. Thomas',
+      revenue: 18000,
+      expenses: 3200,
+      brokerName: 'Caribbean Charter Co.',
+      brokerCommission: 2700,
+      notes: 'Smooth trip. Guests requested same dates next year.',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      comments: [],
+    },
+    {
+      id: 'ch2',
+      title: 'St. Thomas Day Charter',
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      startDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+      status: 'upcoming',
+      guestCount: 4,
+      itinerary: 'Crown Bay > Christmas Cove > Honeymoon Beach > Crown Bay',
+      departurePort: 'Crown Bay, St. Thomas',
+      arrivalPort: 'Crown Bay, St. Thomas',
+      revenue: 4500,
+      expenses: 800,
+      notes: 'Guests allergic to shellfish - coordinate provisions.',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      comments: [],
+    },
+    {
+      id: 'ch3',
+      title: 'USVI Week Charter',
+      vesselId: '1',
+      vesselName: 'Purely Blu',
+      startDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() + 37 * 24 * 60 * 60 * 1000),
+      status: 'upcoming',
+      guestCount: 8,
+      guestNames: 'Williams party',
+      itinerary: 'Red Hook > St. John > Buck Island > St. Croix > Red Hook',
+      departurePort: 'Red Hook, St. Thomas',
+      arrivalPort: 'Red Hook, St. Thomas',
+      revenue: 28000,
+      expenses: 5500,
+      brokerName: 'Horizon Yachts',
+      brokerCommission: 4200,
+      specialRequests: 'Dive gear for 4, paddleboards, sunset cocktail setup each evening',
+      notes: 'High-value repeat client. Confirm provisioning 48hrs prior.',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      comments: [],
+    },
+    {
+      id: 'ch4',
+      title: 'Private Sunset Cruise',
+      vesselId: '3',
+      vesselName: 'Sea Breeze',
+      startDate: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000),
+      status: 'completed',
+      guestCount: 2,
+      itinerary: 'Cruz Bay > Caneel Bay > Cruz Bay',
+      departurePort: 'Cruz Bay, St. John',
+      arrivalPort: 'Cruz Bay, St. John',
+      revenue: 1200,
+      expenses: 200,
+      notes: 'Anniversary celebration. Provided champagne + cheese board.',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000),
+      comments: [],
+    },
+  ]);
+
+  const [equipment, setEquipment] = useState<Equipment[]>([
+    {
+      id: 'eq1',
+      name: 'Life Jackets (Adult)',
+      description: 'Type I offshore PFDs, USCG approved',
+      category: 'safety',
+      vesselId: '1',
+      vesselName: 'Purely Blu',
+      quantity: 12,
+      condition: 'good',
+      manufacturer: 'Mustang Survival',
+      lastInspectionDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      nextInspectionDate: new Date(Date.now() + 150 * 24 * 60 * 60 * 1000),
+      location: 'Cockpit lazarette',
+      notes: 'Replaced 4 units in January',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      comments: [],
+    },
+    {
+      id: 'eq2',
+      name: 'EPIRB',
+      description: 'ACR GlobalFix V4 emergency position indicating radio beacon',
+      category: 'safety',
+      vesselId: '1',
+      vesselName: 'Purely Blu',
+      quantity: 1,
+      condition: 'good',
+      manufacturer: 'ACR Electronics',
+      model: 'GlobalFix V4',
+      serialNumber: 'ACR-2024-77831',
+      lastInspectionDate: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
+      nextInspectionDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      location: 'Helm station',
+      notes: 'Battery replacement due 2027',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
+      comments: [],
+    },
+    {
+      id: 'eq3',
+      name: 'Fire Extinguishers',
+      description: 'ABC dry chemical, 5lb portable units',
+      category: 'safety',
+      vesselId: '1',
+      vesselName: 'Purely Blu',
+      quantity: 6,
+      condition: 'fair',
+      manufacturer: 'Kidde',
+      lastInspectionDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+      nextInspectionDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      location: 'Galley, engine room, salon, each cabin',
+      notes: '2 units due for annual service tag',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+      comments: [],
+    },
+    {
+      id: 'eq4',
+      name: 'Paddleboards',
+      description: 'Inflatable SUP boards with paddles and pump',
+      category: 'water_toys',
+      vesselId: '1',
+      vesselName: 'Purely Blu',
+      quantity: 2,
+      condition: 'good',
+      manufacturer: 'Red Paddle Co',
+      location: 'Foredeck locker',
+      notes: '',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+      comments: [],
+    },
+    {
+      id: 'eq5',
+      name: 'Snorkel Sets',
+      description: 'Mask, snorkel, and fins combo sets',
+      category: 'water_toys',
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      quantity: 8,
+      condition: 'fair',
+      location: 'Swim platform locker',
+      notes: '2 masks have scratched lenses - replace next provisioning',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+      comments: [],
+    },
+    {
+      id: 'eq6',
+      name: 'Kayak',
+      description: 'Two-person sit-on-top kayak',
+      category: 'water_toys',
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      quantity: 1,
+      condition: 'poor',
+      manufacturer: 'Ocean Kayak',
+      location: 'Davits',
+      notes: 'Hull crack on starboard side. Needs replacement.',
+      createdBy: 'crew1',
+      createdByName: 'Marcus Rivera',
+      createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      comments: [],
+    },
+    {
+      id: 'eq7',
+      name: 'Radar',
+      description: 'Garmin GMR Fantom 24 radome radar',
+      category: 'navigation',
+      vesselId: '3',
+      vesselName: 'Sea Breeze',
+      quantity: 1,
+      condition: 'good',
+      manufacturer: 'Garmin',
+      model: 'GMR Fantom 24',
+      serialNumber: 'GRM-2023-44219',
+      location: 'Mast mount',
+      notes: '',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000),
+      comments: [],
+    },
+    {
+      id: 'eq8',
+      name: 'Flare Kit',
+      description: 'SOLAS-approved distress flare pack',
+      category: 'safety',
+      vesselId: '3',
+      vesselName: 'Sea Breeze',
+      quantity: 1,
+      condition: 'needs_replacement',
+      lastInspectionDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+      location: 'Helm station cabinet',
+      notes: 'Flares expired last month. Order replacement set.',
+      createdBy: 'crew2',
+      createdByName: 'Tanya Brooks',
+      createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      comments: [],
+    },
+    {
+      id: 'eq9',
+      name: 'VHF Radio',
+      description: 'Fixed-mount DSC VHF marine radio',
+      category: 'communication',
+      vesselId: '1',
+      vesselName: 'Purely Blu',
+      quantity: 2,
+      condition: 'good',
+      manufacturer: 'Standard Horizon',
+      model: 'GX6000',
+      location: 'Helm station + nav station',
+      notes: 'Both units programmed with MMSI',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000),
+      comments: [],
+    },
+    {
+      id: 'eq10',
+      name: 'Dinghy',
+      description: 'AB Inflatables 10ft RIB with 15hp Yamaha',
+      category: 'tender',
+      vesselId: '2',
+      vesselName: 'Ocean Pearl',
+      quantity: 1,
+      condition: 'fair',
+      manufacturer: 'AB Inflatables',
+      location: 'Davits',
+      notes: 'Outboard service due at 100 hours. Currently at 87.',
+      createdBy: 'manager1',
+      createdByName: 'Brett Nealson',
+      createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
+      comments: [],
+    },
+  ]);
+
   // Use ref to track if data has been loaded
   const hasLoadedData = useRef(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1232,6 +1767,54 @@ export function DataProvider({ children }: { children: ReactNode }) {
             updatedAt: new Date(event.updatedAt),
           })));
         }
+
+        if (parsed.engineHourLogs) {
+          setEngineHourLogs(parsed.engineHourLogs.map((log: EngineHourLog) => ({
+            ...log,
+            timestamp: new Date(log.timestamp),
+          })));
+        }
+
+        if (parsed.contacts) {
+          setContacts(parsed.contacts.map((c: Contact) => ({
+            ...c,
+            createdAt: new Date(c.createdAt),
+            updatedAt: new Date(c.updatedAt),
+          })));
+        }
+
+        if (parsed.certifications) {
+          setCertifications(parsed.certifications.map((c: CrewCertification) => ({
+            ...c,
+            issueDate: new Date(c.issueDate),
+            expiryDate: new Date(c.expiryDate),
+            createdAt: new Date(c.createdAt),
+            updatedAt: new Date(c.updatedAt),
+          })));
+        }
+
+        if (parsed.charterLogs) {
+          setCharterLogs(parsed.charterLogs.map((c: CharterLog) => ({
+            ...c,
+            comments: c.comments || [],
+            startDate: new Date(c.startDate),
+            endDate: new Date(c.endDate),
+            createdAt: new Date(c.createdAt),
+            updatedAt: new Date(c.updatedAt),
+          })));
+        }
+
+        if (parsed.equipment) {
+          setEquipment(parsed.equipment.map((e: Equipment) => ({
+            ...e,
+            comments: e.comments || [],
+            purchaseDate: e.purchaseDate ? new Date(e.purchaseDate) : undefined,
+            lastInspectionDate: e.lastInspectionDate ? new Date(e.lastInspectionDate) : undefined,
+            nextInspectionDate: e.nextInspectionDate ? new Date(e.nextInspectionDate) : undefined,
+            createdAt: new Date(e.createdAt),
+            updatedAt: new Date(e.updatedAt),
+          })));
+        }
       }
 
       hasLoadedData.current = true;
@@ -1262,13 +1845,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
           notifications,
           expenses,
           calendarEvents,
+          engineHourLogs,
+          contacts,
+          certifications,
+          charterLogs,
+          equipment,
         };
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       } catch (error) {
         console.error('Error saving data:', error);
       }
     }, 1000);
-  }, [vessels, maintenanceTasks, issues, supplyRequests, documents, activityLogs, notifications, expenses, calendarEvents]);
+  }, [vessels, maintenanceTasks, issues, supplyRequests, documents, activityLogs, notifications, expenses, calendarEvents, engineHourLogs, contacts, certifications, charterLogs, equipment]);
 
   // Load data from storage on mount only
   useEffect(() => {
@@ -1769,6 +2357,205 @@ export function DataProvider({ children }: { children: ReactNode }) {
     ));
   };
 
+  // Engine hour functions
+  const getEngineHourLogsForVessel = (vesselId: string): EngineHourLog[] => {
+    return engineHourLogs.filter(log => log.vesselId === vesselId).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  };
+
+  const updateEngineHours = (vesselId: string, newHours: number, userId: string, userName: string, userRole: string, notes: string) => {
+    const vessel = vessels.find(v => v.id === vesselId);
+    if (!vessel) return;
+    const previousHours = vessel.engineHours || 0;
+    const log: EngineHourLog = {
+      id: generateId(),
+      vesselId,
+      vesselName: vessel.name,
+      previousHours,
+      newHours,
+      updatedBy: userId,
+      updatedByName: userName,
+      notes,
+      timestamp: new Date(),
+    };
+    setEngineHourLogs(prev => [log, ...prev]);
+    setVessels(prev => prev.map(v => v.id === vesselId ? { ...v, engineHours: newHours } : v));
+    addActivityLog({
+      type: 'system',
+      title: 'Engine Hours Updated',
+      description: `${vessel.name} engine hours updated from ${previousHours} to ${newHours}`,
+      userId,
+      userName,
+      userRole,
+      vesselId,
+      vesselName: vessel.name,
+    });
+  };
+
+  // Contact functions
+  const getContactsForUser = (userId: string, userRole: 'owner' | 'manager' | 'crew'): Contact[] => {
+    const userVessels = getVesselsForUser(userId, userRole);
+    const vesselIds = userVessels.map(v => v.id);
+    return contacts.filter(c => c.vesselIds.some(vid => vesselIds.includes(vid)));
+  };
+
+  const addContact = (contact: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newContact: Contact = {
+      ...contact,
+      id: generateId(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setContacts(prev => [...prev, newContact]);
+    addActivityLog({
+      type: 'contact',
+      title: 'Contact Added',
+      description: `${contact.name} added to contact directory`,
+      userId: contact.createdBy,
+      userName: contact.createdByName,
+      userRole: 'manager',
+      vesselId: contact.vesselIds[0] || '',
+      vesselName: contact.vesselNames[0] || '',
+      relatedId: newContact.id,
+      relatedType: 'contact',
+    });
+  };
+
+  const updateContact = (id: string, updates: Partial<Contact>) => {
+    setContacts(prev => prev.map(c => c.id === id ? { ...c, ...updates, updatedAt: new Date() } : c));
+  };
+
+  const deleteContact = (id: string) => {
+    setContacts(prev => prev.filter(c => c.id !== id));
+  };
+
+  // Certification functions
+  const getCertificationsForUser = (userId: string, userRole: 'owner' | 'manager' | 'crew'): CrewCertification[] => {
+    if (userRole === 'crew') {
+      return certifications.filter(c => c.crewId === userId);
+    }
+    const userVessels = getVesselsForUser(userId, userRole);
+    const crewIds = userVessels.flatMap(v => v.crewIds || []);
+    return certifications.filter(c => crewIds.includes(c.crewId));
+  };
+
+  const addCertification = (cert: Omit<CrewCertification, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newCert: CrewCertification = {
+      ...cert,
+      id: generateId(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setCertifications(prev => [...prev, newCert]);
+    addActivityLog({
+      type: 'certification',
+      title: 'Certification Added',
+      description: `${cert.certType} added for ${cert.crewName}`,
+      userId: cert.createdBy,
+      userName: cert.createdByName,
+      userRole: 'manager',
+      vesselId: cert.vesselId,
+      vesselName: cert.vesselName,
+      relatedId: newCert.id,
+      relatedType: 'certification',
+    });
+  };
+
+  const updateCertification = (id: string, updates: Partial<CrewCertification>) => {
+    setCertifications(prev => prev.map(c => c.id === id ? { ...c, ...updates, updatedAt: new Date() } : c));
+  };
+
+  const deleteCertification = (id: string) => {
+    setCertifications(prev => prev.filter(c => c.id !== id));
+  };
+
+  // Charter log functions
+  const getCharterLogsForUser = (userId: string, userRole: 'owner' | 'manager' | 'crew'): CharterLog[] => {
+    const userVessels = getVesselsForUser(userId, userRole);
+    const vesselIds = userVessels.map(v => v.id);
+    return charterLogs.filter(c => vesselIds.includes(c.vesselId));
+  };
+
+  const addCharterLog = (log: Omit<CharterLog, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newLog: CharterLog = {
+      ...log,
+      id: generateId(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setCharterLogs(prev => [...prev, newLog]);
+    addActivityLog({
+      type: 'charter',
+      title: 'Charter Log Created',
+      description: `${log.title} added for ${log.vesselName}`,
+      userId: log.createdBy,
+      userName: log.createdByName,
+      userRole: 'manager',
+      vesselId: log.vesselId,
+      vesselName: log.vesselName,
+      relatedId: newLog.id,
+      relatedType: 'charter',
+    });
+  };
+
+  const updateCharterLog = (id: string, updates: Partial<CharterLog>) => {
+    setCharterLogs(prev => prev.map(c => c.id === id ? { ...c, ...updates, updatedAt: new Date() } : c));
+  };
+
+  const deleteCharterLog = (id: string) => {
+    setCharterLogs(prev => prev.filter(c => c.id !== id));
+  };
+
+  const addCharterLogComment = (logId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
+    const newComment: Comment = { ...comment, id: generateId(), createdAt: new Date() };
+    setCharterLogs(prev => prev.map(c =>
+      c.id === logId ? { ...c, comments: [...(c.comments || []), newComment], updatedAt: new Date() } : c
+    ));
+  };
+
+  // Equipment functions
+  const getEquipmentForUser = (userId: string, userRole: 'owner' | 'manager' | 'crew'): Equipment[] => {
+    const userVessels = getVesselsForUser(userId, userRole);
+    const vesselIds = userVessels.map(v => v.id);
+    return equipment.filter(e => vesselIds.includes(e.vesselId));
+  };
+
+  const addEquipment = (item: Omit<Equipment, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newItem: Equipment = {
+      ...item,
+      id: generateId(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setEquipment(prev => [...prev, newItem]);
+    addActivityLog({
+      type: 'equipment',
+      title: 'Equipment Added',
+      description: `${item.name} added to ${item.vesselName}`,
+      userId: item.createdBy,
+      userName: item.createdByName,
+      userRole: 'manager',
+      vesselId: item.vesselId,
+      vesselName: item.vesselName,
+      relatedId: newItem.id,
+      relatedType: 'equipment',
+    });
+  };
+
+  const updateEquipment = (id: string, updates: Partial<Equipment>) => {
+    setEquipment(prev => prev.map(e => e.id === id ? { ...e, ...updates, updatedAt: new Date() } : e));
+  };
+
+  const deleteEquipment = (id: string) => {
+    setEquipment(prev => prev.filter(e => e.id !== id));
+  };
+
+  const addEquipmentComment = (equipmentId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => {
+    const newComment: Comment = { ...comment, id: generateId(), createdAt: new Date() };
+    setEquipment(prev => prev.map(e =>
+      e.id === equipmentId ? { ...e, comments: [...(e.comments || []), newComment], updatedAt: new Date() } : e
+    ));
+  };
+
   // Vessel assignment functions
   const updateVessel = (id: string, updates: Partial<Vessel>) => {
     setVessels(vessels.map(vessel =>
@@ -1923,6 +2710,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
         updateCalendarEvent,
         deleteCalendarEvent,
         addCalendarEventComment,
+        engineHourLogs,
+        getEngineHourLogsForVessel,
+        updateEngineHours,
+        contacts,
+        getContactsForUser,
+        addContact,
+        updateContact,
+        deleteContact,
+        certifications,
+        getCertificationsForUser,
+        addCertification,
+        updateCertification,
+        deleteCertification,
+        charterLogs,
+        getCharterLogsForUser,
+        addCharterLog,
+        updateCharterLog,
+        deleteCharterLog,
+        addCharterLogComment,
+        equipment,
+        getEquipmentForUser,
+        addEquipment,
+        updateEquipment,
+        deleteEquipment,
+        addEquipmentComment,
         loadData,
         saveData,
       }}

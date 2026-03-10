@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { StyleSheet, View, Text, ScrollView } from "react-native";
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
 import { colors } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
@@ -26,6 +26,7 @@ export default function VesselDetailScreen() {
     supplyRequests,
     documents,
     calendarEvents,
+    getEngineHourLogsForVessel,
   } = useData();
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
     new Set(),
@@ -61,6 +62,7 @@ export default function VesselDetailScreen() {
   const vesselSupplies = supplyRequests.filter((s) => s.vesselId === vessel.id);
   const vesselDocs = documents.filter((d) => d.vesselId === vessel.id);
   const vesselEvents = calendarEvents.filter((e) => e.vesselId === vessel.id);
+  const engineHourLogs = getEngineHourLogsForVessel(vessel.id);
 
   const activeTasks = vesselTasks.filter((t) => t.status !== "completed");
   const openIssues = vesselIssues.filter((i) => i.status !== "completed");
@@ -78,16 +80,20 @@ export default function VesselDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.titleSection}>
-          <View
-            style={[styles.iconCircle, { backgroundColor: colors.text + "20" }]}
-          >
-            <IconSymbol
-              ios_icon_name="sailboat.fill"
-              android_material_icon_name="sailing"
-              size={40}
-              color={colors.text}
-            />
-          </View>
+          {vessel.image ? (
+            <Image source={vessel.image} style={styles.vesselImage} />
+          ) : (
+            <View
+              style={[styles.iconCircle, { backgroundColor: colors.text + "20" }]}
+            >
+              <IconSymbol
+                ios_icon_name="sailboat.fill"
+                android_material_icon_name="sailing"
+                size={40}
+                color={colors.text}
+              />
+            </View>
+          )}
           <Text style={styles.title}>{vessel.name}</Text>
           <Text style={styles.subtitle}>{vessel.location}</Text>
           <View style={styles.badges}>
@@ -117,6 +123,43 @@ export default function VesselDetailScreen() {
               </Text>
             </View>
           </View>
+        </View>
+
+        {/* Engine Hours */}
+        <View style={styles.engineHoursSection}>
+          <View style={styles.engineHoursHeader}>
+            <View>
+              <Text style={styles.engineHoursLabel}>Engine Hours</Text>
+              <Text style={styles.engineHoursValue}>
+                {(vessel.engineHours || 0).toLocaleString()}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.updateHoursButton}
+              onPress={() =>
+                router.push({
+                  pathname: "/update-engine-hours",
+                  params: { vesselId: vessel.id },
+                })
+              }
+            >
+              <Text style={styles.updateHoursButtonText}>Update Hours</Text>
+            </TouchableOpacity>
+          </View>
+          {engineHourLogs.length > 0 && (
+            <View style={styles.engineLogList}>
+              {engineHourLogs.slice(0, 5).map((log) => (
+                <View key={log.id} style={styles.engineLogRow}>
+                  <Text style={styles.engineLogHours}>
+                    {log.newHours.toLocaleString()} hrs
+                  </Text>
+                  <Text style={styles.engineLogMeta}>
+                    {log.updatedByName} {"\u00B7"} {formatDate(log.timestamp)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
 
         <View style={styles.listArea}>
@@ -330,6 +373,12 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     paddingHorizontal: 20,
   },
+  vesselImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
   iconCircle: {
     width: 80,
     height: 80,
@@ -354,4 +403,59 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 12, fontWeight: "600" },
   statsRow: { flexDirection: "row", gap: 12, marginBottom: 24 },
   listArea: {},
+  engineHoursSection: {
+    marginHorizontal: 16,
+    marginBottom: 24,
+    backgroundColor: colors.container,
+    borderRadius: 12,
+    padding: 16,
+    gap: 12,
+  },
+  engineHoursHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  engineHoursLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.textSecondary,
+    marginBottom: 4,
+  },
+  engineHoursValue: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: colors.text,
+  },
+  updateHoursButton: {
+    backgroundColor: colors.accent + "20",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  updateHoursButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.accent,
+  },
+  engineLogList: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.surfaceThree,
+    paddingTop: 12,
+    gap: 8,
+  },
+  engineLogRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  engineLogHours: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  engineLogMeta: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
 });

@@ -27,7 +27,7 @@ export default function TabLayout() {
   const urgentMaintenanceCount = useMemo(() => {
     if (!userId || !userRole) return 0;
     const tasks = getMaintenanceTasksForUser(userId, userRole);
-    return tasks.filter((t) => t.priority === "high" || t.priority === "urgent")
+    return tasks.filter((t) => t.priority === "high" || t.priority === "urgent" || t.priority === "critical")
       .length;
   }, [userId, userRole, getMaintenanceTasksForUser]);
 
@@ -167,6 +167,60 @@ export default function TabLayout() {
           androidSrc={<VectorIcon family={MaterialIcons} name="description" />}
         />
         <Label>Documents</Label>
+      </NativeTabs.Trigger>
+
+      {/* Contacts (owner + manager) */}
+      <NativeTabs.Trigger
+        name="contacts"
+        hidden={userRole === "crew"}
+        {...sharedTriggerProps}
+      >
+        <Icon
+          sf={{ default: "person.2", selected: "person.2.fill" }}
+          androidSrc={<VectorIcon family={MaterialIcons} name="contacts" />}
+        />
+        <Label>Contacts</Label>
+      </NativeTabs.Trigger>
+
+      {/* Certifications (owner + manager) */}
+      <NativeTabs.Trigger
+        name="certifications"
+        hidden={userRole === "crew"}
+        {...sharedTriggerProps}
+      >
+        <Icon
+          sf={{ default: "checkmark.seal", selected: "checkmark.seal.fill" }}
+          androidSrc={<VectorIcon family={MaterialIcons} name="verified" />}
+        />
+        <Label>Certs</Label>
+      </NativeTabs.Trigger>
+
+      {/* Charters (owner + manager) */}
+      <NativeTabs.Trigger
+        name="charters"
+        hidden={userRole === "crew"}
+        {...sharedTriggerProps}
+      >
+        <Icon
+          sf={{ default: "sailboat", selected: "sailboat.fill" }}
+          androidSrc={
+            <VectorIcon family={MaterialIcons} name="directions-boat" />
+          }
+        />
+        <Label>Charters</Label>
+      </NativeTabs.Trigger>
+
+      {/* Equipment (owner + manager) */}
+      <NativeTabs.Trigger
+        name="equipment"
+        hidden={userRole === "crew"}
+        {...sharedTriggerProps}
+      >
+        <Icon
+          sf={{ default: "lifepreserver", selected: "lifepreserver.fill" }}
+          androidSrc={<VectorIcon family={MaterialIcons} name="inventory" />}
+        />
+        <Label>Equipment</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
