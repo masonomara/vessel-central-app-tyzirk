@@ -7,8 +7,10 @@
 - the login screen also needs to be better aligned with the rest of the app.
 - run MAUNUAL_WALKTHROUGH and steamroll little style ficxes
 - Remove or restyle the "Quick Demo" buttons on the login screen (Owner/Manager/Crew)
-- Confirm notification placeholder behavior doesn't crash
-- Ensure profile notification preferences actually persist (currently UI-only)
+- Full physical device walkthrough -- every tab, modal, form on iOS
+- Full physical device walkthrough on Android
+- Fix any layout breaks found across screen sizes
+- Kill every dead-end screen (screens that lead nowhere on tap)
 
 ## Legal & Metadata
 
@@ -17,13 +19,6 @@
 - Write Google Play Store metadata
 - Bundle ID review -- `com.vesselcentral.app` may need updating
 - App version bump from 1.0.0 if needed
-
-## Crash Fixes & Stability
-
-- Full physical device walkthrough -- every tab, modal, form on iOS
-- Full physical device walkthrough on Android
-- Fix any layout breaks found across screen sizes
-- Kill every dead-end screen (screens that lead nowhere on tap)
 
 ## Submission
 

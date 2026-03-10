@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Switch,
   Alert,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack } from "expo-router";
 import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "expo-router";
@@ -61,11 +62,44 @@ export default function ProfileScreen() {
     approvals: true,
   });
 
+  const storageKey = `@vessel_notif_prefs_${userId}`;
+
+  useEffect(() => {
+    if (!userId) return;
+    AsyncStorage.getItem(storageKey).then((raw) => {
+      if (!raw) return;
+      try {
+        const prefs = JSON.parse(raw);
+        if (typeof prefs.enabled === "boolean") setNotificationsEnabled(prefs.enabled);
+        if (prefs.categories) setCategoryEnabled((prev) => ({ ...prev, ...prefs.categories }));
+      } catch {}
+    });
+  }, [userId, storageKey]);
+
+  const savePrefs = useCallback(
+    (enabled: boolean, categories: Record<NotificationCategory, boolean>) => {
+      AsyncStorage.setItem(storageKey, JSON.stringify({ enabled, categories }));
+    },
+    [storageKey],
+  );
+
+  const handleToggleAll = useCallback(
+    (value: boolean) => {
+      setNotificationsEnabled(value);
+      savePrefs(value, categoryEnabled);
+    },
+    [categoryEnabled, savePrefs],
+  );
+
   const toggleCategory = useCallback(
     (key: NotificationCategory, value: boolean) => {
-      setCategoryEnabled((prev) => ({ ...prev, [key]: value }));
+      setCategoryEnabled((prev) => {
+        const next = { ...prev, [key]: value };
+        savePrefs(notificationsEnabled, next);
+        return next;
+      });
     },
-    [],
+    [notificationsEnabled, savePrefs],
   );
 
   const handleLogout = () => {
@@ -131,7 +165,7 @@ export default function ProfileScreen() {
             <Text style={styles.switchLabel}>All Notifications</Text>
             <Switch
               value={notificationsEnabled}
-              onValueChange={setNotificationsEnabled}
+              onValueChange={handleToggleAll}
               thumbColor={colors.surfaceOne}
             />
           </View>
