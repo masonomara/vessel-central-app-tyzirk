@@ -22,7 +22,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { scrollProps } from '../hooks/useTopPadding';
 
-const URGENCY_LEVELS: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
+const URGENCY_LEVELS: TaskPriority[] = ['none', 'low', 'medium', 'high', 'urgent', 'critical'];
 
 const VESSEL_LOCATIONS = [
   'Engine Room',

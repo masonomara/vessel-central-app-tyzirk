@@ -128,7 +128,7 @@ export default memo(function FilterModal({
               <View style={styles.filterSection}>
                 <Text style={styles.filterLabel}>Priority</Text>
                 <View style={styles.filterOptions}>
-                  {['all', 'low', 'medium', 'high', 'urgent'].map((priority) => (
+                  {['all', 'none', 'low', 'medium', 'high', 'urgent', 'critical'].map((priority) => (
                     <FilterChip
                       key={priority}
                       label={priority.toUpperCase()}

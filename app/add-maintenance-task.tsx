@@ -45,15 +45,17 @@ export default function AddMaintenanceTaskScreen() {
   const [showPriorityPicker, setShowPriorityPicker] = useState(false);
   const [showFrequencyPicker, setShowFrequencyPicker] = useState(false);
 
-  const priorities: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
+  const priorities: TaskPriority[] = ['none', 'low', 'medium', 'high', 'urgent', 'critical'];
   const frequencies: MaintenanceFrequency[] = ['daily', 'weekly', 'monthly', 'quarterly', 'yearly'];
 
   const getPriorityColor = (p: TaskPriority) => {
     switch (p) {
+      case 'critical': return colors.purpleForeground;
       case 'urgent': return colors.danger;
       case 'high': return colors.warning;
       case 'medium': return colors.accent;
       case 'low': return colors.success;
+      case 'none': return colors.grey;
       default: return colors.grey;
     }
   };

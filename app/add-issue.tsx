@@ -35,7 +35,7 @@ const ISSUE_CATEGORIES = [
   'Other',
 ];
 
-const PRIORITY_OPTIONS: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
+const PRIORITY_OPTIONS: TaskPriority[] = ['none', 'low', 'medium', 'high', 'urgent', 'critical'];
 
 export default function AddIssueScreen() {
   const router = useRouter();

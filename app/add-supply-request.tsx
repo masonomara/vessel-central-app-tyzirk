@@ -31,7 +31,7 @@ const SUPPLY_CATEGORIES = [
   'Other',
 ];
 
-const PRIORITY_OPTIONS: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
+const PRIORITY_OPTIONS: TaskPriority[] = ['none', 'low', 'medium', 'high', 'urgent', 'critical'];
 
 const UNIT_OPTIONS = [
   'units',

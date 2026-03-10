@@ -239,10 +239,12 @@ export default function MaintenanceDetailScreen() {
         <DropdownRow
           label="Priority"
           options={[
+            { label: "Critical", value: "critical" },
             { label: "Urgent", value: "urgent" },
             { label: "High", value: "high" },
             { label: "Medium", value: "medium" },
             { label: "Low", value: "low" },
+            { label: "None", value: "none" },
           ]}
           selectedValue={task.priority}
           onSelect={(value) => handlePriorityChange(value as TaskPriority)}
