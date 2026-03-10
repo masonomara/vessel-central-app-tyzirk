@@ -4,7 +4,6 @@ import {
   View,
   Text,
   ScrollView,
-  Alert,
   TextInput,
   TouchableOpacity,
 } from "react-native";
@@ -22,7 +21,7 @@ import { PriorityDetailRow } from "../components/PriorityDetailRow";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, isOverdue } from "../utils/dateUtils";
 import { formatLabel } from "../utils/formatLabel";
-import { formatFileSize } from "../utils/fileUtils";
+import { formatFileSize, openDocument } from "../utils/fileUtils";
 import { scrollProps } from "../hooks/useTopPadding";
 
 export default function DocumentDetailScreen() {
@@ -101,12 +100,7 @@ export default function DocumentDetailScreen() {
         />
         <TouchableOpacity
           style={styles.previewSection}
-          onPress={() =>
-            Alert.alert(
-              "No File Available",
-              "This document has no file attached.",
-            )
-          }
+          onPress={() => openDocument(doc.fileUri, doc.fileType)}
           activeOpacity={0.7}
         >
           <View style={styles.previewPlaceholder}>
