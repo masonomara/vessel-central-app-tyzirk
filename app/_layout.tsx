@@ -99,6 +99,47 @@ function RootLayoutContent() {
           options={{ title: "Profile", headerBackTitle: "Back" }}
         />
 
+        {/* Add-form modals */}
+        <Stack.Screen
+          name="add-certification"
+          options={{
+            presentation: "modal",
+            animation: "slide_from_bottom",
+            title: "New Certification",
+          }}
+        />
+        <Stack.Screen
+          name="add-charter"
+          options={{
+            presentation: "modal",
+            animation: "slide_from_bottom",
+            title: "Log Charter",
+          }}
+        />
+        <Stack.Screen
+          name="add-contact"
+          options={{
+            presentation: "modal",
+            animation: "slide_from_bottom",
+            title: "New Contact",
+          }}
+        />
+        <Stack.Screen
+          name="add-equipment"
+          options={{
+            presentation: "modal",
+            animation: "slide_from_bottom",
+            title: "New Equipment",
+          }}
+        />
+
+        {/* Detail screens */}
+        <Stack.Screen name="certification-detail" options={{ title: "Certification" }} />
+        <Stack.Screen name="charter-detail" options={{ title: "Charter Details" }} />
+        <Stack.Screen name="contact-detail" options={{ title: "Contact" }} />
+        <Stack.Screen name="equipment-detail" options={{ title: "Equipment" }} />
+        <Stack.Screen name="update-engine-hours" options={{ title: "Update Engine Hours" }} />
+
         {/* Utility screens */}
         <Stack.Screen name="assign-boats" options={{ title: "Assign Boats" }} />
         <Stack.Screen name="analytics" options={{ title: "Analytics" }} />
