@@ -273,17 +273,16 @@ export default function LoginScreen() {
             </Text>
           </TouchableOpacity>
 
-          {/* Demo section */}
           {!showEmailLogin && (
-            <View style={styles.demoSection}>
+            <View style={styles.quickLoginSection}>
               <View style={styles.dividerRow}>
                 <View style={styles.divider} />
-                <Text style={styles.dividerText}>Quick Demo</Text>
+                <Text style={styles.dividerText}>Quick Login</Text>
                 <View style={styles.divider} />
               </View>
-              <View style={styles.demoButtonRow}>
+              <View style={styles.quickLoginButtonRow}>
                 <TouchableOpacity
-                  style={styles.demoButton}
+                  style={styles.quickLoginButton}
                   onPress={() => handleQuickLogin("owner")}
                   disabled={isLoading}
                   activeOpacity={0.7}
@@ -294,11 +293,11 @@ export default function LoginScreen() {
                     size={20}
                     color={colors.gold}
                   />
-                  <Text style={styles.demoButtonText}>Owner</Text>
+                  <Text style={styles.quickLoginButtonText}>Owner</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.demoButton}
+                  style={styles.quickLoginButton}
                   onPress={() => handleQuickLogin("manager")}
                   disabled={isLoading}
                   activeOpacity={0.7}
@@ -309,11 +308,11 @@ export default function LoginScreen() {
                     size={20}
                     color={colors.accent}
                   />
-                  <Text style={styles.demoButtonText}>Manager</Text>
+                  <Text style={styles.quickLoginButtonText}>Manager</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.demoButton}
+                  style={styles.quickLoginButton}
                   onPress={() => handleQuickLogin("crew")}
                   disabled={isLoading}
                   activeOpacity={0.7}
@@ -324,7 +323,7 @@ export default function LoginScreen() {
                     size={20}
                     color={colors.success}
                   />
-                  <Text style={styles.demoButtonText}>Crew</Text>
+                  <Text style={styles.quickLoginButtonText}>Crew</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -421,7 +420,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#FFFFFF",
   },
-  demoSection: {
+  quickLoginSection: {
     marginTop: 24,
   },
   dividerRow: {
@@ -442,11 +441,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     textTransform: "uppercase",
   },
-  demoButtonRow: {
+  quickLoginButtonRow: {
     flexDirection: "row",
     gap: 10,
   },
-  demoButton: {
+  quickLoginButton: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -457,7 +456,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
   },
-  demoButtonText: {
+  quickLoginButtonText: {
     fontSize: 13,
     fontWeight: "600",
     color: "rgba(255,255,255,0.7)",

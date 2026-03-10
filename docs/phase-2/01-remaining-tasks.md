@@ -7,7 +7,6 @@
 - the login screen also needs to be better aligned with the rest of the app.
 - run MAUNUAL_WALKTHROUGH and steamroll little style ficxes
 - Remove or restyle the "Quick Demo" buttons on the login screen (Owner/Manager/Crew)
-- Strip any remaining "Demo Mode" indicators or prototype badges
 - Confirm notification placeholder behavior doesn't crash
 - Ensure profile notification preferences actually persist (currently UI-only)
 
