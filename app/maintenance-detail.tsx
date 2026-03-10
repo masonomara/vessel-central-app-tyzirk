@@ -29,14 +29,10 @@ import { TaskStatus, TaskPriority } from "../types";
 import { scrollProps } from "../hooks/useTopPadding";
 
 const MOCK_USERS: Record<string, string> = {
-  manager1: "Sarah Johnson",
-  manager2: "Tom Wilson",
-  manager3: "Alex Martinez",
-  crew1: "Mike Davis",
-  crew2: "Sarah Williams",
-  crew3: "Jane Smith",
-  crew4: "Tom Anderson",
-  crew5: "Lisa Martinez",
+  owner1: "Diane Sanderson",
+  manager1: "Brett Nealson",
+  crew1: "Marcus Rivera",
+  crew2: "Tanya Brooks",
 };
 
 export default function MaintenanceDetailScreen() {

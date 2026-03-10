@@ -140,7 +140,7 @@ export default function MemberSetupScreen() {
               style={styles.input}
               value={phone}
               onChangeText={setPhone}
-              placeholder="+1 (555) 123-4567"
+              placeholder="+1 (340) 555-0100"
               placeholderTextColor={colors.textTertiary}
               keyboardType="phone-pad"
             />

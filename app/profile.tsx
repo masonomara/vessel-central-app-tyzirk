@@ -33,7 +33,20 @@ const CATEGORIES: { key: NotificationCategory; label: string }[] = [
 ];
 
 export default function ProfileScreen() {
-  const { signOut, userName, userRole } = useAuth();
+  const { signOut, userName, userRole, userId } = useAuth();
+
+  const USER_PROFILES: Record<string, { email: string; phone: string; location: string }> = {
+    owner1: { email: 'diane@vesselco.com', phone: '+1 (340) 775-1001', location: 'St. Thomas, USVI' },
+    manager1: { email: 'brett@vesselco.com', phone: '+1 (340) 775-1002', location: 'St. Thomas, USVI' },
+    crew1: { email: 'marcus@vesselco.com', phone: '+1 (340) 775-1003', location: 'St. Thomas, USVI' },
+    crew2: { email: 'tanya@vesselco.com', phone: '+1 (340) 775-1004', location: 'St. Thomas, USVI' },
+  };
+
+  const profile = USER_PROFILES[userId] || {
+    email: userName ? `${userName.split(' ')[0].toLowerCase()}@vesselco.com` : 'user@vesselco.com',
+    phone: '+1 (340) 775-1000',
+    location: 'St. Thomas, USVI',
+  };
   const router = useRouter();
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -108,9 +121,9 @@ export default function ProfileScreen() {
           <Text style={ds.title}>{userName || "User"}</Text>
         </View>
 
-        <DetailRow label="Email" value="user@example.com" inline />
-        <DetailRow label="Phone" value="+1 (555) 123-4567" inline />
-        <DetailRow label="Location" value="San Francisco, CA" inline />
+        <DetailRow label="Email" value={profile.email} inline />
+        <DetailRow label="Phone" value={profile.phone} inline />
+        <DetailRow label="Location" value={profile.location} inline />
 
         <View style={styles.notificationSection}>
           <Text style={styles.sectionLabel}>Notifications</Text>

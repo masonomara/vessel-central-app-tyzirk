@@ -46,17 +46,12 @@ export default function AssignBoatsScreen() {
 
   // Mock users - in a real app, this would come from a database
   const mockOwners = [
-    { id: 'owner1', name: 'John Smith' },
-    { id: 'owner2', name: 'Emily Brown' },
-    { id: 'owner3', name: 'Robert Johnson' },
+    { id: 'owner1', name: 'Diane Sanderson' },
   ];
 
   const mockCrew = [
-    { id: 'crew1', name: 'Mike Davis' },
-    { id: 'crew2', name: 'Sarah Wilson' },
-    { id: 'crew3', name: 'Jane Smith' },
-    { id: 'crew4', name: 'Tom Anderson' },
-    { id: 'crew5', name: 'Lisa Martinez' },
+    { id: 'crew1', name: 'Marcus Rivera' },
+    { id: 'crew2', name: 'Tanya Brooks' },
   ];
 
   const filteredVessels = useMemo(() => {

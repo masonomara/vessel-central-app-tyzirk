@@ -26,7 +26,7 @@ export function RealtimeFeed({ limit = 20, onItemPress }: RealtimeFeedProps) {
           </View>
           <View style={styles.eventContent}>
             <Text style={styles.eventTitle}>New Issue Reported</Text>
-            <Text style={styles.eventDescription} numberOfLines={2}>Mike Davis reported Deck Leak on Azure Dream</Text>
+            <Text style={styles.eventDescription} numberOfLines={2}>Marcus Rivera reported Port Navigation Light Intermittent on Purely Blu</Text>
             <Text style={styles.eventTime}>2 hours ago</Text>
           </View>
         </PressableCard>
@@ -37,7 +37,7 @@ export function RealtimeFeed({ limit = 20, onItemPress }: RealtimeFeedProps) {
           </View>
           <View style={styles.eventContent}>
             <Text style={styles.eventTitle}>Supply Request Approved</Text>
-            <Text style={styles.eventDescription} numberOfLines={2}>Engine Oil request approved for Azure Dream</Text>
+            <Text style={styles.eventDescription} numberOfLines={2}>Saildrive Seal Kit approved for Purely Blu</Text>
             <Text style={styles.eventTime}>12 hours ago</Text>
           </View>
         </PressableCard>
@@ -75,7 +75,7 @@ export function RealtimeFeed({ limit = 20, onItemPress }: RealtimeFeedProps) {
             </View>
             <View style={styles.eventContent}>
               <Text style={styles.eventTitle}>Task Assigned</Text>
-              <Text style={styles.eventDescription} numberOfLines={2}>Deck Cleaning assigned to Mike Davis on Azure Dream</Text>
+              <Text style={styles.eventDescription} numberOfLines={2}>Teak Cockpit Table Refinish assigned to Marcus Rivera on Purely Blu</Text>
               <Text style={styles.eventTime}>3 days ago</Text>
             </View>
           </PressableCard>

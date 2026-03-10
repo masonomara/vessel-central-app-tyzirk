@@ -1269,148 +1269,148 @@ Bumping from 2 to 3 forces a data reset on existing installs so users see the ne
 
 Foundation layer. Everything else references user IDs and names, so this goes first.
 
-- [ ] **1.1** Replace `MOCK_USERS` array in `app/login.tsx` (lines 31-74)
+- [x] **1.1** Replace `MOCK_USERS` array in `app/login.tsx` (lines 31-74)
   - Remove owner2, manager2, crew3
   - Add: Diane Sanderson (owner1), Brett Nealson (manager1), Marcus Rivera (crew1), Tanya Brooks (crew2)
   - Update emails to match new names
-- [ ] **1.2** Bump `DATA_VERSION` from 2 to 3 in `contexts/DataContext.tsx` (line 88)
+- [x] **1.2** Bump `DATA_VERSION` from 2 to 3 in `contexts/DataContext.tsx` (line 88)
   - Forces data reset on existing installs
-- [ ] **1.3** Verify login screen renders correctly with 4 quick-login buttons instead of 6
-- [ ] **1.4** Test each quick-login role routes to the correct dashboard tab
+- [x] **1.3** Verify login screen renders correctly with 4 quick-login buttons instead of 6
+- [x] **1.4** Test each quick-login role routes to the correct dashboard tab
 
 ### Phase 2: Vessels (Step 2)
 
 Vessel IDs and names cascade into every other entity. Must be done before tasks/issues/supplies.
 
-- [ ] **2.1** Replace vessels array in `contexts/DataContext.tsx` (lines 91-122)
+- [x] **2.1** Replace vessels array in `contexts/DataContext.tsx` (lines 91-122)
   - Vessel 1: Purely Blu, Red Hook, St. Thomas, USVI, active
   - Vessel 2: Ocean Pearl, Nanny Cay, Tortola, BVI, active
   - Vessel 3: Sea Breeze, Cruz Bay, St. John, USVI, maintenance
   - All vessels: ownerId=owner1, managerId=manager1
-- [ ] **2.2** Verify owner dashboard shows all 3 vessels
-- [ ] **2.3** Verify manager dashboard shows all 3 vessels
-- [ ] **2.4** Verify crew dashboards show only vessels where crewIds includes their ID
-- [ ] **2.5** Verify vessel-detail screen renders correctly for each vessel
+- [x] **2.2** Verify owner dashboard shows all 3 vessels
+- [x] **2.3** Verify manager dashboard shows all 3 vessels
+- [x] **2.4** Verify crew dashboards show only vessels where crewIds includes their ID
+- [x] **2.5** Verify vessel-detail screen renders correctly for each vessel
 
 ### Phase 3: Maintenance Tasks (Step 3)
 
 Largest data block. 9 tasks derived from spreadsheet maintenance projections.
 
-- [ ] **3.1** Replace maintenanceTasks array in `contexts/DataContext.tsx` (lines 124-367)
+- [x] **3.1** Replace maintenanceTasks array in `contexts/DataContext.tsx` (lines 124-367)
   - 9 tasks total: 4 open, 2 in_progress, 1 waiting_on_parts, 1 completed, 1 open (long-term)
   - All tasks use new user names (Marcus Rivera, Tanya Brooks, Brett Nealson)
   - All vesselName values match new vessel names
   - Completed task (Zinc Anode) has completionHistory with cost
   - Waiting task (Saildrive Seal) has comment from manager
   - In-progress task (Ice Maker) has comment from crew
-- [ ] **3.2** Verify maintenance tab SectionList has items in all 4 status groups
-- [ ] **3.3** Verify maintenance-detail screen renders correctly (tap into Zinc Anode to confirm completion history)
-- [ ] **3.4** Verify maintenance-detail screen renders comments (tap into Saildrive Seal)
-- [ ] **3.5** Verify owner dashboard maintenance summary counts are correct
-- [ ] **3.6** Verify crew dashboard shows only tasks assigned to logged-in crew member
+- [x] **3.2** Verify maintenance tab SectionList has items in all 4 status groups
+- [x] **3.3** Verify maintenance-detail screen renders correctly (tap into Zinc Anode to confirm completion history)
+- [x] **3.4** Verify maintenance-detail screen renders comments (tap into Saildrive Seal)
+- [x] **3.5** Verify owner dashboard maintenance summary counts are correct
+- [x] **3.6** Verify crew dashboard shows only tasks assigned to logged-in crew member
 
 ### Phase 4: Issues (Step 4)
 
 5 issues derived from spreadsheet "Open Issues by System" breakdown.
 
-- [ ] **4.1** Replace issues array in `contexts/DataContext.tsx` (lines 369-515)
+- [x] **4.1** Replace issues array in `contexts/DataContext.tsx` (lines 369-515)
   - 5 issues: 3 open, 1 in_progress, 1 completed
   - Categories from spreadsheet: Electrical, Lighting, Electronics, Dinghy, Sails/Canvas
   - All user references use new aliased names
   - Comments on issues 1-3 and 5
-- [ ] **4.2** Verify issues tab SectionList populates correctly
-- [ ] **4.3** Verify issue-detail screen renders comments thread
-- [ ] **4.4** Verify manager dashboard shows open issues count
+- [x] **4.2** Verify issues tab SectionList populates correctly
+- [x] **4.3** Verify issue-detail screen renders comments thread
+- [x] **4.4** Verify manager dashboard shows open issues count
 
 ### Phase 5: Supply Requests (Step 5)
 
 6 supply requests tied to maintenance task parts needs.
 
-- [ ] **5.1** Replace supplyRequests array in `contexts/DataContext.tsx` (lines 517-652)
+- [x] **5.1** Replace supplyRequests array in `contexts/DataContext.tsx` (lines 517-652)
   - 6 requests: 2 pending, 2 ordered, 1 approved, 1 received
   - Categories: Mechanical Parts, Rigging, Maintenance Supplies, Appliance Parts, Plumbing Parts
   - Vendors where applicable (Parts & Power, West Marine)
   - All user references use new aliased names
-- [ ] **5.2** Verify supplies tab SectionList populates all status groups
-- [ ] **5.3** Verify supply-detail screen renders correctly
-- [ ] **5.4** Verify manager dashboard shows pending supply approvals
-- [ ] **5.5** Verify owner dashboard shows pending supply approvals
+- [x] **5.2** Verify supplies tab SectionList populates all status groups
+- [x] **5.3** Verify supply-detail screen renders correctly
+- [x] **5.4** Verify manager dashboard shows pending supply approvals
+- [x] **5.5** Verify owner dashboard shows pending supply approvals
 
 ### Phase 6: Documents (Step 6)
 
 7 documents mapped from spreadsheet certification tracking sections.
 
-- [ ] **6.1** Replace documents array in `contexts/DataContext.tsx` (lines 654-784)
-  - 7 documents across categories: registration (3), insurance (1), safety (2), registration (1)
+- [x] **6.1** Replace documents array in `contexts/DataContext.tsx` (lines 654-784)
+  - 7 documents across categories: registration (4), insurance (1), safety (2)
   - Expiry dates from spreadsheet where available
   - fileUri values remain as placeholders (file://documents/...) — PDF bundling is out of scope
   - All user references use new aliased names
-- [ ] **6.2** Verify documents tab groups documents by category correctly
-- [ ] **6.3** Verify document-detail screen renders metadata (title, expiry, tags)
-- [ ] **6.4** Confirm documents tab only visible for owner role
+- [x] **6.2** Verify documents tab groups documents by category correctly
+- [x] **6.3** Verify document-detail screen renders metadata (title, expiry, tags)
+- [x] **6.4** Confirm documents tab only visible for owner role
 
 ### Phase 7: Activity Logs & Notifications (Steps 7-8)
 
 Lightweight data that references entities created in Phases 3-6.
 
-- [ ] **7.1** Replace activityLogs array in `contexts/DataContext.tsx` (lines 786-829)
+- [x] **7.1** Replace activityLogs array in `contexts/DataContext.tsx` (lines 786-829)
   - 5 log entries referencing new entity names and user aliases
   - Types: issue (2), approval (1), maintenance (1), supply (1)
   - Timestamps spread across last 10 days
-- [ ] **7.2** Replace notifications array in `contexts/DataContext.tsx` (lines 831-872)
+- [x] **7.2** Replace notifications array in `contexts/DataContext.tsx` (lines 831-872)
   - 4 notifications: 2 for manager1, 2 for owner1
   - Reference new issue/supply names
-- [ ] **7.3** Verify owner dashboard activity feed shows recent entries
-- [ ] **7.4** Verify manager dashboard activity feed shows recent entries
+- [x] **7.3** Verify owner dashboard activity feed shows recent entries
+- [x] **7.4** Verify manager dashboard activity feed shows recent entries
 
 ### Phase 8: Expenses (Step 9)
 
 7 expenses with realistic Caribbean charter costs.
 
-- [ ] **8.1** Replace expenses array in `contexts/DataContext.tsx` (lines 874-987)
+- [x] **8.1** Replace expenses array in `contexts/DataContext.tsx` (lines 874-987)
   - 7 expenses: Fuel (2), Docking, Provisioning, Maintenance, Insurance, Administrative
   - All user references use new aliased names
   - Mix of statuses: 5 paid, 1 pending, 0 approved (for dashboard variety)
-- [ ] **8.2** Verify analytics screen chart renders with new expense data
-- [ ] **8.3** Verify owner dashboard expense summary is correct
+- [x] **8.2** Verify analytics screen chart renders with new expense data
+- [x] **8.3** Verify owner dashboard expense summary is correct
 
 ### Phase 9: Calendar Events (Step 10)
 
 5 events using Caribbean locations and charter-season context.
 
-- [ ] **9.1** Replace calendarEvents array in `contexts/DataContext.tsx` (lines 989-1114)
+- [x] **9.1** Replace calendarEvents array in `contexts/DataContext.tsx` (lines 989-1114)
   - 5 events: charter, provisioning, maintenance (haul out), inspection, crew_change
   - All locations are Caribbean (Red Hook, Nanny Cay, Subbase Drydock, Cost-U-Less)
   - All user references use new aliased names
   - Haul out event links to saildrive seal task via relatedTaskId
-- [ ] **9.2** Verify calendar month view shows event dots on correct dates
-- [ ] **9.3** Verify tapping a date shows the event list for that day
-- [ ] **9.4** Verify calendar-event-detail screen renders correctly
+- [x] **9.2** Verify calendar month view shows event dots on correct dates
+- [x] **9.3** Verify tapping a date shows the event list for that day
+- [x] **9.4** Verify calendar-event-detail screen renders correctly
 
 ### Phase 10: Profile & Member Setup (Steps 11-12)
 
 Quick fixes to hardcoded UI values.
 
-- [ ] **10.1** Add USER_PROFILES lookup map inside profile component in `app/profile.tsx`
+- [x] **10.1** Add USER_PROFILES lookup map inside profile component in `app/profile.tsx`
   - Map owner1, manager1, crew1, crew2 to email/phone/location
   - Fallback for custom member-setup users
-- [ ] **10.2** Replace 3 hardcoded DetailRow values with dynamic `profile.*` references in `app/profile.tsx` (lines 111-113)
-- [ ] **10.3** Change phone placeholder in `app/member-setup.tsx` (line 143) from `+1 (555) 123-4567` to `+1 (340) 555-0100`
-- [ ] **10.4** Verify profile screen shows correct data for each demo user role
-- [ ] **10.5** Verify member-setup screen shows updated placeholder
+- [x] **10.2** Replace 3 hardcoded DetailRow values with dynamic `profile.*` references in `app/profile.tsx` (lines 111-113)
+- [x] **10.3** Change phone placeholder in `app/member-setup.tsx` (line 143) from `+1 (555) 123-4567` to `+1 (340) 555-0100`
+- [x] **10.4** Verify profile screen shows correct data for each demo user role
+- [x] **10.5** Verify member-setup screen shows updated placeholder
 
 ### Phase 11: Full Walkthrough Verification
 
 End-to-end check after all data is in place.
 
-- [ ] **11.1** Log in as owner (Diane Sanderson) — verify dashboard, vessels, documents, calendar, analytics, profile
-- [ ] **11.2** Log in as manager (Brett Nealson) — verify dashboard, maintenance, issues, supplies, calendar, profile
-- [ ] **11.3** Log in as crew (Marcus Rivera) — verify dashboard, assigned tasks only, issues, supplies, calendar, profile
-- [ ] **11.4** Log in as crew (Tanya Brooks) — verify different assigned tasks appear vs Marcus
-- [ ] **11.5** Confirm no references to old names remain (John Smith, Emily Brown, Sarah Johnson, Tom Wilson, Mike Davis, Jane Smith, Sarah Williams)
-- [ ] **11.6** Confirm no references to old locations remain (Monaco, Miami, "Caribbean Marina")
-- [ ] **11.7** Confirm no references to old vessel name "Azure Dream" remain in any visible UI
-- [ ] **11.8** Clear AsyncStorage / reinstall to confirm DATA_VERSION bump triggers fresh data load
+- [x] **11.1** Log in as owner (Diane Sanderson) — verify dashboard, vessels, documents, calendar, analytics, profile
+- [x] **11.2** Log in as manager (Brett Nealson) — verify dashboard, maintenance, issues, supplies, calendar, profile
+- [x] **11.3** Log in as crew (Marcus Rivera) — verify dashboard, assigned tasks only, issues, supplies, calendar, profile
+- [x] **11.4** Log in as crew (Tanya Brooks) — verify different assigned tasks appear vs Marcus
+- [x] **11.5** Confirm no references to old names remain (John Smith, Emily Brown, Sarah Johnson, Tom Wilson, Mike Davis, Jane Smith, Sarah Williams)
+- [x] **11.6** Confirm no references to old locations remain (Monaco, Miami, "Caribbean Marina")
+- [x] **11.7** Confirm no references to old vessel name "Azure Dream" remain in any visible UI
+- [x] **11.8** Clear AsyncStorage / reinstall to confirm DATA_VERSION bump triggers fresh data load
 
 ---
 
