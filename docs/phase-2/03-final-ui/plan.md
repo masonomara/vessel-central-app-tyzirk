@@ -113,6 +113,7 @@ Verify each opens as a bottom-sheet modal (not a push). Stack registrations alre
 3. **Horizontal padding**: All section headers, content blocks, and cards must have consistent `paddingHorizontal: 20` (or equivalent margin). No content flush against screen edges.
 
 Screens to audit:
+
 - All three dashboards (owner, manager, crew)
 - All tab screens (calendar, maintenance, issues, supplies, documents, contacts, certifications, charters, equipment)
 - All detail screens (vessel-detail, maintenance-detail, issue-detail, supply-detail, document-detail, calendar-event-detail, certification-detail, charter-detail, contact-detail, equipment-detail)
@@ -416,11 +417,13 @@ Legend: `[CLAUDE]` = code changes I will make. `[HUMAN]` = requires physical dev
 ### Phase 1: Dead-End & Navigation Audit
 
 **[CLAUDE]**
-- [ ] 1.1 -- Make Issues tab visible to owner role in `app/(tabs)/_layout.tsx` (remove `hidden={userRole === "owner"}` on issues trigger, or change to show for owner)
-- [ ] 1.2 -- Make Supplies tab visible to owner role in `app/(tabs)/_layout.tsx` (same pattern)
-- [ ] 1.3 -- Add missing Stack.Screen entries to `app/_layout.tsx` for: `add-certification`, `add-charter`, `add-contact`, `add-equipment` (modal presentation), `certification-detail`, `charter-detail`, `contact-detail`, `equipment-detail`, `update-engine-hours`
+
+- [x] 1.1 -- Make Issues tab visible to owner role in `app/(tabs)/_layout.tsx` -- removed `hidden` prop entirely so all roles see Issues
+- [x] 1.2 -- Make Supplies tab visible to owner role in `app/(tabs)/_layout.tsx` -- removed `hidden` prop entirely so all roles see Supplies
+- [x] 1.3 -- Stack.Screen entries already present in `app/_layout.tsx` for all Phase 2 screens (verified: add-certification, add-charter, add-contact, add-equipment as modals; certification-detail, charter-detail, contact-detail, equipment-detail, update-engine-hours as detail screens)
 
 **[HUMAN]**
+
 - [ ] 1.4 -- Walk every row in tables 1.1-1.4 on device. Tap each source, confirm target loads, confirm back button returns. Log any that fail.
 - [ ] 1.5 -- Walk table 1.5 (analytics links). Confirm all 4 stat card taps land on the correct tab now that Issues/Supplies are visible to owner.
 - [ ] 1.6 -- Walk table 1.6 (add buttons). Confirm each tab's header-right add button opens the correct modal as a bottom sheet.
@@ -428,22 +431,29 @@ Legend: `[CLAUDE]` = code changes I will make. `[HUMAN]` = requires physical dev
 ### Phase 2: Layout & Visual Fixes
 
 **[CLAUDE]**
-- [ ] 2.1a -- Create shared `VesselCard` component in `components/VesselCard.tsx`. Single-column layout, vessel image on left, name/location/status on right. Consistent across roles.
-- [ ] 2.1b -- Refactor owner dashboard (`app/(tabs)/owner/index.tsx`) to use `VesselCard`. Remove fleet grid flexWrap layout.
-- [ ] 2.1c -- Refactor manager dashboard (`app/(tabs)/manager/index.tsx`) to use `VesselCard`. Remove custom vessel card styles.
-- [ ] 2.1d -- Refactor crew dashboard (`app/(tabs)/crew/index.tsx`) to use `VesselCard`. Remove custom vessel card styles.
-- [ ] 2.2a -- Audit and fix padding on all 3 dashboards (owner, manager, crew). Ensure `paddingHorizontal: 20` on headers, consistent scroll content padding.
-- [ ] 2.2b -- Audit and fix padding on all 9 tab screens (calendar, maintenance, issues, supplies, documents, contacts, certifications, charters, equipment). Use `supplies/index.tsx` as reference.
-- [ ] 2.2c -- Audit and fix padding on all 10 detail screens. Ensure bottom safe area spacer (`insets.bottom + 20`) exists in every ScrollView.
-- [ ] 2.2d -- Audit and fix padding on all 10 add-form modals. Ensure submit button is reachable with keyboard up.
-- [ ] 2.2e -- Audit and fix padding on utility screens (profile, analytics, assign-boats, update-engine-hours).
-- [ ] 2.3 -- Fix crew vessel card `marginHorizontal: 20` (subsumed by 2.1d if VesselCard is adopted, otherwise standalone fix).
-- [ ] 2.4 -- Fix analytics chart width: replace `Dimensions.get('window').width` with `useWindowDimensions()`, correct subtraction to `screenWidth - 72`.
-- [ ] 2.5 -- Audit all 10 detail screens for bottom safe area padding. Add `<View style={{ height: insets.bottom + 20 }} />` where missing.
-- [ ] 2.6a -- Audit all 10 add-form modals for headerLeft cancel button. Add where missing.
-- [ ] 2.6b -- Verify cancel button calls `router.back()` and resets form state in each modal.
+
+- [x] 2.1a -- Created shared `VesselCard` component in `components/VesselCard.tsx`. Horizontal layout: vessel image (72x72) on left, name/location/status/crew on right. React.memo optimized.
+- [x] 2.1b -- Refactored owner dashboard to use `VesselCard`. Removed fleet grid flexWrap, LinearGradient import, and all old vessel card styles.
+- [x] 2.1c -- Refactored manager dashboard to use `VesselCard`. Removed ProgressRing import and all old vessel card styles.
+- [x] 2.1d -- Refactored crew dashboard to use `VesselCard`. Removed PressableCard/IconSymbol imports and all old vessel card styles.
+- [x] 2.2a -- Fixed crew dashboard header: added `paddingHorizontal: 20`. Owner and manager already had it.
+- [x] 2.2b -- Tab screens already use `indexScreenStyles` from commonStyles which provides consistent padding. Verified supplies as reference -- all follow same pattern.
+- [x] 2.2c -- Added `paddingBottom: 40` to `detailScreenStyles.scrollContent` in commonStyles.ts. All detail screens using `ds.scrollContent` now have bottom padding.
+- [x] 2.2d -- Fixed `add-maintenance-task.tsx` scrollContent missing paddingBottom. Other modals already had adequate padding (verified via audit).
+- [x] 2.2e -- Fixed `update-engine-hours.tsx` content style missing paddingBottom. Profile and analytics already had adequate padding.
+- [x] 2.3 -- Subsumed by 2.1d. VesselCard component includes `marginHorizontal: 20`.
+- [x] 2.4 -- Replaced `Dimensions.get('window').width` with `useWindowDimensions()` in analytics.tsx. Corrected chart width from `screenWidth - 60` to `screenWidth - 72`.
+- [x] 2.5 -- Covered by 2.2c (detailScreenStyles.scrollContent now has paddingBottom: 40) and 2.2e (update-engine-hours fixed).
+- [x] 2.6a -- Audited all 10 add-form modals. All have headerLeft cancel buttons already present.
+- [x] 2.6b -- Verified all cancel buttons call `router.back()`. Form reset happens via component unmount on modal dismiss.
+
+**Also fixed pre-existing type errors:**
+
+- [x] Fixed `getPriorityBadgeColors` type error in owner dashboard (changed `string` to `TaskPriority`)
+- [x] Fixed missing `category` field in add-maintenance-task.tsx submission object
 
 **[HUMAN]**
+
 - [ ] 2.7 -- Run app on device after fixes. Check every dashboard for vessel card consistency.
 - [ ] 2.8 -- Scroll to bottom of every screen on device. Confirm no content hidden behind home indicator or tab bar.
 - [ ] 2.9 -- Open every add-form modal. Confirm cancel button visible and functional. Scroll to bottom, confirm submit button reachable.
@@ -452,11 +462,13 @@ Legend: `[CLAUDE]` = code changes I will make. `[HUMAN]` = requires physical dev
 ### Phase 3: Cross-Screen Consistency
 
 **[CLAUDE]**
-- [ ] 3.1 -- Audit all 9 tab SectionList screens for consistent `CollapsibleSectionHeader` props (height, font, count style). Fix any deviations.
-- [ ] 3.2 -- Audit all 9 tab screens for empty state handling when filter yields 0 results. Ensure `EmptyState` component renders (not blank space).
-- [ ] 3.3 -- Audit all list card badges across maintenance, issues, supplies, documents, contacts, certifications, charters, equipment. Confirm all use `getPriorityBadgeColors()` or equivalent consistent pattern.
+
+- [x] 3.1 -- Audited all 9 tab screens. All 8 SectionList screens use `CollapsibleSectionHeader` with consistent props (title, count, collapsed, onToggle). Calendar uses custom headers by design (not a SectionList).
+- [x] 3.2 -- Audited all 9 tab screens. All have custom empty state Views with icon + message text when filters produce 0 results. No blank screens.
+- [x] 3.3 -- Audited badge patterns. Priority badges use `getPriorityBadgeColors()` consistently. Status/type badges use per-entity helpers (contact type map, certification status, charter status, equipment condition) -- contextually correct since each entity has different status semantics.
 
 **[HUMAN]**
+
 - [ ] 3.4 -- On device, filter each tab to produce 0 results (search gibberish, filter to empty status). Confirm empty state renders with icon and message, no crash.
 - [ ] 3.5 -- Visually compare section headers across all tabs. Confirm font size, weight, spacing, chevron animation are identical.
 - [ ] 3.6 -- Spot-check badge colors on 3-4 list screens. Confirm visual consistency (same red for "high", same green for "completed", etc).
@@ -464,6 +476,7 @@ Legend: `[CLAUDE]` = code changes I will make. `[HUMAN]` = requires physical dev
 ### Phase 4: Manual Test Walkthrough
 
 **[HUMAN]** -- entire phase is on-device testing.
+
 - [ ] 4.1 -- Fresh install / clear AsyncStorage
 - [ ] 4.2 -- Login screen (7 checkpoints)
 - [ ] 4.3 -- Owner dashboard (12 checkpoints)
@@ -481,12 +494,14 @@ Legend: `[CLAUDE]` = code changes I will make. `[HUMAN]` = requires physical dev
 ### Phase 5: Fix & Re-Test
 
 **[CLAUDE]**
+
 - [ ] 5.1 -- Fix any crashes found during Phase 4 walkthrough
 - [ ] 5.2 -- Fix any dead-end screens found during Phase 4 walkthrough
 - [ ] 5.3 -- Fix any layout breaks found during Phase 4 walkthrough
 - [ ] 5.4 -- Fix any visual inconsistencies found during Phase 4 walkthrough
 
 **[HUMAN]**
+
 - [ ] 5.5 -- Re-run only the failed sections from Phase 4
 - [ ] 5.6 -- Final full walkthrough pass (all sections, all roles)
 - [ ] 5.7 -- Fill in Test Completion Matrix below
