@@ -1,17 +1,15 @@
 import React, { useState } from "react";
 import {
-  StyleSheet,
   View,
   Text,
   ScrollView,
   TextInput,
   TouchableOpacity,
   Alert,
-  Platform,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { colors } from "../styles/commonStyles";
+import { colors, formStyles } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { EquipmentCategory, EquipmentCondition } from "../types";
@@ -141,65 +139,56 @@ export default function AddEquipmentScreen() {
     showPicker: boolean,
     setShowPicker: (show: boolean) => void,
   ) => (
-    <View style={styles.section}>
-      <Text style={styles.label}>{label}</Text>
-      {Platform.OS === "ios" ? (
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <DateTimePicker
-            value={value || new Date()}
-            mode="date"
-            display="default"
-            onChange={(_, date) => {
-              if (date) onChange(date);
-            }}
-            style={styles.datePicker}
-          />
-          {value && (
-            <TouchableOpacity onPress={() => onChange(null)}>
-              <Text style={{ color: colors.danger, fontSize: 14 }}>Clear</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      ) : (
-        <>
-          <TouchableOpacity
-            style={styles.input}
-            onPress={() => setShowPicker(true)}
-          >
-            <Text style={{ color: value ? colors.text : colors.textSecondary }}>
-              {value ? value.toLocaleDateString() : "Select date (optional)"}
-            </Text>
-          </TouchableOpacity>
-          {showPicker && (
-            <DateTimePicker
-              value={value || new Date()}
-              mode="date"
-              display="default"
-              onChange={(_, date) => {
-                setShowPicker(false);
-                if (date) onChange(date);
-              }}
-            />
-          )}
-        </>
+    <View style={formStyles.section}>
+      <Text style={formStyles.label}>{label}</Text>
+      <TouchableOpacity
+        style={formStyles.dateButton}
+        onPress={() => setShowPicker(true)}
+      >
+        <Text
+          style={[
+            formStyles.dateButtonText,
+            !value && { color: colors.textTertiary },
+          ]}
+        >
+          {value ? value.toLocaleDateString() : "Select date (optional)"}
+        </Text>
+      </TouchableOpacity>
+      {value && (
+        <TouchableOpacity onPress={() => onChange(null)}>
+          <Text style={{ color: colors.danger, fontSize: 14, marginTop: 6 }}>
+            Clear
+          </Text>
+        </TouchableOpacity>
+      )}
+      {showPicker && (
+        <DateTimePicker
+          value={value || new Date()}
+          mode="date"
+          display="default"
+          onChange={(_, date) => {
+            setShowPicker(false);
+            if (date) onChange(date);
+          }}
+        />
       )}
     </View>
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+    <View style={formStyles.container}>
       <Stack.Screen
         options={{
           title: "Add Equipment",
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={formStyles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           ),
           headerRight: () => (
             <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
               <Text
-                style={[styles.saveText, isSubmitting && { opacity: 0.5 }]}
+                style={[formStyles.saveText, isSubmitting && { opacity: 0.5 }]}
               >
                 Save
               </Text>
@@ -209,32 +198,32 @@ export default function AddEquipmentScreen() {
       />
 
       <ScrollView
-        style={styles.scrollView}
+        style={formStyles.scrollView}
         contentContainerStyle={[
-          styles.scrollContent,
-          { paddingBottom: insets.bottom + 64 },
+          formStyles.scrollContent,
+          { paddingBottom: insets.bottom },
         ]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
-        <View style={styles.section}>
-          <Text style={styles.label}>Equipment Name *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Equipment Name *</Text>
           <TextInput
-            style={styles.input}
+            style={formStyles.input}
             placeholder="e.g., Life Jackets"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={name}
             onChangeText={setName}
             maxLength={100}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Description</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Description</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[formStyles.input, formStyles.textArea]}
             placeholder="Equipment description..."
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={description}
             onChangeText={setDescription}
             multiline
@@ -243,26 +232,26 @@ export default function AddEquipmentScreen() {
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Category *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Category *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {EQUIPMENT_CATEGORIES.map((cat) => (
               <TouchableOpacity
                 key={cat.value}
                 style={[
-                  styles.optionChip,
-                  category === cat.value && styles.optionChipActive,
+                  formStyles.optionChip,
+                  category === cat.value && formStyles.optionChipActive,
                 ]}
                 onPress={() => setCategory(cat.value)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
-                    category === cat.value && styles.optionChipTextActive,
+                    formStyles.optionChipText,
+                    category === cat.value && formStyles.optionChipTextActive,
                   ]}
                 >
                   {cat.label}
@@ -272,27 +261,27 @@ export default function AddEquipmentScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Vessel *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Vessel *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {userVessels.map((vessel) => (
               <TouchableOpacity
                 key={vessel.id}
                 style={[
-                  styles.optionChip,
-                  selectedVesselId === vessel.id && styles.optionChipActive,
+                  formStyles.optionChip,
+                  selectedVesselId === vessel.id && formStyles.optionChipActive,
                 ]}
                 onPress={() => setSelectedVesselId(vessel.id)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
+                    formStyles.optionChipText,
                     selectedVesselId === vessel.id &&
-                      styles.optionChipTextActive,
+                      formStyles.optionChipTextActive,
                   ]}
                 >
                   {vessel.name}
@@ -302,38 +291,38 @@ export default function AddEquipmentScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Quantity *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Quantity *</Text>
           <TextInput
-            style={styles.input}
+            style={formStyles.input}
             placeholder="1"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={quantity}
             onChangeText={setQuantity}
             keyboardType="numeric"
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Condition *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Condition *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {CONDITION_OPTIONS.map((opt) => (
               <TouchableOpacity
                 key={opt.value}
                 style={[
-                  styles.optionChip,
-                  condition === opt.value && styles.optionChipActive,
+                  formStyles.optionChip,
+                  condition === opt.value && formStyles.optionChipActive,
                 ]}
                 onPress={() => setCondition(opt.value)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
-                    condition === opt.value && styles.optionChipTextActive,
+                    formStyles.optionChipText,
+                    condition === opt.value && formStyles.optionChipTextActive,
                   ]}
                 >
                   {opt.label}
@@ -343,34 +332,34 @@ export default function AddEquipmentScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Serial Number</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Serial Number</Text>
           <TextInput
-            style={styles.input}
+            style={formStyles.input}
             placeholder="Serial number (optional)"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={serialNumber}
             onChangeText={setSerialNumber}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Manufacturer</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Manufacturer</Text>
           <TextInput
-            style={styles.input}
+            style={formStyles.input}
             placeholder="Manufacturer (optional)"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={manufacturer}
             onChangeText={setManufacturer}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Model</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Model</Text>
           <TextInput
-            style={styles.input}
+            style={formStyles.input}
             placeholder="Model (optional)"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={model}
             onChangeText={setModel}
           />
@@ -400,23 +389,23 @@ export default function AddEquipmentScreen() {
           setShowNextInspectionPicker,
         )}
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Location *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Location *</Text>
           <TextInput
-            style={styles.input}
+            style={formStyles.input}
             placeholder="e.g., Forward Locker, Bridge"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={location}
             onChangeText={setLocation}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Notes</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Notes</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[formStyles.input, formStyles.textArea]}
             placeholder="Additional notes..."
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={notes}
             onChangeText={setNotes}
             multiline
@@ -424,107 +413,7 @@ export default function AddEquipmentScreen() {
             textAlignVertical="top"
           />
         </View>
-
-        <TouchableOpacity
-          style={[
-            styles.submitButton,
-            isSubmitting && styles.submitButtonDisabled,
-          ]}
-          onPress={handleSubmit}
-          disabled={isSubmitting}
-        >
-          <Text style={styles.submitButtonText}>
-            {isSubmitting ? "Saving..." : "Add Equipment"}
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  cancelText: {
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  saveText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.accent,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  textArea: {
-    minHeight: 120,
-    paddingTop: 14,
-  },
-  optionsContainer: {
-    gap: 8,
-  },
-  optionChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: colors.surfaceOne,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  optionChipActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  optionChipText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
-  optionChipTextActive: {
-    color: colors.text,
-  },
-  datePicker: {
-    alignSelf: "flex-start",
-  },
-  submitButton: {
-    backgroundColor: colors.accent,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 8,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-  },
-});

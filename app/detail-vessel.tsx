@@ -354,7 +354,7 @@ export default function VesselDetailScreen() {
             </View>
           )}
 
-          <View style={{ height: insets.bottom + 64 }} />
+          <View style={{ height: insets.bottom }} />
         </View>
       </ScrollView>
     </View>

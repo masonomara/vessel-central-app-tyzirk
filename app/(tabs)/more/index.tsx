@@ -1,12 +1,11 @@
-import { View, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useWindowDimensions } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { scrollProps } from "../../../hooks/useTopPadding";
 import { colors } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
-import { GroupedListContainer } from "../../../components/GroupedListContainer";
-import { ListItemCard } from "../../../components/ListItemCard";
+import { IconSymbol } from "../../../components/IconSymbol";
 
 type MoreItem = {
   key: string;
@@ -65,6 +64,11 @@ export default function MoreScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { userRole } = useAuth();
+  const { width } = useWindowDimensions();
+  const gap = 12;
+  const padding = 20;
+  const columns = 2;
+  const cardWidth = (width - padding * 2 - gap * (columns - 1)) / columns;
 
   const visibleItems = MORE_ITEMS.filter((item) =>
     item.roles.includes(userRole || ""),
@@ -96,36 +100,68 @@ export default function MoreScreen() {
         style={{ flex: 1, backgroundColor: colors.surfaceOne }}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + 64 },
+          { paddingBottom: insets.bottom },
         ]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
-        <GroupedListContainer>
-          {visibleItems.map((item, index) => (
-            <ListItemCard
+        <View style={styles.grid}>
+          {visibleItems.map((item) => (
+            <TouchableOpacity
               key={item.key}
-              title={item.label}
-              description=""
-              vesselName=""
-              onPress={() => router.push(item.route as any)}
-              isFirst={index === 0}
-              isLast={index === visibleItems.length - 1}
-              icon={item.icon}
-              style={{ marginLeft: 0, backgroundColor: "transparent" }}
-            />
+              style={[styles.gridCard, { width: cardWidth }]}
+              onPress={() => router.navigate(item.route as any)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.gridIconHolder}>
+                <IconSymbol
+                  ios_icon_name={item.icon.iosName}
+                  android_material_icon_name={item.icon.androidName}
+                  size={24}
+                  color={colors.textSecondary}
+                />
+              </View>
+              <Text style={styles.gridCardLabel}>{item.label}</Text>
+            </TouchableOpacity>
           ))}
-        </GroupedListContainer>
+        </View>
       </ScrollView>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   scrollContent: {
     paddingTop: 8,
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingHorizontal: 20,
+    columnGap: 12,
+    rowGap: 12,
+  },
+  gridCard: {
+    backgroundColor: colors.container,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  gridIconHolder: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: colors.surfaceTwo,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  gridCardLabel: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.text,
   },
 });

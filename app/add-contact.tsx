@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  StyleSheet,
   View,
   Text,
   ScrollView,
@@ -9,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { colors } from "../styles/commonStyles";
+import { colors, formStyles } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { ContactType } from "../types";
@@ -99,19 +98,19 @@ export default function AddContactScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+    <View style={formStyles.container}>
       <Stack.Screen
         options={{
           title: "Add Contact",
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={formStyles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           ),
           headerRight: () => (
             <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
               <Text
-                style={[styles.saveText, isSubmitting && { opacity: 0.5 }]}
+                style={[formStyles.saveText, isSubmitting && { opacity: 0.5 }]}
               >
                 Save
               </Text>
@@ -121,58 +120,58 @@ export default function AddContactScreen() {
       />
 
       <ScrollView
-        style={styles.scrollView}
+        style={formStyles.scrollView}
         contentContainerStyle={[
-          styles.scrollContent,
-          { paddingBottom: insets.bottom + 64 },
+          formStyles.scrollContent,
+          { paddingBottom: insets.bottom },
         ]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
-        <View style={styles.section}>
-          <Text style={styles.label}>Name *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Name *</Text>
           <TextInput
-            style={styles.input}
+            style={formStyles.input}
             placeholder="Contact name"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={name}
             onChangeText={setName}
             maxLength={100}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Role</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Role</Text>
           <TextInput
-            style={styles.input}
+            style={formStyles.input}
             placeholder="e.g., Captain, Electrician, Dock Master"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={role}
             onChangeText={setRole}
             maxLength={100}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Contact Type *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Contact Type *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {CONTACT_TYPES.map((type) => (
               <TouchableOpacity
                 key={type}
                 style={[
-                  styles.optionChip,
-                  contactType === type && styles.optionChipActive,
+                  formStyles.optionChip,
+                  contactType === type && formStyles.optionChipActive,
                 ]}
                 onPress={() => setContactType(type)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
-                    contactType === type && styles.optionChipTextActive,
+                    formStyles.optionChipText,
+                    contactType === type && formStyles.optionChipTextActive,
                   ]}
                 >
                   {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -182,12 +181,12 @@ export default function AddContactScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Phone *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Phone *</Text>
           <TextInput
-            style={styles.input}
+            style={formStyles.input}
             placeholder="Phone number"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
@@ -195,12 +194,12 @@ export default function AddContactScreen() {
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Email</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Email</Text>
           <TextInput
-            style={styles.input}
+            style={formStyles.input}
             placeholder="Email address"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -209,40 +208,40 @@ export default function AddContactScreen() {
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Company</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Company</Text>
           <TextInput
-            style={styles.input}
+            style={formStyles.input}
             placeholder="Company name (optional)"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={company}
             onChangeText={setCompany}
             maxLength={100}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Vessels</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Vessels</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {userVessels.map((vessel) => (
               <TouchableOpacity
                 key={vessel.id}
                 style={[
-                  styles.optionChip,
+                  formStyles.optionChip,
                   selectedVesselIds.includes(vessel.id) &&
-                    styles.optionChipActive,
+                    formStyles.optionChipActive,
                 ]}
                 onPress={() => toggleVessel(vessel.id)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
+                    formStyles.optionChipText,
                     selectedVesselIds.includes(vessel.id) &&
-                      styles.optionChipTextActive,
+                      formStyles.optionChipTextActive,
                   ]}
                 >
                   {vessel.name}
@@ -252,12 +251,12 @@ export default function AddContactScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Notes</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Notes</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[formStyles.input, formStyles.textArea]}
             placeholder="Additional notes..."
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={notes}
             onChangeText={setNotes}
             multiline
@@ -265,104 +264,7 @@ export default function AddContactScreen() {
             textAlignVertical="top"
           />
         </View>
-
-        <TouchableOpacity
-          style={[
-            styles.submitButton,
-            isSubmitting && styles.submitButtonDisabled,
-          ]}
-          onPress={handleSubmit}
-          disabled={isSubmitting}
-        >
-          <Text style={styles.submitButtonText}>
-            {isSubmitting ? "Saving..." : "Add Contact"}
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  cancelText: {
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  saveText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.accent,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  textArea: {
-    minHeight: 100,
-    paddingTop: 14,
-  },
-  optionsContainer: {
-    gap: 8,
-  },
-  optionChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: colors.surfaceOne,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  optionChipActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  optionChipText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
-  optionChipTextActive: {
-    color: colors.text,
-  },
-  submitButton: {
-    backgroundColor: colors.accent,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 8,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
-  },
-});

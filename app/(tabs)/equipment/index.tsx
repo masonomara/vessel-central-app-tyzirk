@@ -247,7 +247,7 @@ export default function EquipmentScreen() {
         ListFooterComponent={
           <View
             style={{
-              height: insets.bottom + 64,
+              height: insets.bottom,
             }}
           />
         }

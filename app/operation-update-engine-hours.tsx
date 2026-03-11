@@ -47,7 +47,7 @@ export default function UpdateEngineHoursScreen() {
         style={styles.scrollView}
         contentContainerStyle={[
           styles.content,
-          { paddingBottom: insets.bottom + 64 },
+          { paddingBottom: insets.bottom },
         ]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}

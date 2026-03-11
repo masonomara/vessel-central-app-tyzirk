@@ -86,7 +86,7 @@ export default function CrewDashboard() {
         style={[styles.scrollView, { backgroundColor: colors.surfaceOne }]}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + 64 },
+          { paddingBottom: insets.bottom },
         ]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}

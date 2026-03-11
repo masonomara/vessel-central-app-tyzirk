@@ -266,7 +266,7 @@ export default function CalendarScreen() {
         style={[styles.scrollView, commonStyles.container]}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + 64 },
+          { paddingBottom: insets.bottom },
         ]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}

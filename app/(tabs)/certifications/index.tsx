@@ -263,7 +263,7 @@ style={{ flexDirection: "row", alignItems: "center", gap: 10, marginLeft: 8, mar
         ListFooterComponent={
           <View
             style={{
-              height: insets.bottom + 64,
+              height: insets.bottom,
             }}
           />
         }

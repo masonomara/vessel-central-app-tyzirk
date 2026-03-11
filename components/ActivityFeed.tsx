@@ -2,8 +2,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '../styles/commonStyles';
-import { IconSymbol } from './IconSymbol';
-import { PressableCard } from './PressableCard';
+import { ListItemCard } from './ListItemCard';
+import { GroupedListContainer } from './GroupedListContainer';
 
 interface ActivityFeedProps {
   userId?: string;
@@ -12,75 +12,87 @@ interface ActivityFeedProps {
   onItemPress?: (type: string, id: string) => void;
 }
 
+const allEvents = [
+  {
+    type: 'issue',
+    id: '1',
+    title: 'New Issue Reported',
+    description: 'Marcus Rivera reported Port Navigation Light Intermittent on Purely Blu',
+    vesselName: 'Purely Blu',
+    time: '2 hours ago',
+    icon: { iosName: 'exclamationmark.triangle.fill', androidName: 'warning' },
+  },
+  {
+    type: 'supply',
+    id: '2',
+    title: 'Supply Request Approved',
+    description: 'Saildrive Seal Kit approved for Purely Blu',
+    vesselName: 'Purely Blu',
+    time: '12 hours ago',
+    icon: { iosName: 'checkmark.circle.fill', androidName: 'check-circle' },
+  },
+  {
+    type: 'maintenance',
+    id: '1',
+    title: 'Task Completed',
+    description: 'Navigation system maintenance completed on Ocean Pearl',
+    vesselName: 'Ocean Pearl',
+    time: '1 day ago',
+    icon: { iosName: 'checkmark.circle.fill', androidName: 'check-circle' },
+  },
+  {
+    type: 'maintenance',
+    id: '2',
+    title: 'Maintenance Updated',
+    description: 'Safety Equipment Check status changed to In Progress',
+    vesselName: '',
+    time: '2 days ago',
+    icon: { iosName: 'wrench.fill', androidName: 'build' },
+  },
+  {
+    type: 'maintenance',
+    id: '3',
+    title: 'Task Assigned',
+    description: 'Teak Cockpit Table Refinish assigned to Marcus Rivera on Purely Blu',
+    vesselName: 'Purely Blu',
+    time: '3 days ago',
+    icon: { iosName: 'person.fill.checkmark', androidName: 'assignment' },
+  },
+];
+
 export function ActivityFeed({ limit = 20, onItemPress }: ActivityFeedProps) {
+  const events = allEvents.slice(0, limit);
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Activity Feed</Text>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Activity Feed</Text>
+        <Text style={styles.sectionCount}>
+          {events.length} {events.length === 1 ? 'item' : 'items'}
+        </Text>
       </View>
 
-      <View style={styles.listContent}>
-        <PressableCard style={styles.eventCard} onPress={() => onItemPress?.('issue', '1')}>
-          <View style={[styles.eventIcon, { backgroundColor: colors.danger + '20' }]}>
-            <IconSymbol ios_icon_name="exclamationmark.triangle.fill" android_material_icon_name="warning" size={24} color={colors.danger} />
-          </View>
-          <View style={styles.eventContent}>
-            <Text style={styles.eventTitle}>New Issue Reported</Text>
-            <Text style={styles.eventDescription} numberOfLines={2}>Marcus Rivera reported Port Navigation Light Intermittent on Purely Blu</Text>
-            <Text style={styles.eventTime}>2 hours ago</Text>
-          </View>
-        </PressableCard>
-
-        <PressableCard style={styles.eventCard} onPress={() => onItemPress?.('supply', '2')}>
-          <View style={[styles.eventIcon, { backgroundColor: colors.success + '20' }]}>
-            <IconSymbol ios_icon_name="checkmark.circle.fill" android_material_icon_name="check-circle" size={24} color={colors.success} />
-          </View>
-          <View style={styles.eventContent}>
-            <Text style={styles.eventTitle}>Supply Request Approved</Text>
-            <Text style={styles.eventDescription} numberOfLines={2}>Saildrive Seal Kit approved for Purely Blu</Text>
-            <Text style={styles.eventTime}>12 hours ago</Text>
-          </View>
-        </PressableCard>
-
-        {limit > 2 && (
-          <PressableCard style={styles.eventCard} onPress={() => onItemPress?.('maintenance', '1')}>
-            <View style={[styles.eventIcon, { backgroundColor: colors.success + '20' }]}>
-              <IconSymbol ios_icon_name="checkmark.circle.fill" android_material_icon_name="check-circle" size={24} color={colors.success} />
-            </View>
-            <View style={styles.eventContent}>
-              <Text style={styles.eventTitle}>Task Completed</Text>
-              <Text style={styles.eventDescription} numberOfLines={2}>Navigation system maintenance completed on Ocean Pearl</Text>
-              <Text style={styles.eventTime}>1 day ago</Text>
-            </View>
-          </PressableCard>
-        )}
-
-        {limit > 3 && (
-          <PressableCard style={styles.eventCard} onPress={() => onItemPress?.('maintenance', '2')}>
-            <View style={[styles.eventIcon, { backgroundColor: colors.warning + '20' }]}>
-              <IconSymbol ios_icon_name="wrench.fill" android_material_icon_name="build" size={24} color={colors.warning} />
-            </View>
-            <View style={styles.eventContent}>
-              <Text style={styles.eventTitle}>Maintenance Updated</Text>
-              <Text style={styles.eventDescription} numberOfLines={2}>Safety Equipment Check status changed to In Progress</Text>
-              <Text style={styles.eventTime}>2 days ago</Text>
-            </View>
-          </PressableCard>
-        )}
-
-        {limit > 4 && (
-          <PressableCard style={styles.eventCard} onPress={() => onItemPress?.('maintenance', '3')}>
-            <View style={[styles.eventIcon, { backgroundColor: colors.accent + '20' }]}>
-              <IconSymbol ios_icon_name="person.fill.checkmark" android_material_icon_name="assignment" size={24} color={colors.accent} />
-            </View>
-            <View style={styles.eventContent}>
-              <Text style={styles.eventTitle}>Task Assigned</Text>
-              <Text style={styles.eventDescription} numberOfLines={2}>Teak Cockpit Table Refinish assigned to Marcus Rivera on Purely Blu</Text>
-              <Text style={styles.eventTime}>3 days ago</Text>
-            </View>
-          </PressableCard>
-        )}
-      </View>
+      {events.length > 0 ? (
+        <GroupedListContainer>
+          {events.map((event, index) => (
+            <ListItemCard
+              key={`${event.type}-${event.id}`}
+              title={event.title}
+              description={event.description}
+              vesselName={event.vesselName}
+              onPress={() => onItemPress?.(event.type, event.id)}
+              isFirst={index === 0}
+              isLast={index === events.length - 1}
+              icon={event.icon}
+              metaText={event.time}
+              inContainer={true}
+              style={{ marginLeft: 0, backgroundColor: 'transparent' }}
+            />
+          ))}
+        </GroupedListContainer>
+      ) : (
+        <Text style={styles.emptyText}>No recent activity</Text>
+      )}
     </View>
   );
 }
@@ -89,52 +101,27 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.surfaceOne,
   },
-  header: {
+  sectionHeader: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: 16,
+    height: 56,
+    paddingHorizontal: 20,
   },
-  headerTitle: {
-    fontSize: 20,
+  sectionTitle: {
+    fontSize: 17,
+    lineHeight: 22,
     fontWeight: '600',
     color: colors.text,
   },
-  listContent: {
-    gap: 12,
+  sectionCount: {
+    fontSize: 15,
+    color: colors.textTertiary,
   },
-  eventCard: {
-    flexDirection: 'row',
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  eventIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  eventContent: {
-    flex: 1,
-  },
-  eventTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  eventDescription: {
+  emptyText: {
     fontSize: 14,
     color: colors.textSecondary,
-    marginBottom: 4,
-  },
-  eventTime: {
-    fontSize: 12,
-    color: colors.textSecondary,
+    textAlign: 'center',
+    padding: 20,
   },
 });

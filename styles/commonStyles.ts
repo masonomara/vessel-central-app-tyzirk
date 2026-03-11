@@ -532,6 +532,143 @@ export const indexScreenStyles = StyleSheet.create({
   },
 });
 
+export const formStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.surfaceOne,
+  },
+  cancelText: {
+    fontSize: 16,
+    color: colors.textSecondary,
+  },
+  saveText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.textSecondary,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: colors.container,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: colors.text,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  textArea: {
+    minHeight: 100,
+    paddingTop: 14,
+    textAlignVertical: "top",
+  },
+  optionsContainer: {
+    gap: 8,
+  },
+  optionChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: colors.surfaceOne,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  optionChipActive: {
+    borderColor: colors.text,
+  },
+  optionChipText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.textSecondary,
+  },
+  optionChipTextActive: {
+    color: colors.text,
+  },
+  dateButton: {
+    backgroundColor: colors.container,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  dateButtonText: {
+    fontSize: 16,
+    color: colors.text,
+  },
+  dateTimeRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  dateTimeButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: colors.container,
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  dateTimeText: {
+    fontSize: 16,
+    color: colors.text,
+    fontWeight: "500",
+  },
+  switchRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  helperText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 6,
+  },
+  costInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.container,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingLeft: 16,
+  },
+  currencySymbol: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+    marginRight: 8,
+  },
+  costInput: {
+    flex: 1,
+    borderWidth: 0,
+    paddingLeft: 0,
+  },
+  row: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  flex1: {
+    flex: 1,
+  },
+});
+
 export const detailScreenStyles = StyleSheet.create({
   scrollContent: {},
   titleSection: {

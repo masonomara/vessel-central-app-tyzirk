@@ -255,7 +255,7 @@ export default function SuppliesScreen() {
         ListFooterComponent={
           <View
             style={{
-              height: insets.bottom + 64,
+              height: insets.bottom,
             }}
           />
         }

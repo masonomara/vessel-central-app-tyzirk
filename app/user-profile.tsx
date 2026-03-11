@@ -149,7 +149,7 @@ export default function ProfileScreen() {
         style={styles.scrollView}
         contentContainerStyle={[
           ds.scrollContent,
-          { flexGrow: 1, paddingBottom: insets.bottom + 64 },
+          { flexGrow: 1, paddingBottom: insets.bottom },
         ]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}

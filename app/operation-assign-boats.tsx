@@ -10,8 +10,7 @@ import {
   TextInput,
   Modal,
 } from 'react-native';
-import { Stack, router } from 'expo-router';
-import { useTheme } from '@react-navigation/native';
+import { Stack } from 'expo-router';
 import { colors } from '../styles/commonStyles';
 import { useData } from '../contexts/DataContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,17 +20,8 @@ import { scrollProps } from '../hooks/useTopPadding';
 
 type AssignmentType = 'owner' | 'crew';
 
-interface Assignment {
-  vesselId: string;
-  vesselName: string;
-  userId: string;
-  userName: string;
-  type: AssignmentType;
-}
-
 export default function AssignBoatsScreen() {
   const insets = useSafeAreaInsets();
-  const theme = useTheme();
   const { 
     vessels, 
     assignOwnerToVessel, 
@@ -197,7 +187,7 @@ export default function AssignBoatsScreen() {
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingBottom: insets.bottom + 64 },
+            { paddingBottom: insets.bottom },
           ]}
           showsVerticalScrollIndicator={false}
           {...scrollProps}

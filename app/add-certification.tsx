@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  StyleSheet,
   View,
   Text,
   ScrollView,
@@ -11,7 +10,7 @@ import {
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { colors } from "../styles/commonStyles";
+import { colors, formStyles } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { scrollProps } from "../hooks/useTopPadding";
@@ -128,19 +127,19 @@ export default function AddCertificationScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+    <View style={formStyles.container}>
       <Stack.Screen
         options={{
           title: "Add Certification",
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={formStyles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           ),
           headerRight: () => (
             <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
               <Text
-                style={[styles.saveText, isSubmitting && { opacity: 0.5 }]}
+                style={[formStyles.saveText, isSubmitting && { opacity: 0.5 }]}
               >
                 Save
               </Text>
@@ -150,34 +149,34 @@ export default function AddCertificationScreen() {
       />
 
       <ScrollView
-        style={styles.scrollView}
+        style={formStyles.scrollView}
         contentContainerStyle={[
-          styles.scrollContent,
-          { paddingBottom: insets.bottom + 64 },
+          formStyles.scrollContent,
+          { paddingBottom: insets.bottom },
         ]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
-        <View style={styles.section}>
-          <Text style={styles.label}>Crew Member *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Crew Member *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {CREW_OPTIONS.map((crew) => (
               <TouchableOpacity
                 key={crew.id}
                 style={[
-                  styles.optionChip,
-                  crewId === crew.id && styles.optionChipActive,
+                  formStyles.optionChip,
+                  crewId === crew.id && formStyles.optionChipActive,
                 ]}
                 onPress={() => selectCrew(crew.id, crew.name)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
-                    crewId === crew.id && styles.optionChipTextActive,
+                    formStyles.optionChipText,
+                    crewId === crew.id && formStyles.optionChipTextActive,
                   ]}
                 >
                   {crew.name}
@@ -187,49 +186,49 @@ export default function AddCertificationScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Certification Type *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Certification Type *</Text>
           <TextInput
-            style={styles.input}
+            style={formStyles.input}
             placeholder="e.g., STCW, MCA Yacht Rating"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={certType}
             onChangeText={setCertType}
             maxLength={100}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Issuing Authority *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Issuing Authority *</Text>
           <TextInput
-            style={styles.input}
+            style={formStyles.input}
             placeholder="e.g., MCA, USCG, RYA"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={issuingAuthority}
             onChangeText={setIssuingAuthority}
             maxLength={100}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Certificate Number</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Certificate Number</Text>
           <TextInput
-            style={styles.input}
+            style={formStyles.input}
             placeholder="Certificate number (optional)"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={certificateNumber}
             onChangeText={setCertificateNumber}
             maxLength={50}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Issue Date *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Issue Date *</Text>
           <TouchableOpacity
-            style={styles.dateButton}
+            style={formStyles.dateButton}
             onPress={() => setShowIssueDatePicker(true)}
           >
-            <Text style={styles.dateButtonText}>
+            <Text style={formStyles.dateButtonText}>
               {formatDisplayDate(issueDate)}
             </Text>
           </TouchableOpacity>
@@ -242,13 +241,13 @@ export default function AddCertificationScreen() {
           )}
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Expiry Date *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Expiry Date *</Text>
           <TouchableOpacity
-            style={styles.dateButton}
+            style={formStyles.dateButton}
             onPress={() => setShowExpiryDatePicker(true)}
           >
-            <Text style={styles.dateButtonText}>
+            <Text style={formStyles.dateButtonText}>
               {formatDisplayDate(expiryDate)}
             </Text>
           </TouchableOpacity>
@@ -261,27 +260,27 @@ export default function AddCertificationScreen() {
           )}
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Vessel *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Vessel *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {userVessels.map((vessel) => (
               <TouchableOpacity
                 key={vessel.id}
                 style={[
-                  styles.optionChip,
-                  selectedVesselId === vessel.id && styles.optionChipActive,
+                  formStyles.optionChip,
+                  selectedVesselId === vessel.id && formStyles.optionChipActive,
                 ]}
                 onPress={() => setSelectedVesselId(vessel.id)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
+                    formStyles.optionChipText,
                     selectedVesselId === vessel.id &&
-                      styles.optionChipTextActive,
+                      formStyles.optionChipTextActive,
                   ]}
                 >
                   {vessel.name}
@@ -291,12 +290,12 @@ export default function AddCertificationScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Notes</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Notes</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[formStyles.input, formStyles.textArea]}
             placeholder="Additional notes..."
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={notes}
             onChangeText={setNotes}
             multiline
@@ -304,116 +303,7 @@ export default function AddCertificationScreen() {
             textAlignVertical="top"
           />
         </View>
-
-        <TouchableOpacity
-          style={[
-            styles.submitButton,
-            isSubmitting && styles.submitButtonDisabled,
-          ]}
-          onPress={handleSubmit}
-          disabled={isSubmitting}
-        >
-          <Text style={styles.submitButtonText}>
-            {isSubmitting ? "Saving..." : "Add Certification"}
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  cancelText: {
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  saveText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.accent,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  textArea: {
-    minHeight: 100,
-    paddingTop: 14,
-  },
-  optionsContainer: {
-    gap: 8,
-  },
-  optionChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: colors.surfaceOne,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  optionChipActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  optionChipText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
-  optionChipTextActive: {
-    color: colors.text,
-  },
-  dateButton: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  dateButtonText: {
-    fontSize: 16,
-    color: colors.text,
-  },
-  submitButton: {
-    backgroundColor: colors.accent,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 8,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
-  },
-});

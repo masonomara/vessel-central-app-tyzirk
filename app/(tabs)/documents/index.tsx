@@ -212,7 +212,7 @@ export default function DocumentsScreen() {
         ListFooterComponent={
           <View
             style={{
-              height: insets.bottom + 64,
+              height: insets.bottom,
             }}
           />
         }
