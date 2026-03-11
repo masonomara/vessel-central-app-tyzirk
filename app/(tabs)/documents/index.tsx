@@ -167,7 +167,12 @@ export default function DocumentsScreen() {
       <Stack.Screen
         options={{
           title: "Documents",
-          headerLargeTitle: true,
+          headerLargeTitleEnabled: true,
+          headerLargeTitleStyle: {
+            fontSize: 28,
+            fontWeight: "600",
+            color: colors.text,
+          },
           headerRight: () => (
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}

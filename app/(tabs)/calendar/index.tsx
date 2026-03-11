@@ -206,7 +206,7 @@ export default function CalendarScreen() {
         description={event.description}
         vesselName={event.vesselName}
         onPress={() => handleEventPress(event)}
-        isFirst={index === 0}
+        // isFirst={index === 0}
         isLast={index === array.length - 1}
         bordered
         icon={{ iosName: "calendar", androidName: "event" }}
@@ -231,7 +231,12 @@ export default function CalendarScreen() {
       <Stack.Screen
         options={{
           title: "Calendar",
-          headerLargeTitle: true,
+          headerLargeTitleEnabled: true,
+          headerLargeTitleStyle: {
+            fontSize: 28,
+            fontWeight: "600",
+            color: colors.text,
+          },
           headerRight: () => (
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}

@@ -131,12 +131,19 @@ export default function SuppliesScreen() {
         }}
         metaText={formatDate(item.createdAt)}
         actions={
-          (userRole === "manager" || userRole === "owner") && item.status === "pending" ? (
+          (userRole === "manager" || userRole === "owner") &&
+          item.status === "pending" ? (
             <View style={styles.actionButtons}>
-              <TouchableOpacity style={styles.approveButton} onPress={() => handleApprove(item.id)}>
+              <TouchableOpacity
+                style={styles.approveButton}
+                onPress={() => handleApprove(item.id)}
+              >
                 <Text style={styles.approveButtonText}>Approve</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.denyButton} onPress={() => handleDeny(item.id)}>
+              <TouchableOpacity
+                style={styles.denyButton}
+                onPress={() => handleDeny(item.id)}
+              >
                 <Text style={styles.denyButtonText}>Deny</Text>
               </TouchableOpacity>
             </View>
@@ -201,7 +208,12 @@ export default function SuppliesScreen() {
       <Stack.Screen
         options={{
           title: "Supplies",
-          headerLargeTitle: true,
+          headerLargeTitleEnabled: true,
+          headerLargeTitleStyle: {
+            fontSize: 28,
+            fontWeight: "600",
+            color: colors.text,
+          },
           headerRight: () => (
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
@@ -225,7 +237,10 @@ export default function SuppliesScreen() {
       />
 
       <SectionList
-        style={[indexScreenStyles.container, { backgroundColor: colors.surfaceOne }]}
+        style={[
+          indexScreenStyles.container,
+          { backgroundColor: colors.surfaceOne },
+        ]}
         sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}

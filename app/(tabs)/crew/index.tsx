@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, ScrollView } from "react-native";
 import { ListItemCard } from "../../../components/ListItemCard";
 import { GroupedListContainer } from "../../../components/GroupedListContainer";
 import { VesselCard } from "../../../components/VesselCard";
-import { colors, commonStyles } from "../../../styles/commonStyles";
+import { colors } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
@@ -52,16 +52,21 @@ export default function CrewDashboard() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+    <>
       <Stack.Screen
         options={{
-          title: "",
-          headerShown: false,
+          title: `Hello, ${userName?.split(" ")[0] || ""}`,
+          headerLargeTitleEnabled: true,
+          headerLargeTitleStyle: {
+            fontSize: 28,
+            fontWeight: "600",
+            color: colors.text,
+          },
           headerRight: () => <ProfileHeaderButton />,
         }}
       />
       <ScrollView
-        style={styles.scrollView}
+        style={[styles.scrollView, { backgroundColor: colors.surfaceOne }]}
         contentContainerStyle={[
           styles.scrollContent,
           { paddingBottom: insets.bottom + 64 },
@@ -69,18 +74,6 @@ export default function CrewDashboard() {
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
-        <View style={[styles.header, { paddingTop: insets.top + 44 }]}>
-          <Text style={styles.greeting}>
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
-          </Text>
-          <Text style={commonStyles.title}>
-            Hello, {userName?.split(" ")[0]}
-          </Text>
-        </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -123,6 +116,7 @@ export default function CrewDashboard() {
                         ? "Completed"
                         : formatDueDate(task.dueDate)
                     }
+                    // FLAG
                     style={{ marginLeft: 0, backgroundColor: "transparent" }}
                   />
                 );
@@ -166,6 +160,7 @@ export default function CrewDashboard() {
                     bg: getPriorityBadgeColors(request.priority).bg,
                   }}
                   metaText={formatDate(request.createdAt)}
+                  // FLAG
                   style={{ marginLeft: 0, backgroundColor: "transparent" }}
                 />
               ))}
@@ -196,29 +191,16 @@ export default function CrewDashboard() {
           ))}
         </View>
       </ScrollView>
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 0,
-  },
-  header: {
-    marginBottom: 20,
-    paddingHorizontal: 20,
-  },
-  greeting: {
-    fontSize: 16,
-    lineHeight: 21,
-    color: colors.textSecondary,
-    marginBottom: 6,
   },
   section: {
     marginBottom: 20,

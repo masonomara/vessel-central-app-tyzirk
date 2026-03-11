@@ -78,7 +78,7 @@ export const ListItemCard = React.memo(
             borderRadius: 12,
             marginHorizontal: 20,
             marginLeft: 20,
-            paddingLeft: 16,
+            paddingLeft: 0,
             paddingRight: 16,
             paddingBottom: 12,
           },

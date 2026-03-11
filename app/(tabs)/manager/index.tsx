@@ -9,7 +9,7 @@ import {
 import { ListItemCard } from "../../../components/ListItemCard";
 import { GroupedListContainer } from "../../../components/GroupedListContainer";
 import { VesselCard } from "../../../components/VesselCard";
-import { colors, commonStyles } from "../../../styles/commonStyles";
+import { colors } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
@@ -91,11 +91,16 @@ export default function ManagerDashboard() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+    <>
       <Stack.Screen
         options={{
-          title: "",
-          headerTransparent: true,
+          title: `Hello, ${userName?.split(" ")[0] || ""}`,
+          headerLargeTitleEnabled: true,
+          headerLargeTitleStyle: {
+            fontSize: 28,
+            fontWeight: "600",
+            color: colors.text,
+          },
           headerRight: () => (
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
@@ -115,7 +120,7 @@ export default function ManagerDashboard() {
       <GlobalSearch visible={showSearch} onClose={() => setShowSearch(false)} />
 
       <ScrollView
-        style={styles.scrollView}
+        style={[styles.scrollView, { backgroundColor: colors.surfaceOne }]}
         contentContainerStyle={[
           styles.scrollContent,
           { paddingBottom: insets.bottom + 64 },
@@ -123,16 +128,6 @@ export default function ManagerDashboard() {
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
-        <View style={[styles.header, { paddingTop: insets.top + 44 }]}>
-          <Text style={styles.greeting}>
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
-          </Text>
-          <Text style={commonStyles.title}>Hello, {userName?.split(" ")[0]}</Text>
-        </View>
         {pendingApprovals.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -193,6 +188,7 @@ export default function ManagerDashboard() {
                         </TouchableOpacity>
                       </View>
                     }
+                    // FLAG
                     style={{ marginLeft: 0, backgroundColor: "transparent" }}
                   />
                 );
@@ -293,6 +289,7 @@ export default function ManagerDashboard() {
                       bg: priorityBadge.bg,
                     }}
                     metaText={formatDueDate(item.dueDate)}
+                    // FLAG
                     style={{ marginLeft: 0, backgroundColor: "transparent" }}
                   />
                 );
@@ -303,28 +300,16 @@ export default function ManagerDashboard() {
           )}
         </View>
       </ScrollView>
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 0,
-  },
-  header: {
-    marginBottom: 24,
-    paddingHorizontal: 20,
-  },
-  greeting: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    marginBottom: 4,
   },
   section: {
     marginBottom: 24,

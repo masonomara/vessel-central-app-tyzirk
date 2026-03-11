@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import * as Haptics from "expo-haptics";
-import { colors, commonStyles } from "../../../styles/commonStyles";
+import { colors } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
@@ -203,15 +203,16 @@ export default function OwnerDashboard() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+    <>
       <Stack.Screen
         options={{
-          title: "",
-          headerStyle: {
-            backgroundColor: "transparent",
+          title: `Hello, ${userName?.split(" ")[0] || ""}`,
+          headerLargeTitleEnabled: true,
+          headerLargeTitleStyle: {
+            fontSize: 28,
+            fontWeight: "600",
+            color: colors.text,
           },
-          headerShown: true,
-          headerTransparent: true,
           headerRight: () => (
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
@@ -236,7 +237,7 @@ export default function OwnerDashboard() {
       <GlobalSearch visible={showSearch} onClose={() => setShowSearch(false)} />
 
       <ScrollView
-        style={styles.scrollView}
+        style={[styles.scrollView, { backgroundColor: colors.surfaceOne }]}
         contentContainerStyle={[
           styles.scrollContent,
           { paddingBottom: insets.bottom + 64 },
@@ -244,18 +245,6 @@ export default function OwnerDashboard() {
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
-        <View style={[styles.header, { paddingTop: insets.top + 44 }]}>
-          <Text style={styles.greeting}>
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
-          </Text>
-          <Text style={commonStyles.title}>
-            Hello, {userName?.split(" ")[0]}
-          </Text>
-        </View>
         {pendingApprovals.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -294,6 +283,7 @@ export default function OwnerDashboard() {
                       bg: getPriorityBadgeColors(approval.priority).bg,
                     }}
                     metaText={formatDate(new Date(approval.createdAt))}
+                    // FLAG
                     style={{ marginLeft: 0, backgroundColor: "transparent" }}
                   />
                 );
@@ -345,6 +335,7 @@ export default function OwnerDashboard() {
                   icon={getActivityTypeIcon(log.type)}
                   badge={getActivityPriorityBadge(log)}
                   metaText={formatDate(new Date(log.timestamp))}
+                  // FLAG
                   style={{ marginLeft: 0, backgroundColor: "transparent" }}
                 />
               ))}
@@ -464,6 +455,7 @@ export default function OwnerDashboard() {
                       bg: priorityBadge.bg,
                     }}
                     metaText={formatDueDate(upcomingMaintenance.dueDate)}
+                    // FLAG
                     style={{ marginLeft: 0, backgroundColor: "transparent" }}
                   />
                 );
@@ -472,29 +464,16 @@ export default function OwnerDashboard() {
           </View>
         )}
       </ScrollView>
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 0,
-  },
-  header: {
-    marginBottom: 24,
-    paddingHorizontal: 20,
-  },
-  greeting: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    marginBottom: 4,
-    fontWeight: "500",
   },
   section: {
     marginBottom: 24,
