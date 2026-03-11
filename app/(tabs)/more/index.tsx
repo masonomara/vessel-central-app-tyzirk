@@ -176,6 +176,6 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     fontWeight: "500",
     color: colors.text,
-    marginTop: 8,
+    marginTop: 10,
   },
 });
