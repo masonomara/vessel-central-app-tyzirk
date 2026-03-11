@@ -445,7 +445,7 @@ export const indexScreenStyles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 16,
-    lineHeight: 22,
+    lineHeight: 21,
     fontWeight: "600",
     color: colors.text,
     flex: 1,
