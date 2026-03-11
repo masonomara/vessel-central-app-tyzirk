@@ -195,6 +195,7 @@ export default function ChartersScreen() {
         options={{
           title: "Charters",
           headerLargeTitleEnabled: true,
+          headerBackTitle: "Back",
           headerLargeTitleStyle: {
             fontSize: 28,
             fontWeight: "600",

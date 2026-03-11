@@ -224,6 +224,7 @@ export default function ContactsScreen() {
         options={{
           title: "Contacts",
           headerLargeTitleEnabled: true,
+          headerBackTitle: "Back",
           headerLargeTitleStyle: {
             fontSize: 28,
             fontWeight: "600",

@@ -209,6 +209,7 @@ export default function SuppliesScreen() {
         options={{
           title: "Supplies",
           headerLargeTitleEnabled: true,
+          headerBackTitle: "Back",
           headerLargeTitleStyle: {
             fontSize: 28,
             fontWeight: "600",

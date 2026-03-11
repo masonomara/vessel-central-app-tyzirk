@@ -206,6 +206,7 @@ export default function EquipmentScreen() {
         options={{
           title: "Equipment",
           headerLargeTitleEnabled: true,
+          headerBackTitle: "Back",
           headerLargeTitleStyle: {
             fontSize: 28,
             fontWeight: "600",

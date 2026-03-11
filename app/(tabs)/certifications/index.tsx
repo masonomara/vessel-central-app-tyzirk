@@ -229,6 +229,7 @@ export default function CertificationsScreen() {
         options={{
           title: "Certifications",
           headerLargeTitleEnabled: true,
+          headerBackTitle: "Back",
           headerLargeTitleStyle: {
             fontSize: 28,
             fontWeight: "600",
