@@ -4,7 +4,6 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
   Alert,
 } from "react-native";
 import { useLocalSearchParams, Stack, useRouter } from "expo-router";
@@ -161,9 +160,14 @@ export default function CertificationDetailScreen() {
         />
         {cert.notes && <DetailRow label="Notes" value={cert.notes} />}
 
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-          <Text style={styles.deleteButtonText}>Delete Certification</Text>
-        </TouchableOpacity>
+        <DetailRow
+          label="Delete"
+          button={{
+            label: "Delete Certification",
+            onPress: handleDelete,
+            variant: "danger",
+          }}
+        />
       </ScrollView>
     </View>
   );
@@ -181,20 +185,5 @@ const styles = StyleSheet.create({
   statusBadgeText: {
     fontSize: 12,
     fontWeight: "600",
-  },
-  deleteButton: {
-    backgroundColor: colors.danger,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 20,
-    marginTop: 24,
-    marginBottom: 40,
-  },
-  deleteButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
   },
 });

@@ -1,10 +1,8 @@
 import React from "react";
 import {
-  StyleSheet,
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
   Alert,
 } from "react-native";
 import { useLocalSearchParams, Stack, useRouter } from "expo-router";
@@ -100,28 +98,16 @@ export default function ContactDetailScreen() {
         <DetailRow label="Email" inline value={contact.email} />
         {contact.notes && <DetailRow label="Notes" value={contact.notes} />}
 
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-          <Text style={styles.deleteButtonText}>Delete Contact</Text>
-        </TouchableOpacity>
+        <DetailRow
+          label="Delete"
+          button={{
+            label: "Delete Contact",
+            onPress: handleDelete,
+            variant: "danger",
+          }}
+        />
       </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  deleteButton: {
-    backgroundColor: colors.danger,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 20,
-    marginTop: 24,
-    marginBottom: 40,
-  },
-  deleteButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
-  },
-});

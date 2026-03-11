@@ -1,4 +1,3 @@
-import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { router, Href } from "expo-router";
 import { colors } from "../styles/commonStyles";
@@ -30,6 +29,7 @@ interface DetailRowWithButton extends DetailRowBaseProps {
     label: string;
     onPress: () => void;
     color?: string;
+    variant?: "danger";
   };
   chips?: never;
 }
@@ -63,7 +63,7 @@ export function DetailRow({
       style={[
         styles.row,
         !label && styles.rowNoBorder,
-        inline && styles.rowInline,
+        (inline || button) && styles.rowInline,
       ]}
     >
       {label ? <Text style={styles.label}>{label}</Text> : null}
@@ -108,9 +108,15 @@ export function DetailRow({
         <TouchableOpacity
           style={[
             styles.button,
-            { backgroundColor: button.color || colors.accent },
+            {
+              backgroundColor:
+                button.variant === "danger"
+                  ? colors.danger
+                  : button.color || colors.accent,
+            },
           ]}
           onPress={button.onPress}
+          activeOpacity={0.7}
         >
           <Text style={styles.buttonText}>{button.label}</Text>
         </TouchableOpacity>
@@ -181,18 +187,14 @@ const styles = StyleSheet.create({
   valueInline: { marginTop: 0, textAlign: "right" },
   valueLinked: { color: colors.accent },
   button: {
-    paddingVertical: 10,
+    paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: "center" as const,
     justifyContent: "center" as const,
-    marginTop: 13,
-    alignSelf: "flex-start" as const,
-    width: "100%",
-    height: 44,
   },
   buttonText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600" as const,
     color: "#FFFFFF",
   },

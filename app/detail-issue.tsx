@@ -176,6 +176,7 @@ export default function IssueDetailScreen() {
           <>
             {!issue.assignedToName && issue.status !== "completed" && (
               <DetailRow
+                label="Assigned To"
                 button={{
                   label: "Assign to Crew",
                   onPress: handleAssign,

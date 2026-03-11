@@ -189,10 +189,11 @@ export default function ProfileScreen() {
         </View>
 
         <DetailRow
+          label="Account"
           button={{
             label: "Log Out",
             onPress: handleLogout,
-            color: colors.danger,
+            variant: "danger",
           }}
         />
       </ScrollView>

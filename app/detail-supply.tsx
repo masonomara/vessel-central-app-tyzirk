@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -12,7 +12,6 @@ import { useLocalSearchParams, Stack } from "expo-router";
 import {
   commonStyles,
   colors,
-  buttonStyles,
   detailScreenStyles as ds,
 } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
@@ -176,21 +175,24 @@ export default function SupplyDetailScreen() {
         />
 
         {needsApproval && isManagerOrOwner && (
-          <View style={[buttonStyles.approvalRow, { paddingHorizontal: 20, paddingVertical: 12 }]}>
-            <TouchableOpacity
-              style={buttonStyles.approveButton}
-              onPress={handleApprove}
-              activeOpacity={0.7}
-            >
-              <Text style={buttonStyles.approveButtonText}>Approve</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={buttonStyles.denyButton}
-              onPress={handleDeny}
-              activeOpacity={0.7}
-            >
-              <Text style={buttonStyles.denyButtonText}>Deny</Text>
-            </TouchableOpacity>
+          <View style={styles.approvalRow}>
+            <Text style={styles.approvalLabel}>Approval</Text>
+            <View style={styles.approvalButtons}>
+              <TouchableOpacity
+                style={styles.approveButton}
+                onPress={handleApprove}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.approvalButtonText}>Approve</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.denyButton}
+                onPress={handleDeny}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.approvalButtonText}>Deny</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
 
@@ -339,6 +341,42 @@ export default function SupplyDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  approvalRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderSoft,
+    backgroundColor: colors.surfaceOne,
+  },
+  approvalLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  approvalButtons: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  approveButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: colors.greenForeground,
+  },
+  denyButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: colors.redForeground,
+  },
+  approvalButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
   historySection: {
     paddingHorizontal: 20,
     paddingTop: 20,

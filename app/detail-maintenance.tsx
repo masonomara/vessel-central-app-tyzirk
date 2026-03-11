@@ -229,6 +229,7 @@ export default function MaintenanceDetailScreen() {
           task.status !== "completed" &&
           userRole !== "owner" && (
             <DetailRow
+              label="Assigned To"
               button={{
                 label: "Assign to Crew",
                 onPress: handleAssign,
