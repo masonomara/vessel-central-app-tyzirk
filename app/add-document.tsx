@@ -17,6 +17,7 @@ import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { DocumentCategory } from '../types';
+import { formatFileSize } from '../utils/fileUtils';
 import { scrollProps } from '../hooks/useTopPadding';
 
 const DOCUMENT_CATEGORIES: DocumentCategory[] = [
@@ -200,16 +201,6 @@ export default function AddDocumentScreen() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) {
-      return '0 Bytes';
-    }
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   };
 
   return (

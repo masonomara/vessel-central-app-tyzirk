@@ -2,7 +2,7 @@
 import { CalendarEvent, CalendarEventType } from '../types/calendar';
 import { colors } from '../styles/commonStyles';
 
-export const EVENT_TYPE_COLORS: Record<CalendarEventType, string> = {
+const EVENT_TYPE_COLORS: Record<CalendarEventType, string> = {
   maintenance: colors.warning,
   charter: colors.accent,
   inspection: colors.info,
@@ -38,7 +38,7 @@ export const formatEventTime = (date: Date): string => {
   });
 };
 
-export const formatEventDate = (date: Date): string => {
+const formatEventDate = (date: Date): string => {
   return new Date(date).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -49,56 +49,32 @@ export const formatEventDate = (date: Date): string => {
 export const formatEventDateRange = (start: Date, end: Date, allDay: boolean): string => {
   const startDate = formatEventDate(start);
   const endDate = formatEventDate(end);
-  
+
   if (allDay) {
     if (startDate === endDate) {
       return startDate;
     }
     return `${startDate} - ${endDate}`;
   }
-  
+
   if (startDate === endDate) {
     return `${startDate}, ${formatEventTime(start)} - ${formatEventTime(end)}`;
   }
-  
+
   return `${startDate} ${formatEventTime(start)} - ${endDate} ${formatEventTime(end)}`;
-};
-
-export const isEventToday = (event: CalendarEvent): boolean => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  const eventStart = new Date(event.startDate);
-  eventStart.setHours(0, 0, 0, 0);
-  
-  return eventStart.getTime() === today.getTime();
-};
-
-export const isEventUpcoming = (event: CalendarEvent): boolean => {
-  const now = new Date();
-  const eventStart = new Date(event.startDate);
-  
-  return eventStart > now;
-};
-
-export const isEventPast = (event: CalendarEvent): boolean => {
-  const now = new Date();
-  const eventEnd = new Date(event.endDate);
-  
-  return eventEnd < now;
 };
 
 export const getEventsForDate = (events: CalendarEvent[], date: Date): CalendarEvent[] => {
   const targetDate = new Date(date);
   targetDate.setHours(0, 0, 0, 0);
-  
+
   return events.filter(event => {
     const eventStart = new Date(event.startDate);
     eventStart.setHours(0, 0, 0, 0);
-    
+
     const eventEnd = new Date(event.endDate);
     eventEnd.setHours(0, 0, 0, 0);
-    
+
     return targetDate >= eventStart && targetDate <= eventEnd;
   });
 };

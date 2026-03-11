@@ -19,7 +19,8 @@ import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { TaskPriority, Attachment } from '../types';
-import { optimizeImage, formatFileSize, validateImage } from '../utils/imageUtils';
+import { optimizeImage, validateImage } from '../utils/imageUtils';
+import { formatFileSize } from '../utils/fileUtils';
 import { scrollProps } from '../hooks/useTopPadding';
 
 const ISSUE_CATEGORIES = [

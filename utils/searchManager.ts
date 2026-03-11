@@ -11,7 +11,7 @@ export interface SearchResult {
   relevance: number;
 }
 
-export interface SearchFilters {
+interface SearchFilters {
   types?: Array<'maintenance' | 'issue' | 'supply' | 'document' | 'vessel'>;
   vesselId?: string;
   dateFrom?: Date;
@@ -20,7 +20,7 @@ export interface SearchFilters {
   priority?: string;
 }
 
-export interface SavedFilter {
+interface SavedFilter {
   id: string;
   name: string;
   filters: SearchFilters;

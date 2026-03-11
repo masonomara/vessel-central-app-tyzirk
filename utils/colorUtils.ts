@@ -1,8 +1,6 @@
 import { colors } from "../styles/commonStyles";
 import {
   TaskPriority,
-  TaskStatus,
-  SupplyRequestStatus,
   EquipmentCondition,
 } from "../types";
 
@@ -47,21 +45,6 @@ export function getPriorityBadgeColors(priority: TaskPriority): {
   }
 }
 
-export function getStatusColor(status: TaskStatus): string {
-  switch (status) {
-    case "completed":
-      return colors.success;
-    case "in_progress":
-      return colors.accent;
-    case "waiting_on_parts":
-      return colors.warning;
-    case "open":
-      return colors.grey;
-    default:
-      return colors.grey;
-  }
-}
-
 export function getConditionBadgeColors(condition: EquipmentCondition): {
   fg: string;
   bg: string;
@@ -77,22 +60,5 @@ export function getConditionBadgeColors(condition: EquipmentCondition): {
       return { fg: colors.redForeground, bg: colors.redBackground };
     default:
       return { fg: colors.textSecondary, bg: colors.surfaceThree };
-  }
-}
-
-export function getSupplyStatusColor(status: SupplyRequestStatus): string {
-  switch (status) {
-    case "approved":
-      return colors.success;
-    case "ordered":
-      return colors.accent;
-    case "received":
-      return colors.success;
-    case "denied":
-      return colors.danger;
-    case "pending":
-      return colors.warning;
-    default:
-      return colors.grey;
   }
 }
