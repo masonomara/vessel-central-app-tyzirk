@@ -1,4 +1,11 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useWindowDimensions } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  useWindowDimensions,
+} from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { scrollProps } from "../../../hooks/useTopPadding";
@@ -85,7 +92,8 @@ export default function MoreScreen() {
             fontWeight: "600",
             color: colors.text,
           },
-          headerRight: () => <View
+          headerRight: () => (
+            <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
@@ -93,7 +101,10 @@ export default function MoreScreen() {
                 marginLeft: 4,
                 marginRight: 4,
               }}
-            ><ProfileHeaderButton /></View>,
+            >
+              <ProfileHeaderButton />
+            </View>
+          ),
         }}
       />
       <ScrollView
@@ -117,10 +128,11 @@ export default function MoreScreen() {
                 <IconSymbol
                   ios_icon_name={item.icon.iosName}
                   android_material_icon_name={item.icon.androidName}
-                  size={24}
+                  size={22}
                   color={colors.textSecondary}
                 />
               </View>
+
               <Text style={styles.gridCardLabel}>{item.label}</Text>
             </TouchableOpacity>
           ))}
@@ -138,30 +150,32 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     paddingHorizontal: 20,
-    columnGap: 12,
-    rowGap: 12,
+    columnGap: 10,
+    rowGap: 10,
   },
   gridCard: {
     backgroundColor: colors.container,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.borderSoft,
-    paddingVertical: 20,
+    paddingVertical: 16,
     paddingHorizontal: 16,
     alignItems: "flex-start",
-    gap: 12,
+    gap: 0,
   },
   gridIconHolder: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 100,
     backgroundColor: colors.surfaceTwo,
     alignItems: "center",
     justifyContent: "center",
   },
   gridCardLabel: {
-    fontSize: 15,
-    fontWeight: "600",
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: "500",
     color: colors.text,
+    marginTop: 8,
   },
 });
