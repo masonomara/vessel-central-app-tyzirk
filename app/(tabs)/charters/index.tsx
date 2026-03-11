@@ -190,15 +190,11 @@ export default function ChartersScreen() {
   );
 
   return (
-    <View
-      style={[
-        indexScreenStyles.container,
-        { backgroundColor: colors.surfaceOne },
-      ]}
-    >
+    <>
       <Stack.Screen
         options={{
           title: "Charters",
+          headerLargeTitle: true,
           headerRight: () => (
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
@@ -218,6 +214,7 @@ export default function ChartersScreen() {
       />
 
       <SectionList
+        style={[indexScreenStyles.container, { backgroundColor: colors.surfaceOne }]}
         sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
@@ -236,6 +233,6 @@ export default function ChartersScreen() {
         stickySectionHeadersEnabled={false}
         {...scrollProps}
       />
-    </View>
+    </>
   );
 }

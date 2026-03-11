@@ -189,15 +189,11 @@ export default function ContactsScreen() {
   );
 
   return (
-    <View
-      style={[
-        indexScreenStyles.container,
-        { backgroundColor: colors.surfaceOne },
-      ]}
-    >
+    <>
       <Stack.Screen
         options={{
           title: "Contacts",
+          headerLargeTitle: true,
           headerRight: () => (
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
@@ -217,6 +213,7 @@ export default function ContactsScreen() {
       />
 
       <SectionList
+        style={[indexScreenStyles.container, { backgroundColor: colors.surfaceOne }]}
         sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
@@ -235,6 +232,6 @@ export default function ContactsScreen() {
         stickySectionHeadersEnabled={false}
         {...scrollProps}
       />
-    </View>
+    </>
   );
 }

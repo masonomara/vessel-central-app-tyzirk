@@ -224,15 +224,11 @@ export default function CertificationsScreen() {
   );
 
   return (
-    <View
-      style={[
-        indexScreenStyles.container,
-        { backgroundColor: colors.surfaceOne },
-      ]}
-    >
+    <>
       <Stack.Screen
         options={{
           title: "Certifications",
+          headerLargeTitle: true,
           headerRight: () => (
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
@@ -254,6 +250,7 @@ export default function CertificationsScreen() {
       />
 
       <SectionList
+        style={[indexScreenStyles.container, { backgroundColor: colors.surfaceOne }]}
         sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
@@ -272,6 +269,6 @@ export default function CertificationsScreen() {
         stickySectionHeadersEnabled={false}
         {...scrollProps}
       />
-    </View>
+    </>
   );
 }

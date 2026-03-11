@@ -15,6 +15,7 @@ import { SearchBar } from "../../../components/SearchBar";
 import { FilterRow } from "../../../components/FilterRow";
 import { CollapsibleSectionHeader } from "../../../components/CollapsibleSectionHeader";
 
+
 const CATEGORY_ORDER: EquipmentCategory[] = [
   "safety",
   "water_toys",
@@ -200,15 +201,11 @@ export default function EquipmentScreen() {
   );
 
   return (
-    <View
-      style={[
-        indexScreenStyles.container,
-        { backgroundColor: colors.surfaceOne },
-      ]}
-    >
+    <>
       <Stack.Screen
         options={{
           title: "Equipment",
+          headerLargeTitle: true,
           headerRight: () => (
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
@@ -230,6 +227,7 @@ export default function EquipmentScreen() {
       />
 
       <SectionList
+        style={[indexScreenStyles.container, { backgroundColor: colors.surfaceOne }]}
         sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
@@ -248,6 +246,6 @@ export default function EquipmentScreen() {
         stickySectionHeadersEnabled={false}
         {...scrollProps}
       />
-    </View>
+    </>
   );
 }

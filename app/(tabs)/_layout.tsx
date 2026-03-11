@@ -142,9 +142,10 @@ export default function TabLayout() {
         <Badge hidden={openIssueCount === 0}>{String(openIssueCount)}</Badge>
       </NativeTabs.Trigger>
 
-      {/* Supplies (all roles) */}
+      {/* Supplies (crew only as direct tab; owner+manager access via More) */}
       <NativeTabs.Trigger
         name="supplies"
+        hidden={userRole !== "crew"}
         {...sharedTriggerProps}
       >
         <Icon
@@ -154,71 +155,39 @@ export default function TabLayout() {
         <Label>Supplies</Label>
       </NativeTabs.Trigger>
 
-      {/* Documents (owner only) */}
-      <NativeTabs.Trigger
-        name="documents"
-        hidden={userRole !== "owner"}
-        {...sharedTriggerProps}
-      >
-        <Icon
-          sf={{ default: "doc.text", selected: "doc.text.fill" }}
-          androidSrc={<VectorIcon family={MaterialIcons} name="description" />}
-        />
+      {/* Hidden overflow tabs (accessed via More tab for owner+manager) */}
+      <NativeTabs.Trigger name="documents" hidden {...sharedTriggerProps}>
+        <Icon sf="doc.text" androidSrc={<VectorIcon family={MaterialIcons} name="description" />} />
         <Label>Documents</Label>
       </NativeTabs.Trigger>
-
-      {/* Contacts (owner + manager) */}
-      <NativeTabs.Trigger
-        name="contacts"
-        hidden={userRole === "crew"}
-        {...sharedTriggerProps}
-      >
-        <Icon
-          sf={{ default: "person.2", selected: "person.2.fill" }}
-          androidSrc={<VectorIcon family={MaterialIcons} name="contacts" />}
-        />
+      <NativeTabs.Trigger name="contacts" hidden {...sharedTriggerProps}>
+        <Icon sf="person.2" androidSrc={<VectorIcon family={MaterialIcons} name="contacts" />} />
         <Label>Contacts</Label>
       </NativeTabs.Trigger>
-
-      {/* Certifications (owner + manager) */}
-      <NativeTabs.Trigger
-        name="certifications"
-        hidden={userRole === "crew"}
-        {...sharedTriggerProps}
-      >
-        <Icon
-          sf={{ default: "checkmark.seal", selected: "checkmark.seal.fill" }}
-          androidSrc={<VectorIcon family={MaterialIcons} name="verified" />}
-        />
+      <NativeTabs.Trigger name="certifications" hidden {...sharedTriggerProps}>
+        <Icon sf="checkmark.seal" androidSrc={<VectorIcon family={MaterialIcons} name="verified" />} />
         <Label>Certs</Label>
       </NativeTabs.Trigger>
-
-      {/* Charters (owner + manager) */}
-      <NativeTabs.Trigger
-        name="charters"
-        hidden={userRole === "crew"}
-        {...sharedTriggerProps}
-      >
-        <Icon
-          sf={{ default: "sailboat", selected: "sailboat.fill" }}
-          androidSrc={
-            <VectorIcon family={MaterialIcons} name="directions-boat" />
-          }
-        />
+      <NativeTabs.Trigger name="charters" hidden {...sharedTriggerProps}>
+        <Icon sf="sailboat" androidSrc={<VectorIcon family={MaterialIcons} name="directions-boat" />} />
         <Label>Charters</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="equipment" hidden {...sharedTriggerProps}>
+        <Icon sf="lifepreserver" androidSrc={<VectorIcon family={MaterialIcons} name="inventory" />} />
+        <Label>Equipment</Label>
+      </NativeTabs.Trigger>
 
-      {/* Equipment (owner + manager) */}
+      {/* More (owner + manager) */}
       <NativeTabs.Trigger
-        name="equipment"
+        name="more"
         hidden={userRole === "crew"}
         {...sharedTriggerProps}
       >
         <Icon
-          sf={{ default: "lifepreserver", selected: "lifepreserver.fill" }}
-          androidSrc={<VectorIcon family={MaterialIcons} name="inventory" />}
+          sf={{ default: "ellipsis.circle", selected: "ellipsis.circle.fill" }}
+          androidSrc={<VectorIcon family={MaterialIcons} name="more-horiz" />}
         />
-        <Label>Equipment</Label>
+        <Label>More</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );

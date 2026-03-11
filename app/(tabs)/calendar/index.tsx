@@ -227,10 +227,11 @@ export default function CalendarScreen() {
   );
 
   return (
-    <View style={commonStyles.container}>
+    <>
       <Stack.Screen
         options={{
           title: "Calendar",
+          headerLargeTitle: true,
           headerRight: () => (
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
@@ -249,7 +250,7 @@ export default function CalendarScreen() {
         }}
       />
       <ScrollView
-        style={styles.scrollView}
+        style={[styles.scrollView, commonStyles.container]}
         contentContainerStyle={[
           styles.scrollContent,
           { paddingBottom: insets.bottom + 64 },
@@ -351,7 +352,7 @@ export default function CalendarScreen() {
           )}
         </View>
       </ScrollView>
-    </View>
+    </>
   );
 }
 

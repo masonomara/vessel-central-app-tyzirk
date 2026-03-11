@@ -163,15 +163,11 @@ export default function DocumentsScreen() {
   );
 
   return (
-    <View
-      style={[
-        indexScreenStyles.container,
-        { backgroundColor: colors.surfaceOne },
-      ]}
-    >
+    <>
       <Stack.Screen
         options={{
           title: "Documents",
+          headerLargeTitle: true,
           headerRight: () => (
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
@@ -193,6 +189,7 @@ export default function DocumentsScreen() {
       />
 
       <SectionList
+        style={[indexScreenStyles.container, { backgroundColor: colors.surfaceOne }]}
         sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
@@ -211,6 +208,6 @@ export default function DocumentsScreen() {
         stickySectionHeadersEnabled={false}
         {...scrollProps}
       />
-    </View>
+    </>
   );
 }
