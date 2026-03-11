@@ -14,13 +14,36 @@ import { FilterRow } from "../../../components/FilterRow";
 import { CollapsibleSectionHeader } from "../../../components/CollapsibleSectionHeader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const CONTACT_TYPE_BADGE: Record<ContactType, { fg: string; bg: string; label: string }> = {
+const CONTACT_TYPE_BADGE: Record<
+  ContactType,
+  { fg: string; bg: string; label: string }
+> = {
   crew: { fg: colors.blueForeground, bg: colors.blueBackground, label: "Crew" },
-  vendor: { fg: colors.orangeForeground, bg: colors.orangeBackground, label: "Vendor" },
-  marina: { fg: colors.greenForeground, bg: colors.greenBackground, label: "Marina" },
-  emergency: { fg: colors.redForeground, bg: colors.redBackground, label: "Emergency" },
-  owner: { fg: colors.purpleForeground, bg: colors.purpleBackground, label: "Owner" },
-  other: { fg: colors.yellowForeground, bg: colors.yellowBackground, label: "Other" },
+  vendor: {
+    fg: colors.orangeForeground,
+    bg: colors.orangeBackground,
+    label: "Vendor",
+  },
+  marina: {
+    fg: colors.greenForeground,
+    bg: colors.greenBackground,
+    label: "Marina",
+  },
+  emergency: {
+    fg: colors.redForeground,
+    bg: colors.redBackground,
+    label: "Emergency",
+  },
+  owner: {
+    fg: colors.purpleForeground,
+    bg: colors.purpleBackground,
+    label: "Owner",
+  },
+  other: {
+    fg: colors.yellowForeground,
+    bg: colors.yellowBackground,
+    label: "Other",
+  },
 };
 
 export default function ContactsScreen() {
@@ -86,7 +109,14 @@ export default function ContactsScreen() {
       groups[c.contactType].push(c);
     });
 
-    const order: ContactType[] = ["crew", "vendor", "marina", "emergency", "owner", "other"];
+    const order: ContactType[] = [
+      "crew",
+      "vendor",
+      "marina",
+      "emergency",
+      "owner",
+      "other",
+    ];
 
     return order
       .filter((type) => groups[type].length > 0)
@@ -201,13 +231,19 @@ export default function ContactsScreen() {
           },
           headerRight: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                marginLeft: 4,
+                marginRight: 4,
+              }}
             >
               <TouchableOpacity onPress={() => router.push("/add-contact")}>
                 <IconSymbol
                   ios_icon_name="plus"
                   android_material_icon_name="add"
-                  size={24}
+                  size={28}
                   color={colors.text}
                 />
               </TouchableOpacity>
@@ -218,7 +254,10 @@ export default function ContactsScreen() {
       />
 
       <SectionList
-        style={[indexScreenStyles.container, { backgroundColor: colors.surfaceOne }]}
+        style={[
+          indexScreenStyles.container,
+          { backgroundColor: colors.surfaceOne },
+        ]}
         sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}

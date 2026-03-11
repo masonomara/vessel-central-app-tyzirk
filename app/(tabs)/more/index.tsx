@@ -20,42 +20,42 @@ const MORE_ITEMS: MoreItem[] = [
   {
     key: "supplies",
     label: "Supplies",
-    route: "/(tabs)/more/supplies",
+    route: "/(tabs)/supplies",
     icon: { iosName: "shippingbox.fill", androidName: "inventory-2" },
     roles: ["owner", "manager"],
   },
   {
     key: "documents",
     label: "Documents",
-    route: "/(tabs)/more/documents",
+    route: "/(tabs)/documents",
     icon: { iosName: "doc.text.fill", androidName: "description" },
     roles: ["owner"],
   },
   {
     key: "contacts",
     label: "Contacts",
-    route: "/(tabs)/more/contacts",
+    route: "/(tabs)/contacts",
     icon: { iosName: "person.2.fill", androidName: "contacts" },
     roles: ["owner", "manager"],
   },
   {
     key: "certifications",
     label: "Certifications",
-    route: "/(tabs)/more/certifications",
+    route: "/(tabs)/certifications",
     icon: { iosName: "checkmark.seal.fill", androidName: "verified" },
     roles: ["owner", "manager"],
   },
   {
     key: "charters",
     label: "Charters",
-    route: "/(tabs)/more/charters",
+    route: "/(tabs)/charters",
     icon: { iosName: "sailboat.fill", androidName: "directions-boat" },
     roles: ["owner", "manager"],
   },
   {
     key: "equipment",
     label: "Equipment",
-    route: "/(tabs)/more/equipment",
+    route: "/(tabs)/equipment",
     icon: { iosName: "lifepreserver.fill", androidName: "inventory" },
     roles: ["owner", "manager"],
   },
@@ -71,14 +71,29 @@ export default function MoreScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+    <>
       <Stack.Screen
         options={{
-          title: "",
-          headerRight: () => <ProfileHeaderButton />,
+          title: "More Details",
+          headerLargeTitleEnabled: true,
+          headerLargeTitleStyle: {
+            fontSize: 28,
+            fontWeight: "600",
+            color: colors.text,
+          },
+          headerRight: () => <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                marginLeft: 4,
+                marginRight: 4,
+              }}
+            ><ProfileHeaderButton /></View>,
         }}
       />
       <ScrollView
+        style={{ flex: 1, backgroundColor: colors.surfaceOne }}
         contentContainerStyle={[
           styles.scrollContent,
           { paddingBottom: insets.bottom + 64 },
@@ -102,7 +117,7 @@ export default function MoreScreen() {
           ))}
         </GroupedListContainer>
       </ScrollView>
-    </View>
+    </>
   );
 }
 

@@ -11,6 +11,7 @@ export function ProfileHeaderButton() {
         android_material_icon_name="account-circle"
         size={28}
         color={colors.text}
+        style={{ height: 28, width: 28}}
       />
     </TouchableOpacity>
   );

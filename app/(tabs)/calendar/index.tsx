@@ -15,6 +15,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
 import { ListItemCard } from "../../../components/ListItemCard";
+import { GroupedListContainer } from "../../../components/GroupedListContainer";
 import {
   getEventsForDate,
   getEventsForMonth,
@@ -206,9 +207,8 @@ export default function CalendarScreen() {
         description={event.description}
         vesselName={event.vesselName}
         onPress={() => handleEventPress(event)}
-        // isFirst={index === 0}
+        isFirst={index === 0}
         isLast={index === array.length - 1}
-        bordered
         icon={{ iosName: "calendar", androidName: "event" }}
         badge={{
           label: getEventTypeLabel(event.type),
@@ -220,7 +220,9 @@ export default function CalendarScreen() {
           event.endDate,
           event.allDay,
         )}
+        inContainer={true}
         secondaryMetaText={event.location || undefined}
+        style={{ marginLeft: 0, backgroundColor: "transparent" }}
       />
     ),
     [handleEventPress],
@@ -239,13 +241,19 @@ export default function CalendarScreen() {
           },
           headerRight: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                marginLeft: 4,
+                marginRight: 4,
+              }}
             >
               <TouchableOpacity onPress={handleAddEvent}>
                 <IconSymbol
                   ios_icon_name="plus"
                   android_material_icon_name="add"
-                  size={24}
+                  size={28}
                   color={colors.text}
                 />
               </TouchableOpacity>
@@ -351,9 +359,9 @@ export default function CalendarScreen() {
               </TouchableOpacity>
             </View>
           ) : (
-            <View style={styles.eventsList}>
+            <GroupedListContainer>
               {selectedDateEvents.map(renderEventItem)}
-            </View>
+            </GroupedListContainer>
           )}
         </View>
       </ScrollView>
@@ -492,9 +500,6 @@ const styles = StyleSheet.create({
   eventsCount: {
     fontSize: 15,
     color: colors.textTertiary,
-  },
-  eventsList: {
-    gap: 8,
   },
   emptyState: {
     alignItems: "center",

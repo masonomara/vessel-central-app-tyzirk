@@ -40,6 +40,7 @@ interface ListItemCardProps {
   bordered?: boolean;
 
   actions?: React.ReactNode;
+  inContainer?: boolean;
 }
 
 export const ListItemCard = React.memo(
@@ -60,6 +61,7 @@ export const ListItemCard = React.memo(
     secondaryMetaText,
     bordered,
     actions,
+    inContainer,
   }: ListItemCardProps) => {
     const handleComplete = useCallback(() => {
       onComplete?.();
@@ -82,6 +84,11 @@ export const ListItemCard = React.memo(
             paddingRight: 16,
             paddingBottom: 12,
           },
+          inContainer && {
+            paddingLeft: 0,
+            paddingRight: 16,
+            marginLeft: 0,
+          },
           style,
         ]}
         onPress={onPress}
@@ -103,35 +110,53 @@ export const ListItemCard = React.memo(
                 indexScreenStyles.completeButton,
                 {
                   backgroundColor: isCompleted
-                    ? colors.greenBackground
+                    ? colors.greenForeground
                     : "transparent",
                   borderColor: isCompleted
-                    ? colors.greenBackground
+                    ? colors.greenForeground
                     : colors.border,
                   borderWidth: 1,
+                },
+                inContainer && {
+                  marginLeft: 0,
                 },
               ]}
               onPress={handleComplete}
               hitSlop={8}
             >
-              {isCompleted && (
+              {isCompleted ? (
                 <IconSymbol
                   ios_icon_name="checkmark.circle.fill"
                   android_material_icon_name="check"
                   size={16}
-                  color={colors.greenForeground}
+                  color={colors.container}
+                />
+              ) : (
+                <IconSymbol
+                  ios_icon_name="checkmark.circle.fill"
+                  android_material_icon_name="check"
+                  size={16}
+                  color={colors.textTertiary}
                 />
               )}
             </Pressable>
           )}
 
           {!showCheckbox && icon && (
-            <View style={indexScreenStyles.iconHolder}>
+            <View
+              style={[
+                indexScreenStyles.iconHolder,
+                inContainer && {
+                  marginLeft: 16,
+                  paddingLeft: 0,
+                },
+              ]}
+            >
               <IconSymbol
                 ios_icon_name={icon.iosName}
                 android_material_icon_name={icon.androidName}
-                size={20}
-                color={colors.textTertiary}
+                size={16}
+                color={colors.textSecondary}
               />
             </View>
           )}

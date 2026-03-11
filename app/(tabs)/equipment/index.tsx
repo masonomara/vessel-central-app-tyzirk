@@ -213,7 +213,13 @@ export default function EquipmentScreen() {
           },
           headerRight: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                marginLeft: 4,
+                marginRight: 4,
+              }}
             >
               <TouchableOpacity
                 onPress={() => router.push("/add-equipment")}

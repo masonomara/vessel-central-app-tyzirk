@@ -215,7 +215,13 @@ export default function OwnerDashboard() {
           },
           headerRight: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                marginLeft: 4,
+                marginRight: 4,
+              }}
             >
               <TouchableOpacity
                 onPress={() => {
@@ -283,7 +289,7 @@ export default function OwnerDashboard() {
                       bg: getPriorityBadgeColors(approval.priority).bg,
                     }}
                     metaText={formatDate(new Date(approval.createdAt))}
-                    // FLAG
+                    inContainer={true}
                     style={{ marginLeft: 0, backgroundColor: "transparent" }}
                   />
                 );
@@ -335,7 +341,7 @@ export default function OwnerDashboard() {
                   icon={getActivityTypeIcon(log.type)}
                   badge={getActivityPriorityBadge(log)}
                   metaText={formatDate(new Date(log.timestamp))}
-                  // FLAG
+inContainer={true}
                   style={{ marginLeft: 0, backgroundColor: "transparent" }}
                 />
               ))}
@@ -455,8 +461,7 @@ export default function OwnerDashboard() {
                       bg: priorityBadge.bg,
                     }}
                     metaText={formatDueDate(upcomingMaintenance.dueDate)}
-                    // FLAG
-                    style={{ marginLeft: 0, backgroundColor: "transparent" }}
+                    inContainer={true}
                   />
                 );
               })()}

@@ -103,7 +103,13 @@ export default function ManagerDashboard() {
           },
           headerRight: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                marginLeft: 4,
+                marginRight: 4,
+              }}
             >
               <TouchableOpacity onPress={() => setShowSearch(true)}>
                 <IconSymbol
@@ -188,7 +194,7 @@ export default function ManagerDashboard() {
                         </TouchableOpacity>
                       </View>
                     }
-                    // FLAG
+                    inContainer={true}
                     style={{ marginLeft: 0, backgroundColor: "transparent" }}
                   />
                 );
@@ -289,7 +295,7 @@ export default function ManagerDashboard() {
                       bg: priorityBadge.bg,
                     }}
                     metaText={formatDueDate(item.dueDate)}
-                    // FLAG
+                    inContainer={true}
                     style={{ marginLeft: 0, backgroundColor: "transparent" }}
                   />
                 );

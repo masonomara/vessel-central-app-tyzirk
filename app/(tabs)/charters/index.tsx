@@ -202,13 +202,12 @@ export default function ChartersScreen() {
           },
           headerRight: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
-            >
+style={{ flexDirection: "row", alignItems: "center", gap: 10, marginLeft: 8, marginRight: 8 }}            >
               <TouchableOpacity onPress={() => router.push("/add-charter")}>
                 <IconSymbol
                   ios_icon_name="plus"
                   android_material_icon_name="add"
-                  size={24}
+                  size={28}
                   color={colors.text}
                 />
               </TouchableOpacity>

@@ -491,10 +491,16 @@ export const indexScreenStyles = StyleSheet.create({
   },
 
   iconHolder: {
-    height: 20,
-    width: 20,
-    marginLeft: 24,
-    marginTop: 2,
+    height: 32,
+    width: 32,
+    marginLeft: 20,
+    marginRight: -4,
+    marginBottom: -8,
+    marginTop: -2,
+    backgroundColor: colors.surfaceThree,
+    borderRadius: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // Offset for rows under checkbox

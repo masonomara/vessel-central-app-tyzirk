@@ -7,7 +7,11 @@ import { colors } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
-import { getPriorityBadgeColors, formatDueDate, formatDate } from "../../../utils/formatting";
+import {
+  getPriorityBadgeColors,
+  formatDueDate,
+  formatDate,
+} from "../../../utils/formatting";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, router } from "expo-router";
 import { scrollProps } from "../../../hooks/useTopPadding";
@@ -62,7 +66,20 @@ export default function CrewDashboard() {
             fontWeight: "600",
             color: colors.text,
           },
-          headerRight: () => <ProfileHeaderButton />,
+
+          headerRight: () => (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                marginLeft: 4,
+                marginRight: 4,
+              }}
+            >
+              <ProfileHeaderButton />
+            </View>
+          ),
         }}
       />
       <ScrollView
@@ -74,7 +91,6 @@ export default function CrewDashboard() {
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
-
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My Tasks</Text>
@@ -116,7 +132,7 @@ export default function CrewDashboard() {
                         ? "Completed"
                         : formatDueDate(task.dueDate)
                     }
-                    // FLAG
+                    inContainer={true}
                     style={{ marginLeft: 0, backgroundColor: "transparent" }}
                   />
                 );
@@ -160,7 +176,7 @@ export default function CrewDashboard() {
                     bg: getPriorityBadgeColors(request.priority).bg,
                   }}
                   metaText={formatDate(request.createdAt)}
-                  // FLAG
+                  inContainer={true}
                   style={{ marginLeft: 0, backgroundColor: "transparent" }}
                 />
               ))}

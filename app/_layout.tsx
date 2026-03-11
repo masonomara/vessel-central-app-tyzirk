@@ -4,7 +4,12 @@ import { DataProvider } from "../contexts/DataContext";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { View, StyleSheet } from "react-native";
 import { stackScreenOptions } from "../components/TabStackLayout";
+import { colors } from "../styles/commonStyles";
 import * as SplashScreen from "expo-splash-screen";
+
+const headerWithBg = {
+  headerStyle: { backgroundColor: colors.surfaceOne },
+};
 
 SplashScreen.preventAutoHideAsync();
 
@@ -33,6 +38,7 @@ function RootLayoutContent() {
             presentation: "modal",
             animation: "slide_from_bottom",
             title: "New Event",
+            ...headerWithBg,
           }}
         />
         <Stack.Screen
@@ -41,6 +47,7 @@ function RootLayoutContent() {
             presentation: "modal",
             animation: "slide_from_bottom",
             title: "New Certification",
+            ...headerWithBg,
           }}
         />
         <Stack.Screen
@@ -49,6 +56,7 @@ function RootLayoutContent() {
             presentation: "modal",
             animation: "slide_from_bottom",
             title: "Log Charter",
+            ...headerWithBg,
           }}
         />
         <Stack.Screen
@@ -57,6 +65,7 @@ function RootLayoutContent() {
             presentation: "modal",
             animation: "slide_from_bottom",
             title: "New Contact",
+            ...headerWithBg,
           }}
         />
         <Stack.Screen
@@ -65,6 +74,7 @@ function RootLayoutContent() {
             presentation: "modal",
             animation: "slide_from_bottom",
             title: "Upload Document",
+            ...headerWithBg,
           }}
         />
         <Stack.Screen
@@ -73,6 +83,7 @@ function RootLayoutContent() {
             presentation: "modal",
             animation: "slide_from_bottom",
             title: "New Equipment",
+            ...headerWithBg,
           }}
         />
         <Stack.Screen
@@ -81,6 +92,7 @@ function RootLayoutContent() {
             presentation: "modal",
             animation: "slide_from_bottom",
             title: "Report Issue",
+            ...headerWithBg,
           }}
         />
         <Stack.Screen
@@ -89,6 +101,7 @@ function RootLayoutContent() {
             presentation: "modal",
             animation: "slide_from_bottom",
             title: "New Maintenance Task",
+            ...headerWithBg,
           }}
         />
         <Stack.Screen
@@ -97,6 +110,7 @@ function RootLayoutContent() {
             presentation: "modal",
             animation: "slide_from_bottom",
             title: "Request Parts",
+            ...headerWithBg,
           }}
         />
         <Stack.Screen
@@ -105,56 +119,57 @@ function RootLayoutContent() {
             presentation: "modal",
             animation: "slide_from_bottom",
             title: "Request Supplies",
+            ...headerWithBg,
           }}
         />
 
         {/* Analytics */}
-        <Stack.Screen name="boat-analytics" options={{ title: "Analytics" }} />
+        <Stack.Screen name="boat-analytics" options={{ title: "Analytics", ...headerWithBg }} />
 
         {/* Detail screens */}
         <Stack.Screen
           name="detail-calendar-event"
-          options={{ title: "Event Details" }}
+          options={{ title: "Event Details", ...headerWithBg }}
         />
         <Stack.Screen
           name="detail-certification"
-          options={{ title: "Certification" }}
+          options={{ title: "Certification", ...headerWithBg }}
         />
         <Stack.Screen
           name="detail-charter"
-          options={{ title: "Charter Details" }}
+          options={{ title: "Charter Details", ...headerWithBg }}
         />
-        <Stack.Screen name="detail-contact" options={{ title: "Contact" }} />
-        <Stack.Screen name="detail-document" options={{ title: "Document" }} />
-        <Stack.Screen name="detail-equipment" options={{ title: "Equipment" }} />
+        <Stack.Screen name="detail-contact" options={{ title: "Contact", ...headerWithBg }} />
+        <Stack.Screen name="detail-document" options={{ title: "Document", ...headerWithBg }} />
+        <Stack.Screen name="detail-equipment" options={{ title: "Equipment", ...headerWithBg }} />
         <Stack.Screen
           name="detail-issue"
-          options={{ title: "Issue Details" }}
+          options={{ title: "Issue Details", ...headerWithBg }}
         />
-        <Stack.Screen name="detail-maintenance" options={{ title: "" }} />
+        <Stack.Screen name="detail-maintenance" options={{ title: "", ...headerWithBg }} />
         <Stack.Screen
           name="detail-supply"
-          options={{ title: "Supply Request" }}
+          options={{ title: "Supply Request", ...headerWithBg }}
         />
         <Stack.Screen
           name="detail-vessel"
-          options={{ title: "Vessel Details", headerBackTitle: "Back" }}
+          options={{ title: "Vessel Details", headerBackTitle: "Back", ...headerWithBg }}
         />
 
         {/* Operation screens */}
         <Stack.Screen
           name="operation-assign-boats"
-          options={{ title: "Assign Boats" }}
+          options={{ title: "Assign Boats", ...headerWithBg }}
         />
         <Stack.Screen
           name="operation-update-engine-hours"
-          options={{ title: "Update Engine Hours" }}
+          options={{ title: "Update Engine Hours", ...headerWithBg }}
         />
 
         {/* Profile */}
         <Stack.Screen
           name="user-profile"
-          options={{ title: "Profile", headerBackTitle: "Back" }}
+          options={{ title: "Profile", headerBackTitle: "Back", ...headerWithBg }}
         />
       </Stack>
     </View>

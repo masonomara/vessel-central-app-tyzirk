@@ -209,7 +209,13 @@ export default function MaintenanceScreen() {
           },
           headerRight: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                marginLeft: 4,
+                marginRight: 4,
+              }}
             >
               {(userRole === "manager" || userRole === "owner") && (
                 <TouchableOpacity

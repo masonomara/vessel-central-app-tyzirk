@@ -175,7 +175,13 @@ export default function DocumentsScreen() {
           },
           headerRight: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                marginLeft: 4,
+                marginRight: 4,
+              }}
             >
               {(userRole === "manager" || userRole === "owner") && (
                 <TouchableOpacity onPress={() => router.push("/add-document")}>
@@ -194,7 +200,10 @@ export default function DocumentsScreen() {
       />
 
       <SectionList
-        style={[indexScreenStyles.container, { backgroundColor: colors.surfaceOne }]}
+        style={[
+          indexScreenStyles.container,
+          { backgroundColor: colors.surfaceOne },
+        ]}
         sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
