@@ -9,7 +9,7 @@ import {
 import { ListItemCard } from "../../../components/ListItemCard";
 import { GroupedListContainer } from "../../../components/GroupedListContainer";
 import { VesselCard } from "../../../components/VesselCard";
-import { colors } from "../../../styles/commonStyles";
+import { colors, buttonStyles } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
@@ -167,30 +167,18 @@ export default function ManagerDashboard() {
                       bg: getPriorityBadgeColors(approval.priority).bg,
                     }}
                     actions={
-                      <View style={styles.approvalActions}>
+                      <View style={[buttonStyles.approvalRow, { marginTop: 12 }]}>
                         <TouchableOpacity
-                          style={styles.approveButton}
+                          style={buttonStyles.approveButton}
                           onPress={() => handleApprove(approval.id)}
                         >
-                          <IconSymbol
-                            ios_icon_name="checkmark.circle.fill"
-                            android_material_icon_name="check-circle"
-                            size={20}
-                            color={colors.success}
-                          />
-                          <Text style={styles.approveButtonText}>Approve</Text>
+                          <Text style={buttonStyles.approveButtonText}>Approve</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                          style={styles.rejectButton}
+                          style={buttonStyles.denyButton}
                           onPress={() => handleReject(approval.id)}
                         >
-                          <IconSymbol
-                            ios_icon_name="xmark.circle.fill"
-                            android_material_icon_name="cancel"
-                            size={20}
-                            color={colors.danger}
-                          />
-                          <Text style={styles.rejectButtonText}>Reject</Text>
+                          <Text style={buttonStyles.denyButtonText}>Deny</Text>
                         </TouchableOpacity>
                       </View>
                     }
@@ -336,42 +324,6 @@ const styles = StyleSheet.create({
   sectionCount: {
     fontSize: 15,
     color: colors.textTertiary,
-  },
-  // Approval action buttons
-  approvalActions: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 12,
-  },
-  approveButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.success + "30",
-    borderRadius: 8,
-    padding: 10,
-    gap: 6,
-  },
-  approveButtonText: {
-    color: colors.success,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  rejectButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.danger + "30",
-    borderRadius: 8,
-    padding: 10,
-    gap: 6,
-  },
-  rejectButtonText: {
-    color: colors.danger,
-    fontSize: 14,
-    fontWeight: "600",
   },
   viewAllButton: {
     flexDirection: "row",

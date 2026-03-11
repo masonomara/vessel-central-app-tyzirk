@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
 import {
-  StyleSheet,
   View,
   Text,
   SectionList,
@@ -9,7 +8,7 @@ import {
 import { Stack, useRouter } from "expo-router";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { scrollProps } from "../../../hooks/useTopPadding";
-import { colors, indexScreenStyles } from "../../../styles/commonStyles";
+import { colors, buttonStyles, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
@@ -133,18 +132,18 @@ export default function SuppliesScreen() {
         actions={
           (userRole === "manager" || userRole === "owner") &&
           item.status === "pending" ? (
-            <View style={styles.actionButtons}>
+            <View style={[buttonStyles.approvalRow, { paddingTop: 16 }]}>
               <TouchableOpacity
-                style={styles.approveButton}
+                style={buttonStyles.approveButton}
                 onPress={() => handleApprove(item.id)}
               >
-                <Text style={styles.approveButtonText}>Approve</Text>
+                <Text style={buttonStyles.approveButtonText}>Approve</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.denyButton}
+                style={buttonStyles.denyButton}
                 onPress={() => handleDeny(item.id)}
               >
-                <Text style={styles.denyButtonText}>Deny</Text>
+                <Text style={buttonStyles.denyButtonText}>Deny</Text>
               </TouchableOpacity>
             </View>
           ) : undefined
@@ -270,34 +269,3 @@ export default function SuppliesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  actionButtons: {
-    flexDirection: "row",
-    gap: 8,
-    paddingTop: 16,
-  },
-  approveButton: {
-    flex: 1,
-    alignItems: "center",
-    backgroundColor: colors.greenForeground,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  approveButtonText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.container,
-  },
-  denyButton: {
-    flex: 1,
-    alignItems: "center",
-    backgroundColor: colors.redForeground,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  denyButtonText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.container,
-  },
-});

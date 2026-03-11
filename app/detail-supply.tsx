@@ -12,6 +12,7 @@ import { useLocalSearchParams, Stack } from "expo-router";
 import {
   commonStyles,
   colors,
+  buttonStyles,
   detailScreenStyles as ds,
 } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
@@ -175,32 +176,20 @@ export default function SupplyDetailScreen() {
         />
 
         {needsApproval && isManagerOrOwner && (
-          <View style={styles.approvalRow}>
+          <View style={[buttonStyles.approvalRow, { paddingHorizontal: 20, paddingVertical: 12 }]}>
             <TouchableOpacity
-              style={styles.approveBtn}
+              style={buttonStyles.approveButton}
               onPress={handleApprove}
               activeOpacity={0.7}
             >
-              {/* <IconSymbol
-                ios_icon_name="checkmark.circle.fill"
-                android_material_icon_name="check-circle"
-                size={16}
-                color={colors.greenForeground}
-              /> */}
-              <Text style={styles.approveBtnText}>Approve Request</Text>
+              <Text style={buttonStyles.approveButtonText}>Approve</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.denyBtn}
+              style={buttonStyles.denyButton}
               onPress={handleDeny}
               activeOpacity={0.7}
             >
-              {/* <IconSymbol
-                ios_icon_name="xmark.circle.fill"
-                android_material_icon_name="cancel"
-                size={16}
-                color={colors.redForeground}
-              /> */}
-              <Text style={styles.denyBtnText}>Deny Request</Text>
+              <Text style={buttonStyles.denyButtonText}>Deny</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -350,42 +339,6 @@ export default function SupplyDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  approvalRow: {
-    flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  approveBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: colors.greenForeground,
-  },
-  approveBtnText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: colors.container,
-  },
-  denyBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: colors.redForeground,
-  },
-  denyBtnText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: colors.container,
-  },
   historySection: {
     paddingHorizontal: 20,
     paddingTop: 20,

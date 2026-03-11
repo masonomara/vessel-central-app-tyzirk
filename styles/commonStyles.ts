@@ -1,7 +1,6 @@
 import { StyleSheet } from "react-native";
 
 export const colors = {
-
   // Accent Colors
   accent: "#3B82F6", // Bright Blue (operational)
   gold: "#C9A84C", // Gold (premium accent)
@@ -180,6 +179,40 @@ export const buttonStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     letterSpacing: 0.3,
+  },
+  approvalRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  approveButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 8,
+    borderRadius: 6,
+    backgroundColor: colors.greenForeground,
+  },
+  approveButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.container,
+  },
+  denyButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 8,
+    borderRadius: 6,
+    backgroundColor: colors.redForeground,
+  },
+  denyButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.container,
   },
 });
 
@@ -403,7 +436,7 @@ export const indexScreenStyles = StyleSheet.create({
     justifyContent: "space-between",
     height: 56,
     paddingHorizontal: 20,
-    borderTopWidth: 3.5,
+    borderTopWidth: 4,
     borderColor: colors.surfaceTwo,
   },
   sectionHeader: {
@@ -499,8 +532,8 @@ export const indexScreenStyles = StyleSheet.create({
     marginTop: -2,
     backgroundColor: colors.surfaceTwo,
     borderRadius: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   // Offset for rows under checkbox
@@ -680,8 +713,8 @@ export const analyticsChartConfig = {
     borderRadius: 16,
   },
   propsForDots: {
-    r: '6',
-    strokeWidth: '2',
+    r: "6",
+    strokeWidth: "2",
     stroke: colors.accent,
   },
 };
