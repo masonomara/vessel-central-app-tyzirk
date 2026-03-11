@@ -444,7 +444,7 @@ export const indexScreenStyles = StyleSheet.create({
     paddingTop: 16,
   },
   cardTitle: {
-    fontSize: 17,
+    fontSize: 16,
     lineHeight: 22,
     fontWeight: "600",
     color: colors.text,
