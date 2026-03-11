@@ -6,6 +6,7 @@ import { useData } from "../contexts/DataContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { ListItemCard } from "../components/ListItemCard";
 import { CollapsibleSectionHeader } from "../components/CollapsibleSectionHeader";
+import { VesselAnalyticsSection } from "../components/VesselAnalyticsSection";
 import { scrollProps } from "../hooks/useTopPadding";
 import { formatDate, formatDueDate, formatLabel, getPriorityBadgeColors } from "../utils/formatting";
 import {
@@ -160,6 +161,8 @@ export default function VesselDetailScreen() {
           )}
         </View>
 
+        <VesselAnalyticsSection vesselId={vessel.id} />
+
         <View style={styles.listArea}>
           {openIssues.length > 0 && (
             <View>
@@ -182,6 +185,7 @@ export default function VesselDetailScreen() {
                         params: { id: issue.id },
                       })
                     }
+                    isFirst={index === 0}
                     isLast={index === openIssues.length - 1}
                     icon={{
                       iosName: "exclamationmark.triangle.fill",
@@ -221,6 +225,7 @@ export default function VesselDetailScreen() {
                         params: { eventId: event.id },
                       })
                     }
+                    isFirst={index === 0}
                     isLast={index === vesselEvents.length - 1}
                     icon={{ iosName: "calendar", androidName: "event" }}
                     badge={{
@@ -260,6 +265,7 @@ export default function VesselDetailScreen() {
                         params: { id: task.id },
                       })
                     }
+                    isFirst={index === 0}
                     isLast={index === activeTasks.length - 1}
                     icon={{
                       iosName: "wrench.and.screwdriver.fill",
@@ -299,6 +305,7 @@ export default function VesselDetailScreen() {
                         params: { id: req.id },
                       })
                     }
+                    isFirst={index === 0}
                     isLast={index === pendingSupplies.length - 1}
                     icon={{
                       iosName: "shippingbox",
@@ -338,6 +345,7 @@ export default function VesselDetailScreen() {
                         params: { id: doc.id },
                       })
                     }
+                    isFirst={index === 0}
                     isLast={index === vesselDocs.length - 1}
                     icon={{
                       iosName: "doc.text.fill",

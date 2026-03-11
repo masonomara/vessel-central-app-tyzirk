@@ -157,10 +157,7 @@ function RootLayoutContent() {
         />
 
         {/* Operation screens */}
-        <Stack.Screen
-          name="operation-assign-boats"
-          options={{ title: "Assign Boats", ...headerWithBg }}
-        />
+      
         <Stack.Screen
           name="operation-update-engine-hours"
           options={{ title: "Update Engine Hours", ...headerWithBg }}

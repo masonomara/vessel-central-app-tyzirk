@@ -19,42 +19,42 @@ const MORE_ITEMS: MoreItem[] = [
   {
     key: "supplies",
     label: "Supplies",
-    route: "/(tabs)/supplies",
+    route: "/(tabs)/more/supplies",
     icon: { iosName: "shippingbox.fill", androidName: "inventory-2" },
     roles: ["owner", "manager"],
   },
   {
     key: "documents",
     label: "Documents",
-    route: "/(tabs)/documents",
+    route: "/(tabs)/more/documents",
     icon: { iosName: "doc.text.fill", androidName: "description" },
     roles: ["owner"],
   },
   {
     key: "contacts",
     label: "Contacts",
-    route: "/(tabs)/contacts",
+    route: "/(tabs)/more/contacts",
     icon: { iosName: "person.2.fill", androidName: "contacts" },
     roles: ["owner", "manager"],
   },
   {
     key: "certifications",
     label: "Certifications",
-    route: "/(tabs)/certifications",
+    route: "/(tabs)/more/certifications",
     icon: { iosName: "checkmark.seal.fill", androidName: "verified" },
     roles: ["owner", "manager"],
   },
   {
     key: "charters",
     label: "Charters",
-    route: "/(tabs)/charters",
+    route: "/(tabs)/more/charters",
     icon: { iosName: "sailboat.fill", androidName: "directions-boat" },
     roles: ["owner", "manager"],
   },
   {
     key: "equipment",
     label: "Equipment",
-    route: "/(tabs)/equipment",
+    route: "/(tabs)/more/equipment",
     icon: { iosName: "lifepreserver.fill", androidName: "inventory" },
     roles: ["owner", "manager"],
   },
@@ -110,7 +110,7 @@ export default function MoreScreen() {
             <TouchableOpacity
               key={item.key}
               style={[styles.gridCard, { width: cardWidth }]}
-              onPress={() => router.navigate(item.route as any)}
+              onPress={() => router.push(item.route as any)}
               activeOpacity={0.7}
             >
               <View style={styles.gridIconHolder}>

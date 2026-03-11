@@ -1,187 +1,53 @@
-
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, View, Text, ScrollView, useWindowDimensions } from 'react-native';
 import { Stack, router } from 'expo-router';
-import { colors } from '../styles/commonStyles';
+import { colors, analyticsChartConfig } from '../styles/commonStyles';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
-import { IconSymbol } from '../components/IconSymbol';
-import { PressableCard } from '../components/PressableCard';
-import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+import { VesselCard } from '../components/VesselCard';
+import { LineChart, BarChart } from 'react-native-chart-kit';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scrollProps } from '../hooks/useTopPadding';
+import { useExpenseAnalytics } from '../hooks/useExpenseAnalytics';
 
 export default function AnalyticsScreen() {
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
   const { userId, userRole } = useAuth();
-  const { 
-    getExpensesForUser, 
-    getMaintenanceTasksForUser,
-    getIssuesForUser,
-    getSupplyRequestsForUser,
+  const {
+    getExpensesForUser,
+    getCharterLogsForUser,
+    getVesselsForUser,
   } = useData();
 
-  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
-
   const expenses = useMemo(() => {
-    if (!userId || !userRole) {
-      return [];
-    }
+    if (!userId || !userRole) return [];
     return getExpensesForUser(userId, userRole);
   }, [userId, userRole, getExpensesForUser]);
 
-  const maintenanceTasks = useMemo(() => {
-    if (!userId || !userRole) {
-      return [];
-    }
-    return getMaintenanceTasksForUser(userId, userRole);
-  }, [userId, userRole, getMaintenanceTasksForUser]);
+  const charterLogs = useMemo(() => {
+    if (!userId || !userRole) return [];
+    return getCharterLogsForUser(userId, userRole);
+  }, [userId, userRole, getCharterLogsForUser]);
 
-  const issues = useMemo(() => {
-    if (!userId || !userRole) {
-      return [];
-    }
-    return getIssuesForUser(userId, userRole);
-  }, [userId, userRole, getIssuesForUser]);
+  const vessels = useMemo(() => {
+    if (!userId || !userRole) return [];
+    return getVesselsForUser(userId, userRole);
+  }, [userId, userRole, getVesselsForUser]);
 
-  const supplyRequests = useMemo(() => {
-    if (!userId || !userRole) {
-      return [];
-    }
-    return getSupplyRequestsForUser(userId, userRole);
-  }, [userId, userRole, getSupplyRequestsForUser]);
+  const { totalExpenses, avgMonthlyExpense, expensesByMonth, expensesByCategory } =
+    useExpenseAnalytics(expenses);
 
-  const expensesByMonth = useMemo(() => {
-    const monthlyData: { [key: string]: number } = {};
-    const now = new Date();
-    
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const key = date.toLocaleString('default', { month: 'short' });
-      monthlyData[key] = 0;
-    }
+  const charterRevenue = useMemo(() => {
+    return charterLogs.reduce((sum, c) => sum + c.revenue, 0);
+  }, [charterLogs]);
 
-    expenses.forEach(expense => {
-      const expenseDate = new Date(expense.date);
-      const monthKey = expenseDate.toLocaleString('default', { month: 'short' });
-      if (monthlyData[monthKey] !== undefined) {
-        monthlyData[monthKey] += expense.amount;
-      }
-    });
-
-    return {
-      labels: Object.keys(monthlyData),
-      datasets: [{
-        data: Object.values(monthlyData),
-      }],
-    };
-  }, [expenses]);
-
-  const tasksByStatus = useMemo(() => {
-    const statusCounts = {
-      open: 0,
-      in_progress: 0,
-      waiting_on_parts: 0,
-      completed: 0,
-    };
-
-    maintenanceTasks.forEach(task => {
-      statusCounts[task.status]++;
-    });
-
-    return [
-      {
-        name: 'Open',
-        count: statusCounts.open,
-        color: colors.grey,
-        legendFontColor: colors.textSecondary,
-        legendFontSize: 12,
-      },
-      {
-        name: 'In Progress',
-        count: statusCounts.in_progress,
-        color: colors.accent,
-        legendFontColor: colors.textSecondary,
-        legendFontSize: 12,
-      },
-      {
-        name: 'Waiting',
-        count: statusCounts.waiting_on_parts,
-        color: colors.warning,
-        legendFontColor: colors.textSecondary,
-        legendFontSize: 12,
-      },
-      {
-        name: 'Completed',
-        count: statusCounts.completed,
-        color: colors.success,
-        legendFontColor: colors.textSecondary,
-        legendFontSize: 12,
-      },
-    ];
-  }, [maintenanceTasks]);
-
-  const expensesByCategory = useMemo(() => {
-    const categoryTotals: { [key: string]: number } = {};
-
-    expenses.forEach(expense => {
-      if (!categoryTotals[expense.category]) {
-        categoryTotals[expense.category] = 0;
-      }
-      categoryTotals[expense.category] += expense.amount;
-    });
-
-    const sortedCategories = Object.entries(categoryTotals)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-
-    return {
-      labels: sortedCategories.map(([cat]) => cat),
-      datasets: [{
-        data: sortedCategories.map(([, amount]) => amount),
-      }],
-    };
-  }, [expenses]);
-
-  const totalExpenses = useMemo(() => {
-    return expenses.reduce((sum, exp) => sum + exp.amount, 0);
-  }, [expenses]);
-
-  const avgResponseTime = useMemo(() => {
-    const resolved = issues.filter((i): i is typeof i & { resolvedAt: Date } => i.resolvedAt != null);
-    if (resolved.length === 0) return '\u2014';
-    const totalDays = resolved.reduce((sum, i) => {
-      const diff = new Date(i.resolvedAt).getTime() - new Date(i.createdAt).getTime();
-      return sum + diff / (1000 * 60 * 60 * 24);
-    }, 0);
-    return (totalDays / resolved.length).toFixed(1) + ' days';
-  }, [issues]);
-
-  const avgMonthlyExpense = useMemo(() => {
-    if (expensesByMonth.datasets[0].data.length === 0) {
-      return 0;
-    }
-    const total = expensesByMonth.datasets[0].data.reduce((sum, val) => sum + val, 0);
-    return total / expensesByMonth.datasets[0].data.length;
-  }, [expensesByMonth]);
-
-  const chartConfig = {
-    backgroundColor: colors.surfaceOne,
-    backgroundGradientFrom: colors.surfaceOne,
-    backgroundGradientTo: colors.surfaceOne,
-    decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`,
-    style: {
-      borderRadius: 16,
-    },
-    propsForDots: {
-      r: '6',
-      strokeWidth: '2',
-      stroke: colors.accent,
-    },
-  };
+  const charterProfit = useMemo(() => {
+    return charterLogs.reduce(
+      (sum, c) => sum + (c.revenue - c.expenses - (c.brokerCommission || 0)),
+      0,
+    );
+  }, [charterLogs]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
@@ -196,73 +62,42 @@ export default function AnalyticsScreen() {
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
-        <View style={styles.statsGrid}>
-          <View style={styles.statCard}>
-            <IconSymbol 
-              ios_icon_name="dollarsign.circle.fill" 
-              android_material_icon_name="payments" 
-              size={32} 
-              color={colors.success} 
-            />
-            <Text style={styles.statLabel}>Total Expenses</Text>
-            <Text style={styles.statValue}>${totalExpenses.toLocaleString()}</Text>
+        <View style={styles.section}>
+          <View style={styles.card}>
+            <View style={styles.statsGrid}>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Total Expenses</Text>
+                <Text style={styles.statValue}>${totalExpenses.toLocaleString()}</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Avg Monthly</Text>
+                <Text style={styles.statValue}>${Math.round(avgMonthlyExpense).toLocaleString()}</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Charter Revenue</Text>
+                <Text style={styles.statValue}>${charterRevenue.toLocaleString()}</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Charter Profit</Text>
+                <Text style={[styles.statValue, { color: charterProfit >= 0 ? colors.success : colors.danger }]}>
+                  ${charterProfit.toLocaleString()}
+                </Text>
+              </View>
+            </View>
           </View>
-
-          <View style={styles.statCard}>
-            <IconSymbol 
-              ios_icon_name="chart.line.uptrend.xyaxis" 
-              android_material_icon_name="trending-up" 
-              size={32} 
-              color={colors.accent} 
-            />
-            <Text style={styles.statLabel}>Avg Monthly</Text>
-            <Text style={styles.statValue}>${Math.round(avgMonthlyExpense).toLocaleString()}</Text>
-          </View>
-
-          <PressableCard
-            variant="ghost"
-            style={styles.statCard}
-            onPress={() => router.push('/(tabs)/maintenance')}
-          >
-            <IconSymbol
-              ios_icon_name="wrench.and.screwdriver.fill"
-              android_material_icon_name="build"
-              size={32}
-              color={colors.warning}
-            />
-            <Text style={styles.statLabel}>Active Tasks</Text>
-            <Text style={styles.statValue}>
-              {maintenanceTasks.filter(t => t.status !== 'completed').length}
-            </Text>
-          </PressableCard>
-
-          <PressableCard
-            variant="ghost"
-            style={styles.statCard}
-            onPress={() => router.push('/(tabs)/issues')}
-          >
-            <IconSymbol
-              ios_icon_name="exclamationmark.triangle.fill"
-              android_material_icon_name="warning"
-              size={32}
-              color={colors.danger}
-            />
-            <Text style={styles.statLabel}>Open Issues</Text>
-            <Text style={styles.statValue}>
-              {issues.filter(i => i.status !== 'completed').length}
-            </Text>
-          </PressableCard>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Expense Trends</Text>
-          <View style={styles.chartCard}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Expense Trends</Text>
+          </View>
+          <View style={styles.card}>
             {expensesByMonth.datasets[0].data.some(v => v > 0) ? (
               <LineChart
                 data={expensesByMonth}
-                width={screenWidth - 72}
+                width={screenWidth - 80}
                 height={220}
-                chartConfig={chartConfig}
+                chartConfig={analyticsChartConfig}
                 bezier
                 style={styles.chart}
                 withInnerLines={false}
@@ -272,20 +107,22 @@ export default function AnalyticsScreen() {
                 fromZero
               />
             ) : (
-              <Text style={styles.noDataText}>No expense data available</Text>
+              <Text style={styles.emptyText}>No expense data available</Text>
             )}
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Expenses by Category</Text>
-          <View style={styles.chartCard}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Expenses by Category</Text>
+          </View>
+          <View style={styles.card}>
             {expensesByCategory.datasets[0].data.some(v => v > 0) ? (
               <BarChart
                 data={expensesByCategory}
-                width={screenWidth - 72}
+                width={screenWidth - 80}
                 height={220}
-                chartConfig={chartConfig}
+                chartConfig={analyticsChartConfig}
                 style={styles.chart}
                 showValuesOnTopOfBars
                 fromZero
@@ -293,93 +130,28 @@ export default function AnalyticsScreen() {
                 yAxisSuffix=""
               />
             ) : (
-              <Text style={styles.noDataText}>No category data available</Text>
+              <Text style={styles.emptyText}>No category data available</Text>
             )}
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Task Status Distribution</Text>
-          <View style={styles.chartCard}>
-            {tasksByStatus.some(s => s.count > 0) ? (
-              <PieChart
-                data={tasksByStatus}
-                width={screenWidth - 72}
-                height={220}
-                chartConfig={chartConfig}
-                accessor="count"
-                backgroundColor="transparent"
-                paddingLeft="15"
-                absolute
-                style={styles.chart}
+        {vessels.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Fleet Vessels</Text>
+              <Text style={styles.sectionCount}>
+                {vessels.length} {vessels.length === 1 ? 'vessel' : 'vessels'}
+              </Text>
+            </View>
+            {vessels.map(vessel => (
+              <VesselCard
+                key={vessel.id}
+                vessel={vessel}
+                onPress={() => router.push({ pathname: '/detail-vessel', params: { id: vessel.id } })}
               />
-            ) : (
-              <Text style={styles.noDataText}>No task data available</Text>
-            )}
+            ))}
           </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Key Metrics</Text>
-          
-          <PressableCard
-            variant="ghost"
-            style={styles.metricCard}
-            onPress={() => router.push('/(tabs)/maintenance')}
-          >
-            <View style={styles.metricHeader}>
-              <IconSymbol
-                ios_icon_name="checkmark.circle.fill"
-                android_material_icon_name="check-circle"
-                size={24}
-                color={colors.success}
-              />
-              <Text style={styles.metricTitle}>Completion Rate</Text>
-            </View>
-            <Text style={styles.metricValue}>
-              {maintenanceTasks.length > 0
-                ? Math.round((maintenanceTasks.filter(t => t.status === 'completed').length / maintenanceTasks.length) * 100)
-                : 0}%
-            </Text>
-            <Text style={styles.metricSubtext}>
-              {maintenanceTasks.filter(t => t.status === 'completed').length} of {maintenanceTasks.length} tasks completed
-            </Text>
-          </PressableCard>
-
-          <View style={styles.metricCard}>
-            <View style={styles.metricHeader}>
-              <IconSymbol 
-                ios_icon_name="clock.fill" 
-                android_material_icon_name="schedule" 
-                size={24} 
-                color={colors.warning} 
-              />
-              <Text style={styles.metricTitle}>Average Response Time</Text>
-            </View>
-            <Text style={styles.metricValue}>{avgResponseTime}</Text>
-            <Text style={styles.metricSubtext}>From issue report to resolution</Text>
-          </View>
-
-          <PressableCard
-            variant="ghost"
-            style={styles.metricCard}
-            onPress={() => router.push('/(tabs)/supplies')}
-          >
-            <View style={styles.metricHeader}>
-              <IconSymbol
-                ios_icon_name="shippingbox.fill"
-                android_material_icon_name="inventory-2"
-                size={24}
-                color={colors.accent}
-              />
-              <Text style={styles.metricTitle}>Supply Requests</Text>
-            </View>
-            <Text style={styles.metricValue}>{supplyRequests.length}</Text>
-            <Text style={styles.metricSubtext}>
-              {supplyRequests.filter(r => r.status === 'pending').length} pending approval
-            </Text>
-          </PressableCard>
-        </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -393,88 +165,63 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    paddingHorizontal: 0,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 56,
     paddingHorizontal: 20,
+  },
+  sectionTitle: {
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  sectionCount: {
+    fontSize: 15,
+    color: colors.textTertiary,
+  },
+  card: {
+    backgroundColor: colors.container,
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 20,
+    gap: 12,
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-    marginBottom: 24,
   },
-  statCard: {
+  statItem: {
+    minWidth: '45%',
     flex: 1,
-    minWidth: '47%',
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
   },
   statLabel: {
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: '600',
     color: colors.textSecondary,
-    marginTop: 8,
     marginBottom: 4,
   },
   statValue: {
-    fontSize: 24,
-    fontWeight: '600',
+    fontSize: 28,
+    fontWeight: '700',
     color: colors.text,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 16,
-  },
-  chartCard: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
   },
   chart: {
-    borderRadius: 16,
+    borderRadius: 12,
+    marginHorizontal: -8,
   },
-  noDataText: {
+  emptyText: {
     fontSize: 14,
     color: colors.textSecondary,
     textAlign: 'center',
-    paddingVertical: 40,
-  },
-  metricCard: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  metricHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 12,
-  },
-  metricTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  metricValue: {
-    fontSize: 32,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  metricSubtext: {
-    fontSize: 14,
-    color: colors.textSecondary,
+    padding: 20,
   },
 });

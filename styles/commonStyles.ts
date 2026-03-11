@@ -669,6 +669,23 @@ export const formStyles = StyleSheet.create({
   },
 });
 
+export const analyticsChartConfig = {
+  backgroundColor: colors.container,
+  backgroundGradientFrom: colors.container,
+  backgroundGradientTo: colors.container,
+  decimalPlaces: 0,
+  color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
+  labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`,
+  style: {
+    borderRadius: 16,
+  },
+  propsForDots: {
+    r: '6',
+    strokeWidth: '2',
+    stroke: colors.accent,
+  },
+};
+
 export const detailScreenStyles = StyleSheet.create({
   scrollContent: {},
   titleSection: {
@@ -681,10 +698,11 @@ export const detailScreenStyles = StyleSheet.create({
     gap: 10,
   },
   title: {
-    fontSize: 24,
+    fontSize: 27,
     fontWeight: "600",
     color: colors.text,
     flex: 1,
+    lineHeight: 33,
   },
   subtitle: {
     fontSize: 17,
