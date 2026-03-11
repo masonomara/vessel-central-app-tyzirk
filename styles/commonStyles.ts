@@ -231,20 +231,26 @@ export const buttonStyles = StyleSheet.create({
   },
   outlineButtonInverted: {
     flexDirection: "row",
-    backgroundColor: colors.container,
+  
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.xl,
-    borderRadius: 12,
-    borderColor: colors.container,
+
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
+    height: 44,
+    padding: 0,
+    margin: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
   },
   outlineButtonInvertedText: {
-    color: colors.text,
+    color: colors.container,
     fontSize: 16,
     fontWeight: "600",
     letterSpacing: 0.3,
+        padding: 0,
+    margin: 0,
   },
 });
 

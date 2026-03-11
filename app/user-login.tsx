@@ -70,9 +70,15 @@ export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const formOpacity = useRef(new Animated.Value(0)).current;
-  const formTranslate = useRef(new Animated.Value(20)).current;
-  const demoOpacity = useRef(new Animated.Value(1)).current;
+  const transition = useRef(new Animated.Value(0)).current;
+  const formOpacity = transition.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, 0, 1],
+  });
+  const demoOpacity = transition.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 0, 0],
+  });
 
   const handleMockLogin = async (user: MockUser) => {
     setUserRole(user.role);
@@ -120,45 +126,22 @@ export default function LoginScreen() {
 
   const showForm = () => {
     setShowEmailLogin(true);
-    Animated.parallel([
-      Animated.timing(formOpacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(formTranslate, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(demoOpacity, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    Animated.spring(transition, {
+      toValue: 1,
+      speed: 18,
+      bounciness: 3,
+      useNativeDriver: true,
+    }).start();
   };
 
   const hideForm = () => {
     Keyboard.dismiss();
-    Animated.parallel([
-      Animated.timing(formOpacity, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(formTranslate, {
-        toValue: 20,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(demoOpacity, {
-        toValue: 1,
-        duration: 300,
-        delay: 100,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
+    Animated.spring(transition, {
+      toValue: 0,
+      speed: 18,
+      bounciness: 3,
+      useNativeDriver: true,
+    }).start(() => {
       setShowEmailLogin(false);
       setEmail("");
       setPassword("");
@@ -192,157 +175,172 @@ export default function LoginScreen() {
 
           {/* Bottom actions */}
           <View style={styles.bottomSection}>
-            {/* Email login form — slides in above Sign In */}
-            {showEmailLogin && (
-              <Animated.View
-                style={[
-                  styles.formSection,
-                  {
-                    opacity: formOpacity,
-                    transform: [{ translateY: formTranslate }],
-                  },
-                ]}
-              >
-                <View style={styles.inputWrapper}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Email"
-                    placeholderTextColor="rgba(255,255,255,0.4)"
-                    value={email}
-                    onChangeText={(t) => {
-                      setEmail(t);
-                      setError("");
-                    }}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    editable={!isLoading}
-                  />
-                </View>
-                <View style={styles.inputWrapper}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Password"
-                    placeholderTextColor="rgba(255,255,255,0.4)"
-                    value={password}
-                    onChangeText={(t) => {
-                      setPassword(t);
-                      setError("");
-                    }}
-                    secureTextEntry={!showPassword}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    editable={!isLoading}
-                  />
-                  <TouchableOpacity
-                    onPress={() => setShowPassword(!showPassword)}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    <IconSymbol
-                      ios_icon_name={
-                        showPassword ? "eye.slash.fill" : "eye.fill"
-                      }
-                      android_material_icon_name={
-                        showPassword ? "visibility-off" : "visibility"
-                      }
-                      size={18}
-                      color="rgba(255,255,255,0.5)"
-                    />
-                  </TouchableOpacity>
-                </View>
-                {error ? <Text style={styles.errorText}>{error}</Text> : null}
-              </Animated.View>
-            )}
-
-            {/* Sign In — always visible, opens form or submits */}
-            <TouchableOpacity
-              style={buttonStyles.primaryButtonInverted}
-              onPress={showEmailLogin ? handleEmailLogin : showForm}
-              disabled={isLoading}
-              activeOpacity={0.8}
+            {/* Screen 1: Sign In + App Demos */}
+            <Animated.View
+              style={[
+                styles.screenContainer,
+                {
+                  opacity: demoOpacity,
+                },
+              ]}
+              pointerEvents={showEmailLogin ? "none" : "auto"}
             >
-              {isLoading ? (
-                <ActivityIndicator color="#0A1628" size="small" />
-              ) : (
+              <TouchableOpacity
+                style={buttonStyles.primaryButtonInverted}
+                onPress={showForm}
+                disabled={isLoading}
+                activeOpacity={0.8}
+              >
                 <Text style={buttonStyles.primaryButtonInvertedText}>
                   Sign In
                 </Text>
-              )}
-            </TouchableOpacity>
+              </TouchableOpacity>
 
-            {/* Cancel — only when form is open */}
+              <View style={styles.quickLoginSection}>
+                <View style={styles.dividerRow}>
+                  <View style={styles.divider} />
+                  <Text style={styles.dividerText}>APP DEMOS</Text>
+                  <View style={styles.divider} />
+                </View>
+                <View style={styles.quickLoginButtonRow}>
+                  <TouchableOpacity
+                    style={styles.quickLoginButton}
+                    onPress={() => handleQuickLogin("owner")}
+                    disabled={isLoading}
+                    activeOpacity={0.7}
+                  >
+                    <IconSymbol
+                      ios_icon_name="crown.fill"
+                      android_material_icon_name="workspace-premium"
+                      size={20}
+                      color={colors.container}
+                    />
+                    <Text style={styles.quickLoginButtonText}>Owner</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.quickLoginButton}
+                    onPress={() => handleQuickLogin("manager")}
+                    disabled={isLoading}
+                    activeOpacity={0.7}
+                  >
+                    <IconSymbol
+                      ios_icon_name="chart.bar.fill"
+                      android_material_icon_name="dashboard"
+                      size={20}
+                      color={colors.container}
+                    />
+                    <Text style={styles.quickLoginButtonText}>Manager</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.quickLoginButton}
+                    onPress={() => handleQuickLogin("crew")}
+                    disabled={isLoading}
+                    activeOpacity={0.7}
+                  >
+                    <IconSymbol
+                      ios_icon_name="person.2.fill"
+                      android_material_icon_name="groups"
+                      size={20}
+                      color={colors.container}
+                    />
+                    <Text style={styles.quickLoginButtonText}>Crew</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Animated.View>
+
+            {/* Screen 2: Email + Password + Submit + Cancel */}
             {showEmailLogin && (
-              <Animated.View style={{ opacity: formOpacity, marginTop: 12 }}>
+              <Animated.View
+                style={[
+                  styles.screenContainer,
+                  {
+                    opacity: formOpacity,
+                  },
+                ]}
+              >
+                <View style={styles.formSection}>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Email"
+                      placeholderTextColor="rgba(255,255,255,0.4)"
+                      value={email}
+                      onChangeText={(t) => {
+                        setEmail(t);
+                        setError("");
+                      }}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      editable={!isLoading}
+                    />
+                  </View>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Password"
+                      placeholderTextColor="rgba(255,255,255,0.5)"
+                      value={password}
+                      onChangeText={(t) => {
+                        setPassword(t);
+                        setError("");
+                      }}
+                      secureTextEntry={!showPassword}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      editable={!isLoading}
+                    />
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(!showPassword)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <IconSymbol
+                        ios_icon_name={
+                          showPassword ? "eye.slash.fill" : "eye.fill"
+                        }
+                        android_material_icon_name={
+                          showPassword ? "visibility-off" : "visibility"
+                        }
+                        size={18}
+                        color="rgba(255,255,255,0.5)"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  {error ? (
+                    <Text style={styles.errorText}>{error}</Text>
+                  ) : null}
+                </View>
+
                 <TouchableOpacity
-                  style={buttonStyles.outlineButtonInverted}
+                  style={buttonStyles.primaryButtonInverted}
+                  onPress={handleEmailLogin}
+                  disabled={isLoading}
+                  activeOpacity={0.8}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator color="#0A1628" size="small" />
+                  ) : (
+                    <Text style={buttonStyles.primaryButtonInvertedText}>
+                      Continue
+                    </Text>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[buttonStyles.outlineButtonInverted, { marginTop: 10 }]}
                   onPress={hideForm}
                   disabled={isLoading}
                   activeOpacity={0.8}
                 >
                   <Text style={buttonStyles.outlineButtonInvertedText}>
-                    Cancel
+                    Back
                   </Text>
                 </TouchableOpacity>
               </Animated.View>
             )}
-
-            {/* Demo section — crossfades with form */}
-            <Animated.View
-              style={[styles.quickLoginSection, { opacity: demoOpacity }]}
-              pointerEvents={showEmailLogin ? "none" : "auto"}
-            >
-              <View style={styles.dividerRow}>
-                <View style={styles.divider} />
-                <Text style={styles.dividerText}>APP DEMOS</Text>
-                <View style={styles.divider} />
-              </View>
-              <View style={styles.quickLoginButtonRow}>
-                <TouchableOpacity
-                  style={styles.quickLoginButton}
-                  onPress={() => handleQuickLogin("owner")}
-                  disabled={isLoading}
-                  activeOpacity={0.7}
-                >
-                  <IconSymbol
-                    ios_icon_name="crown.fill"
-                    android_material_icon_name="workspace-premium"
-                    size={20}
-                    color={colors.container}
-                  />
-                  <Text style={styles.quickLoginButtonText}>Owner</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.quickLoginButton}
-                  onPress={() => handleQuickLogin("manager")}
-                  disabled={isLoading}
-                  activeOpacity={0.7}
-                >
-                  <IconSymbol
-                    ios_icon_name="chart.bar.fill"
-                    android_material_icon_name="dashboard"
-                    size={20}
-                    color={colors.container}
-                  />
-                  <Text style={styles.quickLoginButtonText}>Manager</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.quickLoginButton}
-                  onPress={() => handleQuickLogin("crew")}
-                  disabled={isLoading}
-                  activeOpacity={0.7}
-                >
-                  <IconSymbol
-                    ios_icon_name="person.2.fill"
-                    android_material_icon_name="groups"
-                    size={20}
-                    color={colors.container}
-                  />
-                  <Text style={styles.quickLoginButtonText}>Crew</Text>
-                </TouchableOpacity>
-              </View>
-            </Animated.View>
           </View>
         </KeyboardAvoidingView>
 
@@ -382,10 +380,13 @@ const styles = StyleSheet.create({
     height: 256,
   },
   bottomSection: {
-    paddingHorizontal: 24,
     flex: 1,
-    justifyContent: "flex-end",
-    paddingBottom: Platform.OS === "ios" ? 50 : 32,
+  },
+  screenContainer: {
+    position: "absolute",
+    left: 24,
+    right: 24,
+    bottom: Platform.OS === "ios" ? 50 : 32,
   },
   formSection: {
     marginBottom: 16,
@@ -399,7 +400,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
+    borderColor: "rgba(255,255,255,0.3)",
   },
   input: {
     flex: 1,
