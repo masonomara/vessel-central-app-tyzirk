@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   badges: { flexDirection: "row", gap: 8 },
-  statusBadge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
+  statusBadge: { paddingHorizontal: 8, paddingVertical: 6, borderRadius: 8 },
   statusText: { fontSize: 12, fontWeight: "600" },
   statsRow: { flexDirection: "row", gap: 12, marginBottom: 24 },
   listArea: {},

@@ -469,7 +469,7 @@ export const indexScreenStyles = StyleSheet.create({
     marginTop: 2,
   },
   priorityText: {
-    fontSize: 15,
+    fontSize: 14,
     color: colors.textSecondary,
     fontWeight: "500",
     borderRadius: 4,

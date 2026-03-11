@@ -15,6 +15,7 @@ import {
 } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { DetailRow } from "../components/DetailRow";
+import { DetailCellPair } from "../components/DetailCellPair";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate } from "../utils/formatting";
 import { CertificationStatus } from "../types";
@@ -120,7 +121,27 @@ export default function CertificationDetailScreen() {
           </View>
         </View>
 
-        <DetailRow label="Crew Member" inline value={cert.crewName} />
+        <DetailCellPair
+          items={[
+            {
+              label: "Vessel",
+              value: cert.vesselName,
+              icon: {
+                ios_icon_name: "sailboat.fill",
+                android_material_icon_name: "directions-boat",
+              },
+            },
+            {
+              label: "Crew Member",
+              value: cert.crewName,
+              icon: {
+                ios_icon_name: "person.fill",
+                android_material_icon_name: "person",
+              },
+            },
+          ]}
+        />
+
         <DetailRow
           label="Issuing Authority"
           inline
@@ -134,17 +155,11 @@ export default function CertificationDetailScreen() {
           />
         ) : null}
         <DetailRow
-          label="Issue Date"
+          label="Dates"
           inline
-          value={formatDate(new Date(cert.issueDate))}
+          value={formatDate(new Date(cert.issueDate)) + " → " + formatDate(new Date(cert.expiryDate))}
         />
-        <DetailRow
-          label="Expiry Date"
-          inline
-          value={formatDate(new Date(cert.expiryDate))}
-        />
-        <DetailRow label="Vessel" inline value={cert.vesselName} />
-        <DetailRow label="Notes" value={cert.notes || "No notes"} />
+        {cert.notes && <DetailRow label="Notes" value={cert.notes} />}
 
         <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
           <Text style={styles.deleteButtonText}>Delete Certification</Text>
@@ -157,7 +172,7 @@ export default function CertificationDetailScreen() {
 const styles = StyleSheet.create({
   statusBadge: {
     alignSelf: "flex-start",
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
     marginTop: 8,

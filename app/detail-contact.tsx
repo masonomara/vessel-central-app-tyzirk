@@ -15,6 +15,7 @@ import {
 } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { DetailRow } from "../components/DetailRow";
+import { DetailCellPair } from "../components/DetailCellPair";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatLabel } from "../utils/formatting";
 import { scrollProps } from "../hooks/useTopPadding";
@@ -68,6 +69,27 @@ export default function ContactDetailScreen() {
           <Text style={ds.title}>{contact.name}</Text>
         </View>
 
+        <DetailCellPair
+          items={[
+            {
+              label: "Vessel",
+              value: contact.vesselNames.length > 0 ? contact.vesselNames[0] : "None",
+              icon: {
+                ios_icon_name: "sailboat.fill",
+                android_material_icon_name: "directions-boat",
+              },
+            },
+            {
+              label: "Company",
+              value: contact.company || "N/A",
+              icon: {
+                ios_icon_name: "building.2.fill",
+                android_material_icon_name: "business",
+              },
+            },
+          ]}
+        />
+
         <DetailRow label="Role" inline value={contact.role} />
         <DetailRow
           label="Type"
@@ -76,22 +98,7 @@ export default function ContactDetailScreen() {
         />
         <DetailRow label="Phone" inline value={contact.phone} />
         <DetailRow label="Email" inline value={contact.email} />
-        {contact.company ? (
-          <DetailRow label="Company" inline value={contact.company} />
-        ) : null}
-        <DetailRow
-          label="Vessels"
-          inline
-          value={
-            contact.vesselNames.length > 0
-              ? contact.vesselNames.join(", ")
-              : "None"
-          }
-        />
-        <DetailRow
-          label="Notes"
-          value={contact.notes || "No notes"}
-        />
+        {contact.notes && <DetailRow label="Notes" value={contact.notes} />}
 
         <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
           <Text style={styles.deleteButtonText}>Delete Contact</Text>

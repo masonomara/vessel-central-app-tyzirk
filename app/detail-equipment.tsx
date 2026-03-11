@@ -18,6 +18,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
 import { DropdownRow } from "../components/DropdownRow";
+import { DetailCellPair } from "../components/DetailCellPair";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, formatLabel } from "../utils/formatting";
 import { EquipmentCondition } from "../types";
@@ -82,6 +83,31 @@ export default function EquipmentDetailScreen() {
           <Text style={ds.title}>{item.name}</Text>
         </View>
 
+        <DetailCellPair
+          items={[
+            {
+              label: "Vessel",
+              value: item.vesselName,
+              icon: {
+                ios_icon_name: "sailboat.fill",
+                android_material_icon_name: "directions-boat",
+              },
+              linkTo: {
+                pathname: "/detail-vessel",
+                params: { id: item.vesselId },
+              },
+            },
+            {
+              label: "Added By",
+              value: item.createdByName,
+              icon: {
+                ios_icon_name: "person.fill",
+                android_material_icon_name: "person",
+              },
+            },
+          ]}
+        />
+
         <DropdownRow
           label="Condition"
           options={[
@@ -98,15 +124,6 @@ export default function EquipmentDetailScreen() {
           label="Category"
           inline
           value={formatLabel(item.category)}
-        />
-        <DetailRow
-          label="Vessel"
-          inline
-          value={item.vesselName}
-          linkTo={{
-            pathname: "/detail-vessel",
-            params: { id: item.vesselId },
-          }}
         />
         <DetailRow label="Quantity" inline value={String(item.quantity)} />
         {item.serialNumber ? (
@@ -140,8 +157,8 @@ export default function EquipmentDetailScreen() {
             value={formatDate(item.nextInspectionDate)}
           />
         ) : null}
-        <DetailRow label="Description" value={item.description} />
-        <DetailRow label="Notes" value={item.notes || "No notes"} />
+        {item.description && <DetailRow label="Description" value={item.description} />}
+        {item.notes && <DetailRow label="Notes" value={item.notes} />}
 
         <View style={styles.historySection}>
           <View style={styles.commentCard}>

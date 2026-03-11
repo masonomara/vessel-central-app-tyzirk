@@ -18,6 +18,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
 import { DropdownRow } from "../components/DropdownRow";
+import { DetailCellPair } from "../components/DetailCellPair";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, formatLabel } from "../utils/formatting";
 import { CharterStatus } from "../types";
@@ -82,6 +83,31 @@ export default function CharterDetailScreen() {
           <Text style={ds.title}>{charter.title}</Text>
         </View>
 
+        <DetailCellPair
+          items={[
+            {
+              label: "Vessel",
+              value: charter.vesselName,
+              icon: {
+                ios_icon_name: "sailboat.fill",
+                android_material_icon_name: "directions-boat",
+              },
+              linkTo: {
+                pathname: "/detail-vessel",
+                params: { id: charter.vesselId },
+              },
+            },
+            {
+              label: "Created By",
+              value: charter.createdByName,
+              icon: {
+                ios_icon_name: "person.fill",
+                android_material_icon_name: "person",
+              },
+            },
+          ]}
+        />
+
         <DropdownRow
           label="Status"
           options={[
@@ -95,15 +121,6 @@ export default function CharterDetailScreen() {
         />
 
         <DetailRow
-          label="Vessel"
-          inline
-          value={charter.vesselName}
-          linkTo={{
-            pathname: "/detail-vessel",
-            params: { id: charter.vesselId },
-          }}
-        />
-        <DetailRow
           label="Dates"
           inline
           value={
@@ -112,6 +129,9 @@ export default function CharterDetailScreen() {
             formatDate(charter.endDate)
           }
         />
+        {charter.itinerary ? (
+          <DetailRow label="Itinerary" value={charter.itinerary} />
+        ) : null}
         <DetailRow
           label="Guest Count"
           inline
@@ -120,26 +140,17 @@ export default function CharterDetailScreen() {
         {charter.guestNames ? (
           <DetailRow label="Guest Names" value={charter.guestNames} />
         ) : null}
-        <DetailRow
-          label="Departure Port"
-          inline
-          value={charter.departurePort}
-        />
-        <DetailRow label="Arrival Port" inline value={charter.arrivalPort} />
-        <DetailRow label="Itinerary" value={charter.itinerary} />
+        {charter.specialRequests ? (
+          <DetailRow label="Special Requests" value={charter.specialRequests} />
+        ) : null}
+        {charter.notes && <DetailRow label="Notes" value={charter.notes} />}
         {charter.brokerName ? (
           <DetailRow label="Broker" inline value={charter.brokerName} />
         ) : null}
-
         <DetailRow
           label="Revenue"
           inline
           value={"$" + charter.revenue.toLocaleString()}
-        />
-        <DetailRow
-          label="Expenses"
-          inline
-          value={"$" + charter.expenses.toLocaleString()}
         />
         <DetailRow
           label="Net Revenue"
@@ -149,18 +160,6 @@ export default function CharterDetailScreen() {
             Math.abs(netRevenue).toLocaleString()
           }
         />
-        {charter.brokerCommission != null ? (
-          <DetailRow
-            label="Broker Commission"
-            inline
-            value={"$" + charter.brokerCommission.toLocaleString()}
-          />
-        ) : null}
-
-        {charter.specialRequests ? (
-          <DetailRow label="Special Requests" value={charter.specialRequests} />
-        ) : null}
-        <DetailRow label="Notes" value={charter.notes || "No notes"} />
 
         <View style={styles.historySection}>
           <View style={styles.commentCard}>

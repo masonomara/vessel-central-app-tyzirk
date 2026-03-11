@@ -19,6 +19,7 @@ const neutral = { fg: colors.textSecondary, bg: colors.surfaceThree };
 
 const valueColors: Record<string, { fg: string; bg: string }> = {
   // priority
+  critical: red,
   urgent: red,
   high: red,
   medium: orange,
@@ -27,7 +28,8 @@ const valueColors: Record<string, { fg: string; bg: string }> = {
   completed: green,
   cancelled: red,
   denied: red,
-  in_progress: neutral,
+  in_progress: orange,
+  upcoming: blue,
   open: neutral,
   waiting_on_parts: neutral,
   scheduled: neutral,
@@ -35,6 +37,11 @@ const valueColors: Record<string, { fg: string; bg: string }> = {
   approved: neutral,
   ordered: neutral,
   received: green,
+  // equipment condition
+  good: neutral,
+  fair: neutral,
+  poor: yellow,
+  needs_replacement: red,
   // categories (neutral)
   maintenance: neutral,
   charter: neutral,
