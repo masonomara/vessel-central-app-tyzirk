@@ -14,6 +14,7 @@ import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { ContactType } from "../types";
 import { scrollProps } from "../hooks/useTopPadding";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CONTACT_TYPES: ContactType[] = [
   "crew",
@@ -25,6 +26,7 @@ const CONTACT_TYPES: ContactType[] = [
 ];
 
 export default function AddContactScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { addContact, vessels, getVesselsForUser } = useData();
   const { userId, userName, userRole } = useAuth();
@@ -119,9 +121,13 @@ export default function AddContactScreen() {
       />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        {...scrollProps}
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 64 },
+        ]}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
         <View style={styles.section}>
           <Text style={styles.label}>Name *</Text>
@@ -290,10 +296,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: colors.accent,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 120,
   },
   section: {
     marginBottom: 24,

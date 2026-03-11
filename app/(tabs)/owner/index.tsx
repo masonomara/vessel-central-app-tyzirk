@@ -19,13 +19,19 @@ import { PressableCard } from "../../../components/PressableCard";
 import { VesselCard } from "../../../components/VesselCard";
 import GlobalSearch from "../../../components/GlobalSearch";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
-import { getPriorityBadgeColors, formatDueDate, formatDate } from "../../../utils/formatting";
+import {
+  getPriorityBadgeColors,
+  formatDueDate,
+  formatDate,
+} from "../../../utils/formatting";
 import type { TaskPriority } from "../../../types";
 
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, router } from "expo-router";
 import { scrollProps } from "../../../hooks/useTopPadding";
 
 export default function OwnerDashboard() {
+  const insets = useSafeAreaInsets();
   const { userName, userId, userRole } = useAuth();
   const [showSearch, setShowSearch] = useState(false);
   const {
@@ -156,7 +162,10 @@ export default function OwnerDashboard() {
       case "task":
         return { iosName: "wrench.and.screwdriver.fill", androidName: "build" };
       case "issue":
-        return { iosName: "exclamationmark.triangle.fill", androidName: "report-problem" };
+        return {
+          iosName: "exclamationmark.triangle.fill",
+          androidName: "report-problem",
+        };
       case "supply":
         return { iosName: "shippingbox", androidName: "inventory-2" };
       default:
@@ -164,7 +173,10 @@ export default function OwnerDashboard() {
     }
   };
 
-  const getActivityPriorityBadge = (log: { type: string; relatedId?: string }) => {
+  const getActivityPriorityBadge = (log: {
+    type: string;
+    relatedId?: string;
+  }) => {
     let priority: TaskPriority | undefined;
 
     if (log.relatedId) {
@@ -194,7 +206,12 @@ export default function OwnerDashboard() {
     <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
       <Stack.Screen
         options={{
-          title: "Owner Dashboard",
+          title: "",
+          headerStyle: {
+            backgroundColor: "transparent",
+          },
+          headerShown: true,
+          headerTransparent: true,
           headerRight: () => (
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
@@ -219,11 +236,15 @@ export default function OwnerDashboard() {
       <GlobalSearch visible={showSearch} onClose={() => setShowSearch(false)} />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 64 },
+        ]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + 44 }]}>
           <Text style={styles.greeting}>
             {new Date().toLocaleDateString("en-US", {
               weekday: "long",
@@ -231,14 +252,17 @@ export default function OwnerDashboard() {
               day: "numeric",
             })}
           </Text>
-          <Text style={commonStyles.title}>Hello, {userName?.split(" ")[0]}</Text>
+          <Text style={commonStyles.title}>
+            Hello, {userName?.split(" ")[0]}
+          </Text>
         </View>
         {pendingApprovals.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Pending Approvals</Text>
               <Text style={styles.sectionCount}>
-                {pendingApprovals.length} {pendingApprovals.length === 1 ? "item" : "items"}
+                {pendingApprovals.length}{" "}
+                {pendingApprovals.length === 1 ? "item" : "items"}
               </Text>
             </View>
             <GroupedListContainer>
@@ -258,9 +282,14 @@ export default function OwnerDashboard() {
                     }
                     isFirst={index === 0}
                     isLast={index === sliced.length - 1}
-                    icon={{ iosName: "shippingbox", androidName: "inventory-2" }}
+                    icon={{
+                      iosName: "shippingbox",
+                      androidName: "inventory-2",
+                    }}
                     badge={{
-                      label: approval.priority.charAt(0).toUpperCase() + approval.priority.slice(1),
+                      label:
+                        approval.priority.charAt(0).toUpperCase() +
+                        approval.priority.slice(1),
                       fg: getPriorityBadgeColors(approval.priority).fg,
                       bg: getPriorityBadgeColors(approval.priority).bg,
                     }}
@@ -276,7 +305,8 @@ export default function OwnerDashboard() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Activity</Text>
             <Text style={styles.sectionCount}>
-              {myActivityLogs.length} {myActivityLogs.length === 1 ? "item" : "items"}
+              {myActivityLogs.length}{" "}
+              {myActivityLogs.length === 1 ? "item" : "items"}
             </Text>
           </View>
           {myActivityLogs.length > 0 ? (
@@ -406,7 +436,9 @@ export default function OwnerDashboard() {
             </View>
             <GroupedListContainer>
               {(() => {
-                const priorityBadge = getPriorityBadgeColors(upcomingMaintenance.priority);
+                const priorityBadge = getPriorityBadgeColors(
+                  upcomingMaintenance.priority,
+                );
                 return (
                   <ListItemCard
                     title={upcomingMaintenance.title}
@@ -420,9 +452,14 @@ export default function OwnerDashboard() {
                     }
                     isFirst
                     isLast
-                    icon={{ iosName: "wrench.and.screwdriver.fill", androidName: "build" }}
+                    icon={{
+                      iosName: "wrench.and.screwdriver.fill",
+                      androidName: "build",
+                    }}
                     badge={{
-                      label: upcomingMaintenance.priority.charAt(0).toUpperCase() + upcomingMaintenance.priority.slice(1),
+                      label:
+                        upcomingMaintenance.priority.charAt(0).toUpperCase() +
+                        upcomingMaintenance.priority.slice(1),
                       fg: priorityBadge.fg,
                       bg: priorityBadge.bg,
                     }}
@@ -443,9 +480,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 0,
-    paddingBottom: 20,
   },
   header: {
     marginBottom: 24,

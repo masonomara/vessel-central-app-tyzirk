@@ -20,6 +20,7 @@ import { formatDate } from "../utils/formatting";
 import { CertificationStatus } from "../types";
 import { scrollProps } from "../hooks/useTopPadding";
 
+
 function getCertStatus(expiryDate: Date): CertificationStatus {
   const now = new Date();
   const expiry = new Date(expiryDate);
@@ -100,6 +101,7 @@ export default function CertificationDetailScreen() {
       />
 
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={[ds.scrollContent, { flexGrow: 1 }]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}

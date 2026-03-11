@@ -13,6 +13,7 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../styles/commonStyles";
+import { scrollProps } from "../hooks/useTopPadding";
 import { IconSymbol } from "../components/IconSymbol";
 import { useAuth } from "../contexts/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -82,10 +83,14 @@ export default function MemberSetupScreen() {
         </View>
 
         <ScrollView
-          style={styles.flex}
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: insets.bottom + 64 },
+          ]}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          {...scrollProps}
         >
           <Text style={styles.title}>Member Details</Text>
           <Text style={styles.subtitle}>Tell us about yourself to get started.</Text>
@@ -230,9 +235,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 24,
-    paddingBottom: 32,
   },
   title: {
     fontSize: 28,

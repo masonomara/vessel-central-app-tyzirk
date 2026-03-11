@@ -21,8 +21,10 @@ import { TaskPriority, MaintenanceFrequency } from '../types';
 import { PRIORITY_OPTIONS } from '../utils/formatting';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { scrollProps } from '../hooks/useTopPadding';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function AddMaintenanceTaskScreen() {
+  const insets = useSafeAreaInsets();
   const { vessels, addMaintenanceTask } = useData();
   const { userId, userName, userRole } = useAuth();
 
@@ -171,9 +173,12 @@ export default function AddMaintenanceTaskScreen() {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        {...scrollProps}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 64 },
+        ]}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.section}>
@@ -485,7 +490,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 40,
   },
   section: {
     marginBottom: 24,

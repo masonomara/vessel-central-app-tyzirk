@@ -19,6 +19,7 @@ import { DetailNotFound } from "../components/DetailNotFound";
 import { formatLabel } from "../utils/formatting";
 import { scrollProps } from "../hooks/useTopPadding";
 
+
 export default function ContactDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
@@ -58,6 +59,7 @@ export default function ContactDetailScreen() {
       />
 
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={[ds.scrollContent, { flexGrow: 1 }]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}

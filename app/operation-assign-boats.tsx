@@ -14,6 +14,7 @@ import { Stack, router } from 'expo-router';
 import { useTheme } from '@react-navigation/native';
 import { colors } from '../styles/commonStyles';
 import { useData } from '../contexts/DataContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '../components/IconSymbol';
 import { Vessel } from '../types';
 import { scrollProps } from '../hooks/useTopPadding';
@@ -29,6 +30,7 @@ interface Assignment {
 }
 
 export default function AssignBoatsScreen() {
+  const insets = useSafeAreaInsets();
   const theme = useTheme();
   const { 
     vessels, 
@@ -192,8 +194,13 @@ export default function AssignBoatsScreen() {
         </View>
 
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: insets.bottom + 64 },
+          ]}
           showsVerticalScrollIndicator={false}
+          {...scrollProps}
         >
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Boat Assignments</Text>
@@ -446,9 +453,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 120,
   },
   header: {
     marginTop: 16,

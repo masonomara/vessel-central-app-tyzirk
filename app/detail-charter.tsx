@@ -23,6 +23,7 @@ import { formatDate, formatLabel } from "../utils/formatting";
 import { CharterStatus } from "../types";
 import { scrollProps } from "../hooks/useTopPadding";
 
+
 export default function CharterDetailScreen() {
   const { id } = useLocalSearchParams();
   const { charterLogs, updateCharterLog, addCharterLogComment } = useData();
@@ -72,6 +73,7 @@ export default function CharterDetailScreen() {
       />
 
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={[ds.scrollContent, { flexGrow: 1 }]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}

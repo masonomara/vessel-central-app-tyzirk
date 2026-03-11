@@ -23,6 +23,7 @@ import { formatDate, formatLabel } from "../utils/formatting";
 import { EquipmentCondition } from "../types";
 import { scrollProps } from "../hooks/useTopPadding";
 
+
 export default function EquipmentDetailScreen() {
   const { id } = useLocalSearchParams();
   const { equipment, updateEquipment, addEquipmentComment } = useData();
@@ -72,6 +73,7 @@ export default function EquipmentDetailScreen() {
       />
 
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={[ds.scrollContent, { flexGrow: 1 }]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}

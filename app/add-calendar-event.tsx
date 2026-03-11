@@ -19,8 +19,10 @@ import { IconSymbol } from "../components/IconSymbol";
 import { CalendarEventType } from "../types/calendar";
 import { EVENT_TYPE_LABELS, getEventColor } from "../utils/calendar";
 import { scrollProps } from "../hooks/useTopPadding";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function AddCalendarEventScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams();
   const { userId, userName, userRole } = useAuth();
@@ -205,9 +207,12 @@ export default function AddCalendarEventScreen() {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        {...scrollProps}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 64 },
+        ]}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
         <View style={styles.form}>
           {/* Title */}
@@ -462,9 +467,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  scrollContent: {
-    paddingBottom: 120,
-  },
+  scrollContent: {},
   cancelText: {
     fontSize: 16,
     color: colors.text,

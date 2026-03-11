@@ -27,6 +27,7 @@ import { formatDate, formatDueDate, isOverdue, formatLabel } from "../utils/form
 import { TaskStatus, TaskPriority } from "../types";
 import { scrollProps } from "../hooks/useTopPadding";
 
+
 const MOCK_USERS: Record<string, string> = {
   owner1: "Diane Sanderson",
   manager1: "Brett Nealson",
@@ -187,6 +188,7 @@ export default function MaintenanceDetailScreen() {
       />
 
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={[
           ds.scrollContent,
           { flexGrow: 1 },

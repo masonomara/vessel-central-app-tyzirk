@@ -4,10 +4,12 @@ import { Stack, useRouter, useLocalSearchParams } from "expo-router";
 import { colors } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { scrollProps } from "../hooks/useTopPadding";
 import { TouchableOpacity } from "react-native";
 
 export default function UpdateEngineHoursScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { vesselId } = useLocalSearchParams();
   const { vessels, updateEngineHours } = useData();
@@ -41,7 +43,15 @@ export default function UpdateEngineHoursScreen() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.content} {...scrollProps}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: insets.bottom + 64 },
+        ]}
+        showsVerticalScrollIndicator={false}
+        {...scrollProps}
+      >
         <Stack.Screen
           options={{
             title: "Update Engine Hours",
@@ -99,9 +109,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.surfaceOne,
   },
+  scrollView: {
+    flex: 1,
+  },
   content: {
     padding: 16,
-    paddingBottom: 40,
     gap: 20,
   },
   vesselName: {

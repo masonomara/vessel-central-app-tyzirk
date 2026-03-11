@@ -22,6 +22,7 @@ import { PRIORITY_OPTIONS } from '../utils/formatting';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { scrollProps } from '../hooks/useTopPadding';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const URGENCY_LEVELS = PRIORITY_OPTIONS;
 
@@ -60,6 +61,7 @@ const PART_CATEGORIES = [
 ];
 
 export default function AddPartsRequestScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { addSupplyRequest, vessels, getVesselsForUser } = useData();
   const { userId, userName, userRole } = useAuth();
@@ -260,9 +262,13 @@ export default function AddPartsRequestScreen() {
       />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        {...scrollProps}
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 64 },
+        ]}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
         <View style={styles.infoCard}>
           <IconSymbol
@@ -579,10 +585,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.accent,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 120,
   },
   infoCard: {
     flexDirection: 'row',

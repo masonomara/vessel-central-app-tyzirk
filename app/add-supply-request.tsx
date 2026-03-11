@@ -18,6 +18,7 @@ import { IconSymbol } from '../components/IconSymbol';
 import { TaskPriority } from '../types';
 import { getPriorityColor, PRIORITY_OPTIONS } from '../utils/formatting';
 import { scrollProps } from '../hooks/useTopPadding';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SUPPLY_CATEGORIES = [
   'Cleaning',
@@ -47,6 +48,7 @@ const UNIT_OPTIONS = [
 ];
 
 export default function AddSupplyRequestScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { addSupplyRequest, vessels, getVesselsForUser } = useData();
   const { userId, userName, userRole } = useAuth();
@@ -172,9 +174,13 @@ export default function AddSupplyRequestScreen() {
       />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        {...scrollProps}
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 64 },
+        ]}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
         <View style={styles.section}>
           <Text style={styles.label}>Item Name *</Text>
@@ -420,10 +426,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.accent,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 120,
   },
   section: {
     marginBottom: 24,

@@ -527,9 +527,7 @@ export const indexScreenStyles = StyleSheet.create({
 });
 
 export const detailScreenStyles = StyleSheet.create({
-  scrollContent: {
-    paddingBottom: 40,
-  },
+  scrollContent: {},
   titleSection: {
     paddingHorizontal: 20,
     marginTop: 20,

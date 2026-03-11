@@ -28,6 +28,7 @@ import { formatDate, formatLabel } from "../utils/formatting";
 import { CalendarEventStatus } from "../types";
 import { scrollProps } from "../hooks/useTopPadding";
 
+
 export default function CalendarEventDetailScreen() {
   const { eventId } = useLocalSearchParams();
   const { calendarEvents, updateCalendarEvent, addCalendarEventComment } =
@@ -76,6 +77,7 @@ export default function CalendarEventDetailScreen() {
       />
 
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={[
           ds.scrollContent,
           { flexGrow: 1 },

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
 import { Stack, useRouter } from "expo-router";
 import { scrollProps } from "../../../hooks/useTopPadding";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
-import { colors, commonStyles, shadows } from "../../../styles/commonStyles";
+import { colors, commonStyles } from "../../../styles/commonStyles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
@@ -21,9 +21,7 @@ import {
   getDaysInMonth,
   getFirstDayOfMonth,
   getMonthName,
-  formatEventTime,
   formatEventDateRange,
-  getEventColor,
   getEventTypeLabel,
   sortEventsByDate,
 } from "../../../utils/calendar";
@@ -32,13 +30,12 @@ import { CalendarEvent } from "../../../types/calendar";
 export default function CalendarScreen() {
   const router = useRouter();
   const { userId, userRole } = useAuth();
-  const { calendarEvents, getCalendarEventsForUser } = useData();
+  const { getCalendarEventsForUser } = useData();
 
   const insets = useSafeAreaInsets();
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
 
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
@@ -47,7 +44,7 @@ export default function CalendarScreen() {
   const userEvents = useMemo(() => {
     if (!userId || !userRole) return [];
     return getCalendarEventsForUser(userId, userRole);
-  }, [userId, userRole, calendarEvents, getCalendarEventsForUser]);
+  }, [userId, userRole, getCalendarEventsForUser]);
 
   // Get events for the selected date
   const selectedDateEvents = useMemo(() => {

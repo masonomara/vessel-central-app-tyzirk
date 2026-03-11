@@ -25,6 +25,7 @@ import { formatDate, formatLabel } from "../utils/formatting";
 import { TaskPriority, SupplyRequestStatus } from "../types";
 import { scrollProps } from "../hooks/useTopPadding";
 
+
 export default function SupplyDetailScreen() {
   const { id } = useLocalSearchParams();
   const {
@@ -136,6 +137,7 @@ export default function SupplyDetailScreen() {
       />
 
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={[
           ds.scrollContent,
           { flexGrow: 1 },

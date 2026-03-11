@@ -23,6 +23,7 @@ import { formatDate, isOverdue, formatLabel, formatFileSize } from "../utils/for
 import { openDocument } from "../utils/files";
 import { scrollProps } from "../hooks/useTopPadding";
 
+
 export default function DocumentDetailScreen() {
   const { id } = useLocalSearchParams();
   const { documents, addDocumentComment } = useData();
@@ -62,6 +63,7 @@ export default function DocumentDetailScreen() {
       />
 
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={[
           ds.scrollContent,
           { flexGrow: 1 },

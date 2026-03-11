@@ -8,10 +8,12 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { getPriorityBadgeColors, formatDueDate, formatDate } from "../../../utils/formatting";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, router } from "expo-router";
 import { scrollProps } from "../../../hooks/useTopPadding";
 
 export default function CrewDashboard() {
+  const insets = useSafeAreaInsets();
   const { userName, userId, userRole } = useAuth();
   const {
     getVesselsForUser,
@@ -53,16 +55,21 @@ export default function CrewDashboard() {
     <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
       <Stack.Screen
         options={{
-          title: "Crew Dashboard",
+          title: "",
+          headerShown: false,
           headerRight: () => <ProfileHeaderButton />,
         }}
       />
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 64 },
+        ]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + 44 }]}>
           <Text style={styles.greeting}>
             {new Date().toLocaleDateString("en-US", {
               weekday: "long",
@@ -197,9 +204,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 0,
-    paddingBottom: 20,
   },
   header: {
     marginBottom: 20,

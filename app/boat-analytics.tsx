@@ -8,9 +8,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { PressableCard } from '../components/PressableCard';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scrollProps } from '../hooks/useTopPadding';
 
 export default function AnalyticsScreen() {
+  const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
   const { userId, userRole } = useAuth();
   const { 
@@ -185,7 +187,15 @@ export default function AnalyticsScreen() {
     <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
       <Stack.Screen options={{ title: 'Analytics' }} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} {...scrollProps}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 64 },
+        ]}
+        showsVerticalScrollIndicator={false}
+        {...scrollProps}
+      >
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <IconSymbol 
@@ -379,9 +389,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
   },
   statsGrid: {
     flexDirection: 'row',

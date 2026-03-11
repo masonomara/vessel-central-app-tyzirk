@@ -23,6 +23,7 @@ import { optimizeImage } from '../utils/files';
 import { validateImage } from '../utils/validation';
 import { formatFileSize, getPriorityColor, PRIORITY_OPTIONS } from '../utils/formatting';
 import { scrollProps } from '../hooks/useTopPadding';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ISSUE_CATEGORIES = [
   'Structural',
@@ -39,6 +40,7 @@ const ISSUE_CATEGORIES = [
 
 
 export default function AddIssueScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { addIssue, vessels, getVesselsForUser } = useData();
   const { userId, userName, userRole } = useAuth();
@@ -335,9 +337,13 @@ export default function AddIssueScreen() {
       )}
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        {...scrollProps}
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 64 },
+        ]}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
         <View style={styles.section}>
           <Text style={styles.label}>Issue Title *</Text>
@@ -601,10 +607,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 120,
   },
   section: {
     marginBottom: 24,

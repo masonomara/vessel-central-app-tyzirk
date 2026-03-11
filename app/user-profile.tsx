@@ -11,6 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack } from "expo-router";
 import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, detailScreenStyles as ds } from "../styles/commonStyles";
 import { scrollProps } from "../hooks/useTopPadding";
 import { DetailRow } from "../components/DetailRow";
@@ -34,6 +35,7 @@ const CATEGORIES: { key: NotificationCategory; label: string }[] = [
 ];
 
 export default function ProfileScreen() {
+  const insets = useSafeAreaInsets();
   const { signOut, userName, userRole, userId } = useAuth();
 
   const USER_PROFILES: Record<string, { email: string; phone: string; location: string }> = {
@@ -144,7 +146,11 @@ export default function ProfileScreen() {
       />
 
       <ScrollView
-        contentContainerStyle={[ds.scrollContent, { flexGrow: 1 }]}
+        style={styles.scrollView}
+        contentContainerStyle={[
+          ds.scrollContent,
+          { flexGrow: 1, paddingBottom: insets.bottom + 64 },
+        ]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
@@ -198,6 +204,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.surfaceOne,
+  },
+  scrollView: {
+    flex: 1,
   },
   notificationSection: {
     paddingHorizontal: 20,
