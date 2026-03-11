@@ -9,7 +9,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
 import { ItemCard } from "../../../components/ItemCard";
 import { CrewCertification, CertificationStatus } from "../../../types";
-import { formatDate } from "../../../utils/dateUtils";
+import { formatDate } from "../../../utils/formatting";
 import { SearchBar } from "../../../components/SearchBar";
 import { FilterRow } from "../../../components/FilterRow";
 import { CollapsibleSectionHeader } from "../../../components/CollapsibleSectionHeader";

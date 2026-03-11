@@ -19,8 +19,7 @@ import { PressableCard } from "../../../components/PressableCard";
 import { VesselCard } from "../../../components/VesselCard";
 import GlobalSearch from "../../../components/GlobalSearch";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
-import { getPriorityBadgeColors } from "../../../utils/colorUtils";
-import { formatDueDate, formatDate } from "../../../utils/dateUtils";
+import { getPriorityBadgeColors, formatDueDate, formatDate } from "../../../utils/formatting";
 import type { TaskPriority } from "../../../types";
 
 import { Stack, router } from "expo-router";

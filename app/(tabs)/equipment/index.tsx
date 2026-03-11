@@ -9,7 +9,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
 import { ItemCard } from "../../../components/ItemCard";
 import { Equipment, EquipmentCategory } from "../../../types";
-import { getConditionBadgeColors } from "../../../utils/colorUtils";
+import { getConditionBadgeColors } from "../../../utils/formatting";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SearchBar } from "../../../components/SearchBar";
 import { FilterRow } from "../../../components/FilterRow";

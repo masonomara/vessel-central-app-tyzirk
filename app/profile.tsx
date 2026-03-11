@@ -14,7 +14,7 @@ import { useRouter } from "expo-router";
 import { colors, detailScreenStyles as ds } from "../styles/commonStyles";
 import { scrollProps } from "../hooks/useTopPadding";
 import { DetailRow } from "../components/DetailRow";
-import { formatLabel } from "../utils/formatLabel";
+import { formatLabel } from "../utils/formatting";
 
 type NotificationCategory =
   | "maintenance"

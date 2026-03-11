@@ -7,13 +7,11 @@ import { IconSymbol } from "../components/IconSymbol";
 import { ItemCard } from "../components/ItemCard";
 import { CollapsibleSectionHeader } from "../components/CollapsibleSectionHeader";
 import { scrollProps } from "../hooks/useTopPadding";
-import { formatDate, formatDueDate } from "../utils/dateUtils";
+import { formatDate, formatDueDate, formatLabel, getPriorityBadgeColors } from "../utils/formatting";
 import {
   formatEventDateRange,
   getEventTypeLabel,
 } from "../utils/calendarUtils";
-import { getPriorityBadgeColors } from "../utils/colorUtils";
-import { formatLabel } from "../utils/formatLabel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function VesselDetailScreen() {

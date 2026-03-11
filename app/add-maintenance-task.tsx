@@ -18,6 +18,7 @@ import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { TaskPriority, MaintenanceFrequency } from '../types';
+import { PRIORITY_OPTIONS } from '../utils/formatting';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { scrollProps } from '../hooks/useTopPadding';
 
@@ -45,7 +46,7 @@ export default function AddMaintenanceTaskScreen() {
   const [showPriorityPicker, setShowPriorityPicker] = useState(false);
   const [showFrequencyPicker, setShowFrequencyPicker] = useState(false);
 
-  const priorities: TaskPriority[] = ['none', 'low', 'medium', 'high', 'urgent', 'critical'];
+  const priorities = PRIORITY_OPTIONS;
   const frequencies: MaintenanceFrequency[] = ['daily', 'weekly', 'monthly', 'quarterly', 'yearly'];
 
   const getPriorityColor = (p: TaskPriority) => {

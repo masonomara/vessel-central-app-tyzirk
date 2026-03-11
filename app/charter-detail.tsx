@@ -19,8 +19,7 @@ import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
 import { DropdownRow } from "../components/DropdownRow";
 import { DetailNotFound } from "../components/DetailNotFound";
-import { formatDate } from "../utils/dateUtils";
-import { formatLabel } from "../utils/formatLabel";
+import { formatDate, formatLabel } from "../utils/formatting";
 import { CharterStatus } from "../types";
 import { scrollProps } from "../hooks/useTopPadding";
 

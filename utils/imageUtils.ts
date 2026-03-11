@@ -1,11 +1,13 @@
 
 /**
- * Image optimization utilities for React Native
- * Handles image compression, resizing, and format conversion
+ * Image optimization and file handling utilities
  */
 
 import * as ImageManipulator from 'expo-image-manipulator';
-import { formatFileSize } from './fileUtils';
+import * as Sharing from 'expo-sharing';
+import { Asset } from 'expo-asset';
+import { Alert } from 'react-native';
+import { formatFileSize } from './formatting';
 
 interface ImageOptimizationOptions {
   maxWidth?: number;
@@ -82,7 +84,9 @@ export async function optimizeImage(
       ? (1 - (optimizedInfo.size / originalInfo.size)) * 100
       : 0;
 
-    console.log(`Image optimized: ${formatFileSize(originalInfo.size)} → ${formatFileSize(optimizedInfo.size)} (${compressionRatio.toFixed(1)}% reduction)`);
+    if (__DEV__) {
+      console.log(`Image optimized: ${formatFileSize(originalInfo.size)} → ${formatFileSize(optimizedInfo.size)} (${compressionRatio.toFixed(1)}% reduction)`);
+    }
 
     return {
       uri: result.uri,
@@ -103,10 +107,8 @@ export async function optimizeImage(
  */
 async function getImageInfo(uri: string): Promise<{ width: number; height: number; size: number }> {
   try {
-    // For local files, we can get the file size
     let size = 0;
 
-    // Try to fetch file info
     try {
       const response = await fetch(uri);
       const blob = await response.blob();
@@ -115,7 +117,6 @@ async function getImageInfo(uri: string): Promise<{ width: number; height: numbe
       console.log('Could not get file size:', error);
     }
 
-    // Get image dimensions
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
@@ -130,7 +131,6 @@ async function getImageInfo(uri: string): Promise<{ width: number; height: numbe
     });
   } catch (error) {
     console.error('Error getting image info:', error);
-    // Return default values if we can't get info
     return { width: 1920, height: 1920, size: 0 };
   }
 }
@@ -147,15 +147,12 @@ function calculateOptimalDimensions(
   let width = originalWidth;
   let height = originalHeight;
 
-  // Check if resizing is needed
   if (width <= maxWidth && height <= maxHeight) {
     return { width, height };
   }
 
-  // Calculate aspect ratio
   const aspectRatio = width / height;
 
-  // Resize based on which dimension exceeds the limit more
   if (width / maxWidth > height / maxHeight) {
     width = maxWidth;
     height = Math.round(width / aspectRatio);
@@ -167,29 +164,34 @@ function calculateOptimalDimensions(
   return { width, height };
 }
 
-/**
- * Validate image before processing
- */
-export function validateImage(
-  mimeType?: string,
-  size?: number,
-  maxSize: number = 10 * 1024 * 1024 // 10MB
-): { valid: boolean; error?: string } {
-  // Check file type
-  if (mimeType && !mimeType.startsWith('image/')) {
-    return {
-      valid: false,
-      error: 'File must be an image',
-    };
+const DEMO_ASSETS: Record<string, number> = {
+  'vessel_registration.pdf': require('../assets/documents/vessel_registration.pdf'),
+  'hull_insurance.pdf': require('../assets/documents/hull_insurance.pdf'),
+  'dpnr_registration.pdf': require('../assets/documents/dpnr_registration.pdf'),
+  'captain_license.pdf': require('../assets/documents/captain_license.pdf'),
+  'fcc_license.pdf': require('../assets/documents/fcc_license.pdf'),
+  'bahamas_permit.pdf': require('../assets/documents/bahamas_permit.pdf'),
+  'safety_manual.pdf': require('../assets/documents/safety_manual.pdf'),
+};
+
+export async function openDocument(fileUri: string, fileType: string): Promise<void> {
+  let uri = fileUri;
+
+  if (fileUri.startsWith('file://documents/')) {
+    const basename = fileUri.replace('file://documents/', '');
+    const assetModule = DEMO_ASSETS[basename];
+    if (!assetModule) {
+      Alert.alert('File Not Found', 'Demo document asset is missing.');
+      return;
+    }
+    const asset = Asset.fromModule(assetModule);
+    await asset.downloadAsync();
+    uri = asset.localUri!;
   }
 
-  // Check file size
-  if (size && size > maxSize) {
-    return {
-      valid: false,
-      error: `Image size must be less than ${formatFileSize(maxSize)}`,
-    };
+  if (await Sharing.isAvailableAsync()) {
+    await Sharing.shareAsync(uri, { mimeType: fileType });
+  } else {
+    Alert.alert('Sharing Not Available', 'Cannot open documents on this device.');
   }
-
-  return { valid: true };
 }

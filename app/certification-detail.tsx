@@ -16,7 +16,7 @@ import {
 import { useData } from "../contexts/DataContext";
 import { DetailRow } from "../components/DetailRow";
 import { DetailNotFound } from "../components/DetailNotFound";
-import { formatDate } from "../utils/dateUtils";
+import { formatDate } from "../utils/formatting";
 import { CertificationStatus } from "../types";
 import { scrollProps } from "../hooks/useTopPadding";
 

@@ -3,6 +3,8 @@
  * Validation utilities for form inputs
  */
 
+import { formatFileSize } from './formatting';
+
 export interface ValidationResult {
   valid: boolean;
   message?: string;
@@ -31,3 +33,25 @@ export const validatePositiveNumber = (value: string, fieldName: string): Valida
 
   return { valid: true };
 };
+
+export function validateImage(
+  mimeType?: string,
+  size?: number,
+  maxSize: number = 10 * 1024 * 1024 // 10MB
+): ValidationResult {
+  if (mimeType && !mimeType.startsWith('image/')) {
+    return {
+      valid: false,
+      message: 'File must be an image',
+    };
+  }
+
+  if (size && size > maxSize) {
+    return {
+      valid: false,
+      message: `Image size must be less than ${formatFileSize(maxSize)}`,
+    };
+  }
+
+  return { valid: true };
+}

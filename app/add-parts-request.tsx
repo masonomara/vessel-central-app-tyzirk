@@ -18,11 +18,12 @@ import { IconSymbol } from '../components/IconSymbol';
 import { ValidatedInput } from '../components/ValidatedInput';
 import { TaskPriority } from '../types';
 import { validateRequired, validatePositiveNumber } from '../utils/validation';
+import { PRIORITY_OPTIONS } from '../utils/formatting';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { scrollProps } from '../hooks/useTopPadding';
 
-const URGENCY_LEVELS: TaskPriority[] = ['none', 'low', 'medium', 'high', 'urgent', 'critical'];
+const URGENCY_LEVELS = PRIORITY_OPTIONS;
 
 const VESSEL_LOCATIONS = [
   'Engine Room',

@@ -19,8 +19,9 @@ import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { TaskPriority, Attachment } from '../types';
-import { optimizeImage, validateImage } from '../utils/imageUtils';
-import { formatFileSize } from '../utils/fileUtils';
+import { optimizeImage } from '../utils/imageUtils';
+import { validateImage } from '../utils/validation';
+import { formatFileSize, getPriorityColor, PRIORITY_OPTIONS } from '../utils/formatting';
 import { scrollProps } from '../hooks/useTopPadding';
 
 const ISSUE_CATEGORIES = [
@@ -36,7 +37,6 @@ const ISSUE_CATEGORIES = [
   'Other',
 ];
 
-const PRIORITY_OPTIONS: TaskPriority[] = ['none', 'low', 'medium', 'high', 'urgent', 'critical'];
 
 export default function AddIssueScreen() {
   const router = useRouter();
@@ -94,7 +94,7 @@ export default function AddIssueScreen() {
             // Validate image
             const validation = validateImage(asset.mimeType, asset.fileSize);
             if (!validation.valid) {
-              Alert.alert('Invalid Image', validation.error || 'Image validation failed');
+              Alert.alert('Invalid Image', validation.message || 'Image validation failed');
               continue;
             }
 
@@ -165,7 +165,7 @@ export default function AddIssueScreen() {
         // Validate image
         const validation = validateImage(asset.mimeType, asset.fileSize);
         if (!validation.valid) {
-          Alert.alert('Invalid Image', validation.error || 'Image validation failed');
+          Alert.alert('Invalid Image', validation.message || 'Image validation failed');
           return;
         }
 
@@ -285,16 +285,6 @@ export default function AddIssueScreen() {
       Alert.alert('Error', 'Failed to submit issue. Please try again.');
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const getPriorityColor = (p: TaskPriority) => {
-    switch (p) {
-      case 'urgent': return colors.danger;
-      case 'high': return colors.warning;
-      case 'medium': return colors.accent;
-      case 'low': return colors.success;
-      default: return colors.grey;
     }
   };
 

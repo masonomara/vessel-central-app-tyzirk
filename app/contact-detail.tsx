@@ -16,7 +16,7 @@ import {
 import { useData } from "../contexts/DataContext";
 import { DetailRow } from "../components/DetailRow";
 import { DetailNotFound } from "../components/DetailNotFound";
-import { formatLabel } from "../utils/formatLabel";
+import { formatLabel } from "../utils/formatting";
 import { scrollProps } from "../hooks/useTopPadding";
 
 export default function ContactDetailScreen() {

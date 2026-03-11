@@ -7,8 +7,7 @@ import { colors, commonStyles } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
-import { getPriorityBadgeColors } from "../../../utils/colorUtils";
-import { formatDueDate, formatDate } from "../../../utils/dateUtils";
+import { getPriorityBadgeColors, formatDueDate, formatDate } from "../../../utils/formatting";
 import { Stack, router } from "expo-router";
 import { scrollProps } from "../../../hooks/useTopPadding";
 

@@ -16,8 +16,7 @@ import { IconSymbol } from "../../../components/IconSymbol";
 import GlobalSearch from "../../../components/GlobalSearch";
 import { RealtimeFeed } from "../../../components/RealtimeFeed";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
-import { getPriorityBadgeColors } from "../../../utils/colorUtils";
-import { formatDueDate } from "../../../utils/dateUtils";
+import { getPriorityBadgeColors, formatDueDate } from "../../../utils/formatting";
 import { Stack, router } from "expo-router";
 import { scrollProps } from "../../../hooks/useTopPadding";
 

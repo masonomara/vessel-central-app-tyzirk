@@ -19,9 +19,8 @@ import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
 import { PriorityDetailRow } from "../components/PriorityDetailRow";
 import { DetailNotFound } from "../components/DetailNotFound";
-import { formatDate, isOverdue } from "../utils/dateUtils";
-import { formatLabel } from "../utils/formatLabel";
-import { formatFileSize, openDocument } from "../utils/fileUtils";
+import { formatDate, isOverdue, formatLabel, formatFileSize } from "../utils/formatting";
+import { openDocument } from "../utils/imageUtils";
 import { scrollProps } from "../hooks/useTopPadding";
 
 export default function DocumentDetailScreen() {

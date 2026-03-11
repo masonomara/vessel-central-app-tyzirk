@@ -21,8 +21,7 @@ import { DetailRow } from "../components/DetailRow";
 import { DropdownRow } from "../components/DropdownRow";
 import { PriorityDetailRow } from "../components/PriorityDetailRow";
 import { DetailNotFound } from "../components/DetailNotFound";
-import { formatDate } from "../utils/dateUtils";
-import { formatLabel } from "../utils/formatLabel";
+import { formatDate, formatLabel } from "../utils/formatting";
 import { TaskPriority, SupplyRequestStatus } from "../types";
 import { scrollProps } from "../hooks/useTopPadding";
 

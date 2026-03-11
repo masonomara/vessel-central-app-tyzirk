@@ -17,7 +17,7 @@ import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { DocumentCategory } from '../types';
-import { formatFileSize } from '../utils/fileUtils';
+import { formatFileSize } from '../utils/formatting';
 import { scrollProps } from '../hooks/useTopPadding';
 
 const DOCUMENT_CATEGORIES: DocumentCategory[] = [

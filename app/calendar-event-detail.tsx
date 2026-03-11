@@ -24,8 +24,7 @@ import {
   formatEventDateRange,
   getEventTypeLabel,
 } from "../utils/calendarUtils";
-import { formatDate } from "../utils/dateUtils";
-import { formatLabel } from "../utils/formatLabel";
+import { formatDate, formatLabel } from "../utils/formatting";
 import { CalendarEventStatus } from "../types";
 import { scrollProps } from "../hooks/useTopPadding";
 

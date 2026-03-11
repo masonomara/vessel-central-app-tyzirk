@@ -16,6 +16,7 @@ import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { TaskPriority } from '../types';
+import { getPriorityColor, PRIORITY_OPTIONS } from '../utils/formatting';
 import { scrollProps } from '../hooks/useTopPadding';
 
 const SUPPLY_CATEGORIES = [
@@ -30,8 +31,6 @@ const SUPPLY_CATEGORIES = [
   'Linens',
   'Other',
 ];
-
-const PRIORITY_OPTIONS: TaskPriority[] = ['none', 'low', 'medium', 'high', 'urgent', 'critical'];
 
 const UNIT_OPTIONS = [
   'units',
@@ -151,16 +150,6 @@ export default function AddSupplyRequestScreen() {
       Alert.alert('Error', 'Failed to submit supply request. Please try again.');
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const getPriorityColor = (p: TaskPriority) => {
-    switch (p) {
-      case 'urgent': return colors.danger;
-      case 'high': return colors.warning;
-      case 'medium': return colors.accent;
-      case 'low': return colors.success;
-      default: return colors.grey;
     }
   };
 
