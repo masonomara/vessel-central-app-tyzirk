@@ -6,7 +6,7 @@ import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ItemCard } from "../../../components/ItemCard";
+import { ListItemCard } from "../../../components/ListItemCard";
 import { Document } from "../../../types";
 import { formatDate, formatLabel } from "../../../utils/formatting";
 import { scrollProps } from "../../../hooks/useTopPadding";
@@ -96,7 +96,7 @@ export default function DocumentsScreen() {
       index: number;
       section: { data: Document[] };
     }) => (
-      <ItemCard
+      <ListItemCard
         title={doc.title}
         description={doc.description}
         vesselName={doc.vesselName}

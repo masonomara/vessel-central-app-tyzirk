@@ -5,14 +5,14 @@ import { colors } from '../styles/commonStyles';
 import { IconSymbol } from './IconSymbol';
 import { PressableCard } from './PressableCard';
 
-interface RealtimeFeedProps {
+interface ActivityFeedProps {
   userId?: string;
   limit?: number;
   showUnreadOnly?: boolean;
   onItemPress?: (type: string, id: string) => void;
 }
 
-export function RealtimeFeed({ limit = 20, onItemPress }: RealtimeFeedProps) {
+export function ActivityFeed({ limit = 20, onItemPress }: ActivityFeedProps) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>

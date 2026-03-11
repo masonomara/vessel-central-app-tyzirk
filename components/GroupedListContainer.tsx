@@ -2,12 +2,12 @@ import React from "react";
 import { View, ViewStyle } from "react-native";
 import { colors } from "../styles/commonStyles";
 
-interface ListWrapperProps {
+interface GroupedListContainerProps {
   children: React.ReactNode;
   style?: ViewStyle;
 }
 
-export function ListWrapper({ children, style }: ListWrapperProps) {
+export function GroupedListContainer({ children, style }: GroupedListContainerProps) {
   return (
     <View
       style={[

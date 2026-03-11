@@ -7,7 +7,7 @@ import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ItemCard } from "../../../components/ItemCard";
+import { ListItemCard } from "../../../components/ListItemCard";
 import { CrewCertification, CertificationStatus } from "../../../types";
 import { formatDate } from "../../../utils/formatting";
 import { SearchBar } from "../../../components/SearchBar";
@@ -152,7 +152,7 @@ export default function CertificationsScreen() {
       const badge = getStatusBadge(status);
 
       return (
-        <ItemCard
+        <ListItemCard
           title={item.certType}
           description={`${item.crewName} — ${item.issuingAuthority}`}
           vesselName={item.vesselName}

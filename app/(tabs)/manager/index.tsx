@@ -6,15 +6,15 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { ItemCard } from "../../../components/ItemCard";
-import { ListWrapper } from "../../../components/ListWrapper";
+import { ListItemCard } from "../../../components/ListItemCard";
+import { GroupedListContainer } from "../../../components/GroupedListContainer";
 import { VesselCard } from "../../../components/VesselCard";
 import { colors, commonStyles } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
 import GlobalSearch from "../../../components/GlobalSearch";
-import { RealtimeFeed } from "../../../components/RealtimeFeed";
+import { ActivityFeed } from "../../../components/ActivityFeed";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { getPriorityBadgeColors, formatDueDate } from "../../../utils/formatting";
 import { Stack, router } from "expo-router";
@@ -135,11 +135,11 @@ export default function ManagerDashboard() {
               </Text>
             </View>
 
-            <ListWrapper>
+            <GroupedListContainer>
               {pendingApprovals.slice(0, 3).map((approval, index) => {
                 const sliced = pendingApprovals.slice(0, 3);
                 return (
-                  <ItemCard
+                  <ListItemCard
                     key={approval.id}
                     title={`${approval.itemName} - $${approval.estimatedCost}`}
                     description={approval.description}
@@ -190,7 +190,7 @@ export default function ManagerDashboard() {
                   />
                 );
               })}
-            </ListWrapper>
+            </GroupedListContainer>
             {pendingApprovals.length > 3 && (
               <TouchableOpacity
                 style={styles.viewAllButton}
@@ -211,7 +211,7 @@ export default function ManagerDashboard() {
         )}
 
         <View style={styles.section}>
-          <RealtimeFeed
+          <ActivityFeed
             userId={userId}
             limit={5}
             onItemPress={(type, id) => {
@@ -262,11 +262,11 @@ export default function ManagerDashboard() {
             </Text>
           </View>
           {upcomingMaintenance.length > 0 ? (
-            <ListWrapper>
+            <GroupedListContainer>
               {upcomingMaintenance.map((item, index) => {
                 const priorityBadge = getPriorityBadgeColors(item.priority);
                 return (
-                  <ItemCard
+                  <ListItemCard
                     key={item.id}
                     title={item.title}
                     description={item.vesselName}
@@ -290,7 +290,7 @@ export default function ManagerDashboard() {
                   />
                 );
               })}
-            </ListWrapper>
+            </GroupedListContainer>
           ) : (
             <Text style={styles.emptyText}>No upcoming maintenance</Text>
           )}

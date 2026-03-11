@@ -7,7 +7,7 @@ import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ItemCard } from "../../../components/ItemCard";
+import { ListItemCard } from "../../../components/ListItemCard";
 import { Contact, ContactType } from "../../../types";
 import { SearchBar } from "../../../components/SearchBar";
 import { FilterRow } from "../../../components/FilterRow";
@@ -122,7 +122,7 @@ export default function ContactsScreen() {
         : item.role;
 
       return (
-        <ItemCard
+        <ListItemCard
           title={item.name}
           description={description}
           vesselName={item.vesselNames[0]}

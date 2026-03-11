@@ -16,7 +16,7 @@ interface DetailItem {
   };
 }
 
-interface PriorityDetailRowProps {
+interface DetailCellPairProps {
   items: [DetailItem, DetailItem];
 }
 
@@ -64,7 +64,7 @@ function DetailCell({ label, value, valueColor, linkTo, icon }: DetailItem) {
   return <View style={styles.cellWrapper}>{content}</View>;
 }
 
-export function PriorityDetailRow({ items }: PriorityDetailRowProps) {
+export function DetailCellPair({ items }: DetailCellPairProps) {
   return (
     <View style={styles.row}>
       <DetailCell {...items[0]} />

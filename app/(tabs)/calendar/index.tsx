@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ItemCard } from "../../../components/ItemCard";
+import { ListItemCard } from "../../../components/ListItemCard";
 import {
   getEventsForDate,
   getEventsForMonth,
@@ -26,7 +26,7 @@ import {
   getEventColor,
   getEventTypeLabel,
   sortEventsByDate,
-} from "../../../utils/calendarUtils";
+} from "../../../utils/calendar";
 import { CalendarEvent } from "../../../types/calendar";
 
 export default function CalendarScreen() {
@@ -203,7 +203,7 @@ export default function CalendarScreen() {
 
   const renderEventItem = useCallback(
     (event: CalendarEvent, index: number, array: CalendarEvent[]) => (
-      <ItemCard
+      <ListItemCard
         key={event.id}
         title={event.title}
         description={event.description}

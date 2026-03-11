@@ -13,7 +13,7 @@ import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ItemCard } from "../../../components/ItemCard";
+import { ListItemCard } from "../../../components/ListItemCard";
 import { SupplyRequest } from "../../../types";
 import { formatDate, getPriorityBadgeColors } from "../../../utils/formatting";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -116,7 +116,7 @@ export default function SuppliesScreen() {
       index: number;
       section: { data: SupplyRequest[] };
     }) => (
-      <ItemCard
+      <ListItemCard
         title={`${item.itemName} - $${item.estimatedCost}`}
         description={item.description}
         vesselName={item.vesselName}

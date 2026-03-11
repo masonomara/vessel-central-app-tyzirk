@@ -3,19 +3,19 @@ import React, { memo, useMemo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { colors } from '../styles/commonStyles';
 
-interface MiniChartProps {
+interface MiniBarChartProps {
   data: number[];
   color?: string;
   height?: number;
   showAxis?: boolean;
 }
 
-export const MiniChart = memo(function MiniChart({
+export const MiniBarChart = memo(function MiniBarChart({
   data,
   color = colors.accent,
   height = 60,
   showAxis = false,
-}: MiniChartProps) {
+}: MiniBarChartProps) {
   const chartData = useMemo(() => {
     if (data.length === 0) {
       return null;

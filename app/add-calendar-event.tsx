@@ -17,7 +17,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useData } from "../contexts/DataContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { CalendarEventType } from "../types/calendar";
-import { EVENT_TYPE_LABELS, getEventColor } from "../utils/calendarUtils";
+import { EVENT_TYPE_LABELS, getEventColor } from "../utils/calendar";
 import { scrollProps } from "../hooks/useTopPadding";
 
 export default function AddCalendarEventScreen() {

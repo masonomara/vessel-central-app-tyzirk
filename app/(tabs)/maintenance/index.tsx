@@ -4,7 +4,7 @@ import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ItemCard } from "../../../components/ItemCard";
+import { ListItemCard } from "../../../components/ListItemCard";
 import { MaintenanceTask } from "../../../types";
 import { formatDueDate, isOverdue } from "../../../utils/formatting";
 import { Stack, router } from "expo-router";
@@ -118,7 +118,7 @@ export default function MaintenanceScreen() {
       index: number;
       section: { data: MaintenanceTask[] };
     }) => (
-      <ItemCard
+      <ListItemCard
         title={`${item.title}${item.estimatedCost != null ? ` - $${item.estimatedCost}` : ""}`}
         description={item.description}
         vesselName={item.vesselName}

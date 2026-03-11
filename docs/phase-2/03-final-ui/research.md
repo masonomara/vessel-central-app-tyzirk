@@ -173,7 +173,7 @@ Vessel & Co. is a yacht fleet management app built with React Native 0.81.4, Exp
 | Component | Purpose |
 |-----------|---------|
 | ItemCard | Universal list item -- title, description, vessel, badges, checkbox, actions |
-| ListWrapper | Groups ItemCards with dividers |
+| GroupedListContainer | Groups ItemCards with dividers |
 | PressableCard | Generic touchable container with shadow |
 | DetailRow | Key-value pair layout for detail screens |
 | SearchBar | Text input with search icon |
@@ -188,7 +188,7 @@ Vessel & Co. is a yacht fleet management app built with React Native 0.81.4, Exp
 | ProfileHeaderButton | Profile access from any tab header |
 | RealtimeFeed | Activity stream component |
 | ErrorBoundary | App-level error fallback |
-| BadgeRow, PriorityDetailRow, DropdownRow, ValidatedInput | Form/detail helpers |
+| BadgeRow, DetailCellPair, DropdownRow, ValidatedInput | Form/detail helpers |
 
 ---
 
@@ -336,7 +336,7 @@ Vessel & Co. is a yacht fleet management app built with React Native 0.81.4, Exp
 
 ### Components
 - `components/ItemCard.tsx`
-- `components/ListWrapper.tsx`
+- `components/GroupedListContainer.tsx`
 - `components/PressableCard.tsx`
 - `components/GlobalSearch.tsx`
 - `components/SearchBar.tsx`

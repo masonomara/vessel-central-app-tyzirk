@@ -7,7 +7,7 @@ import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ItemCard } from "../../../components/ItemCard";
+import { ListItemCard } from "../../../components/ListItemCard";
 import { Equipment, EquipmentCategory } from "../../../types";
 import { getConditionBadgeColors } from "../../../utils/formatting";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -132,7 +132,7 @@ export default function EquipmentScreen() {
       index: number;
       section: { data: Equipment[] };
     }) => (
-      <ItemCard
+      <ListItemCard
         title={item.name}
         description={item.description}
         vesselName={item.vesselName}

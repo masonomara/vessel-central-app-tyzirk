@@ -17,10 +17,10 @@ import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
-import { PriorityDetailRow } from "../components/PriorityDetailRow";
+import { DetailCellPair } from "../components/DetailCellPair";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, isOverdue, formatLabel, formatFileSize } from "../utils/formatting";
-import { openDocument } from "../utils/imageUtils";
+import { openDocument } from "../utils/files";
 import { scrollProps } from "../hooks/useTopPadding";
 
 export default function DocumentDetailScreen() {
@@ -73,7 +73,7 @@ export default function DocumentDetailScreen() {
           <Text style={ds.title}>{doc.title}</Text>
         </View>
 
-        <PriorityDetailRow
+        <DetailCellPair
           items={[
             {
               label: "Vessel",

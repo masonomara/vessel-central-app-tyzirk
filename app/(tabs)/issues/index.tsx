@@ -6,7 +6,7 @@ import { scrollProps } from "../../../hooks/useTopPadding";
 import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ItemCard } from "../../../components/ItemCard";
+import { ListItemCard } from "../../../components/ListItemCard";
 import { Issue } from "../../../types";
 import { formatDate, getPriorityBadgeColors } from "../../../utils/formatting";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -101,7 +101,7 @@ export default function IssuesScreen() {
       index: number;
       section: { data: Issue[] };
     }) => (
-      <ItemCard
+      <ListItemCard
         title={item.title}
         description={item.description}
         vesselName={item.vesselName}

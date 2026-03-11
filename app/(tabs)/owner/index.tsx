@@ -12,9 +12,9 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
 import { ProgressRing } from "../../../components/ProgressRing";
-import { MiniChart } from "../../../components/MiniChart";
-import { ItemCard } from "../../../components/ItemCard";
-import { ListWrapper } from "../../../components/ListWrapper";
+import { MiniBarChart } from "../../../components/MiniBarChart";
+import { ListItemCard } from "../../../components/ListItemCard";
+import { GroupedListContainer } from "../../../components/GroupedListContainer";
 import { PressableCard } from "../../../components/PressableCard";
 import { VesselCard } from "../../../components/VesselCard";
 import GlobalSearch from "../../../components/GlobalSearch";
@@ -241,11 +241,11 @@ export default function OwnerDashboard() {
                 {pendingApprovals.length} {pendingApprovals.length === 1 ? "item" : "items"}
               </Text>
             </View>
-            <ListWrapper>
+            <GroupedListContainer>
               {pendingApprovals.slice(0, 2).map((approval, index) => {
                 const sliced = pendingApprovals.slice(0, 2);
                 return (
-                  <ItemCard
+                  <ListItemCard
                     key={approval.id}
                     title={`${approval.itemName} - $${approval.estimatedCost}`}
                     description={`${approval.quantity} ${approval.unit}`}
@@ -269,7 +269,7 @@ export default function OwnerDashboard() {
                   />
                 );
               })}
-            </ListWrapper>
+            </GroupedListContainer>
           </View>
         )}
         <View style={styles.section}>
@@ -280,9 +280,9 @@ export default function OwnerDashboard() {
             </Text>
           </View>
           {myActivityLogs.length > 0 ? (
-            <ListWrapper>
+            <GroupedListContainer>
               {myActivityLogs.map((log, index) => (
-                <ItemCard
+                <ListItemCard
                   key={log.id}
                   title={log.title}
                   description={log.description}
@@ -318,7 +318,7 @@ export default function OwnerDashboard() {
                   style={{ marginLeft: 0, backgroundColor: "transparent" }}
                 />
               ))}
-            </ListWrapper>
+            </GroupedListContainer>
           ) : (
             <Text style={styles.emptyText}>No recent activity</Text>
           )}
@@ -391,7 +391,7 @@ export default function OwnerDashboard() {
               <Text style={styles.expenseChartTitle}>Expense Trend</Text>
               <Text style={styles.expenseChartSubtitle}>Last 6 months</Text>
             </View>
-            <MiniChart
+            <MiniBarChart
               data={last6MonthsExpenses}
               color={colors.success}
               height={80}
@@ -404,11 +404,11 @@ export default function OwnerDashboard() {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Next Maintenance</Text>
             </View>
-            <ListWrapper>
+            <GroupedListContainer>
               {(() => {
                 const priorityBadge = getPriorityBadgeColors(upcomingMaintenance.priority);
                 return (
-                  <ItemCard
+                  <ListItemCard
                     title={upcomingMaintenance.title}
                     description={upcomingMaintenance.vesselName}
                     vesselName={upcomingMaintenance.vesselName}
@@ -431,7 +431,7 @@ export default function OwnerDashboard() {
                   />
                 );
               })()}
-            </ListWrapper>
+            </GroupedListContainer>
           </View>
         )}
       </ScrollView>

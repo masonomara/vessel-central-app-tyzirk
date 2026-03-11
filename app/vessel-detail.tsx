@@ -4,14 +4,14 @@ import { useLocalSearchParams, Stack, router } from "expo-router";
 import { colors } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { IconSymbol } from "../components/IconSymbol";
-import { ItemCard } from "../components/ItemCard";
+import { ListItemCard } from "../components/ListItemCard";
 import { CollapsibleSectionHeader } from "../components/CollapsibleSectionHeader";
 import { scrollProps } from "../hooks/useTopPadding";
 import { formatDate, formatDueDate, formatLabel, getPriorityBadgeColors } from "../utils/formatting";
 import {
   formatEventDateRange,
   getEventTypeLabel,
-} from "../utils/calendarUtils";
+} from "../utils/calendar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function VesselDetailScreen() {
@@ -171,7 +171,7 @@ export default function VesselDetailScreen() {
               />
               {!collapsedSections.has("Open Issues") &&
                 openIssues.map((issue, index) => (
-                  <ItemCard
+                  <ListItemCard
                     key={issue.id}
                     title={issue.title}
                     description={issue.description}
@@ -210,7 +210,7 @@ export default function VesselDetailScreen() {
               />
               {!collapsedSections.has("Events") &&
                 vesselEvents.map((event, index) => (
-                  <ItemCard
+                  <ListItemCard
                     key={event.id}
                     title={event.title}
                     description={event.description}
@@ -249,7 +249,7 @@ export default function VesselDetailScreen() {
               />
               {!collapsedSections.has("Maintenance") &&
                 activeTasks.map((task, index) => (
-                  <ItemCard
+                  <ListItemCard
                     key={task.id}
                     title={`${task.title}${task.estimatedCost != null ? ` - $${task.estimatedCost}` : ""}`}
                     description={task.description}
@@ -288,7 +288,7 @@ export default function VesselDetailScreen() {
               />
               {!collapsedSections.has("Supplies") &&
                 pendingSupplies.map((req, index) => (
-                  <ItemCard
+                  <ListItemCard
                     key={req.id}
                     title={`${req.itemName} - $${req.estimatedCost}`}
                     description={req.description}
@@ -327,7 +327,7 @@ export default function VesselDetailScreen() {
               />
               {!collapsedSections.has("Documents") &&
                 vesselDocs.map((doc, index) => (
-                  <ItemCard
+                  <ListItemCard
                     key={doc.id}
                     title={doc.title}
                     description={doc.description}

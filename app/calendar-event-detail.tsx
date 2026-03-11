@@ -18,12 +18,12 @@ import { useAuth } from "../contexts/AuthContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
 import { DropdownRow } from "../components/DropdownRow";
-import { PriorityDetailRow } from "../components/PriorityDetailRow";
+import { DetailCellPair } from "../components/DetailCellPair";
 import { DetailNotFound } from "../components/DetailNotFound";
 import {
   formatEventDateRange,
   getEventTypeLabel,
-} from "../utils/calendarUtils";
+} from "../utils/calendar";
 import { formatDate, formatLabel } from "../utils/formatting";
 import { CalendarEventStatus } from "../types";
 import { scrollProps } from "../hooks/useTopPadding";
@@ -87,7 +87,7 @@ export default function CalendarEventDetailScreen() {
           <Text style={ds.title}>{event.title}</Text>
         </View>
 
-        <PriorityDetailRow
+        <DetailCellPair
           items={[
             {
               label: "Vessel",

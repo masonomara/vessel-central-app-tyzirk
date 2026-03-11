@@ -7,7 +7,7 @@ import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ItemCard } from "../../../components/ItemCard";
+import { ListItemCard } from "../../../components/ListItemCard";
 import { CharterLog, CharterStatus } from "../../../types";
 import { formatDate } from "../../../utils/formatting";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -122,7 +122,7 @@ export default function ChartersScreen() {
       index: number;
       section: { data: CharterLog[] };
     }) => (
-      <ItemCard
+      <ListItemCard
         title={item.title}
         description={
           formatDate(item.startDate) + " \u2014 " + formatDate(item.endDate)

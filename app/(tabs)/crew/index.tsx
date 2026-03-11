@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { StyleSheet, View, Text, ScrollView } from "react-native";
-import { ItemCard } from "../../../components/ItemCard";
-import { ListWrapper } from "../../../components/ListWrapper";
+import { ListItemCard } from "../../../components/ListItemCard";
+import { GroupedListContainer } from "../../../components/GroupedListContainer";
 import { VesselCard } from "../../../components/VesselCard";
 import { colors, commonStyles } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -84,11 +84,11 @@ export default function CrewDashboard() {
           </View>
 
           {myTasks.length > 0 ? (
-            <ListWrapper>
+            <GroupedListContainer>
               {myTasks.map((task, index) => {
                 const priorityBadge = getPriorityBadgeColors(task.priority);
                 return (
-                  <ItemCard
+                  <ListItemCard
                     key={task.id}
                     title={task.title}
                     description={task.description}
@@ -120,7 +120,7 @@ export default function CrewDashboard() {
                   />
                 );
               })}
-            </ListWrapper>
+            </GroupedListContainer>
           ) : (
             <Text style={styles.emptyText}>No tasks assigned</Text>
           )}
@@ -135,9 +135,9 @@ export default function CrewDashboard() {
             </Text>
           </View>
           {mySupplyRequests.length > 0 ? (
-            <ListWrapper>
+            <GroupedListContainer>
               {mySupplyRequests.map((request, index) => (
-                <ItemCard
+                <ListItemCard
                   key={request.id}
                   title={`${request.itemName} - $${request.estimatedCost}`}
                   description={`${request.quantity} ${request.unit}`}
@@ -162,7 +162,7 @@ export default function CrewDashboard() {
                   style={{ marginLeft: 0, backgroundColor: "transparent" }}
                 />
               ))}
-            </ListWrapper>
+            </GroupedListContainer>
           ) : (
             <Text style={styles.emptyText}>No supply requests</Text>
           )}

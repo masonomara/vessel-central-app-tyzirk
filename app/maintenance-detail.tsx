@@ -21,7 +21,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { DetailRow } from "../components/DetailRow";
 import { DropdownRow } from "../components/DropdownRow";
-import { PriorityDetailRow } from "../components/PriorityDetailRow";
+import { DetailCellPair } from "../components/DetailCellPair";
 import { DetailNotFound } from "../components/DetailNotFound";
 import { formatDate, formatDueDate, isOverdue, formatLabel } from "../utils/formatting";
 import { TaskStatus, TaskPriority } from "../types";
@@ -198,7 +198,7 @@ export default function MaintenanceDetailScreen() {
           <Text style={ds.title}>{task.title}</Text>
         </View>
 
-        <PriorityDetailRow
+        <DetailCellPair
           items={[
             {
               label: "Vessel",

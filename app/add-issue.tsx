@@ -19,7 +19,7 @@ import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { TaskPriority, Attachment } from '../types';
-import { optimizeImage } from '../utils/imageUtils';
+import { optimizeImage } from '../utils/files';
 import { validateImage } from '../utils/validation';
 import { formatFileSize, getPriorityColor, PRIORITY_OPTIONS } from '../utils/formatting';
 import { scrollProps } from '../hooks/useTopPadding';

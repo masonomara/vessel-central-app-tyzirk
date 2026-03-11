@@ -10,7 +10,7 @@ import { indexScreenStyles } from "../styles/commonStyles";
 import { colors } from "../styles/commonStyles";
 import { IconSymbol } from "./IconSymbol";
 
-interface ItemCardProps {
+interface ListItemCardProps {
   title: string;
   description: string;
   vesselName: string;
@@ -42,7 +42,7 @@ interface ItemCardProps {
   actions?: React.ReactNode;
 }
 
-export const ItemCard = React.memo(
+export const ListItemCard = React.memo(
   ({
     title,
     description,
@@ -60,7 +60,7 @@ export const ItemCard = React.memo(
     secondaryMetaText,
     bordered,
     actions,
-  }: ItemCardProps) => {
+  }: ListItemCardProps) => {
     const handleComplete = useCallback(() => {
       onComplete?.();
     }, [onComplete]);
