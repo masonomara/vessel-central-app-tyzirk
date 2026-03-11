@@ -79,7 +79,7 @@ export default function IssuesScreen() {
 
   const handleIssuePress = useCallback(
     (issue: Issue) => {
-      router.push({ pathname: "/issue-detail", params: { id: issue.id } });
+      router.push({ pathname: "/detail-issue", params: { id: issue.id } });
     },
     [router],
   );

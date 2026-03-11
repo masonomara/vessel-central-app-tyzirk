@@ -81,7 +81,7 @@ export default function DocumentsScreen() {
 
   const handleDocumentPress = useCallback(
     (doc: Document) => {
-      router.push({ pathname: "/document-detail", params: { id: doc.id } });
+      router.push({ pathname: "/detail-document", params: { id: doc.id } });
     },
     [router],
   );

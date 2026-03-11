@@ -97,7 +97,7 @@ export default function CharterDetailScreen() {
           inline
           value={charter.vesselName}
           linkTo={{
-            pathname: "/vessel-detail",
+            pathname: "/detail-vessel",
             params: { id: charter.vesselId },
           }}
         />

@@ -14,8 +14,11 @@ function RootLayoutContent() {
       <Stack screenOptions={stackScreenOptions}>
         {/* Auth screens — no header */}
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="member-setup" options={{ headerShown: false }} />
+        <Stack.Screen name="user-login" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="operation-member-setup"
+          options={{ headerShown: false }}
+        />
 
         {/* Tabs — header handled by NativeTabs */}
         <Stack.Screen
@@ -25,30 +28,6 @@ function RootLayoutContent() {
 
         {/* Add-form modals */}
         <Stack.Screen
-          name="add-maintenance-task"
-          options={{
-            presentation: "modal",
-            animation: "slide_from_bottom",
-            title: "New Maintenance Task",
-          }}
-        />
-        <Stack.Screen
-          name="add-issue"
-          options={{
-            presentation: "modal",
-            animation: "slide_from_bottom",
-            title: "Report Issue",
-          }}
-        />
-        <Stack.Screen
-          name="add-document"
-          options={{
-            presentation: "modal",
-            animation: "slide_from_bottom",
-            title: "Upload Document",
-          }}
-        />
-        <Stack.Screen
           name="add-calendar-event"
           options={{
             presentation: "modal",
@@ -56,50 +35,6 @@ function RootLayoutContent() {
             title: "New Event",
           }}
         />
-        <Stack.Screen
-          name="add-supply-request"
-          options={{
-            presentation: "modal",
-            animation: "slide_from_bottom",
-            title: "Request Supplies",
-          }}
-        />
-        <Stack.Screen
-          name="add-parts-request"
-          options={{
-            presentation: "modal",
-            animation: "slide_from_bottom",
-            title: "Request Parts",
-          }}
-        />
-
-        {/* Detail screens */}
-        <Stack.Screen name="maintenance-detail" options={{ title: "" }} />
-        <Stack.Screen
-          name="issue-detail"
-          options={{ title: "Issue Details" }}
-        />
-        <Stack.Screen
-          name="supply-detail"
-          options={{ title: "Supply Request" }}
-        />
-        <Stack.Screen name="document-detail" options={{ title: "Document" }} />
-        <Stack.Screen
-          name="calendar-event-detail"
-          options={{ title: "Event Details" }}
-        />
-        <Stack.Screen
-          name="vessel-detail"
-          options={{ title: "Vessel Details", headerBackTitle: "Back" }}
-        />
-
-        {/* Profile — pushed from headerRight button */}
-        <Stack.Screen
-          name="profile"
-          options={{ title: "Profile", headerBackTitle: "Back" }}
-        />
-
-        {/* Add-form modals */}
         <Stack.Screen
           name="add-certification"
           options={{
@@ -125,6 +60,14 @@ function RootLayoutContent() {
           }}
         />
         <Stack.Screen
+          name="add-document"
+          options={{
+            presentation: "modal",
+            animation: "slide_from_bottom",
+            title: "Upload Document",
+          }}
+        />
+        <Stack.Screen
           name="add-equipment"
           options={{
             presentation: "modal",
@@ -132,17 +75,87 @@ function RootLayoutContent() {
             title: "New Equipment",
           }}
         />
+        <Stack.Screen
+          name="add-issue"
+          options={{
+            presentation: "modal",
+            animation: "slide_from_bottom",
+            title: "Report Issue",
+          }}
+        />
+        <Stack.Screen
+          name="add-maintenance-task"
+          options={{
+            presentation: "modal",
+            animation: "slide_from_bottom",
+            title: "New Maintenance Task",
+          }}
+        />
+        <Stack.Screen
+          name="add-parts-request"
+          options={{
+            presentation: "modal",
+            animation: "slide_from_bottom",
+            title: "Request Parts",
+          }}
+        />
+        <Stack.Screen
+          name="add-supply-request"
+          options={{
+            presentation: "modal",
+            animation: "slide_from_bottom",
+            title: "Request Supplies",
+          }}
+        />
+
+        {/* Analytics */}
+        <Stack.Screen name="boat-analytics" options={{ title: "Analytics" }} />
 
         {/* Detail screens */}
-        <Stack.Screen name="certification-detail" options={{ title: "Certification" }} />
-        <Stack.Screen name="charter-detail" options={{ title: "Charter Details" }} />
-        <Stack.Screen name="contact-detail" options={{ title: "Contact" }} />
-        <Stack.Screen name="equipment-detail" options={{ title: "Equipment" }} />
-        <Stack.Screen name="update-engine-hours" options={{ title: "Update Engine Hours" }} />
+        <Stack.Screen
+          name="detail-calendar-event"
+          options={{ title: "Event Details" }}
+        />
+        <Stack.Screen
+          name="detail-certification"
+          options={{ title: "Certification" }}
+        />
+        <Stack.Screen
+          name="detail-charter"
+          options={{ title: "Charter Details" }}
+        />
+        <Stack.Screen name="detail-contact" options={{ title: "Contact" }} />
+        <Stack.Screen name="detail-document" options={{ title: "Document" }} />
+        <Stack.Screen name="detail-equipment" options={{ title: "Equipment" }} />
+        <Stack.Screen
+          name="detail-issue"
+          options={{ title: "Issue Details" }}
+        />
+        <Stack.Screen name="detail-maintenance" options={{ title: "" }} />
+        <Stack.Screen
+          name="detail-supply"
+          options={{ title: "Supply Request" }}
+        />
+        <Stack.Screen
+          name="detail-vessel"
+          options={{ title: "Vessel Details", headerBackTitle: "Back" }}
+        />
 
-        {/* Utility screens */}
-        <Stack.Screen name="assign-boats" options={{ title: "Assign Boats" }} />
-        <Stack.Screen name="analytics" options={{ title: "Analytics" }} />
+        {/* Operation screens */}
+        <Stack.Screen
+          name="operation-assign-boats"
+          options={{ title: "Assign Boats" }}
+        />
+        <Stack.Screen
+          name="operation-update-engine-hours"
+          options={{ title: "Update Engine Hours" }}
+        />
+
+        {/* Profile */}
+        <Stack.Screen
+          name="user-profile"
+          options={{ title: "Profile", headerBackTitle: "Back" }}
+        />
       </Stack>
     </View>
   );

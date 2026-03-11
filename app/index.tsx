@@ -16,16 +16,16 @@ export default function Index() {
       try {
         const authToken = await AsyncStorage.getItem("authToken");
         if (!authToken) {
-          router.replace("/login");
+          router.replace("/user-login");
           return;
         }
         const userRole = await AsyncStorage.getItem("userRole");
         if (userRole === "owner") router.replace("/(tabs)/owner");
         else if (userRole === "manager") router.replace("/(tabs)/manager");
         else if (userRole === "crew") router.replace("/(tabs)/crew");
-        else router.replace("/login");
+        else router.replace("/user-login");
       } catch {
-        router.replace("/login");
+        router.replace("/user-login");
       } finally {
         SplashScreen.hideAsync();
       }

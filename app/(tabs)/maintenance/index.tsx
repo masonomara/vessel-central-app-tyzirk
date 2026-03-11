@@ -98,7 +98,7 @@ export default function MaintenanceScreen() {
   }, [maintenanceTasks, filterVessel, searchQuery]);
 
   const handleTaskPress = useCallback((task: MaintenanceTask) => {
-    router.push(`/maintenance-detail?id=${task.id}`);
+    router.push(`/detail-maintenance?id=${task.id}`);
   }, []);
 
   const handleComplete = useCallback(

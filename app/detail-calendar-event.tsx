@@ -97,7 +97,7 @@ export default function CalendarEventDetailScreen() {
                 android_material_icon_name: "directions-boat",
               },
               linkTo: {
-                pathname: "/vessel-detail",
+                pathname: "/detail-vessel",
                 params: { id: event.vesselId },
               },
             },

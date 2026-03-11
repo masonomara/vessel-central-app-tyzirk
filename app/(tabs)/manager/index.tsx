@@ -146,7 +146,7 @@ export default function ManagerDashboard() {
                     vesselName={approval.vesselName}
                     onPress={() =>
                       router.push({
-                        pathname: "/supply-detail",
+                        pathname: "/detail-supply",
                         params: { id: approval.id },
                       })
                     }
@@ -217,16 +217,16 @@ export default function ManagerDashboard() {
             onItemPress={(type, id) => {
               switch (type) {
                 case "issue":
-                  router.push({ pathname: "/issue-detail", params: { id } });
+                  router.push({ pathname: "/detail-issue", params: { id } });
                   break;
                 case "maintenance":
                   router.push({
-                    pathname: "/maintenance-detail",
+                    pathname: "/detail-maintenance",
                     params: { id },
                   });
                   break;
                 case "supply":
-                  router.push({ pathname: "/supply-detail", params: { id } });
+                  router.push({ pathname: "/detail-supply", params: { id } });
                   break;
               }
             }}
@@ -246,7 +246,7 @@ export default function ManagerDashboard() {
               vessel={vessel}
               onPress={() =>
                 router.push({
-                  pathname: "/vessel-detail",
+                  pathname: "/detail-vessel",
                   params: { id: vessel.id },
                 })
               }
@@ -273,7 +273,7 @@ export default function ManagerDashboard() {
                     vesselName={item.vesselName}
                     onPress={() =>
                       router.push({
-                        pathname: "/maintenance-detail",
+                        pathname: "/detail-maintenance",
                         params: { id: item.id },
                       })
                     }

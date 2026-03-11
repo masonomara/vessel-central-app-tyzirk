@@ -95,7 +95,7 @@ export default function CrewDashboard() {
                     vesselName={task.vesselName}
                     onPress={() =>
                       router.push({
-                        pathname: "/maintenance-detail",
+                        pathname: "/detail-maintenance",
                         params: { id: task.id },
                       })
                     }
@@ -144,7 +144,7 @@ export default function CrewDashboard() {
                   vesselName={request.vesselName}
                   onPress={() =>
                     router.push({
-                      pathname: "/supply-detail",
+                      pathname: "/detail-supply",
                       params: { id: request.id },
                     })
                   }
@@ -181,7 +181,7 @@ export default function CrewDashboard() {
               vessel={vessel}
               onPress={() =>
                 router.push({
-                  pathname: "/vessel-detail",
+                  pathname: "/detail-vessel",
                   params: { id: vessel.id },
                 })
               }

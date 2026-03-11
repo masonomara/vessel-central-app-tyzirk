@@ -101,7 +101,7 @@ export default function SuppliesScreen() {
 
   const handleRequestPress = useCallback(
     (request: SupplyRequest) => {
-      router.push({ pathname: "/supply-detail", params: { id: request.id } });
+      router.push({ pathname: "/detail-supply", params: { id: request.id } });
     },
     [router],
   );

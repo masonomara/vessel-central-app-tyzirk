@@ -53,21 +53,21 @@ export default function GlobalSearch({ visible, onClose }: GlobalSearchProps) {
     switch (result.type) {
       case 'maintenance':
         router.push({
-          pathname: '/maintenance-detail',
+          pathname: '/detail-maintenance',
           params: { id: result.id },
         });
         break;
       case 'issue':
-        router.push({ pathname: '/issue-detail', params: { id: result.id } });
+        router.push({ pathname: '/detail-issue', params: { id: result.id } });
         break;
       case 'supply':
-        router.push({ pathname: '/supply-detail', params: { id: result.id } });
+        router.push({ pathname: '/detail-supply', params: { id: result.id } });
         break;
       case 'document':
-        router.push({ pathname: '/document-detail', params: { id: result.id } });
+        router.push({ pathname: '/detail-document', params: { id: result.id } });
         break;
       case 'vessel':
-        router.push({ pathname: '/vessel-detail', params: { id: result.id } });
+        router.push({ pathname: '/detail-vessel', params: { id: result.id } });
         break;
       default:
         console.log('Unknown result type');

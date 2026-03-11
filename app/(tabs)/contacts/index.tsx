@@ -101,7 +101,7 @@ export default function ContactsScreen() {
 
   const handleContactPress = useCallback(
     (contact: Contact) => {
-      router.push({ pathname: "/contact-detail", params: { id: contact.id } });
+      router.push({ pathname: "/detail-contact", params: { id: contact.id } });
     },
     [router],
   );

@@ -136,7 +136,7 @@ export default function VesselDetailScreen() {
               style={styles.updateHoursButton}
               onPress={() =>
                 router.push({
-                  pathname: "/update-engine-hours",
+                  pathname: "/operation-update-engine-hours",
                   params: { vesselId: vessel.id },
                 })
               }
@@ -178,7 +178,7 @@ export default function VesselDetailScreen() {
                     vesselName={vessel.name}
                     onPress={() =>
                       router.push({
-                        pathname: "/issue-detail",
+                        pathname: "/detail-issue",
                         params: { id: issue.id },
                       })
                     }
@@ -217,7 +217,7 @@ export default function VesselDetailScreen() {
                     vesselName={vessel.name}
                     onPress={() =>
                       router.push({
-                        pathname: "/calendar-event-detail",
+                        pathname: "/detail-calendar-event",
                         params: { eventId: event.id },
                       })
                     }
@@ -256,7 +256,7 @@ export default function VesselDetailScreen() {
                     vesselName={vessel.name}
                     onPress={() =>
                       router.push({
-                        pathname: "/maintenance-detail",
+                        pathname: "/detail-maintenance",
                         params: { id: task.id },
                       })
                     }
@@ -295,7 +295,7 @@ export default function VesselDetailScreen() {
                     vesselName={vessel.name}
                     onPress={() =>
                       router.push({
-                        pathname: "/supply-detail",
+                        pathname: "/detail-supply",
                         params: { id: req.id },
                       })
                     }
@@ -334,7 +334,7 @@ export default function VesselDetailScreen() {
                     vesselName={vessel.name}
                     onPress={() =>
                       router.push({
-                        pathname: "/document-detail",
+                        pathname: "/detail-document",
                         params: { id: doc.id },
                       })
                     }

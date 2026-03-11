@@ -157,7 +157,7 @@ export default function SupplyDetailScreen() {
                 android_material_icon_name: "directions-boat",
               },
               linkTo: {
-                pathname: "/vessel-detail",
+                pathname: "/detail-vessel",
                 params: { id: request.vesselId },
               },
             },

@@ -102,7 +102,7 @@ export default function EquipmentDetailScreen() {
           inline
           value={item.vesselName}
           linkTo={{
-            pathname: "/vessel-detail",
+            pathname: "/detail-vessel",
             params: { id: item.vesselId },
           }}
         />

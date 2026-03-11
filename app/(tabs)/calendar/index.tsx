@@ -103,7 +103,7 @@ export default function CalendarScreen() {
   const handleEventPress = useCallback(
     (event: CalendarEvent) => {
       router.push({
-        pathname: "/calendar-event-detail",
+        pathname: "/detail-calendar-event",
         params: { eventId: event.id },
       });
     },

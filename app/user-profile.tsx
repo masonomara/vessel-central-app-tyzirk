@@ -121,7 +121,7 @@ export default function ProfileScreen() {
             }
 
             setTimeout(() => {
-              router.replace("/login");
+              router.replace("/user-login");
             }, 100);
           } catch {
             Alert.alert(

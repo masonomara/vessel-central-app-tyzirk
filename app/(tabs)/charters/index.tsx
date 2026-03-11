@@ -100,7 +100,7 @@ export default function ChartersScreen() {
 
   const handleCharterPress = useCallback(
     (charter: CharterLog) => {
-      router.push({ pathname: "/charter-detail", params: { id: charter.id } });
+      router.push({ pathname: "/detail-charter", params: { id: charter.id } });
     },
     [router],
   );

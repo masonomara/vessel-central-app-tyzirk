@@ -115,7 +115,7 @@ export default function EquipmentScreen() {
   const handleItemPress = useCallback(
     (item: Equipment) => {
       router.push({
-        pathname: "/equipment-detail",
+        pathname: "/detail-equipment",
         params: { id: item.id },
       });
     },

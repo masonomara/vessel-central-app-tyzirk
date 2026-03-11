@@ -131,7 +131,7 @@ export default function CertificationsScreen() {
   const handleCertPress = useCallback(
     (cert: CrewCertification) => {
       router.push({
-        pathname: "/certification-detail",
+        pathname: "/detail-certification",
         params: { id: cert.id },
       });
     },

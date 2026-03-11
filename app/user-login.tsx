@@ -110,7 +110,7 @@ export default function LoginScreen() {
 
     setTimeout(() => {
       setIsLoading(false);
-      router.push({ pathname: "/member-setup", params: { email: email.trim() } });
+      router.push({ pathname: "/operation-member-setup", params: { email: email.trim() } });
     }, 400);
   };
 

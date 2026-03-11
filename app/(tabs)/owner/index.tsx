@@ -252,7 +252,7 @@ export default function OwnerDashboard() {
                     vesselName={approval.vesselName}
                     onPress={() =>
                       router.push({
-                        pathname: "/supply-detail",
+                        pathname: "/detail-supply",
                         params: { id: approval.id },
                       })
                     }
@@ -292,19 +292,19 @@ export default function OwnerDashboard() {
                       case "maintenance":
                       case "task":
                         router.push({
-                          pathname: "/maintenance-detail",
+                          pathname: "/detail-maintenance",
                           params: { id: log.relatedId },
                         });
                         break;
                       case "issue":
                         router.push({
-                          pathname: "/issue-detail",
+                          pathname: "/detail-issue",
                           params: { id: log.relatedId },
                         });
                         break;
                       case "supply":
                         router.push({
-                          pathname: "/supply-detail",
+                          pathname: "/detail-supply",
                           params: { id: log.relatedId },
                         });
                         break;
@@ -336,7 +336,7 @@ export default function OwnerDashboard() {
               vessel={vessel}
               onPress={() =>
                 router.push({
-                  pathname: "/vessel-detail",
+                  pathname: "/detail-vessel",
                   params: { id: vessel.id },
                 })
               }
@@ -351,7 +351,7 @@ export default function OwnerDashboard() {
 
           <PressableCard
             style={styles.performanceCard}
-            onPress={() => router.push("/analytics")}
+            onPress={() => router.push("/boat-analytics")}
           >
             <View style={styles.performanceContent}>
               <View style={styles.performanceLeft}>
@@ -385,7 +385,7 @@ export default function OwnerDashboard() {
 
           <PressableCard
             style={styles.expenseChartCard}
-            onPress={() => router.push("/analytics")}
+            onPress={() => router.push("/boat-analytics")}
           >
             <View style={styles.expenseChartHeader}>
               <Text style={styles.expenseChartTitle}>Expense Trend</Text>
@@ -414,7 +414,7 @@ export default function OwnerDashboard() {
                     vesselName={upcomingMaintenance.vesselName}
                     onPress={() =>
                       router.push({
-                        pathname: "/maintenance-detail",
+                        pathname: "/detail-maintenance",
                         params: { id: upcomingMaintenance.id },
                       })
                     }
