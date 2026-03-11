@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { colors } from "../styles/commonStyles";
+import { colors, buttonStyles } from "../styles/commonStyles";
 import { IconSymbol } from "../components/IconSymbol";
 import { useAuth } from "../contexts/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -71,7 +71,8 @@ export default function LoginScreen() {
   const [error, setError] = useState("");
 
   const formOpacity = useRef(new Animated.Value(0)).current;
-  const formTranslate = useRef(new Animated.Value(30)).current;
+  const formTranslate = useRef(new Animated.Value(20)).current;
+  const demoOpacity = useRef(new Animated.Value(1)).current;
 
   const handleMockLogin = async (user: MockUser) => {
     setUserRole(user.role);
@@ -110,45 +111,59 @@ export default function LoginScreen() {
 
     setTimeout(() => {
       setIsLoading(false);
-      router.push({ pathname: "/operation-member-setup", params: { email: email.trim() } });
+      router.push({
+        pathname: "/operation-member-setup",
+        params: { email: email.trim() },
+      });
     }, 400);
   };
 
-  const toggleEmailLogin = () => {
-    if (showEmailLogin) {
-      Keyboard.dismiss();
-      Animated.parallel([
-        Animated.timing(formOpacity, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(formTranslate, {
-          toValue: 30,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setShowEmailLogin(false);
-        setEmail("");
-        setPassword("");
-        setError("");
-      });
-    } else {
-      setShowEmailLogin(true);
-      Animated.parallel([
-        Animated.timing(formOpacity, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(formTranslate, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
+  const showForm = () => {
+    setShowEmailLogin(true);
+    Animated.parallel([
+      Animated.timing(formOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(formTranslate, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(demoOpacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const hideForm = () => {
+    Keyboard.dismiss();
+    Animated.parallel([
+      Animated.timing(formOpacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(formTranslate, {
+        toValue: 20,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(demoOpacity, {
+        toValue: 1,
+        duration: 300,
+        delay: 100,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShowEmailLogin(false);
+      setEmail("");
+      setPassword("");
+      setError("");
+    });
   };
 
   return (
@@ -158,11 +173,7 @@ export default function LoginScreen() {
       resizeMode="cover"
     >
       <LinearGradient
-        colors={[
-          "rgba(0,0,0,0.35)",
-          "rgba(0,0,0,0.5)",
-          "rgba(0,0,0,0.85)",
-        ]}
+        colors={["rgba(0,0,0,0.35)", "rgba(0,0,0,0.5)", "rgba(0,0,0,0.85)"]}
         locations={[0, 0.4, 1]}
         style={styles.overlay}
       >
@@ -172,112 +183,117 @@ export default function LoginScreen() {
         >
           {/* Center brand */}
           <View style={styles.brandSection}>
-          <Image
-            source={require("../assets/login.png")}
-            style={styles.wordmark}
-            resizeMode="contain"
-          />
-        </View>
-
-        {/* Bottom actions */}
-        <View style={styles.bottomSection}>
-          {/* Email login form */}
-          {showEmailLogin && (
-            <Animated.View
-              style={[
-                styles.formSection,
-                {
-                  opacity: formOpacity,
-                  transform: [{ translateY: formTranslate }],
-                },
-              ]}
-            >
-              <View style={styles.inputWrapper}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Email"
-                  placeholderTextColor="rgba(255,255,255,0.4)"
-                  value={email}
-                  onChangeText={(t) => {
-                    setEmail(t);
-                    setError("");
-                  }}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={!isLoading}
-                />
-              </View>
-              <View style={styles.inputWrapper}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Password"
-                  placeholderTextColor="rgba(255,255,255,0.4)"
-                  value={password}
-                  onChangeText={(t) => {
-                    setPassword(t);
-                    setError("");
-                  }}
-                  secureTextEntry={!showPassword}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={!isLoading}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <IconSymbol
-                    ios_icon_name={showPassword ? "eye.slash.fill" : "eye.fill"}
-                    android_material_icon_name={
-                      showPassword ? "visibility-off" : "visibility"
-                    }
-                    size={18}
-                    color="rgba(255,255,255,0.5)"
-                  />
-                </TouchableOpacity>
-              </View>
-              {error ? <Text style={styles.errorText}>{error}</Text> : null}
-              <TouchableOpacity
-                style={styles.signInButton}
-                onPress={handleEmailLogin}
-                disabled={isLoading}
-                activeOpacity={0.8}
-              >
-                {isLoading ? (
-                  <ActivityIndicator color="#0A1628" size="small" />
-                ) : (
-                  <Text style={styles.signInButtonText}>Sign In</Text>
-                )}
-              </TouchableOpacity>
-            </Animated.View>
-          )}
-
-          {/* Email toggle */}
-          <TouchableOpacity
-            style={styles.emailButton}
-            onPress={toggleEmailLogin}
-            disabled={isLoading}
-            activeOpacity={0.8}
-          >
-            <IconSymbol
-              ios_icon_name={showEmailLogin ? "chevron.down" : "envelope.fill"}
-              android_material_icon_name={
-                showEmailLogin ? "expand-more" : "email"
-              }
-              size={18}
-              color="#fff"
+            <Image
+              source={require("../assets/login.png")}
+              style={styles.wordmark}
+              resizeMode="contain"
             />
-            <Text style={styles.emailButtonText}>
-              {showEmailLogin ? "Cancel" : "Sign in with email"}
-            </Text>
-          </TouchableOpacity>
+          </View>
 
-          {!showEmailLogin && (
-            <View style={styles.quickLoginSection}>
+          {/* Bottom actions */}
+          <View style={styles.bottomSection}>
+            {/* Email login form — slides in above Sign In */}
+            {showEmailLogin && (
+              <Animated.View
+                style={[
+                  styles.formSection,
+                  {
+                    opacity: formOpacity,
+                    transform: [{ translateY: formTranslate }],
+                  },
+                ]}
+              >
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Email"
+                    placeholderTextColor="rgba(255,255,255,0.4)"
+                    value={email}
+                    onChangeText={(t) => {
+                      setEmail(t);
+                      setError("");
+                    }}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    editable={!isLoading}
+                  />
+                </View>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Password"
+                    placeholderTextColor="rgba(255,255,255,0.4)"
+                    value={password}
+                    onChangeText={(t) => {
+                      setPassword(t);
+                      setError("");
+                    }}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    editable={!isLoading}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <IconSymbol
+                      ios_icon_name={
+                        showPassword ? "eye.slash.fill" : "eye.fill"
+                      }
+                      android_material_icon_name={
+                        showPassword ? "visibility-off" : "visibility"
+                      }
+                      size={18}
+                      color="rgba(255,255,255,0.5)"
+                    />
+                  </TouchableOpacity>
+                </View>
+                {error ? <Text style={styles.errorText}>{error}</Text> : null}
+              </Animated.View>
+            )}
+
+            {/* Sign In — always visible, opens form or submits */}
+            <TouchableOpacity
+              style={buttonStyles.primaryButtonInverted}
+              onPress={showEmailLogin ? handleEmailLogin : showForm}
+              disabled={isLoading}
+              activeOpacity={0.8}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#0A1628" size="small" />
+              ) : (
+                <Text style={buttonStyles.primaryButtonInvertedText}>
+                  Sign In
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Cancel — only when form is open */}
+            {showEmailLogin && (
+              <Animated.View style={{ opacity: formOpacity, marginTop: 12 }}>
+                <TouchableOpacity
+                  style={buttonStyles.outlineButtonInverted}
+                  onPress={hideForm}
+                  disabled={isLoading}
+                  activeOpacity={0.8}
+                >
+                  <Text style={buttonStyles.outlineButtonInvertedText}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+              </Animated.View>
+            )}
+
+            {/* Demo section — crossfades with form */}
+            <Animated.View
+              style={[styles.quickLoginSection, { opacity: demoOpacity }]}
+              pointerEvents={showEmailLogin ? "none" : "auto"}
+            >
               <View style={styles.dividerRow}>
                 <View style={styles.divider} />
-                <Text style={styles.dividerText}>Try Demo</Text>
+                <Text style={styles.dividerText}>APP DEMOS</Text>
                 <View style={styles.divider} />
               </View>
               <View style={styles.quickLoginButtonRow}>
@@ -291,7 +307,7 @@ export default function LoginScreen() {
                     ios_icon_name="crown.fill"
                     android_material_icon_name="workspace-premium"
                     size={20}
-                    color={colors.gold}
+                    color={colors.container}
                   />
                   <Text style={styles.quickLoginButtonText}>Owner</Text>
                 </TouchableOpacity>
@@ -306,7 +322,7 @@ export default function LoginScreen() {
                     ios_icon_name="chart.bar.fill"
                     android_material_icon_name="dashboard"
                     size={20}
-                    color={colors.accent}
+                    color={colors.container}
                   />
                   <Text style={styles.quickLoginButtonText}>Manager</Text>
                 </TouchableOpacity>
@@ -321,14 +337,13 @@ export default function LoginScreen() {
                     ios_icon_name="person.2.fill"
                     android_material_icon_name="groups"
                     size={20}
-                    color={colors.success}
+                    color={colors.container}
                   />
                   <Text style={styles.quickLoginButtonText}>Crew</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-          )}
-        </View>
+            </Animated.View>
+          </View>
         </KeyboardAvoidingView>
 
         {isLoading && (
@@ -353,16 +368,23 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   brandSection: {
-    flex: 1,
+    height: 640,
     alignItems: "center",
     justifyContent: "center",
     paddingBottom: 40,
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   wordmark: {
     height: 256,
   },
   bottomSection: {
     paddingHorizontal: 24,
+    flex: 1,
+    justifyContent: "flex-end",
     paddingBottom: Platform.OS === "ios" ? 50 : 32,
   },
   formSection: {
@@ -391,35 +413,6 @@ const styles = StyleSheet.create({
     color: "#FF6B6B",
     textAlign: "center",
   },
-  signInButton: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  signInButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#0A1628",
-    letterSpacing: 0.3,
-  },
-  emailButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.12)",
-    borderRadius: 12,
-    paddingVertical: 16,
-    gap: 10,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.18)",
-  },
-  emailButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
-  },
   quickLoginSection: {
     marginTop: 24,
   },
@@ -432,12 +425,12 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "rgba(255,255,255,0.25)",
   },
   dividerText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "rgba(255,255,255,0.4)",
+    color: "rgba(255,255,255,0.50)",
     letterSpacing: 0.5,
     textTransform: "uppercase",
   },
@@ -449,17 +442,18 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.08)",
-    borderRadius: 12,
-    paddingVertical: 14,
-    gap: 6,
+    backgroundColor: "rgba(255,255,255,0.10)",
+    borderRadius: 8,
+    paddingVertical: 12,
+    gap: 8,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(255,255,255,0.25)",
   },
   quickLoginButtonText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.7)",
+    fontSize: 14,
+    fontWeight: "500",
+    color: "rgba(255,255,255,0.92)",
+    letterSpacing: 0.3,
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,

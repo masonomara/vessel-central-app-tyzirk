@@ -214,6 +214,38 @@ export const buttonStyles = StyleSheet.create({
     fontWeight: "600",
     color: colors.container,
   },
+  primaryButtonInverted: {
+    backgroundColor: colors.container,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    ...shadows.medium,
+  },
+  primaryButtonInvertedText: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "600",
+    letterSpacing: 0.3,
+  },
+  outlineButtonInverted: {
+    flexDirection: "row",
+    backgroundColor: colors.container,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
+    borderRadius: 12,
+    borderColor: colors.container,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+  },
+  outlineButtonInvertedText: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "600",
+    letterSpacing: 0.3,
+  },
 });
 
 export const commonStyles = StyleSheet.create({

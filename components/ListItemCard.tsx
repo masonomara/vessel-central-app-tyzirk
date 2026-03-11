@@ -88,7 +88,7 @@ export const ListItemCard = React.memo(
             paddingLeft: 0,
             paddingRight: 16,
             marginLeft: 0,
-            backgroundColor: 'transparent'
+            backgroundColor: "transparent",
           },
           style,
         ]}
@@ -119,7 +119,7 @@ export const ListItemCard = React.memo(
                   borderWidth: 1,
                 },
                 inContainer && {
-                  marginLeft: 0,
+                  marginLeft: 16,
                 },
               ]}
               onPress={handleComplete}
@@ -179,11 +179,14 @@ export const ListItemCard = React.memo(
         </View>
 
         <View
-          style={
+          style={[
             showCheckbox || icon
               ? indexScreenStyles.bottomRowWithCheckbox
-              : undefined
-          }
+              : undefined,
+            inContainer && {
+              marginLeft: -8,
+            },
+          ]}
         >
           <Text style={indexScreenStyles.cardDescription} numberOfLines={2}>
             {description}
@@ -191,11 +194,14 @@ export const ListItemCard = React.memo(
         </View>
 
         <View
-          style={
+          style={[
             showCheckbox || icon
               ? indexScreenStyles.metaRowWithCheckbox
-              : indexScreenStyles.metaRow
-          }
+              : indexScreenStyles.metaRow,
+            inContainer && {
+              marginLeft: 53,
+            },
+          ]}
         >
           <Text style={indexScreenStyles.metaText}>
             {vesselName}
@@ -218,7 +224,13 @@ export const ListItemCard = React.memo(
         ) : null}
 
         {actions ? (
-          <View style={(showCheckbox || icon) ? indexScreenStyles.bottomRowWithCheckbox : undefined}>
+          <View
+            style={
+              showCheckbox || icon
+                ? indexScreenStyles.bottomRowWithCheckbox
+                : undefined
+            }
+          >
             {actions}
           </View>
         ) : null}
