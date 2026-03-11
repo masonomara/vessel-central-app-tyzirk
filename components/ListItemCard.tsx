@@ -216,7 +216,11 @@ export const ListItemCard = React.memo(
           </View>
         ) : null}
 
-        {actions}
+        {actions ? (
+          <View style={(showCheckbox || icon) ? indexScreenStyles.bottomRowWithCheckbox : undefined}>
+            {actions}
+          </View>
+        ) : null}
       </TouchableOpacity>
     );
   },
