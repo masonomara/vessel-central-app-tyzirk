@@ -153,7 +153,7 @@ export default function LoginScreen() {
 
   return (
     <ImageBackground
-      source={require("../public/login.jpg")}
+      source={require("../assets/login.jpg")}
       style={styles.container}
       resizeMode="cover"
     >
@@ -173,7 +173,7 @@ export default function LoginScreen() {
           {/* Center brand */}
           <View style={styles.brandSection}>
           <Image
-            source={require("../public/login.png")}
+            source={require("../assets/login.png")}
             style={styles.wordmark}
             resizeMode="contain"
           />
