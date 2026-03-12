@@ -4,13 +4,13 @@ import {
   View,
   Text,
   ScrollView,
+  TouchableOpacity,
   useWindowDimensions,
 } from "react-native";
 import { Stack, router } from "expo-router";
 import { colors, analyticsChartConfig } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { useAuth } from "../contexts/AuthContext";
-import { VesselCard } from "../components/VesselCard";
 import { LineChart, BarChart } from "react-native-chart-kit";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { scrollProps } from "../hooks/useTopPadding";
@@ -179,23 +179,32 @@ export default function AnalyticsScreen() {
         {vessels.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Fleet Vessels</Text>
+              <Text style={styles.sectionTitle}>Fleet Overview</Text>
               <Text style={styles.sectionCount}>
                 {vessels.length} {vessels.length === 1 ? "vessel" : "vessels"}
               </Text>
             </View>
-            {vessels.map((vessel) => (
-              <VesselCard
-                key={vessel.id}
-                vessel={vessel}
-                onPress={() =>
-                  router.push({
-                    pathname: "/detail-vessel",
-                    params: { id: vessel.id },
-                  })
-                }
-              />
-            ))}
+            <View style={styles.vesselList}>
+              {vessels.map((vessel) => (
+                <TouchableOpacity
+                  key={vessel.id}
+                  style={styles.vesselItem}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/detail-vessel",
+                      params: { id: vessel.id },
+                    })
+                  }
+                >
+                  <Text style={styles.vesselName}>{vessel.name}</Text>
+                  <Text style={styles.vesselLocation}>{vessel.location}</Text>
+                  <Text style={styles.vesselMeta}>
+                    {vessel.status.charAt(0).toUpperCase() + vessel.status.slice(1)} · {vessel.crewCount} crew member{vessel.crewCount !== 1 ? "s" : ""}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         )}
       </ScrollView>
@@ -278,5 +287,32 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: "center",
     padding: 20,
+  },
+  vesselList: {
+    paddingHorizontal: 20,
+    gap: 10,
+  },
+  vesselItem: {
+    backgroundColor: colors.container,
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+  },
+  vesselName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  vesselLocation: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  vesselMeta: {
+    fontSize: 12,
+    color: colors.textTertiary,
+    marginTop: 6,
   },
 });
