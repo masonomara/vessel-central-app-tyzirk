@@ -268,7 +268,7 @@ export default function SuppliesScreen() {
                       }}>
             {summary.total > 0 && (
               <Text style={indexScreenStyles.listFooterText}>
-                {summary.pending} pending • {summary.received} received
+                {summary.pending} {summary.pending === 1 ? "request" : "requests"} pending
               </Text>
             )}
           </View>

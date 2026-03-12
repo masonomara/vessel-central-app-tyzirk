@@ -235,7 +235,7 @@ export default function IssuesScreen() {
           >
             {summary.total > 0 && (
               <Text style={indexScreenStyles.listFooterText}>
-                {summary.open} open • {summary.completed} completed
+                {summary.open} {summary.open === 1 ? "issue" : "issues"} open
               </Text>
             )}
           </View>

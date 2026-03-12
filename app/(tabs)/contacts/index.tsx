@@ -274,7 +274,7 @@ export default function ContactsScreen() {
           >
             {sections.reduce((sum, s) => sum + s.count, 0) > 0 && (
               <Text style={indexScreenStyles.listFooterText}>
-                {sections.reduce((sum, s) => sum + s.count, 0)} contacts
+                {sections.reduce((sum, s) => sum + s.count, 0)} {sections.reduce((sum, s) => sum + s.count, 0) === 1 ? "contact" : "contacts"} saved
               </Text>
             )}
           </View>

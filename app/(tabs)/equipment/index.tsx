@@ -251,7 +251,7 @@ export default function EquipmentScreen() {
           >
             {sections.reduce((sum, s) => sum + s.count, 0) > 0 && (
               <Text style={indexScreenStyles.listFooterText}>
-                {sections.reduce((sum, s) => sum + s.count, 0)} items
+                {sections.reduce((sum, s) => sum + s.count, 0)} {sections.reduce((sum, s) => sum + s.count, 0) === 1 ? "item" : "items"} tracked
               </Text>
             )}
           </View>

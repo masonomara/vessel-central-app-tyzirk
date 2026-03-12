@@ -251,7 +251,7 @@ export default function MaintenanceScreen() {
           >
             {summary.total > 0 && (
               <Text style={indexScreenStyles.listFooterText}>
-                {summary.open} open • {summary.completed} completed
+                {summary.open} {summary.open === 1 ? "task" : "tasks"} open
               </Text>
             )}
           </View>

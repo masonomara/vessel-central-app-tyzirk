@@ -219,7 +219,7 @@ export default function DocumentsScreen() {
           >
             {sections.reduce((sum, s) => sum + s.count, 0) > 0 && (
               <Text style={indexScreenStyles.listFooterText}>
-                {sections.reduce((sum, s) => sum + s.count, 0)} documents
+                {sections.reduce((sum, s) => sum + s.count, 0)} {sections.reduce((sum, s) => sum + s.count, 0) === 1 ? "document" : "documents"} on file
               </Text>
             )}
           </View>

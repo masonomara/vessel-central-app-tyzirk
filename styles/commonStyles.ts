@@ -413,8 +413,7 @@ export const indexScreenStyles = StyleSheet.create({
   },
   listContent: {
     backgroundColor: colors.surfaceOne,
-    borderBottomWidth: 4,
-    borderBottomColor: colors.surfaceTwo
+ 
   },
   listHeaderComponent: { paddingBottom: 20, backgroundColor: colors.surfaceOne },
 
@@ -604,6 +603,7 @@ export const indexScreenStyles = StyleSheet.create({
   listFooterText: {
     textAlign: "center",
     fontSize: 14,
+    fontStyle: "italic",
     color: colors.textTertiary,
     paddingTop: 24,
     paddingBottom: 8,
