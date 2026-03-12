@@ -44,8 +44,8 @@ export default function IssuesScreen() {
     });
   }, []);
 
-  const sections = useMemo(() => {
-    const filtered = issues.filter((issue) => {
+  const filtered = useMemo(() => {
+    return issues.filter((issue) => {
       const matchesVessel =
         filterVessel === "all" || issue.vesselName === filterVessel;
       const matchesSearch =
@@ -53,7 +53,9 @@ export default function IssuesScreen() {
         issue.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesVessel && matchesSearch;
     });
+  }, [issues, filterVessel, searchQuery]);
 
+  const sections = useMemo(() => {
     const open = filtered.filter((i) => i.status === "open");
     const inProgress = filtered.filter((i) => i.status === "in_progress");
     const waitingOnParts = filtered.filter(
@@ -75,7 +77,13 @@ export default function IssuesScreen() {
         count: s.items.length,
         data: collapsedSections.has(s.title) ? [] : s.items,
       }));
-  }, [issues, filterVessel, searchQuery, collapsedSections]);
+  }, [filtered, collapsedSections]);
+
+  const summary = useMemo(() => {
+    const open = filtered.filter((i) => i.status !== "completed").length;
+    const completed = filtered.filter((i) => i.status === "completed").length;
+    return { open, completed, total: filtered.length };
+  }, [filtered]);
 
   const handleIssuePress = useCallback(
     (issue: Issue) => {
@@ -220,9 +228,17 @@ export default function IssuesScreen() {
         ListFooterComponent={
           <View
             style={{
-              height: insets.bottom,
+              paddingBottom: insets.bottom,
+              borderTopWidth: 4,
+              borderTopColor: colors.surfaceTwo,
             }}
-          />
+          >
+            {summary.total > 0 && (
+              <Text style={indexScreenStyles.listFooterText}>
+                {summary.open} open • {summary.completed} completed
+              </Text>
+            )}
+          </View>
         }
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={indexScreenStyles.listContent}

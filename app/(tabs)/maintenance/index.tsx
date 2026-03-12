@@ -1,12 +1,18 @@
 import React, { useState, useMemo, useCallback } from "react";
-import { StyleSheet, View, Text, SectionList, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  SectionList,
+  TouchableOpacity,
+} from "react-native";
 import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
 import { ListItemCard } from "../../../components/ListItemCard";
 import { MaintenanceTask } from "../../../types";
-import { formatDueDate, isOverdue } from "../../../utils/formatting";
+import { formatDueDate } from "../../../utils/formatting";
 import { Stack, router } from "expo-router";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { scrollProps } from "../../../hooks/useTopPadding";
@@ -46,8 +52,8 @@ export default function MaintenanceScreen() {
     });
   }, []);
 
-  const sections = useMemo(() => {
-    const filtered = maintenanceTasks.filter((task) => {
+  const filtered = useMemo(() => {
+    return maintenanceTasks.filter((task) => {
       const matchesVessel =
         filterVessel === "all" || task.vesselName === filterVessel;
       const matchesSearch =
@@ -55,7 +61,9 @@ export default function MaintenanceScreen() {
         task.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesVessel && matchesSearch;
     });
+  }, [maintenanceTasks, filterVessel, searchQuery]);
 
+  const sections = useMemo(() => {
     const open = filtered.filter((t) => t.status === "open");
     const inProgress = filtered.filter((t) => t.status === "in_progress");
     const waitingOnParts = filtered.filter(
@@ -77,25 +85,13 @@ export default function MaintenanceScreen() {
         count: s.items.length,
         data: collapsedSections.has(s.title) ? [] : s.items,
       }));
-  }, [maintenanceTasks, filterVessel, searchQuery, collapsedSections]);
+  }, [filtered, collapsedSections]);
 
-  const stats = useMemo(() => {
-    const filtered = maintenanceTasks.filter((task) => {
-      const matchesVessel =
-        filterVessel === "all" || task.vesselName === filterVessel;
-      const matchesSearch =
-        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.description.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesVessel && matchesSearch;
-    });
-    return {
-      total: filtered.length,
-      overdue: filtered.filter(
-        (t) => isOverdue(t.dueDate) && t.status !== "completed",
-      ).length,
-      completed: filtered.filter((t) => t.status === "completed").length,
-    };
-  }, [maintenanceTasks, filterVessel, searchQuery]);
+  const summary = useMemo(() => {
+    const open = filtered.filter((t) => t.status !== "completed").length;
+    const completed = filtered.filter((t) => t.status === "completed").length;
+    return { open, completed, total: filtered.length };
+  }, [filtered]);
 
   const handleTaskPress = useCallback((task: MaintenanceTask) => {
     router.push(`/detail-maintenance?id=${task.id}`);
@@ -212,7 +208,7 @@ export default function MaintenanceScreen() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                 gap: 10,
+                gap: 10,
                 marginLeft: 8,
                 marginRight: 8,
               }}
@@ -236,7 +232,10 @@ export default function MaintenanceScreen() {
       />
 
       <SectionList
-        style={[indexScreenStyles.container, { backgroundColor: colors.surfaceOne }]}
+        style={[
+          indexScreenStyles.container,
+          { backgroundColor: colors.surfaceOne },
+        ]}
         sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
@@ -245,9 +244,17 @@ export default function MaintenanceScreen() {
         ListFooterComponent={
           <View
             style={{
-              height: insets.bottom,
+              paddingBottom: insets.bottom,
+              borderTopWidth: 4,
+              borderTopColor: colors.surfaceTwo,
             }}
-          />
+          >
+            {summary.total > 0 && (
+              <Text style={indexScreenStyles.listFooterText}>
+                {summary.open} open • {summary.completed} completed
+              </Text>
+            )}
+          </View>
         }
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={indexScreenStyles.listContent}

@@ -15,7 +15,6 @@ import { SearchBar } from "../../../components/SearchBar";
 import { FilterRow } from "../../../components/FilterRow";
 import { CollapsibleSectionHeader } from "../../../components/CollapsibleSectionHeader";
 
-
 const CATEGORY_ORDER: EquipmentCategory[] = [
   "safety",
   "water_toys",
@@ -106,9 +105,7 @@ export default function EquipmentScreen() {
       (cat) => ({
         title: CATEGORY_LABELS[cat],
         count: grouped[cat].length,
-        data: collapsedSections.has(CATEGORY_LABELS[cat])
-          ? []
-          : grouped[cat],
+        data: collapsedSections.has(CATEGORY_LABELS[cat]) ? [] : grouped[cat],
       }),
     );
   }, [userEquipment, filterVessel, searchQuery, collapsedSections]);
@@ -192,9 +189,7 @@ export default function EquipmentScreen() {
           size={64}
           color={colors.textSecondary}
         />
-        <Text style={indexScreenStyles.emptyStateText}>
-          No equipment found
-        </Text>
+        <Text style={indexScreenStyles.emptyStateText}>No equipment found</Text>
       </View>
     ),
     [],
@@ -217,14 +212,12 @@ export default function EquipmentScreen() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-             gap: 10,
+                gap: 10,
                 marginLeft: 8,
                 marginRight: 8,
               }}
             >
-              <TouchableOpacity
-                onPress={() => router.push("/add-equipment")}
-              >
+              <TouchableOpacity onPress={() => router.push("/add-equipment")}>
                 <IconSymbol
                   ios_icon_name="plus"
                   android_material_icon_name="add"
@@ -239,7 +232,10 @@ export default function EquipmentScreen() {
       />
 
       <SectionList
-        style={[indexScreenStyles.container, { backgroundColor: colors.surfaceOne }]}
+        style={[
+          indexScreenStyles.container,
+          { backgroundColor: colors.surfaceOne },
+        ]}
         sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
@@ -248,9 +244,17 @@ export default function EquipmentScreen() {
         ListFooterComponent={
           <View
             style={{
-              height: insets.bottom,
+              paddingBottom: insets.bottom,
+              borderTopWidth: 4,
+              borderTopColor: colors.surfaceTwo,
             }}
-          />
+          >
+            {sections.reduce((sum, s) => sum + s.count, 0) > 0 && (
+              <Text style={indexScreenStyles.listFooterText}>
+                {sections.reduce((sum, s) => sum + s.count, 0)} items
+              </Text>
+            )}
+          </View>
         }
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={indexScreenStyles.listContent}

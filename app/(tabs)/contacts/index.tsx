@@ -235,7 +235,7 @@ export default function ContactsScreen() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-              gap: 10,
+                gap: 10,
                 marginLeft: 8,
                 marginRight: 8,
               }}
@@ -267,9 +267,17 @@ export default function ContactsScreen() {
         ListFooterComponent={
           <View
             style={{
-              height: insets.bottom,
+              paddingBottom: insets.bottom,
+              borderTopWidth: 4,
+              borderTopColor: colors.surfaceTwo,
             }}
-          />
+          >
+            {sections.reduce((sum, s) => sum + s.count, 0) > 0 && (
+              <Text style={indexScreenStyles.listFooterText}>
+                {sections.reduce((sum, s) => sum + s.count, 0)} contacts
+              </Text>
+            )}
+          </View>
         }
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={indexScreenStyles.listContent}

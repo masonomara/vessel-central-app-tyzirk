@@ -51,8 +51,8 @@ export default function SuppliesScreen() {
     });
   }, []);
 
-  const sections = useMemo(() => {
-    const filtered = supplyRequests.filter((request) => {
+  const filtered = useMemo(() => {
+    return supplyRequests.filter((request) => {
       const matchesVessel =
         filterVessel === "all" || request.vesselName === filterVessel;
       const matchesSearch =
@@ -60,7 +60,9 @@ export default function SuppliesScreen() {
         request.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesVessel && matchesSearch;
     });
+  }, [supplyRequests, filterVessel, searchQuery]);
 
+  const sections = useMemo(() => {
     const needsApproval = filtered.filter((r) => r.status === "pending");
     const approved = filtered.filter((r) => r.status === "approved");
     const ordered = filtered.filter((r) => r.status === "ordered");
@@ -82,7 +84,13 @@ export default function SuppliesScreen() {
         count: s.items.length,
         data: collapsedSections.has(s.title) ? [] : s.items,
       }));
-  }, [supplyRequests, filterVessel, searchQuery, collapsedSections]);
+  }, [filtered, collapsedSections]);
+
+  const summary = useMemo(() => {
+    const pending = filtered.filter((r) => r.status === "pending").length;
+    const received = filtered.filter((r) => r.status === "received").length;
+    return { pending, received, total: filtered.length };
+  }, [filtered]);
 
   const handleApprove = useCallback(
     (id: string) => {
@@ -253,11 +261,17 @@ export default function SuppliesScreen() {
         renderSectionHeader={renderSectionHeader}
         ListHeaderComponent={ListHeaderComponent}
         ListFooterComponent={
-          <View
-            style={{
-              height: insets.bottom,
-            }}
-          />
+          <View style={{
+                        paddingBottom: insets.bottom,
+                        borderTopWidth: 4,
+                        borderTopColor: colors.surfaceTwo,
+                      }}>
+            {summary.total > 0 && (
+              <Text style={indexScreenStyles.listFooterText}>
+                {summary.pending} pending • {summary.received} received
+              </Text>
+            )}
+          </View>
         }
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={indexScreenStyles.listContent}
