@@ -282,7 +282,7 @@ inContainer={true}
             <Text style={styles.emptyText}>No recent activity</Text>
           )}
         </View>
-        <View style={styles.section}>
+        <View style={[styles.section, {marginBottom: 4}]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Fleet Overview</Text>
             <Text style={styles.sectionCount}>
