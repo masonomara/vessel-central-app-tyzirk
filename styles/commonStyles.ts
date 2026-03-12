@@ -231,10 +231,8 @@ export const buttonStyles = StyleSheet.create({
   },
   outlineButtonInverted: {
     flexDirection: "row",
-  
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.xl,
-
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
@@ -249,7 +247,7 @@ export const buttonStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     letterSpacing: 0.3,
-        padding: 0,
+    padding: 0,
     margin: 0,
   },
 });
@@ -416,7 +414,7 @@ export const indexScreenStyles = StyleSheet.create({
   listContent: {
     backgroundColor: colors.surfaceOne,
   },
-  listHeaderComponent: { marginBottom: 20 },
+  listHeaderComponent: { paddingBottom: 20, backgroundColor: colors.surfaceOne },
 
   // Search bar
   searchContainer: {
@@ -495,7 +493,7 @@ export const indexScreenStyles = StyleSheet.create({
 
   // Card base
   card: {
-    backgroundColor: colors.surfaceOne,
+    backgroundColor: 'transparent',
     marginLeft: 0,
     paddingRight: 20,
     marginBottom: 16,
@@ -607,10 +605,13 @@ export const formStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.surfaceOne,
+    
   },
   cancelText: {
-    fontSize: 16,
-    color: colors.textSecondary,
+    fontSize: 15,
+     fontWeight: "500",
+    color: colors.text,
+    paddingHorizontal: 8,
   },
   saveText: {
     fontSize: 16,
@@ -622,13 +623,14 @@ export const formStyles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
+    paddingTop: 24,
   },
   section: {
     marginBottom: 24,
   },
   label: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 13,
+    fontWeight: "500",
     color: colors.textSecondary,
     marginBottom: 8,
   },
@@ -640,7 +642,10 @@ export const formStyles = StyleSheet.create({
     fontSize: 16,
     color: colors.text,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
+  },
+  inputFocused: {
+    borderColor: colors.textSecondary
   },
   textArea: {
     minHeight: 100,
@@ -651,23 +656,24 @@ export const formStyles = StyleSheet.create({
     gap: 8,
   },
   optionChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: colors.surfaceOne,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   optionChipActive: {
-    borderColor: colors.text,
+    backgroundColor: colors.surfaceThree,
+    borderColor: colors.surfaceThree,
   },
   optionChipText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: colors.textSecondary,
+    fontWeight: "500",
+    color: colors.text,
   },
   optionChipTextActive: {
     color: colors.text,
+   
   },
   dateButton: {
     backgroundColor: colors.container,
@@ -675,7 +681,7 @@ export const formStyles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   dateButtonText: {
     fontSize: 16,
@@ -694,7 +700,7 @@ export const formStyles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   dateTimeText: {
     fontSize: 16,
@@ -717,7 +723,7 @@ export const formStyles = StyleSheet.create({
     backgroundColor: colors.container,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
     paddingLeft: 16,
   },
   currencySymbol: {
@@ -737,6 +743,29 @@ export const formStyles = StyleSheet.create({
   },
   flex1: {
     flex: 1,
+  },
+  bottomBar: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 12,
+
+    backgroundColor: colors.surfaceTwo,
+  },
+  submitButton: {
+    backgroundColor: colors.text,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  submitButtonDisabled: {
+    opacity: 0.4,
+  },
+  submitButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    letterSpacing: 0.3,
   },
 });
 

@@ -8,6 +8,8 @@ import {
   Alert,
   Platform,
   Switch,
+  KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 import { Stack, router } from "expo-router";
 import { colors, formStyles } from "../styles/commonStyles";
@@ -39,6 +41,8 @@ export default function AddMaintenanceTaskScreen() {
   const [notes, setNotes] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
   const [assignedToName, setAssignedToName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const frequencies: MaintenanceFrequency[] = [
     "daily",
@@ -47,6 +51,11 @@ export default function AddMaintenanceTaskScreen() {
     "quarterly",
     "yearly",
   ];
+
+  const canSubmit =
+    title.trim().length > 0 &&
+    description.trim().length > 0 &&
+    vesselId.length > 0;
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowDatePicker(Platform.OS === "ios");
@@ -85,42 +94,51 @@ export default function AddMaintenanceTaskScreen() {
     return true;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    const selectedVessel = vessels.find((v) => v.id === vesselId);
-    if (!selectedVessel) {
-      Alert.alert("Error", "Selected vessel not found");
-      return;
+    setIsSubmitting(true);
+
+    try {
+      const selectedVessel = vessels.find((v) => v.id === vesselId);
+      if (!selectedVessel) {
+        Alert.alert("Error", "Selected vessel not found");
+        return;
+      }
+
+      const newTask = {
+        title: title.trim(),
+        description: description.trim(),
+        vesselId,
+        vesselName: selectedVessel.name,
+        assignedTo: assignedTo || null,
+        assignedToName: assignedToName || null,
+        assignedToType: assignedTo ? ("crew" as const) : null,
+        status: "open" as const,
+        priority,
+        dueDate,
+        isRecurring,
+        frequency: isRecurring ? frequency : undefined,
+        frequencyValue: isRecurring ? parseInt(frequencyValue) : undefined,
+        createdBy: userId || "unknown",
+        attachments: [],
+        comments: [],
+        completionHistory: [],
+        estimatedCost: estimatedCost ? parseFloat(estimatedCost) : undefined,
+        category: "general",
+        notes: notes.trim(),
+      };
+
+      addMaintenanceTask(newTask);
+      Alert.alert("Success", "Maintenance task created successfully", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+    } catch (error) {
+      console.error("Error creating maintenance task:", error);
+      Alert.alert("Error", "Failed to create task. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const newTask = {
-      title: title.trim(),
-      description: description.trim(),
-      vesselId,
-      vesselName: selectedVessel.name,
-      assignedTo: assignedTo || null,
-      assignedToName: assignedToName || null,
-      assignedToType: assignedTo ? ("crew" as const) : null,
-      status: "open" as const,
-      priority,
-      dueDate,
-      isRecurring,
-      frequency: isRecurring ? frequency : undefined,
-      frequencyValue: isRecurring ? parseInt(frequencyValue) : undefined,
-      createdBy: userId || "unknown",
-      attachments: [],
-      comments: [],
-      completionHistory: [],
-      estimatedCost: estimatedCost ? parseFloat(estimatedCost) : undefined,
-      category: "general",
-      notes: notes.trim(),
-    };
-
-    addMaintenanceTask(newTask);
-    Alert.alert("Success", "Maintenance task created successfully", [
-      { text: "OK", onPress: () => router.back() },
-    ]);
   };
 
   const handleCancel = () => {
@@ -143,7 +161,10 @@ export default function AddMaintenanceTaskScreen() {
   };
 
   return (
-    <View style={formStyles.container}>
+    <KeyboardAvoidingView
+      style={formStyles.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
       <Stack.Screen
         options={{
           title: "New Maintenance Task",
@@ -152,20 +173,12 @@ export default function AddMaintenanceTaskScreen() {
               <Text style={formStyles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           ),
-          headerRight: () => (
-            <TouchableOpacity onPress={handleSubmit}>
-              <Text style={formStyles.saveText}>Create</Text>
-            </TouchableOpacity>
-          ),
         }}
       />
 
       <ScrollView
         style={formStyles.scrollView}
-        contentContainerStyle={[
-          formStyles.scrollContent,
-          { paddingBottom: insets.bottom },
-        ]}
+        contentContainerStyle={formStyles.scrollContent}
         showsVerticalScrollIndicator={false}
         {...scrollProps}
         keyboardShouldPersistTaps="handled"
@@ -173,11 +186,16 @@ export default function AddMaintenanceTaskScreen() {
         <View style={formStyles.section}>
           <Text style={formStyles.label}>Task Title *</Text>
           <TextInput
-            style={formStyles.input}
+            style={[
+              formStyles.input,
+              focusedField === "title" && formStyles.inputFocused,
+            ]}
             placeholder="e.g., Engine Service"
             placeholderTextColor={colors.textTertiary}
             value={title}
             onChangeText={setTitle}
+            onFocus={() => setFocusedField("title")}
+            onBlur={() => setFocusedField(null)}
             maxLength={100}
           />
         </View>
@@ -185,11 +203,17 @@ export default function AddMaintenanceTaskScreen() {
         <View style={formStyles.section}>
           <Text style={formStyles.label}>Description *</Text>
           <TextInput
-            style={[formStyles.input, formStyles.textArea]}
+            style={[
+              formStyles.input,
+              formStyles.textArea,
+              focusedField === "description" && formStyles.inputFocused,
+            ]}
             placeholder="Describe the maintenance task..."
             placeholderTextColor={colors.textTertiary}
             value={description}
             onChangeText={setDescription}
+            onFocus={() => setFocusedField("description")}
+            onBlur={() => setFocusedField(null)}
             multiline
             numberOfLines={4}
             textAlignVertical="top"
@@ -238,10 +262,7 @@ export default function AddMaintenanceTaskScreen() {
                 key={p}
                 style={[
                   formStyles.optionChip,
-                  priority === p && [
-                    formStyles.optionChipActive,
-                    { borderColor: getPriorityColor(p) },
-                  ],
+                  priority === p && [formStyles.optionChipActive],
                 ]}
                 onPress={() => setPriority(p)}
               >
@@ -251,7 +272,7 @@ export default function AddMaintenanceTaskScreen() {
                     priority === p && formStyles.optionChipTextActive,
                   ]}
                 >
-                  {p.toUpperCase()}
+                  {p.charAt(0).toUpperCase() + p.slice(1)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -289,11 +310,8 @@ export default function AddMaintenanceTaskScreen() {
             <Switch
               value={isRecurring}
               onValueChange={setIsRecurring}
-              trackColor={{
-                false: colors.border,
-                true: colors.accent + "80",
-              }}
-              thumbColor={isRecurring ? colors.accent : colors.textSecondary}
+              trackColor={{ false: colors.borderSoft, true: colors.text }}
+              thumbColor="#FFFFFF"
             />
           </View>
         </View>
@@ -334,11 +352,16 @@ export default function AddMaintenanceTaskScreen() {
                 Every (number of {frequency}s)
               </Text>
               <TextInput
-                style={formStyles.input}
+                style={[
+                  formStyles.input,
+                  focusedField === "frequencyValue" && formStyles.inputFocused,
+                ]}
                 placeholder="e.g., 3"
                 placeholderTextColor={colors.textTertiary}
                 value={frequencyValue}
                 onChangeText={setFrequencyValue}
+                onFocus={() => setFocusedField("frequencyValue")}
+                onBlur={() => setFocusedField(null)}
                 keyboardType="number-pad"
                 maxLength={3}
               />
@@ -351,11 +374,17 @@ export default function AddMaintenanceTaskScreen() {
           <View style={formStyles.costInputContainer}>
             <Text style={formStyles.currencySymbol}>$</Text>
             <TextInput
-              style={[formStyles.input, formStyles.costInput]}
+              style={[
+                formStyles.input,
+                formStyles.costInput,
+                focusedField === "estimatedCost" && formStyles.inputFocused,
+              ]}
               placeholder="0.00"
               placeholderTextColor={colors.textTertiary}
               value={estimatedCost}
               onChangeText={setEstimatedCost}
+              onFocus={() => setFocusedField("estimatedCost")}
+              onBlur={() => setFocusedField(null)}
               keyboardType="decimal-pad"
               maxLength={10}
             />
@@ -365,7 +394,10 @@ export default function AddMaintenanceTaskScreen() {
         <View style={formStyles.section}>
           <Text style={formStyles.label}>Assigned To (Optional)</Text>
           <TextInput
-            style={formStyles.input}
+            style={[
+              formStyles.input,
+              focusedField === "assignedToName" && formStyles.inputFocused,
+            ]}
             placeholder="Crew member name"
             placeholderTextColor={colors.textTertiary}
             value={assignedToName}
@@ -373,6 +405,8 @@ export default function AddMaintenanceTaskScreen() {
               setAssignedToName(text);
               setAssignedTo(text ? "crew_temp_id" : "");
             }}
+            onFocus={() => setFocusedField("assignedToName")}
+            onBlur={() => setFocusedField(null)}
             maxLength={50}
           />
         </View>
@@ -380,11 +414,17 @@ export default function AddMaintenanceTaskScreen() {
         <View style={formStyles.section}>
           <Text style={formStyles.label}>Additional Notes (Optional)</Text>
           <TextInput
-            style={[formStyles.input, formStyles.textArea]}
+            style={[
+              formStyles.input,
+              formStyles.textArea,
+              focusedField === "notes" && formStyles.inputFocused,
+            ]}
             placeholder="Any additional information..."
             placeholderTextColor={colors.textTertiary}
             value={notes}
             onChangeText={setNotes}
+            onFocus={() => setFocusedField("notes")}
+            onBlur={() => setFocusedField(null)}
             multiline
             numberOfLines={3}
             textAlignVertical="top"
@@ -392,6 +432,29 @@ export default function AddMaintenanceTaskScreen() {
           />
         </View>
       </ScrollView>
-    </View>
+
+      <View
+        style={[
+          formStyles.bottomBar,
+          { paddingBottom: insets.bottom },
+        ]}
+      >
+        <TouchableOpacity
+          style={[
+            formStyles.submitButton,
+            !canSubmit && formStyles.submitButtonDisabled,
+          ]}
+          onPress={handleSubmit}
+          disabled={!canSubmit || isSubmitting}
+          activeOpacity={0.8}
+        >
+          {isSubmitting ? (
+            <ActivityIndicator color="#FFFFFF" size="small" />
+          ) : (
+            <Text style={formStyles.submitButtonText}>Create</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }

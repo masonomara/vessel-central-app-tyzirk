@@ -9,6 +9,8 @@ import {
   Alert,
   Image,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -63,8 +65,15 @@ export default function AddIssueScreen() {
     current: 0,
     total: 0,
   });
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const selectedVessel = vessels.find((v) => v.id === selectedVesselId);
+
+  const canSubmit =
+    title.trim().length > 0 &&
+    description.trim().length > 0 &&
+    selectedVesselId.length > 0 &&
+    location.trim().length > 0;
 
   const handlePickImage = async () => {
     try {
@@ -335,22 +344,16 @@ export default function AddIssueScreen() {
   }
 
   return (
-    <View style={formStyles.container}>
+    <KeyboardAvoidingView
+      style={formStyles.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
       <Stack.Screen
         options={{
           title: "Report Issue",
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
               <Text style={formStyles.cancelText}>Cancel</Text>
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
-              <Text
-                style={[formStyles.saveText, isSubmitting && { opacity: 0.5 }]}
-              >
-                Submit
-              </Text>
             </TouchableOpacity>
           ),
         }}
@@ -372,21 +375,23 @@ export default function AddIssueScreen() {
 
       <ScrollView
         style={formStyles.scrollView}
-        contentContainerStyle={[
-          formStyles.scrollContent,
-          { paddingBottom: insets.bottom },
-        ]}
+        contentContainerStyle={formStyles.scrollContent}
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
         <View style={formStyles.section}>
           <Text style={formStyles.label}>Issue Title *</Text>
           <TextInput
-            style={formStyles.input}
+            style={[
+              formStyles.input,
+              focusedField === "title" && formStyles.inputFocused,
+            ]}
             placeholder="Brief description of the issue"
             placeholderTextColor={colors.textTertiary}
             value={title}
             onChangeText={setTitle}
+            onFocus={() => setFocusedField("title")}
+            onBlur={() => setFocusedField(null)}
             maxLength={100}
           />
         </View>
@@ -394,11 +399,17 @@ export default function AddIssueScreen() {
         <View style={formStyles.section}>
           <Text style={formStyles.label}>Description *</Text>
           <TextInput
-            style={[formStyles.input, formStyles.textArea]}
+            style={[
+              formStyles.input,
+              formStyles.textArea,
+              focusedField === "description" && formStyles.inputFocused,
+            ]}
             placeholder="Detailed description of the issue..."
             placeholderTextColor={colors.textTertiary}
             value={description}
             onChangeText={setDescription}
+            onFocus={() => setFocusedField("description")}
+            onBlur={() => setFocusedField(null)}
             multiline
             numberOfLines={6}
             textAlignVertical="top"
@@ -460,7 +471,7 @@ export default function AddIssueScreen() {
                     priority === p && formStyles.optionChipTextActive,
                   ]}
                 >
-                  {p.toUpperCase()}
+                  {p.charAt(0).toUpperCase() + p.slice(1)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -499,11 +510,16 @@ export default function AddIssueScreen() {
         <View style={formStyles.section}>
           <Text style={formStyles.label}>Location on Vessel *</Text>
           <TextInput
-            style={formStyles.input}
+            style={[
+              formStyles.input,
+              focusedField === "location" && formStyles.inputFocused,
+            ]}
             placeholder="e.g., Forward Deck, Engine Room, Galley"
             placeholderTextColor={colors.textTertiary}
             value={location}
             onChangeText={setLocation}
+            onFocus={() => setFocusedField("location")}
+            onBlur={() => setFocusedField(null)}
             maxLength={100}
           />
         </View>
@@ -515,12 +531,13 @@ export default function AddIssueScreen() {
               style={styles.attachmentButton}
               onPress={handleTakePhoto}
               disabled={isOptimizing}
+              activeOpacity={0.7}
             >
               <IconSymbol
                 ios_icon_name="camera.fill"
                 android_material_icon_name="photo-camera"
-                size={24}
-                color={isOptimizing ? colors.textSecondary : colors.accent}
+                size={20}
+                color={isOptimizing ? colors.textTertiary : colors.textTertiary}
               />
               <Text
                 style={[
@@ -536,12 +553,13 @@ export default function AddIssueScreen() {
               style={styles.attachmentButton}
               onPress={handlePickImage}
               disabled={isOptimizing}
+              activeOpacity={0.7}
             >
               <IconSymbol
                 ios_icon_name="photo.fill"
                 android_material_icon_name="photo-library"
-                size={24}
-                color={isOptimizing ? colors.textSecondary : colors.accent}
+                size={20}
+                color={isOptimizing ? colors.textTertiary : colors.textTertiary}
               />
               <Text
                 style={[
@@ -549,7 +567,7 @@ export default function AddIssueScreen() {
                   isOptimizing && styles.attachmentButtonTextDisabled,
                 ]}
               >
-                Choose from Library
+                Library
               </Text>
             </TouchableOpacity>
           </View>
@@ -595,7 +613,30 @@ export default function AddIssueScreen() {
           )}
         </View>
       </ScrollView>
-    </View>
+
+      <View
+        style={[
+          formStyles.bottomBar,
+          { paddingBottom: insets.bottom },
+        ]}
+      >
+        <TouchableOpacity
+          style={[
+            formStyles.submitButton,
+            !canSubmit && formStyles.submitButtonDisabled,
+          ]}
+          onPress={handleSubmit}
+          disabled={!canSubmit || isSubmitting}
+          activeOpacity={0.8}
+        >
+          {isSubmitting ? (
+            <ActivityIndicator color="#FFFFFF" size="small" />
+          ) : (
+            <Text style={formStyles.submitButtonText}>Submit</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -629,27 +670,25 @@ const styles = StyleSheet.create({
   },
   attachmentButtons: {
     flexDirection: "row",
-    gap: 12,
+    gap: 10,
   },
   attachmentButton: {
     flex: 1,
-    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: colors.container,
-    borderRadius: 12,
-    paddingVertical: 16,
+    borderRadius: 8,
+    paddingVertical: 12,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   attachmentButtonText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: colors.accent,
+    fontWeight: "500",
+    color: colors.textSecondary,
   },
   attachmentButtonTextDisabled: {
-    color: colors.textSecondary,
+    color: colors.textTertiary,
   },
   attachmentsList: {
     flexDirection: "row",

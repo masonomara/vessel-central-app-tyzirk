@@ -22,7 +22,7 @@ function RootLayoutContent() {
         <Stack.Screen name="user-login" options={{ headerShown: false }} />
         <Stack.Screen
           name="operation-member-setup"
-          options={{ headerShown: false }}
+          options={{ title: "Create an Account", ...headerWithBg }}
         />
 
         {/* Tabs — header handled by NativeTabs */}

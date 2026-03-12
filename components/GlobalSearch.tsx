@@ -1,8 +1,9 @@
 
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Modal } from 'react-native';
-import { colors } from '../styles/commonStyles';
+import { colors, indexScreenStyles } from '../styles/commonStyles';
 import { IconSymbol } from '../components/IconSymbol';
+import { ListItemCard } from '../components/ListItemCard';
 import { searchManager, SearchResult } from '../utils/search';
 import { useData } from '../contexts/DataContext';
 import { router } from 'expo-router';
@@ -77,34 +78,34 @@ export default function GlobalSearch({ visible, onClose }: GlobalSearchProps) {
   const getResultIcon = (type: string) => {
     switch (type) {
       case 'maintenance':
-        return { ios: 'wrench.and.screwdriver.fill', android: 'build' };
+        return { iosName: 'wrench.and.screwdriver.fill', androidName: 'build' };
       case 'issue':
-        return { ios: 'exclamationmark.triangle.fill', android: 'warning' };
+        return { iosName: 'exclamationmark.triangle.fill', androidName: 'warning' };
       case 'supply':
-        return { ios: 'shippingbox.fill', android: 'inventory_2' };
+        return { iosName: 'shippingbox.fill', androidName: 'inventory_2' };
       case 'document':
-        return { ios: 'doc.text.fill', android: 'description' };
+        return { iosName: 'doc.text.fill', androidName: 'description' };
       case 'vessel':
-        return { ios: 'sailboat.fill', android: 'sailing' };
+        return { iosName: 'sailboat.fill', androidName: 'sailing' };
       default:
-        return { ios: 'circle.fill', android: 'circle' };
+        return { iosName: 'circle.fill', androidName: 'circle' };
     }
   };
 
-  const getResultColor = (type: string) => {
+  const getResultBadge = (type: string) => {
     switch (type) {
       case 'maintenance':
-        return colors.warning;
+        return { label: 'Maintenance', fg: colors.orangeForeground, bg: colors.orangeBackground };
       case 'issue':
-        return colors.danger;
+        return { label: 'Issue', fg: colors.redForeground, bg: colors.redBackground };
       case 'supply':
-        return colors.accent;
+        return { label: 'Supply', fg: colors.blueForeground, bg: colors.blueBackground };
       case 'document':
-        return colors.success;
+        return { label: 'Document', fg: colors.greenForeground, bg: colors.greenBackground };
       case 'vessel':
-        return colors.accent;
+        return { label: 'Vessel', fg: colors.blueForeground, bg: colors.blueBackground };
       default:
-        return colors.textSecondary;
+        return { label: type, fg: colors.textSecondary, bg: colors.surfaceTwo };
     }
   };
 
@@ -120,22 +121,22 @@ export default function GlobalSearch({ visible, onClose }: GlobalSearchProps) {
           <TouchableOpacity onPress={onClose} style={styles.backButton}>
             <IconSymbol 
               ios_icon_name="chevron.left" 
-              android_material_icon_name="arrow-back" 
+              android_material_icon_name="chevron-left" 
               size={24} 
               color={colors.text} 
             />
           </TouchableOpacity>
-          <View style={styles.searchInputContainer}>
-            <IconSymbol 
-              ios_icon_name="magnifyingglass" 
-              android_material_icon_name="search" 
-              size={20} 
-              color={colors.textSecondary} 
+          <View style={[indexScreenStyles.searchContainer, { flex: 1, marginHorizontal: 0 }]}>
+            <IconSymbol
+              ios_icon_name="magnifyingglass"
+              android_material_icon_name="search"
+              size={20}
+              color={colors.textSecondary}
             />
             <TextInput
-              style={styles.searchInput}
-              placeholder="Search everything..."
-              placeholderTextColor={colors.textSecondary}
+              style={indexScreenStyles.searchInput}
+              placeholder="Global search"
+              placeholderTextColor={colors.textTertiary}
               value={query}
               onChangeText={handleSearch}
               autoFocus
@@ -143,11 +144,11 @@ export default function GlobalSearch({ visible, onClose }: GlobalSearchProps) {
             />
             {query.length > 0 && (
               <TouchableOpacity onPress={() => setQuery('')}>
-                <IconSymbol 
-                  ios_icon_name="xmark.circle.fill" 
-                  android_material_icon_name="cancel" 
-                  size={20} 
-                  color={colors.textSecondary} 
+                <IconSymbol
+                  ios_icon_name="xmark.circle.fill"
+                  android_material_icon_name="cancel"
+                  size={20}
+                  color={colors.textSecondary}
                 />
               </TouchableOpacity>
             )}
@@ -197,34 +198,19 @@ export default function GlobalSearch({ visible, onClose }: GlobalSearchProps) {
           {results.length > 0 && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{results.length} Results</Text>
-              {results.map((result, index) => {
-                const icon = getResultIcon(result.type);
-                const color = getResultColor(result.type);
-                
-                return (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.resultItem}
-                    onPress={() => handleResultPress(result)}
-                  >
-                    <View style={[styles.resultIcon, { backgroundColor: color + '20' }]}>
-                      <IconSymbol 
-                        ios_icon_name={icon.ios} 
-                        android_material_icon_name={icon.android} 
-                        size={24} 
-                        color={color} 
-                      />
-                    </View>
-                    <View style={styles.resultContent}>
-                      <Text style={styles.resultTitle}>{result.title}</Text>
-                      <Text style={styles.resultSubtitle}>{result.subtitle}</Text>
-                    </View>
-                    <View style={styles.resultBadge}>
-                      <Text style={styles.resultBadgeText}>{result.type.toUpperCase()}</Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
+              {results.map((result, index) => (
+                <ListItemCard
+                  key={result.id}
+                  title={result.title}
+                  description={result.subtitle}
+                  vesselName={result.data?.vesselName ?? result.data?.location ?? ''}
+                  onPress={() => handleResultPress(result)}
+                  icon={getResultIcon(result.type)}
+                  badge={getResultBadge(result.type)}
+                  isFirst={index === 0}
+                  isLast={index === results.length - 1}
+                />
+              ))}
             </View>
           )}
         </ScrollView>
@@ -242,29 +228,13 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+
     gap: 12,
   },
   backButton: {
     padding: 4,
-  },
-  searchInputContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    gap: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    color: colors.text,
   },
   content: {
     flex: 1,
@@ -297,48 +267,6 @@ const styles = StyleSheet.create({
   historyText: {
     fontSize: 16,
     color: colors.text,
-  },
-  resultItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 12,
-  },
-  resultIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  resultContent: {
-    flex: 1,
-  },
-  resultTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  resultSubtitle: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  resultBadge: {
-    backgroundColor: colors.accent + '20',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  resultBadgeText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: colors.accent,
   },
   emptyState: {
     alignItems: 'center',

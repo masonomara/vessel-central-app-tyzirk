@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
+  KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -41,11 +43,18 @@ export default function AddCertificationScreen() {
   );
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const [showIssueDatePicker, setShowIssueDatePicker] = useState(false);
   const [showExpiryDatePicker, setShowExpiryDatePicker] = useState(false);
 
   const selectedVessel = userVessels.find((v) => v.id === selectedVesselId);
+
+  const canSubmit =
+    crewId.length > 0 &&
+    certType.trim().length > 0 &&
+    issuingAuthority.trim().length > 0 &&
+    selectedVesselId.length > 0;
 
   const selectCrew = (id: string, name: string) => {
     setCrewId(id);
@@ -136,174 +145,212 @@ export default function AddCertificationScreen() {
               <Text style={formStyles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           ),
-          headerRight: () => (
-            <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
-              <Text
-                style={[formStyles.saveText, isSubmitting && { opacity: 0.5 }]}
-              >
-                Save
-              </Text>
-            </TouchableOpacity>
-          ),
         }}
       />
 
-      <ScrollView
-        style={formStyles.scrollView}
-        contentContainerStyle={[
-          formStyles.scrollContent,
-          { paddingBottom: insets.bottom },
-        ]}
-        showsVerticalScrollIndicator={false}
-        {...scrollProps}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Crew Member *</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={formStyles.optionsContainer}
-          >
-            {CREW_OPTIONS.map((crew) => (
-              <TouchableOpacity
-                key={crew.id}
-                style={[
-                  formStyles.optionChip,
-                  crewId === crew.id && formStyles.optionChipActive,
-                ]}
-                onPress={() => selectCrew(crew.id, crew.name)}
-              >
-                <Text
+        <ScrollView
+          style={formStyles.scrollView}
+          contentContainerStyle={formStyles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          {...scrollProps}
+        >
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Crew Member *</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={formStyles.optionsContainer}
+            >
+              {CREW_OPTIONS.map((crew) => (
+                <TouchableOpacity
+                  key={crew.id}
                   style={[
-                    formStyles.optionChipText,
-                    crewId === crew.id && formStyles.optionChipTextActive,
+                    formStyles.optionChip,
+                    crewId === crew.id && formStyles.optionChipActive,
                   ]}
+                  onPress={() => selectCrew(crew.id, crew.name)}
                 >
-                  {crew.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+                  <Text
+                    style={[
+                      formStyles.optionChipText,
+                      crewId === crew.id && formStyles.optionChipTextActive,
+                    ]}
+                  >
+                    {crew.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Certification Type *</Text>
-          <TextInput
-            style={formStyles.input}
-            placeholder="e.g., STCW, MCA Yacht Rating"
-            placeholderTextColor={colors.textTertiary}
-            value={certType}
-            onChangeText={setCertType}
-            maxLength={100}
-          />
-        </View>
-
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Issuing Authority *</Text>
-          <TextInput
-            style={formStyles.input}
-            placeholder="e.g., MCA, USCG, RYA"
-            placeholderTextColor={colors.textTertiary}
-            value={issuingAuthority}
-            onChangeText={setIssuingAuthority}
-            maxLength={100}
-          />
-        </View>
-
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Certificate Number</Text>
-          <TextInput
-            style={formStyles.input}
-            placeholder="Certificate number (optional)"
-            placeholderTextColor={colors.textTertiary}
-            value={certificateNumber}
-            onChangeText={setCertificateNumber}
-            maxLength={50}
-          />
-        </View>
-
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Issue Date *</Text>
-          <TouchableOpacity
-            style={formStyles.dateButton}
-            onPress={() => setShowIssueDatePicker(true)}
-          >
-            <Text style={formStyles.dateButtonText}>
-              {formatDisplayDate(issueDate)}
-            </Text>
-          </TouchableOpacity>
-          {showIssueDatePicker && (
-            <DateTimePicker
-              value={issueDate}
-              mode="date"
-              onChange={handleIssueDateChange}
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Certification Type *</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                focusedField === "certType" && formStyles.inputFocused,
+              ]}
+              placeholder="e.g., STCW, MCA Yacht Rating"
+              placeholderTextColor={colors.textTertiary}
+              value={certType}
+              onChangeText={setCertType}
+              onFocus={() => setFocusedField("certType")}
+              onBlur={() => setFocusedField(null)}
+              maxLength={100}
             />
-          )}
-        </View>
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Expiry Date *</Text>
-          <TouchableOpacity
-            style={formStyles.dateButton}
-            onPress={() => setShowExpiryDatePicker(true)}
-          >
-            <Text style={formStyles.dateButtonText}>
-              {formatDisplayDate(expiryDate)}
-            </Text>
-          </TouchableOpacity>
-          {showExpiryDatePicker && (
-            <DateTimePicker
-              value={expiryDate}
-              mode="date"
-              onChange={handleExpiryDateChange}
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Issuing Authority *</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                focusedField === "issuingAuthority" && formStyles.inputFocused,
+              ]}
+              placeholder="e.g., MCA, USCG, RYA"
+              placeholderTextColor={colors.textTertiary}
+              value={issuingAuthority}
+              onChangeText={setIssuingAuthority}
+              onFocus={() => setFocusedField("issuingAuthority")}
+              onBlur={() => setFocusedField(null)}
+              maxLength={100}
             />
-          )}
-        </View>
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Vessel *</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={formStyles.optionsContainer}
-          >
-            {userVessels.map((vessel) => (
-              <TouchableOpacity
-                key={vessel.id}
-                style={[
-                  formStyles.optionChip,
-                  selectedVesselId === vessel.id && formStyles.optionChipActive,
-                ]}
-                onPress={() => setSelectedVesselId(vessel.id)}
-              >
-                <Text
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Certificate Number</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                focusedField === "certificateNumber" && formStyles.inputFocused,
+              ]}
+              placeholder="Certificate number (optional)"
+              placeholderTextColor={colors.textTertiary}
+              value={certificateNumber}
+              onChangeText={setCertificateNumber}
+              onFocus={() => setFocusedField("certificateNumber")}
+              onBlur={() => setFocusedField(null)}
+              maxLength={50}
+            />
+          </View>
+
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Issue Date *</Text>
+            <TouchableOpacity
+              style={formStyles.dateButton}
+              onPress={() => setShowIssueDatePicker(true)}
+            >
+              <Text style={formStyles.dateButtonText}>
+                {formatDisplayDate(issueDate)}
+              </Text>
+            </TouchableOpacity>
+            {showIssueDatePicker && (
+              <DateTimePicker
+                value={issueDate}
+                mode="date"
+                onChange={handleIssueDateChange}
+              />
+            )}
+          </View>
+
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Expiry Date *</Text>
+            <TouchableOpacity
+              style={formStyles.dateButton}
+              onPress={() => setShowExpiryDatePicker(true)}
+            >
+              <Text style={formStyles.dateButtonText}>
+                {formatDisplayDate(expiryDate)}
+              </Text>
+            </TouchableOpacity>
+            {showExpiryDatePicker && (
+              <DateTimePicker
+                value={expiryDate}
+                mode="date"
+                onChange={handleExpiryDateChange}
+              />
+            )}
+          </View>
+
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Vessel *</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={formStyles.optionsContainer}
+            >
+              {userVessels.map((vessel) => (
+                <TouchableOpacity
+                  key={vessel.id}
                   style={[
-                    formStyles.optionChipText,
+                    formStyles.optionChip,
                     selectedVesselId === vessel.id &&
-                      formStyles.optionChipTextActive,
+                      formStyles.optionChipActive,
                   ]}
+                  onPress={() => setSelectedVesselId(vessel.id)}
                 >
-                  {vessel.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+                  <Text
+                    style={[
+                      formStyles.optionChipText,
+                      selectedVesselId === vessel.id &&
+                        formStyles.optionChipTextActive,
+                    ]}
+                  >
+                    {vessel.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Notes</Text>
-          <TextInput
-            style={[formStyles.input, formStyles.textArea]}
-            placeholder="Additional notes..."
-            placeholderTextColor={colors.textTertiary}
-            value={notes}
-            onChangeText={setNotes}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-          />
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Notes</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                formStyles.textArea,
+                focusedField === "notes" && formStyles.inputFocused,
+              ]}
+              placeholder="Additional notes..."
+              placeholderTextColor={colors.textTertiary}
+              value={notes}
+              onChangeText={setNotes}
+              onFocus={() => setFocusedField("notes")}
+              onBlur={() => setFocusedField(null)}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+          </View>
+        </ScrollView>
+
+        <View
+          style={[
+            formStyles.bottomBar,
+            { paddingBottom: insets.bottom },
+          ]}
+        >
+          <TouchableOpacity
+            style={[
+              formStyles.submitButton,
+              !canSubmit && formStyles.submitButtonDisabled,
+            ]}
+            onPress={handleSubmit}
+            disabled={!canSubmit || isSubmitting}
+            activeOpacity={0.8}
+          >
+            {isSubmitting ? (
+              <ActivityIndicator color="#FFFFFF" size="small" />
+            ) : (
+              <Text style={formStyles.submitButtonText}>Save</Text>
+            )}
+          </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

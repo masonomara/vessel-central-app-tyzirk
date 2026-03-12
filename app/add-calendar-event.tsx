@@ -7,6 +7,9 @@ import {
   TextInput,
   Switch,
   Alert,
+  KeyboardAvoidingView,
+  ActivityIndicator,
+  Platform,
 } from "react-native";
 import { Stack, useRouter, useLocalSearchParams } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -45,11 +48,16 @@ export default function AddCalendarEventScreen() {
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const userVessels = useMemo(() => {
     if (!userId || !userRole) return [];
     return getVesselsForUser(userId, userRole);
   }, [userId, userRole, vessels, getVesselsForUser]);
+
+  const canSubmit =
+    title.trim().length > 0 && selectedVesselId.length > 0;
 
   if (userVessels.length === 0) {
     return (
@@ -94,7 +102,7 @@ export default function AddCalendarEventScreen() {
     "other",
   ];
 
-  const handleSave = () => {
+  const handleSubmit = async () => {
     if (!title.trim()) {
       Alert.alert("Error", "Please enter an event title");
       return;
@@ -116,31 +124,40 @@ export default function AddCalendarEventScreen() {
       return;
     }
 
-    addCalendarEvent({
-      title: title.trim(),
-      description: description.trim(),
-      type: eventType,
-      status: "scheduled",
-      startDate,
-      endDate,
-      allDay,
-      vesselId: selectedVesselId,
-      vesselName: selectedVessel.name,
-      location: location.trim(),
-      attendees: [userId],
-      attendeeNames: [userName],
-      createdBy: userId,
-      createdByName: userName,
-      notes: notes.trim(),
-      reminders: [
-        { id: Date.now().toString(), minutes: 1440, method: "notification" },
-      ],
-      comments: [],
-    });
+    setIsSubmitting(true);
 
-    Alert.alert("Success", "Calendar event created successfully", [
-      { text: "OK", onPress: () => router.back() },
-    ]);
+    try {
+      addCalendarEvent({
+        title: title.trim(),
+        description: description.trim(),
+        type: eventType,
+        status: "scheduled",
+        startDate,
+        endDate,
+        allDay,
+        vesselId: selectedVesselId,
+        vesselName: selectedVessel.name,
+        location: location.trim(),
+        attendees: [userId],
+        attendeeNames: [userName],
+        createdBy: userId,
+        createdByName: userName,
+        notes: notes.trim(),
+        reminders: [
+          { id: Date.now().toString(), minutes: 1440, method: "notification" },
+        ],
+        comments: [],
+      });
+
+      Alert.alert("Success", "Calendar event created successfully", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      Alert.alert("Error", "Failed to create event. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleStartDateChange = (event: any, selectedDate?: Date) => {
@@ -195,234 +212,277 @@ export default function AddCalendarEventScreen() {
               <Text style={formStyles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           ),
-          headerRight: () => (
-            <TouchableOpacity onPress={handleSave}>
-              <Text style={formStyles.saveText}>Save</Text>
-            </TouchableOpacity>
-          ),
         }}
       />
 
-      <ScrollView
-        style={formStyles.scrollView}
-        contentContainerStyle={[
-          formStyles.scrollContent,
-          { paddingBottom: insets.bottom },
-        ]}
-        showsVerticalScrollIndicator={false}
-        {...scrollProps}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {/* Title */}
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Event Title *</Text>
-          <TextInput
-            style={formStyles.input}
-            value={title}
-            onChangeText={setTitle}
-            placeholder="Enter event title"
-            placeholderTextColor={colors.textTertiary}
-          />
-        </View>
-
-        {/* Event Type */}
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Event Type</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={formStyles.optionsContainer}
-          >
-            {eventTypes.map((type) => (
-              <TouchableOpacity
-                key={type}
-                style={[
-                  formStyles.optionChip,
-                  eventType === type && [
-                    formStyles.optionChipActive,
-                    { borderColor: getEventColor(type) },
-                  ],
-                ]}
-                onPress={() => setEventType(type)}
-              >
-                <Text
-                  style={[
-                    formStyles.optionChipText,
-                    eventType === type && { color: getEventColor(type) },
-                  ]}
-                >
-                  {EVENT_TYPE_LABELS[type]}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Vessel */}
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Vessel *</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={formStyles.optionsContainer}
-          >
-            {userVessels.map((vessel) => (
-              <TouchableOpacity
-                key={vessel.id}
-                style={[
-                  formStyles.optionChip,
-                  selectedVesselId === vessel.id && formStyles.optionChipActive,
-                ]}
-                onPress={() => setSelectedVesselId(vessel.id)}
-              >
-                <Text
-                  style={[
-                    formStyles.optionChipText,
-                    selectedVesselId === vessel.id &&
-                      formStyles.optionChipTextActive,
-                  ]}
-                >
-                  {vessel.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* All Day Toggle */}
-        <View style={formStyles.section}>
-          <View style={formStyles.switchRow}>
-            <Text style={formStyles.label}>All Day Event</Text>
-            <Switch
-              value={allDay}
-              onValueChange={setAllDay}
-              trackColor={{ false: colors.border, true: colors.accent }}
-              thumbColor={colors.text}
+        <ScrollView
+          style={formStyles.scrollView}
+          contentContainerStyle={formStyles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          {...scrollProps}
+        >
+          {/* Title */}
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Event Title *</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                focusedField === "title" && formStyles.inputFocused,
+              ]}
+              value={title}
+              onChangeText={setTitle}
+              placeholder="Enter event title"
+              placeholderTextColor={colors.textTertiary}
+              onFocus={() => setFocusedField("title")}
+              onBlur={() => setFocusedField(null)}
             />
           </View>
-        </View>
 
-        {/* Start Date/Time */}
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Start</Text>
-          <View style={formStyles.dateTimeRow}>
-            <TouchableOpacity
-              style={formStyles.dateTimeButton}
-              onPress={() => setShowStartDatePicker(true)}
+          {/* Event Type */}
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Event Type</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={formStyles.optionsContainer}
             >
-              <IconSymbol
-                ios_icon_name="calendar"
-                android_material_icon_name="event"
-                size={20}
-                color={colors.textSecondary}
-              />
-              <Text style={formStyles.dateTimeText}>
-                {startDate.toLocaleDateString()}
-              </Text>
-            </TouchableOpacity>
+              {eventTypes.map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  style={[
+                    formStyles.optionChip,
+                    eventType === type && [
+                      formStyles.optionChipActive,
+                      { borderColor: getEventColor(type) },
+                    ],
+                  ]}
+                  onPress={() => setEventType(type)}
+                >
+                  <Text
+                    style={[
+                      formStyles.optionChipText,
+                      eventType === type && { color: getEventColor(type) },
+                    ]}
+                  >
+                    {EVENT_TYPE_LABELS[type]}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
 
-            {!allDay && (
+          {/* Vessel */}
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Vessel *</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={formStyles.optionsContainer}
+            >
+              {userVessels.map((vessel) => (
+                <TouchableOpacity
+                  key={vessel.id}
+                  style={[
+                    formStyles.optionChip,
+                    selectedVesselId === vessel.id &&
+                      formStyles.optionChipActive,
+                  ]}
+                  onPress={() => setSelectedVesselId(vessel.id)}
+                >
+                  <Text
+                    style={[
+                      formStyles.optionChipText,
+                      selectedVesselId === vessel.id &&
+                        formStyles.optionChipTextActive,
+                    ]}
+                  >
+                    {vessel.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
+          {/* All Day Toggle */}
+          <View style={formStyles.section}>
+            <View style={formStyles.switchRow}>
+              <Text style={formStyles.label}>All Day Event</Text>
+              <Switch
+                value={allDay}
+                onValueChange={setAllDay}
+                trackColor={{ false: colors.borderSoft, true: colors.text }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+          </View>
+
+          {/* Start Date/Time */}
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Start</Text>
+            <View style={formStyles.dateTimeRow}>
               <TouchableOpacity
                 style={formStyles.dateTimeButton}
-                onPress={() => setShowStartTimePicker(true)}
+                onPress={() => setShowStartDatePicker(true)}
               >
                 <IconSymbol
-                  ios_icon_name="clock.fill"
-                  android_material_icon_name="schedule"
+                  ios_icon_name="calendar"
+                  android_material_icon_name="event"
                   size={20}
                   color={colors.textSecondary}
                 />
                 <Text style={formStyles.dateTimeText}>
-                  {startDate.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {startDate.toLocaleDateString()}
                 </Text>
               </TouchableOpacity>
-            )}
+
+              {!allDay && (
+                <TouchableOpacity
+                  style={formStyles.dateTimeButton}
+                  onPress={() => setShowStartTimePicker(true)}
+                >
+                  <IconSymbol
+                    ios_icon_name="clock.fill"
+                    android_material_icon_name="schedule"
+                    size={20}
+                    color={colors.textSecondary}
+                  />
+                  <Text style={formStyles.dateTimeText}>
+                    {startDate.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
-        </View>
 
-        {/* End Date/Time */}
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>End</Text>
-          <View style={formStyles.dateTimeRow}>
-            <TouchableOpacity
-              style={formStyles.dateTimeButton}
-              onPress={() => setShowEndDatePicker(true)}
-            >
-              <IconSymbol
-                ios_icon_name="calendar"
-                android_material_icon_name="event"
-                size={20}
-                color={colors.textSecondary}
-              />
-              <Text style={formStyles.dateTimeText}>
-                {endDate.toLocaleDateString()}
-              </Text>
-            </TouchableOpacity>
-
-            {!allDay && (
+          {/* End Date/Time */}
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>End</Text>
+            <View style={formStyles.dateTimeRow}>
               <TouchableOpacity
                 style={formStyles.dateTimeButton}
-                onPress={() => setShowEndTimePicker(true)}
+                onPress={() => setShowEndDatePicker(true)}
               >
                 <IconSymbol
-                  ios_icon_name="clock.fill"
-                  android_material_icon_name="schedule"
+                  ios_icon_name="calendar"
+                  android_material_icon_name="event"
                   size={20}
                   color={colors.textSecondary}
                 />
                 <Text style={formStyles.dateTimeText}>
-                  {endDate.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {endDate.toLocaleDateString()}
                 </Text>
               </TouchableOpacity>
-            )}
+
+              {!allDay && (
+                <TouchableOpacity
+                  style={formStyles.dateTimeButton}
+                  onPress={() => setShowEndTimePicker(true)}
+                >
+                  <IconSymbol
+                    ios_icon_name="clock.fill"
+                    android_material_icon_name="schedule"
+                    size={20}
+                    color={colors.textSecondary}
+                  />
+                  <Text style={formStyles.dateTimeText}>
+                    {endDate.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
-        </View>
 
-        {/* Location */}
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Location</Text>
-          <TextInput
-            style={formStyles.input}
-            value={location}
-            onChangeText={setLocation}
-            placeholder="Enter location"
-            placeholderTextColor={colors.textTertiary}
-          />
-        </View>
+          {/* Location */}
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Location</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                focusedField === "location" && formStyles.inputFocused,
+              ]}
+              value={location}
+              onChangeText={setLocation}
+              placeholder="Enter location"
+              placeholderTextColor={colors.textTertiary}
+              onFocus={() => setFocusedField("location")}
+              onBlur={() => setFocusedField(null)}
+            />
+          </View>
 
-        {/* Description */}
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Description</Text>
-          <TextInput
-            style={[formStyles.input, formStyles.textArea]}
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Enter event description"
-            placeholderTextColor={colors.textTertiary}
-            multiline
-            numberOfLines={4}
-          />
-        </View>
+          {/* Description */}
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Description</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                formStyles.textArea,
+                focusedField === "description" && formStyles.inputFocused,
+              ]}
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Enter event description"
+              placeholderTextColor={colors.textTertiary}
+              multiline
+              numberOfLines={4}
+              onFocus={() => setFocusedField("description")}
+              onBlur={() => setFocusedField(null)}
+            />
+          </View>
 
-        {/* Notes */}
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Notes</Text>
-          <TextInput
-            style={[formStyles.input, formStyles.textArea]}
-            value={notes}
-            onChangeText={setNotes}
-            placeholder="Additional notes"
-            placeholderTextColor={colors.textTertiary}
-            multiline
-            numberOfLines={3}
-          />
+          {/* Notes */}
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Notes</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                formStyles.textArea,
+                focusedField === "notes" && formStyles.inputFocused,
+              ]}
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="Additional notes"
+              placeholderTextColor={colors.textTertiary}
+              multiline
+              numberOfLines={3}
+              onFocus={() => setFocusedField("notes")}
+              onBlur={() => setFocusedField(null)}
+            />
+          </View>
+        </ScrollView>
+
+        <View
+          style={[
+            formStyles.bottomBar,
+            { paddingBottom: insets.bottom },
+          ]}
+        >
+          <TouchableOpacity
+            style={[
+              formStyles.submitButton,
+              !canSubmit && formStyles.submitButtonDisabled,
+            ]}
+            onPress={handleSubmit}
+            disabled={!canSubmit || isSubmitting}
+            activeOpacity={0.8}
+          >
+            {isSubmitting ? (
+              <ActivityIndicator color="#FFFFFF" size="small" />
+            ) : (
+              <Text style={formStyles.submitButtonText}>Save</Text>
+            )}
+          </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Date/Time Pickers */}
       {showStartDatePicker && (

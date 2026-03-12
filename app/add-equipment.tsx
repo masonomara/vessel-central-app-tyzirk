@@ -6,6 +6,9 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Platform,
+  KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -68,8 +71,16 @@ export default function AddEquipmentScreen() {
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const selectedVessel = vessels.find((v) => v.id === selectedVesselId);
+
+  const canSubmit =
+    name.trim().length > 0 &&
+    selectedVesselId.length > 0 &&
+    quantity.trim().length > 0 &&
+    !isNaN(Number(quantity)) &&
+    location.trim().length > 0;
 
   const validateForm = (): boolean => {
     if (!name.trim()) {
@@ -185,235 +196,295 @@ export default function AddEquipmentScreen() {
               <Text style={formStyles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           ),
-          headerRight: () => (
-            <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
-              <Text
-                style={[formStyles.saveText, isSubmitting && { opacity: 0.5 }]}
-              >
-                Save
-              </Text>
-            </TouchableOpacity>
-          ),
         }}
       />
 
-      <ScrollView
-        style={formStyles.scrollView}
-        contentContainerStyle={[
-          formStyles.scrollContent,
-          { paddingBottom: insets.bottom },
-        ]}
-        showsVerticalScrollIndicator={false}
-        {...scrollProps}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Equipment Name *</Text>
-          <TextInput
-            style={formStyles.input}
-            placeholder="e.g., Life Jackets"
-            placeholderTextColor={colors.textTertiary}
-            value={name}
-            onChangeText={setName}
-            maxLength={100}
-          />
-        </View>
+        <ScrollView
+          style={formStyles.scrollView}
+          contentContainerStyle={formStyles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          {...scrollProps}
+        >
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Equipment Name *</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                focusedField === "name" && formStyles.inputFocused,
+              ]}
+              placeholder="e.g., Life Jackets"
+              placeholderTextColor={colors.textTertiary}
+              value={name}
+              onChangeText={setName}
+              onFocus={() => setFocusedField("name")}
+              onBlur={() => setFocusedField(null)}
+              maxLength={100}
+            />
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Description</Text>
-          <TextInput
-            style={[formStyles.input, formStyles.textArea]}
-            placeholder="Equipment description..."
-            placeholderTextColor={colors.textTertiary}
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-          />
-        </View>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Description</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                formStyles.textArea,
+                focusedField === "description" && formStyles.inputFocused,
+              ]}
+              placeholder="Equipment description..."
+              placeholderTextColor={colors.textTertiary}
+              value={description}
+              onChangeText={setDescription}
+              onFocus={() => setFocusedField("description")}
+              onBlur={() => setFocusedField(null)}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Category *</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={formStyles.optionsContainer}
-          >
-            {EQUIPMENT_CATEGORIES.map((cat) => (
-              <TouchableOpacity
-                key={cat.value}
-                style={[
-                  formStyles.optionChip,
-                  category === cat.value && formStyles.optionChipActive,
-                ]}
-                onPress={() => setCategory(cat.value)}
-              >
-                <Text
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Category *</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={formStyles.optionsContainer}
+            >
+              {EQUIPMENT_CATEGORIES.map((cat) => (
+                <TouchableOpacity
+                  key={cat.value}
                   style={[
-                    formStyles.optionChipText,
-                    category === cat.value && formStyles.optionChipTextActive,
+                    formStyles.optionChip,
+                    category === cat.value && formStyles.optionChipActive,
                   ]}
+                  onPress={() => setCategory(cat.value)}
                 >
-                  {cat.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+                  <Text
+                    style={[
+                      formStyles.optionChipText,
+                      category === cat.value && formStyles.optionChipTextActive,
+                    ]}
+                  >
+                    {cat.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Vessel *</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={formStyles.optionsContainer}
-          >
-            {userVessels.map((vessel) => (
-              <TouchableOpacity
-                key={vessel.id}
-                style={[
-                  formStyles.optionChip,
-                  selectedVesselId === vessel.id && formStyles.optionChipActive,
-                ]}
-                onPress={() => setSelectedVesselId(vessel.id)}
-              >
-                <Text
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Vessel *</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={formStyles.optionsContainer}
+            >
+              {userVessels.map((vessel) => (
+                <TouchableOpacity
+                  key={vessel.id}
                   style={[
-                    formStyles.optionChipText,
+                    formStyles.optionChip,
                     selectedVesselId === vessel.id &&
-                      formStyles.optionChipTextActive,
+                      formStyles.optionChipActive,
                   ]}
+                  onPress={() => setSelectedVesselId(vessel.id)}
                 >
-                  {vessel.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+                  <Text
+                    style={[
+                      formStyles.optionChipText,
+                      selectedVesselId === vessel.id &&
+                        formStyles.optionChipTextActive,
+                    ]}
+                  >
+                    {vessel.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Quantity *</Text>
-          <TextInput
-            style={formStyles.input}
-            placeholder="1"
-            placeholderTextColor={colors.textTertiary}
-            value={quantity}
-            onChangeText={setQuantity}
-            keyboardType="numeric"
-          />
-        </View>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Quantity *</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                focusedField === "quantity" && formStyles.inputFocused,
+              ]}
+              placeholder="1"
+              placeholderTextColor={colors.textTertiary}
+              value={quantity}
+              onChangeText={setQuantity}
+              onFocus={() => setFocusedField("quantity")}
+              onBlur={() => setFocusedField(null)}
+              keyboardType="numeric"
+            />
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Condition *</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={formStyles.optionsContainer}
-          >
-            {CONDITION_OPTIONS.map((opt) => (
-              <TouchableOpacity
-                key={opt.value}
-                style={[
-                  formStyles.optionChip,
-                  condition === opt.value && formStyles.optionChipActive,
-                ]}
-                onPress={() => setCondition(opt.value)}
-              >
-                <Text
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Condition *</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={formStyles.optionsContainer}
+            >
+              {CONDITION_OPTIONS.map((opt) => (
+                <TouchableOpacity
+                  key={opt.value}
                   style={[
-                    formStyles.optionChipText,
-                    condition === opt.value && formStyles.optionChipTextActive,
+                    formStyles.optionChip,
+                    condition === opt.value && formStyles.optionChipActive,
                   ]}
+                  onPress={() => setCondition(opt.value)}
                 >
-                  {opt.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+                  <Text
+                    style={[
+                      formStyles.optionChipText,
+                      condition === opt.value &&
+                        formStyles.optionChipTextActive,
+                    ]}
+                  >
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Serial Number</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                focusedField === "serialNumber" && formStyles.inputFocused,
+              ]}
+              placeholder="Serial number (optional)"
+              placeholderTextColor={colors.textTertiary}
+              value={serialNumber}
+              onChangeText={setSerialNumber}
+              onFocus={() => setFocusedField("serialNumber")}
+              onBlur={() => setFocusedField(null)}
+            />
+          </View>
+
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Manufacturer</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                focusedField === "manufacturer" && formStyles.inputFocused,
+              ]}
+              placeholder="Manufacturer (optional)"
+              placeholderTextColor={colors.textTertiary}
+              value={manufacturer}
+              onChangeText={setManufacturer}
+              onFocus={() => setFocusedField("manufacturer")}
+              onBlur={() => setFocusedField(null)}
+            />
+          </View>
+
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Model</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                focusedField === "model" && formStyles.inputFocused,
+              ]}
+              placeholder="Model (optional)"
+              placeholderTextColor={colors.textTertiary}
+              value={model}
+              onChangeText={setModel}
+              onFocus={() => setFocusedField("model")}
+              onBlur={() => setFocusedField(null)}
+            />
+          </View>
+
+          {renderDatePicker(
+            "Purchase Date",
+            purchaseDate,
+            setPurchaseDate,
+            showPurchaseDatePicker,
+            setShowPurchaseDatePicker,
+          )}
+
+          {renderDatePicker(
+            "Last Inspection Date",
+            lastInspectionDate,
+            setLastInspectionDate,
+            showLastInspectionPicker,
+            setShowLastInspectionPicker,
+          )}
+
+          {renderDatePicker(
+            "Next Inspection Date",
+            nextInspectionDate,
+            setNextInspectionDate,
+            showNextInspectionPicker,
+            setShowNextInspectionPicker,
+          )}
+
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Location *</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                focusedField === "location" && formStyles.inputFocused,
+              ]}
+              placeholder="e.g., Forward Locker, Bridge"
+              placeholderTextColor={colors.textTertiary}
+              value={location}
+              onChangeText={setLocation}
+              onFocus={() => setFocusedField("location")}
+              onBlur={() => setFocusedField(null)}
+            />
+          </View>
+
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Notes</Text>
+            <TextInput
+              style={[
+                formStyles.input,
+                formStyles.textArea,
+                focusedField === "notes" && formStyles.inputFocused,
+              ]}
+              placeholder="Additional notes..."
+              placeholderTextColor={colors.textTertiary}
+              value={notes}
+              onChangeText={setNotes}
+              onFocus={() => setFocusedField("notes")}
+              onBlur={() => setFocusedField(null)}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+          </View>
+        </ScrollView>
+
+        <View
+          style={[
+            formStyles.bottomBar,
+            { paddingBottom: insets.bottom },
+          ]}
+        >
+          <TouchableOpacity
+            style={[
+              formStyles.submitButton,
+              !canSubmit && formStyles.submitButtonDisabled,
+            ]}
+            onPress={handleSubmit}
+            disabled={!canSubmit || isSubmitting}
+            activeOpacity={0.8}
+          >
+            {isSubmitting ? (
+              <ActivityIndicator color="#FFFFFF" size="small" />
+            ) : (
+              <Text style={formStyles.submitButtonText}>Save</Text>
+            )}
+          </TouchableOpacity>
         </View>
-
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Serial Number</Text>
-          <TextInput
-            style={formStyles.input}
-            placeholder="Serial number (optional)"
-            placeholderTextColor={colors.textTertiary}
-            value={serialNumber}
-            onChangeText={setSerialNumber}
-          />
-        </View>
-
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Manufacturer</Text>
-          <TextInput
-            style={formStyles.input}
-            placeholder="Manufacturer (optional)"
-            placeholderTextColor={colors.textTertiary}
-            value={manufacturer}
-            onChangeText={setManufacturer}
-          />
-        </View>
-
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Model</Text>
-          <TextInput
-            style={formStyles.input}
-            placeholder="Model (optional)"
-            placeholderTextColor={colors.textTertiary}
-            value={model}
-            onChangeText={setModel}
-          />
-        </View>
-
-        {renderDatePicker(
-          "Purchase Date",
-          purchaseDate,
-          setPurchaseDate,
-          showPurchaseDatePicker,
-          setShowPurchaseDatePicker,
-        )}
-
-        {renderDatePicker(
-          "Last Inspection Date",
-          lastInspectionDate,
-          setLastInspectionDate,
-          showLastInspectionPicker,
-          setShowLastInspectionPicker,
-        )}
-
-        {renderDatePicker(
-          "Next Inspection Date",
-          nextInspectionDate,
-          setNextInspectionDate,
-          showNextInspectionPicker,
-          setShowNextInspectionPicker,
-        )}
-
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Location *</Text>
-          <TextInput
-            style={formStyles.input}
-            placeholder="e.g., Forward Locker, Bridge"
-            placeholderTextColor={colors.textTertiary}
-            value={location}
-            onChangeText={setLocation}
-          />
-        </View>
-
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Notes</Text>
-          <TextInput
-            style={[formStyles.input, formStyles.textArea]}
-            placeholder="Additional notes..."
-            placeholderTextColor={colors.textTertiary}
-            value={notes}
-            onChangeText={setNotes}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-          />
-        </View>
-      </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

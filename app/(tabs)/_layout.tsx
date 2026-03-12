@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 import {
   NativeTabs,
   Icon,
@@ -15,7 +15,7 @@ import { colors } from "../../styles/commonStyles";
 const isIOS26 = Platform.OS === "ios" && Number(Platform.Version) >= 26;
 
 export default function TabLayout() {
-  const { userRole, userId } = useAuth();
+  const { userRole, userId, isLoading } = useAuth();
   const { getIssuesForUser, getMaintenanceTasksForUser } = useData();
 
   const openIssueCount = useMemo(() => {
@@ -34,6 +34,10 @@ export default function TabLayout() {
   const sharedTriggerProps = {
     disablePopToTop: Platform.OS === "android",
   };
+
+  if (isLoading || !userRole) {
+    return <View style={{ flex: 1, backgroundColor: colors.surfaceTwo }} />;
+  }
 
   return (
     <NativeTabs

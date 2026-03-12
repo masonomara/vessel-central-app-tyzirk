@@ -6,6 +6,9 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Platform,
+  KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { colors, formStyles } from "../styles/commonStyles";
@@ -41,6 +44,9 @@ export default function AddContactScreen() {
   const [selectedVesselIds, setSelectedVesselIds] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+
+  const canSubmit = name.trim().length > 0 && phone.trim().length > 0;
 
   const toggleVessel = (vesselId: string) => {
     setSelectedVesselIds((prev) =>
@@ -107,164 +113,187 @@ export default function AddContactScreen() {
               <Text style={formStyles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           ),
-          headerRight: () => (
-            <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
-              <Text
-                style={[formStyles.saveText, isSubmitting && { opacity: 0.5 }]}
-              >
-                Save
-              </Text>
-            </TouchableOpacity>
-          ),
         }}
       />
 
-      <ScrollView
-        style={formStyles.scrollView}
-        contentContainerStyle={[
-          formStyles.scrollContent,
-          { paddingBottom: insets.bottom },
-        ]}
-        showsVerticalScrollIndicator={false}
-        {...scrollProps}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Name *</Text>
-          <TextInput
-            style={formStyles.input}
-            placeholder="Contact name"
-            placeholderTextColor={colors.textTertiary}
-            value={name}
-            onChangeText={setName}
-            maxLength={100}
-          />
-        </View>
+        <ScrollView
+          style={formStyles.scrollView}
+          contentContainerStyle={[
+            formStyles.scrollContent,
+            { paddingBottom: insets.bottom },
+          ]}
+          showsVerticalScrollIndicator={false}
+          {...scrollProps}
+        >
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Name *</Text>
+            <TextInput
+              style={[formStyles.input, focusedField === "name" && formStyles.inputFocused]}
+              placeholder="Contact name"
+              placeholderTextColor={colors.textTertiary}
+              value={name}
+              onChangeText={setName}
+              onFocus={() => setFocusedField("name")}
+              onBlur={() => setFocusedField(null)}
+              maxLength={100}
+            />
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Role</Text>
-          <TextInput
-            style={formStyles.input}
-            placeholder="e.g., Captain, Electrician, Dock Master"
-            placeholderTextColor={colors.textTertiary}
-            value={role}
-            onChangeText={setRole}
-            maxLength={100}
-          />
-        </View>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Role</Text>
+            <TextInput
+              style={[formStyles.input, focusedField === "role" && formStyles.inputFocused]}
+              placeholder="e.g., Captain, Electrician, Dock Master"
+              placeholderTextColor={colors.textTertiary}
+              value={role}
+              onChangeText={setRole}
+              onFocus={() => setFocusedField("role")}
+              onBlur={() => setFocusedField(null)}
+              maxLength={100}
+            />
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Contact Type *</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={formStyles.optionsContainer}
-          >
-            {CONTACT_TYPES.map((type) => (
-              <TouchableOpacity
-                key={type}
-                style={[
-                  formStyles.optionChip,
-                  contactType === type && formStyles.optionChipActive,
-                ]}
-                onPress={() => setContactType(type)}
-              >
-                <Text
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Contact Type *</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={formStyles.optionsContainer}
+            >
+              {CONTACT_TYPES.map((type) => (
+                <TouchableOpacity
+                  key={type}
                   style={[
-                    formStyles.optionChipText,
-                    contactType === type && formStyles.optionChipTextActive,
+                    formStyles.optionChip,
+                    contactType === type && formStyles.optionChipActive,
                   ]}
+                  onPress={() => setContactType(type)}
                 >
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+                  <Text
+                    style={[
+                      formStyles.optionChipText,
+                      contactType === type && formStyles.optionChipTextActive,
+                    ]}
+                  >
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Phone *</Text>
-          <TextInput
-            style={formStyles.input}
-            placeholder="Phone number"
-            placeholderTextColor={colors.textTertiary}
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
-            maxLength={20}
-          />
-        </View>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Phone *</Text>
+            <TextInput
+              style={[formStyles.input, focusedField === "phone" && formStyles.inputFocused]}
+              placeholder="Phone number"
+              placeholderTextColor={colors.textTertiary}
+              value={phone}
+              onChangeText={setPhone}
+              onFocus={() => setFocusedField("phone")}
+              onBlur={() => setFocusedField(null)}
+              keyboardType="phone-pad"
+              maxLength={20}
+            />
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Email</Text>
-          <TextInput
-            style={formStyles.input}
-            placeholder="Email address"
-            placeholderTextColor={colors.textTertiary}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            maxLength={100}
-          />
-        </View>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Email</Text>
+            <TextInput
+              style={[formStyles.input, focusedField === "email" && formStyles.inputFocused]}
+              placeholder="Email address"
+              placeholderTextColor={colors.textTertiary}
+              value={email}
+              onChangeText={setEmail}
+              onFocus={() => setFocusedField("email")}
+              onBlur={() => setFocusedField(null)}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              maxLength={100}
+            />
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Company</Text>
-          <TextInput
-            style={formStyles.input}
-            placeholder="Company name (optional)"
-            placeholderTextColor={colors.textTertiary}
-            value={company}
-            onChangeText={setCompany}
-            maxLength={100}
-          />
-        </View>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Company</Text>
+            <TextInput
+              style={[formStyles.input, focusedField === "company" && formStyles.inputFocused]}
+              placeholder="Company name (optional)"
+              placeholderTextColor={colors.textTertiary}
+              value={company}
+              onChangeText={setCompany}
+              onFocus={() => setFocusedField("company")}
+              onBlur={() => setFocusedField(null)}
+              maxLength={100}
+            />
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Vessels</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={formStyles.optionsContainer}
-          >
-            {userVessels.map((vessel) => (
-              <TouchableOpacity
-                key={vessel.id}
-                style={[
-                  formStyles.optionChip,
-                  selectedVesselIds.includes(vessel.id) &&
-                    formStyles.optionChipActive,
-                ]}
-                onPress={() => toggleVessel(vessel.id)}
-              >
-                <Text
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Vessels</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={formStyles.optionsContainer}
+            >
+              {userVessels.map((vessel) => (
+                <TouchableOpacity
+                  key={vessel.id}
                   style={[
-                    formStyles.optionChipText,
+                    formStyles.optionChip,
                     selectedVesselIds.includes(vessel.id) &&
-                      formStyles.optionChipTextActive,
+                      formStyles.optionChipActive,
                   ]}
+                  onPress={() => toggleVessel(vessel.id)}
                 >
-                  {vessel.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+                  <Text
+                    style={[
+                      formStyles.optionChipText,
+                      selectedVesselIds.includes(vessel.id) &&
+                        formStyles.optionChipTextActive,
+                    ]}
+                  >
+                    {vessel.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
 
-        <View style={formStyles.section}>
-          <Text style={formStyles.label}>Notes</Text>
-          <TextInput
-            style={[formStyles.input, formStyles.textArea]}
-            placeholder="Additional notes..."
-            placeholderTextColor={colors.textTertiary}
-            value={notes}
-            onChangeText={setNotes}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-          />
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Notes</Text>
+            <TextInput
+              style={[formStyles.input, formStyles.textArea, focusedField === "notes" && formStyles.inputFocused]}
+              placeholder="Additional notes..."
+              placeholderTextColor={colors.textTertiary}
+              value={notes}
+              onChangeText={setNotes}
+              onFocus={() => setFocusedField("notes")}
+              onBlur={() => setFocusedField(null)}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+          </View>
+        </ScrollView>
+
+        <View style={[formStyles.bottomBar, { paddingBottom: insets.bottom }]}>
+          <TouchableOpacity
+            style={[formStyles.submitButton, !canSubmit && formStyles.submitButtonDisabled]}
+            onPress={handleSubmit}
+            disabled={!canSubmit || isSubmitting}
+            activeOpacity={0.8}
+          >
+            {isSubmitting ? (
+              <ActivityIndicator color="#FFFFFF" size="small" />
+            ) : (
+              <Text style={formStyles.submitButtonText}>Save</Text>
+            )}
+          </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

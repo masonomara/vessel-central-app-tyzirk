@@ -106,9 +106,9 @@ export default function ManagerDashboard() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 8,
-                marginLeft: 4,
-                marginRight: 4,
+             gap: 10,
+                marginLeft: 8,
+                marginRight: 8,
               }}
             >
               <TouchableOpacity onPress={() => setShowSearch(true)}>

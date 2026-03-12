@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  StyleSheet,
   View,
   Text,
   TextInput,
@@ -10,9 +9,9 @@ import {
   KeyboardAvoidingView,
   ActivityIndicator,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams, Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors } from "../styles/commonStyles";
+import { colors, formStyles } from "../styles/commonStyles";
 import { scrollProps } from "../hooks/useTopPadding";
 import { IconSymbol } from "../components/IconSymbol";
 import { useAuth } from "../contexts/AuthContext";
@@ -39,6 +38,7 @@ export default function MemberSetupScreen() {
   const [position, setPosition] = useState("");
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const canSubmit = firstName.trim() && lastName.trim() && selectedRole;
 
@@ -62,59 +62,55 @@ export default function MemberSetupScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={formStyles.container}>
+      <Stack.Screen
+        options={{
+          title: "Create an Account",
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <Text style={formStyles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
       <KeyboardAvoidingView
-        style={styles.flex}
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-          >
-            <IconSymbol
-              ios_icon_name="chevron.left"
-              android_material_icon_name="arrow-back"
-              size={22}
-              color={colors.text}
-            />
-          </TouchableOpacity>
-        </View>
-
         <ScrollView
-          style={styles.scrollView}
+          style={formStyles.scrollView}
           contentContainerStyle={[
-            styles.scrollContent,
+            formStyles.scrollContent,
             { paddingBottom: insets.bottom },
           ]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           {...scrollProps}
         >
-          <Text style={styles.title}>Member Details</Text>
-          <Text style={styles.subtitle}>Tell us about yourself to get started.</Text>
-
           {/* Name row */}
-          <View style={styles.row}>
-            <View style={styles.halfField}>
-              <Text style={styles.label}>First Name</Text>
+          <View style={[formStyles.row, formStyles.section]}>
+            <View style={formStyles.flex1}>
+              <Text style={formStyles.label}>First Name</Text>
               <TextInput
-                style={styles.input}
+                style={[formStyles.input, focusedField === "firstName" && formStyles.inputFocused]}
                 value={firstName}
                 onChangeText={setFirstName}
+                onFocus={() => setFocusedField("firstName")}
+                onBlur={() => setFocusedField(null)}
                 placeholder="John"
                 placeholderTextColor={colors.textTertiary}
                 autoCapitalize="words"
                 autoCorrect={false}
               />
             </View>
-            <View style={styles.halfField}>
-              <Text style={styles.label}>Last Name</Text>
+            <View style={formStyles.flex1}>
+              <Text style={formStyles.label}>Last Name</Text>
               <TextInput
-                style={styles.input}
+                style={[formStyles.input, focusedField === "lastName" && formStyles.inputFocused]}
                 value={lastName}
                 onChangeText={setLastName}
+                onFocus={() => setFocusedField("lastName")}
+                onBlur={() => setFocusedField(null)}
                 placeholder="Smith"
                 placeholderTextColor={colors.textTertiary}
                 autoCapitalize="words"
@@ -124,12 +120,14 @@ export default function MemberSetupScreen() {
           </View>
 
           {/* Email */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Email</Text>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Email</Text>
             <TextInput
-              style={styles.input}
+              style={[formStyles.input, focusedField === "email" && formStyles.inputFocused]}
               value={email}
               onChangeText={setEmail}
+              onFocus={() => setFocusedField("email")}
+              onBlur={() => setFocusedField(null)}
               placeholder="john@example.com"
               placeholderTextColor={colors.textTertiary}
               keyboardType="email-address"
@@ -139,12 +137,14 @@ export default function MemberSetupScreen() {
           </View>
 
           {/* Phone */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Phone</Text>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Phone</Text>
             <TextInput
-              style={styles.input}
+              style={[formStyles.input, focusedField === "phone" && formStyles.inputFocused]}
               value={phone}
               onChangeText={setPhone}
+              onFocus={() => setFocusedField("phone")}
+              onBlur={() => setFocusedField(null)}
               placeholder="+1 (340) 555-0100"
               placeholderTextColor={colors.textTertiary}
               keyboardType="phone-pad"
@@ -152,12 +152,14 @@ export default function MemberSetupScreen() {
           </View>
 
           {/* Position */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Position / Title</Text>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Position / Title</Text>
             <TextInput
-              style={styles.input}
+              style={[formStyles.input, focusedField === "position" && formStyles.inputFocused]}
               value={position}
               onChangeText={setPosition}
+              onFocus={() => setFocusedField("position")}
+              onBlur={() => setFocusedField(null)}
               placeholder="e.g. Captain, Chief Engineer"
               placeholderTextColor={colors.textTertiary}
               autoCapitalize="words"
@@ -165,17 +167,29 @@ export default function MemberSetupScreen() {
           </View>
 
           {/* Role selector */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Role</Text>
-            <View style={styles.roleRow}>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Role</Text>
+            <View style={{ flexDirection: "row", gap: 10 }}>
               {ROLES.map((role) => {
                 const active = selectedRole === role.value;
                 return (
                   <TouchableOpacity
                     key={role.value}
                     style={[
-                      styles.roleOption,
-                      active && { borderColor: role.color, backgroundColor: `${role.color}12` },
+                      {
+                        flex: 1,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: 8,
+                        paddingVertical: 12,
+                        gap: 8,
+                        borderWidth: 1,
+                        borderColor: colors.borderSoft,
+                      },
+                      active && {
+                        backgroundColor: colors.surfaceThree,
+                        borderColor: colors.surfaceThree,
+                      },
                     ]}
                     onPress={() => setSelectedRole(role.value)}
                     activeOpacity={0.7}
@@ -183,14 +197,15 @@ export default function MemberSetupScreen() {
                     <IconSymbol
                       ios_icon_name={role.icon}
                       android_material_icon_name={role.androidIcon}
-                      size={22}
-                      color={active ? role.color : colors.textTertiary}
+                      size={20}
+                      color={active ? colors.text : colors.textTertiary}
                     />
                     <Text
-                      style={[
-                        styles.roleLabel,
-                        active && { color: role.color, fontWeight: "600" },
-                      ]}
+                      style={{
+                        fontSize: 14,
+                        fontWeight: active ? "600" : "500",
+                        color: active ? colors.text : colors.textSecondary,
+                      }}
                     >
                       {role.label}
                     </Text>
@@ -202,9 +217,9 @@ export default function MemberSetupScreen() {
         </ScrollView>
 
         {/* Bottom button */}
-        <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <View style={[formStyles.bottomBar, { paddingBottom: insets.bottom }]}>
           <TouchableOpacity
-            style={[styles.submitButton, !canSubmit && styles.submitButtonDisabled]}
+            style={[formStyles.submitButton, !canSubmit && formStyles.submitButtonDisabled]}
             onPress={handleComplete}
             disabled={!canSubmit || isLoading}
             activeOpacity={0.8}
@@ -212,7 +227,7 @@ export default function MemberSetupScreen() {
             {isLoading ? (
               <ActivityIndicator color="#FFFFFF" size="small" />
             ) : (
-              <Text style={styles.submitButtonText}>Continue</Text>
+              <Text style={formStyles.submitButtonText}>Continue</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -220,110 +235,3 @@ export default function MemberSetupScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surfaceOne,
-  },
-  flex: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "600",
-    color: colors.text,
-    letterSpacing: -0.5,
-    marginBottom: 6,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: colors.textSecondary,
-    marginBottom: 32,
-  },
-  field: {
-    marginBottom: 20,
-  },
-  row: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 20,
-  },
-  halfField: {
-    flex: 1,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.textSecondary,
-    marginBottom: 8,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  input: {
-    backgroundColor: colors.container,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: colors.text,
-    fontWeight: "500",
-    borderWidth: 1,
-    borderColor: colors.borderSoft,
-  },
-  roleRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  roleOption: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 8,
-    borderWidth: 1.5,
-    borderColor: colors.borderSoft,
-    backgroundColor: colors.container,
-  },
-  roleLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
-  bottomBar: {
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.borderSoft,
-    backgroundColor: colors.surfaceOne,
-  },
-  submitButton: {
-    backgroundColor: colors.text,
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  submitButtonDisabled: {
-    opacity: 0.4,
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
-    letterSpacing: 0.3,
-  },
-});

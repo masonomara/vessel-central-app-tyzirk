@@ -9,9 +9,11 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
+  KeyboardAvoidingView,
+  ActivityIndicator,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { colors } from '../styles/commonStyles';
+import { colors, formStyles } from '../styles/commonStyles';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
@@ -80,12 +82,21 @@ export default function AddPartsRequestScreen() {
   const [estimatedCost, setEstimatedCost] = useState('');
   const [attachments, setAttachments] = useState<Array<{ uri: string; type: string; name: string }>>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const selectedVessel = vessels.find(v => v.id === selectedVesselId);
 
+  const canSubmit =
+    partName.trim().length > 0 &&
+    description.trim().length > 0 &&
+    quantity.trim().length > 0 &&
+    !isNaN(Number(quantity)) &&
+    Number(quantity) > 0 &&
+    selectedVesselId.length > 0;
+
   if (userVessels.length === 0) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+      <View style={formStyles.container}>
         <Stack.Screen options={{ title: 'Request Parts' }} />
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 }}>
           <IconSymbol ios_icon_name="sailboat" android_material_icon_name="sailing" size={48} color={colors.textTertiary} />
@@ -100,7 +111,7 @@ export default function AddPartsRequestScreen() {
   const handlePickImage = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
+
       if (status !== 'granted') {
         Alert.alert('Permission Required', 'Please grant camera roll permissions to upload images.');
         return;
@@ -244,27 +255,26 @@ export default function AddPartsRequestScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+    <KeyboardAvoidingView
+      style={formStyles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+    >
       <Stack.Screen
         options={{
           title: 'Request Parts',
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.cancelText}>Cancel</Text>
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
-              <Text style={[styles.saveText, isSubmitting && { opacity: 0.5 }]}>Submit</Text>
+              <Text style={formStyles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           ),
         }}
       />
 
       <ScrollView
-        style={styles.scrollView}
+        style={formStyles.scrollView}
         contentContainerStyle={[
-          styles.scrollContent,
+          formStyles.scrollContent,
           { paddingBottom: insets.bottom },
         ]}
         showsVerticalScrollIndicator={false}
@@ -296,21 +306,23 @@ export default function AddPartsRequestScreen() {
           }}
         />
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Part Number (Optional)</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Part Number (Optional)</Text>
           <TextInput
-            style={styles.input}
+            style={[formStyles.input, focusedField === 'partNumber' && formStyles.inputFocused]}
             placeholder="Manufacturer part number or model"
             placeholderTextColor={colors.textSecondary}
             value={partNumber}
             onChangeText={setPartNumber}
+            onFocus={() => setFocusedField('partNumber')}
+            onBlur={() => setFocusedField(null)}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Description of Issue *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Description of Issue *</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[formStyles.input, formStyles.textArea, focusedField === 'description' && formStyles.inputFocused]}
             placeholder="Describe the problem, symptoms, and why this part is needed..."
             placeholderTextColor={colors.textSecondary}
             value={description}
@@ -318,6 +330,8 @@ export default function AddPartsRequestScreen() {
             multiline
             numberOfLines={5}
             textAlignVertical="top"
+            onFocus={() => setFocusedField('description')}
+            onBlur={() => setFocusedField(null)}
           />
         </View>
 
@@ -336,19 +350,19 @@ export default function AddPartsRequestScreen() {
           }}
         />
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Vessel *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Vessel *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {userVessels.map((vessel) => (
               <TouchableOpacity
                 key={vessel.id}
                 style={[
-                  styles.optionChip,
-                  selectedVesselId === vessel.id && styles.optionChipActive,
+                  formStyles.optionChip,
+                  selectedVesselId === vessel.id && formStyles.optionChipActive,
                 ]}
                 onPress={() => setSelectedVesselId(vessel.id)}
               >
@@ -360,8 +374,8 @@ export default function AddPartsRequestScreen() {
                 />
                 <Text
                   style={[
-                    styles.optionChipText,
-                    selectedVesselId === vessel.id && styles.optionChipTextActive,
+                    formStyles.optionChipText,
+                    selectedVesselId === vessel.id && formStyles.optionChipTextActive,
                   ]}
                 >
                   {vessel.name}
@@ -371,26 +385,26 @@ export default function AddPartsRequestScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Location on Vessel *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Location on Vessel *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {VESSEL_LOCATIONS.map((location) => (
               <TouchableOpacity
                 key={location}
                 style={[
-                  styles.optionChip,
-                  vesselLocation === location && styles.optionChipActive,
+                  formStyles.optionChip,
+                  vesselLocation === location && formStyles.optionChipActive,
                 ]}
                 onPress={() => setVesselLocation(location)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
-                    vesselLocation === location && styles.optionChipTextActive,
+                    formStyles.optionChipText,
+                    vesselLocation === location && formStyles.optionChipTextActive,
                   ]}
                 >
                   {location}
@@ -400,8 +414,8 @@ export default function AddPartsRequestScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Urgency Level *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Urgency Level *</Text>
           <View style={styles.urgencyGrid}>
             {URGENCY_LEVELS.map((level) => (
               <TouchableOpacity
@@ -427,33 +441,33 @@ export default function AddPartsRequestScreen() {
                     urgency === level && styles.urgencyTextActive,
                   ]}
                 >
-                  {level.toUpperCase()}
+                  {level.charAt(0).toUpperCase() + level.slice(1)}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Category *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Category *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {PART_CATEGORIES.map((cat) => (
               <TouchableOpacity
                 key={cat}
                 style={[
-                  styles.optionChip,
-                  category === cat && styles.optionChipActive,
+                  formStyles.optionChip,
+                  category === cat && formStyles.optionChipActive,
                 ]}
                 onPress={() => setCategory(cat)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
-                    category === cat && styles.optionChipTextActive,
+                    formStyles.optionChipText,
+                    category === cat && formStyles.optionChipTextActive,
                   ]}
                 >
                   {cat}
@@ -463,38 +477,42 @@ export default function AddPartsRequestScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Preferred Vendor (Optional)</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Preferred Vendor (Optional)</Text>
           <TextInput
-            style={styles.input}
+            style={[formStyles.input, focusedField === 'preferredVendor' && formStyles.inputFocused]}
             placeholder="Specific supplier or brand preference"
             placeholderTextColor={colors.textSecondary}
             value={preferredVendor}
             onChangeText={setPreferredVendor}
+            onFocus={() => setFocusedField('preferredVendor')}
+            onBlur={() => setFocusedField(null)}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Estimated Cost (Optional)</Text>
-          <View style={styles.costInputContainer}>
-            <Text style={styles.currencySymbol}>$</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Estimated Cost (Optional)</Text>
+          <View style={[formStyles.costInputContainer, focusedField === 'estimatedCost' && formStyles.inputFocused]}>
+            <Text style={formStyles.currencySymbol}>$</Text>
             <TextInput
-              style={[styles.input, styles.costInput]}
+              style={[formStyles.input, formStyles.costInput]}
               placeholder="0.00"
               placeholderTextColor={colors.textSecondary}
               value={estimatedCost}
               onChangeText={setEstimatedCost}
               keyboardType="decimal-pad"
+              onFocus={() => setFocusedField('estimatedCost')}
+              onBlur={() => setFocusedField(null)}
             />
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Supporting Photos/Videos</Text>
-          <Text style={styles.helperText}>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Supporting Photos/Videos</Text>
+          <Text style={formStyles.helperText}>
             Add photos or videos showing the issue or part needed
           </Text>
-          
+
           <View style={styles.attachmentButtons}>
             <TouchableOpacity style={styles.attachButton} onPress={handlePickImage}>
               <IconSymbol
@@ -551,47 +569,27 @@ export default function AddPartsRequestScreen() {
             </View>
           )}
         </View>
-
-        <TouchableOpacity
-          style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
-          onPress={handleSubmit}
-          disabled={isSubmitting}
-        >
-          <IconSymbol
-            ios_icon_name="paperplane.fill"
-            android_material_icon_name="send"
-            size={20}
-            color={colors.text}
-          />
-          <Text style={styles.submitButtonText}>
-            {isSubmitting ? 'Submitting...' : 'Submit Parts Request'}
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
-    </View>
+
+      <View style={[formStyles.bottomBar, { paddingBottom: insets.bottom }]}>
+        <TouchableOpacity
+          style={[formStyles.submitButton, !canSubmit && formStyles.submitButtonDisabled]}
+          onPress={handleSubmit}
+          disabled={!canSubmit || isSubmitting}
+          activeOpacity={0.8}
+        >
+          {isSubmitting ? (
+            <ActivityIndicator color="#FFFFFF" size="small" />
+          ) : (
+            <Text style={formStyles.submitButtonText}>Submit</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  cancelText: {
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  saveText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.accent,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
   infoCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -607,80 +605,6 @@ const styles = StyleSheet.create({
     color: colors.text,
     lineHeight: 20,
   },
-  section: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  helperText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    marginBottom: 12,
-  },
-  input: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  textArea: {
-    minHeight: 120,
-    paddingTop: 14,
-  },
-  costInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingLeft: 16,
-  },
-  currencySymbol: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginRight: 8,
-  },
-  costInput: {
-    flex: 1,
-    borderWidth: 0,
-    paddingLeft: 0,
-  },
-  optionsContainer: {
-    gap: 8,
-  },
-  optionChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: colors.surfaceOne,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 6,
-  },
-  optionChipActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  optionChipText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  optionChipTextActive: {
-    color: colors.text,
-  },
   urgencyGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -695,7 +619,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     borderWidth: 2,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
     gap: 12,
   },
   urgencyCardActive: {
@@ -728,7 +652,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
     gap: 8,
   },
   attachButtonText: {
@@ -747,29 +671,11 @@ const styles = StyleSheet.create({
     padding: 12,
     gap: 12,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   attachmentName: {
     flex: 1,
     fontSize: 14,
-    color: colors.text,
-  },
-  submitButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.accent,
-    borderRadius: 12,
-    paddingVertical: 16,
-    marginTop: 8,
-    gap: 8,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
     color: colors.text,
   },
 });
