@@ -153,7 +153,13 @@ function RootLayoutContent() {
         />
         <Stack.Screen
           name="detail-vessel"
-          options={{ title: "Vessel Details", headerBackTitle: "Back", ...headerWithBg }}
+          options={{
+            title: "",
+            headerBackTitle: "Back",
+            headerTransparent: true,
+            headerTintColor: "#fff",
+            headerShadowVisible: false,
+          }}
         />
 
         {/* Operation screens */}

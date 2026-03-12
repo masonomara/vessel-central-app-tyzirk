@@ -55,26 +55,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     overflow: "hidden",
-    padding: 4,
+    padding: 0,
   },
   image: {
     width: 80,
     height: "100%",
-    borderRadius: 6,
+  
     aspectRatio: 1,
   },
   iconFallback: {
     width: 80,
     alignSelf: "stretch",
-    borderRadius: 12,
+  
     backgroundColor: colors.surfaceTwo,
     alignItems: "center",
     justifyContent: "center",
   },
   textContent: {
     flex: 1,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
   },
   title: {
     fontSize: 16,

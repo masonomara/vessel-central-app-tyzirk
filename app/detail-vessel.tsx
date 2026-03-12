@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { StyleSheet, View, Text, ScrollView, Image } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import { colors } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { IconSymbol } from "../components/IconSymbol";
@@ -8,7 +9,6 @@ import { ListItemCard } from "../components/ListItemCard";
 import { CollapsibleSectionHeader } from "../components/CollapsibleSectionHeader";
 import { DetailRow } from "../components/DetailRow";
 import { VesselAnalyticsSection } from "../components/VesselAnalyticsSection";
-import { scrollProps } from "../hooks/useTopPadding";
 import { formatDate, formatDueDate, formatLabel, getPriorityBadgeColors } from "../utils/formatting";
 import {
   formatEventDateRange,
@@ -72,56 +72,32 @@ export default function VesselDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
-      <Stack.Screen options={{ title: vessel.name }} />
+      <Stack.Screen options={{ title: "", headerTransparent: true, headerTintColor: "#fff" }} />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
-        {...scrollProps}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.titleSection}>
+        <View style={styles.heroSection}>
           {vessel.image ? (
-            <Image source={vessel.image} style={styles.vesselImage} />
+            <Image source={vessel.image} style={styles.heroImage} />
           ) : (
-            <View
-              style={[styles.iconCircle, { backgroundColor: colors.text + "20" }]}
-            >
+            <View style={styles.heroFallback}>
               <IconSymbol
                 ios_icon_name="sailboat.fill"
                 android_material_icon_name="sailing"
-                size={40}
-                color={colors.text}
+                size={48}
+                color="#ffffff80"
               />
             </View>
           )}
-          <Text style={styles.title}>{vessel.name}</Text>
-          <Text style={styles.subtitle}>{vessel.location}</Text>
-          <View style={styles.badges}>
-            <View
-              style={[
-                styles.statusBadge,
-                {
-                  backgroundColor:
-                    (vessel.status === "active"
-                      ? colors.success
-                      : colors.warning) + "30",
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.statusText,
-                  {
-                    color:
-                      vessel.status === "active"
-                        ? colors.success
-                        : colors.warning,
-                  },
-                ]}
-              >
-                {vessel.status.toUpperCase()}
-              </Text>
-            </View>
+          <LinearGradient
+            colors={["transparent", "rgba(0,0,0,0.7)"]}
+            style={styles.heroGradient}
+          />
+          <View style={[styles.heroTextContainer, { paddingBottom: 20, paddingTop: insets.top + 60 }]}>
+            <Text style={styles.heroTitle}>{vessel.name}</Text>
+            <Text style={styles.heroSubtitle}>{vessel.location}</Text>
           </View>
         </View>
 
@@ -359,40 +335,45 @@ const styles = StyleSheet.create({
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   errorText: { color: colors.textSecondary, fontSize: 16 },
   scrollContent: { paddingBottom: 0 },
-  titleSection: {
+  heroSection: {
+    position: "relative",
+    marginBottom:0,
+  },
+  heroImage: {
+    width: "100%",
+    height: 360,
+  },
+  heroFallback: {
+    width: "100%",
+    height: 360,
+    backgroundColor: colors.surfaceThree,
     alignItems: "center",
-    marginBottom: 24,
+    justifyContent: "center",
+  },
+  heroGradient: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 160,
+  },
+  heroTextContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
     paddingHorizontal: 20,
   },
-  vesselImage: {
-    width: "100%",
-    height: 200,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  title: {
+  heroTitle: {
     fontSize: 28,
     fontWeight: "600",
-    color: colors.text,
-    marginBottom: 4,
+    color: "#fff",
+    marginBottom: 2,
   },
-  subtitle: {
+  heroSubtitle: {
     fontSize: 16,
-    color: colors.textSecondary,
-    marginBottom: 12,
+    color: "rgba(255,255,255,0.92)",
   },
-  badges: { flexDirection: "row", gap: 8 },
-  statusBadge: { paddingHorizontal: 8, paddingVertical: 6, borderRadius: 8 },
-  statusText: { fontSize: 12, fontWeight: "600" },
-  statsRow: { flexDirection: "row", gap: 12, marginBottom: 24 },
   listArea: {},
   sectionDivider: {
     height: 1,
