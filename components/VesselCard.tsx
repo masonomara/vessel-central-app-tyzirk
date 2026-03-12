@@ -1,6 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Text, Image } from "react-native";
-import { PressableCard } from "./PressableCard";
+import { StyleSheet, View, Text, Image, TouchableOpacity } from "react-native";
 import { IconSymbol } from "./IconSymbol";
 import { colors } from "../styles/commonStyles";
 import type { Vessel } from "../types";
@@ -15,129 +14,84 @@ export const VesselCard = React.memo(function VesselCard({
   onPress,
 }: VesselCardProps) {
   return (
-    <PressableCard style={styles.card} onPress={onPress}>
-      <View style={styles.row}>
-        {vessel.image ? (
-          <Image source={vessel.image} style={styles.image} />
-        ) : (
-          <View style={styles.iconFallback}>
-            <IconSymbol
-              ios_icon_name="sailboat.fill"
-              android_material_icon_name="sailing"
-              size={24}
-              color={colors.accent}
-            />
-          </View>
-        )}
-        <View style={styles.info}>
-          <Text style={styles.name} numberOfLines={1}>
-            {vessel.name}
-          </Text>
-          <Text style={styles.location} numberOfLines={1}>
-            {vessel.location}
-          </Text>
-          <View style={styles.footer}>
-            <View
-              style={[
-                styles.statusBadge,
-                {
-                  backgroundColor:
-                    (vessel.status === "active"
-                      ? colors.success
-                      : colors.warning) + "30",
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.statusText,
-                  {
-                    color:
-                      vessel.status === "active"
-                        ? colors.success
-                        : colors.warning,
-                  },
-                ]}
-              >
-                {vessel.status.toUpperCase()}
-              </Text>
-            </View>
-            <View style={styles.crewBadge}>
-              <IconSymbol
-                ios_icon_name="person.2.fill"
-                android_material_icon_name="groups"
-                size={14}
-                color={colors.textSecondary}
-              />
-              <Text style={styles.crewText}>{vessel.crewCount}</Text>
-            </View>
-          </View>
+    <TouchableOpacity style={styles.card} onPress={onPress}>
+      {vessel.image ? (
+        <Image source={vessel.image} style={styles.image} />
+      ) : (
+        <View style={styles.iconFallback}>
+          <IconSymbol
+            ios_icon_name="sailboat.fill"
+            android_material_icon_name="sailing"
+            size={28}
+            color={colors.textSecondary}
+          />
         </View>
+      )}
+      <View style={styles.textContent}>
+        <Text style={styles.title} numberOfLines={1}>
+          {vessel.name}
+        </Text>
+        <Text style={styles.description} numberOfLines={1}>
+          {vessel.location}
+        </Text>
+        <Text style={styles.metaText}>
+          {vessel.status.charAt(0).toUpperCase() + vessel.status.slice(1)}
+          {` \u2022 ${vessel.crewCount} crew`}
+          {vessel.engineHours ? ` \u2022 ${vessel.engineHours.toLocaleString()} engine hrs` : ""}
+        </Text>
       </View>
-    </PressableCard>
+    </TouchableOpacity>
   );
 });
 
 const styles = StyleSheet.create({
   card: {
+    backgroundColor: colors.container,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    borderRadius: 12,
     marginHorizontal: 20,
     marginBottom: 12,
-  },
-  row: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 14,
+    overflow: "hidden",
+    padding: 4,
   },
   image: {
-    width: 72,
-    height: 72,
-    borderRadius: 12,
+    width: 80,
+    height: "100%",
+    borderRadius: 6,
+    aspectRatio: 1,
   },
   iconFallback: {
-    width: 72,
-    height: 72,
+    width: 80,
+    alignSelf: "stretch",
     borderRadius: 12,
-    backgroundColor: colors.accent + "20",
+    backgroundColor: colors.surfaceTwo,
     alignItems: "center",
     justifyContent: "center",
   },
-  info: {
+  textContent: {
     flex: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
   },
-  name: {
-    fontSize: 17,
+  title: {
+    fontSize: 16,
+    lineHeight: 21,
     fontWeight: "600",
     color: colors.text,
-    marginBottom: 2,
   },
-  location: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: 8,
+  description: {
+    fontSize: 15,
+    color: colors.text,
+    lineHeight: 20,
+    marginTop: 2,
   },
-  footer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  statusText: {
-    fontSize: 10,
-    fontWeight: "600",
-    letterSpacing: 0.5,
-  },
-  crewBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  crewText: {
+  metaText: {
     fontSize: 13,
     color: colors.textSecondary,
-    fontWeight: "600",
+    lineHeight: 17,
+    marginTop: 4,
   },
 });
