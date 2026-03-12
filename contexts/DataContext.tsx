@@ -120,7 +120,13 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 const STORAGE_KEY = '@vessel_co_data';
-const DATA_VERSION = 4;
+const DATA_VERSION = 5;
+
+const VESSEL_IMAGES: Record<string, number> = {
+  '1': require('../assets/vessels/yacht-1.jpg'),
+  '2': require('../assets/vessels/yacht-2.jpg'),
+  '3': require('../assets/vessels/yacht-3.webp'),
+};
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [vessels, setVessels] = useState<Vessel[]>([
@@ -1694,7 +1700,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
 
         if (parsed.vessels) {
-          setVessels(parsed.vessels);
+          setVessels(parsed.vessels.map((v: Vessel) => ({
+            ...v,
+            image: VESSEL_IMAGES[v.id] ?? v.image,
+          })));
         }
 
         if (parsed.maintenanceTasks) {

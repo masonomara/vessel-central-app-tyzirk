@@ -184,7 +184,7 @@ export const ListItemCard = React.memo(
               ? indexScreenStyles.bottomRowWithCheckbox
               : undefined,
             inContainer && {
-              marginLeft: -8,
+              marginLeft: -4,
             },
           ]}
         >
@@ -199,7 +199,7 @@ export const ListItemCard = React.memo(
               ? indexScreenStyles.metaRowWithCheckbox
               : indexScreenStyles.metaRow,
             inContainer && {
-              marginLeft: 53,
+              marginLeft: 57,
             },
           ]}
         >
