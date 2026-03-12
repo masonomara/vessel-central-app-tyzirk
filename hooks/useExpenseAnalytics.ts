@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { Expense } from '../types';
+import { Expense, CharterLog } from '../types';
 
-export function useExpenseAnalytics(expenses: Expense[]) {
+export function useExpenseAnalytics(expenses: Expense[], charterLogs?: CharterLog[]) {
   const expensesByMonth = useMemo(() => {
     const monthlyData: { [key: string]: number } = {};
     const now = new Date();
@@ -50,6 +50,47 @@ export function useExpenseAnalytics(expenses: Expense[]) {
     };
   }, [expenses]);
 
+  const revenueVsExpensesByMonth = useMemo(() => {
+    if (!charterLogs || charterLogs.length === 0) return null;
+
+    const now = new Date();
+    const months: string[] = [];
+    const revenueData: number[] = [];
+    const expenseData: number[] = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = date.toLocaleString('default', { month: 'short' });
+      months.push(key);
+
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+
+      const monthRevenue = charterLogs
+        .filter(c => {
+          const d = new Date(c.startDate);
+          return d >= monthStart && d <= monthEnd;
+        })
+        .reduce((sum, c) => sum + c.revenue, 0);
+
+      const monthExpenses = expenses
+        .filter(e => {
+          const d = new Date(e.date);
+          return d >= monthStart && d <= monthEnd;
+        })
+        .reduce((sum, e) => sum + e.amount, 0);
+
+      revenueData.push(monthRevenue);
+      expenseData.push(monthExpenses);
+    }
+
+    return {
+      labels: months,
+      datasets: [{ data: revenueData }, { data: expenseData }],
+      legend: ['Revenue', 'Expenses'],
+    };
+  }, [charterLogs, expenses]);
+
   const totalExpenses = useMemo(() => {
     return expenses.reduce((sum, exp) => sum + exp.amount, 0);
   }, [expenses]);
@@ -66,5 +107,6 @@ export function useExpenseAnalytics(expenses: Expense[]) {
     avgMonthlyExpense,
     expensesByMonth,
     expensesByCategory,
+    revenueVsExpensesByMonth,
   };
 }

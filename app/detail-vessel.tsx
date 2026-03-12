@@ -1,11 +1,12 @@
 import { useState, useCallback } from "react";
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
+import { StyleSheet, View, Text, ScrollView, Image } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
 import { colors } from "../styles/commonStyles";
 import { useData } from "../contexts/DataContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { ListItemCard } from "../components/ListItemCard";
 import { CollapsibleSectionHeader } from "../components/CollapsibleSectionHeader";
+import { DetailRow } from "../components/DetailRow";
 import { VesselAnalyticsSection } from "../components/VesselAnalyticsSection";
 import { scrollProps } from "../hooks/useTopPadding";
 import { formatDate, formatDueDate, formatLabel, getPriorityBadgeColors } from "../utils/formatting";
@@ -124,43 +125,27 @@ export default function VesselDetailScreen() {
           </View>
         </View>
 
-        {/* Engine Hours */}
-        <View style={styles.engineHoursSection}>
-          <View style={styles.engineHoursHeader}>
-            <View>
-              <Text style={styles.engineHoursLabel}>Engine Hours</Text>
-              <Text style={styles.engineHoursValue}>
-                {(vessel.engineHours || 0).toLocaleString()}
-              </Text>
-            </View>
-            <TouchableOpacity
-              style={styles.updateHoursButton}
-              onPress={() =>
-                router.push({
-                  pathname: "/operation-update-engine-hours",
-                  params: { vesselId: vessel.id },
-                })
-              }
-            >
-              <Text style={styles.updateHoursButtonText}>Update Hours</Text>
-            </TouchableOpacity>
-          </View>
-          {engineHourLogs.length > 0 && (
-            <View style={styles.engineLogList}>
-              {engineHourLogs.slice(0, 5).map((log) => (
-                <View key={log.id} style={styles.engineLogRow}>
-                  <Text style={styles.engineLogHours}>
-                    {log.newHours.toLocaleString()} hrs
-                  </Text>
-                  <Text style={styles.engineLogMeta}>
-                    {log.updatedByName} {"\u00B7"} {formatDate(log.timestamp)}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
+        <DetailRow
+          label="Engine Hours"
+          inline
+          button={{
+            label: "Update Hours",
+            onPress: () =>
+              router.push({
+                pathname: "/operation-update-engine-hours",
+                params: { vesselId: vessel.id },
+              }),
+            color: colors.text,
+          }}
+        />
+        {engineHourLogs.length > 0 && (
+          <DetailRow
+            label="Last Engine Update"
+            value={`${engineHourLogs[0].newHours.toLocaleString()} hours by ${engineHourLogs[0].updatedByName} ${formatDate(engineHourLogs[0].timestamp)}`}
+          />
+        )}
 
+        <View style={styles.sectionDivider} />
         <VesselAnalyticsSection vesselId={vessel.id} />
 
         <View style={styles.listArea}>
@@ -409,59 +394,9 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 12, fontWeight: "600" },
   statsRow: { flexDirection: "row", gap: 12, marginBottom: 24 },
   listArea: {},
-  engineHoursSection: {
-    marginHorizontal: 16,
-    marginBottom: 24,
-    backgroundColor: colors.container,
-    borderRadius: 12,
-    padding: 16,
-    gap: 12,
-  },
-  engineHoursHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  engineHoursLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.textSecondary,
-    marginBottom: 4,
-  },
-  engineHoursValue: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: colors.text,
-  },
-  updateHoursButton: {
-    backgroundColor: colors.accent + "20",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  updateHoursButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.accent,
-  },
-  engineLogList: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.surfaceThree,
-    paddingTop: 12,
-    gap: 8,
-  },
-  engineLogRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  engineLogHours: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.text,
-  },
-  engineLogMeta: {
-    fontSize: 12,
-    color: colors.textSecondary,
+  sectionDivider: {
+    height: 1,
+    backgroundColor: colors.borderSoft,
+    marginBottom: 16,
   },
 });

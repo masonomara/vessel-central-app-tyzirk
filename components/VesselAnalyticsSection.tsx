@@ -6,7 +6,7 @@ import { useExpenseAnalytics } from '../hooks/useExpenseAnalytics';
 import { LineChart, BarChart } from 'react-native-chart-kit';
 
 interface VesselAnalyticsSectionProps {
-  vesselId: string;
+  vesselId?: string;
 }
 
 export const VesselAnalyticsSection = React.memo(function VesselAnalyticsSection({
@@ -15,11 +15,11 @@ export const VesselAnalyticsSection = React.memo(function VesselAnalyticsSection
   const { width: screenWidth } = useWindowDimensions();
   const { expenses, charterLogs } = useData();
 
-  const vesselExpenses = expenses.filter(e => e.vesselId === vesselId);
-  const vesselCharters = charterLogs.filter(c => c.vesselId === vesselId);
+  const vesselExpenses = vesselId ? expenses.filter(e => e.vesselId === vesselId) : expenses;
+  const vesselCharters = vesselId ? charterLogs.filter(c => c.vesselId === vesselId) : charterLogs;
 
-  const { totalExpenses, avgMonthlyExpense, expensesByMonth, expensesByCategory } =
-    useExpenseAnalytics(vesselExpenses);
+  const { totalExpenses, avgMonthlyExpense, expensesByMonth, expensesByCategory, revenueVsExpensesByMonth } =
+    useExpenseAnalytics(vesselExpenses, vesselCharters);
 
   const charterRevenue = vesselCharters.reduce((sum, c) => sum + c.revenue, 0);
   const charterProfit = vesselCharters.reduce(
@@ -35,38 +35,37 @@ export const VesselAnalyticsSection = React.memo(function VesselAnalyticsSection
   }
 
   const chartWidth = screenWidth - 72;
+  const statCardWidth = (screenWidth - 32 - 8) / 2;
 
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
-        <View style={styles.statsGrid}>
-          <View style={styles.statItem}>
-            <Text style={styles.statLabel}>Total Expenses</Text>
-            <Text style={styles.statValue}>${totalExpenses.toLocaleString()}</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statLabel}>Avg Monthly</Text>
-            <Text style={styles.statValue}>
-              ${Math.round(avgMonthlyExpense).toLocaleString()}
-            </Text>
-          </View>
-          {hasCharters && (
-            <>
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Charter Revenue</Text>
-                <Text style={styles.statValue}>
-                  ${charterRevenue.toLocaleString()}
-                </Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Charter Profit</Text>
-                <Text style={[styles.statValue, { color: charterProfit >= 0 ? colors.greenForeground : colors.redForeground }]}>
-                  ${charterProfit.toLocaleString()}
-                </Text>
-              </View>
-            </>
-          )}
+      <View style={styles.statsGrid}>
+        <View style={[styles.statItem, { width: statCardWidth }]}>
+          <Text style={styles.statLabel}>Total Expenses</Text>
+          <Text style={styles.statValue}>${totalExpenses.toLocaleString()}</Text>
         </View>
+        <View style={[styles.statItem, { width: statCardWidth }]}>
+          <Text style={styles.statLabel}>Avg Monthly</Text>
+          <Text style={styles.statValue}>
+            ${Math.round(avgMonthlyExpense).toLocaleString()}
+          </Text>
+        </View>
+        {hasCharters && (
+          <>
+            <View style={[styles.statItem, { width: statCardWidth }]}>
+              <Text style={styles.statLabel}>Charter Revenue</Text>
+              <Text style={styles.statValue}>
+                ${charterRevenue.toLocaleString()}
+              </Text>
+            </View>
+            <View style={[styles.statItem, { width: statCardWidth }]}>
+              <Text style={styles.statLabel}>Charter Profit</Text>
+              <Text style={[styles.statValue, { color: charterProfit >= 0 ? colors.greenForeground : colors.redForeground }]}>
+                ${charterProfit.toLocaleString()}
+              </Text>
+            </View>
+          </>
+        )}
       </View>
 
       {hasExpenses && expensesByMonth.datasets[0].data.some(v => v > 0) && (
@@ -104,6 +103,22 @@ export const VesselAnalyticsSection = React.memo(function VesselAnalyticsSection
           />
         </View>
       )}
+
+      {revenueVsExpensesByMonth && revenueVsExpensesByMonth.datasets[0].data.some(v => v > 0) && (
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>Revenue vs Expenses</Text>
+          <BarChart
+            data={revenueVsExpensesByMonth}
+            width={chartWidth}
+            height={160}
+            chartConfig={analyticsChartConfig}
+            style={styles.chart}
+            fromZero
+            yAxisLabel="$"
+            yAxisSuffix=""
+          />
+        </View>
+      )}
     </View>
   );
 });
@@ -119,6 +134,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     gap: 12,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
   },
   cardLabel: {
     fontSize: 14,
@@ -129,21 +146,27 @@ const styles = StyleSheet.create({
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 8,
   },
   statItem: {
-    minWidth: '45%',
-    flex: 1,
+    backgroundColor: colors.container,
+    borderRadius: 12,
+    padding: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
   },
   statLabel: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '500',
     color: colors.textSecondary,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   statValue: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 16,
+    marginTop: 2,
+
+    fontWeight: '600',
     color: colors.text,
   },
   chart: {

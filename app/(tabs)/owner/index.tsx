@@ -11,12 +11,10 @@ import { colors } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ProgressRing } from "../../../components/ProgressRing";
-import { MiniBarChart } from "../../../components/MiniBarChart";
 import { ListItemCard } from "../../../components/ListItemCard";
 import { GroupedListContainer } from "../../../components/GroupedListContainer";
-import { PressableCard } from "../../../components/PressableCard";
 import { VesselCard } from "../../../components/VesselCard";
+import { VesselAnalyticsSection } from "../../../components/VesselAnalyticsSection";
 import GlobalSearch from "../../../components/GlobalSearch";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import {
@@ -37,7 +35,6 @@ export default function OwnerDashboard() {
   const {
     getVesselsForUser,
     getMaintenanceTasksForUser,
-    getExpensesForUser,
     getActivityLogsForUser,
     getSupplyRequestsForUser,
     getIssuesForUser,
@@ -56,13 +53,6 @@ export default function OwnerDashboard() {
     }
     return getMaintenanceTasksForUser(userId, userRole);
   }, [userId, userRole, getMaintenanceTasksForUser]);
-
-  const myExpenses = useMemo(() => {
-    if (!userId || !userRole) {
-      return [];
-    }
-    return getExpensesForUser(userId, userRole);
-  }, [userId, userRole, getExpensesForUser]);
 
   const myActivityLogs = useMemo(() => {
     if (!userId || !userRole) {
@@ -89,55 +79,6 @@ export default function OwnerDashboard() {
     return mySupplyRequests.filter((req) => req.status === "pending");
   }, [mySupplyRequests]);
 
-  const totalMonthlyExpenses = useMemo(() => {
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    return myExpenses
-      .filter((exp) => {
-        const expDate = new Date(exp.date);
-        return (
-          expDate.getMonth() === currentMonth &&
-          expDate.getFullYear() === currentYear
-        );
-      })
-      .reduce((sum, exp) => sum + exp.amount, 0);
-  }, [myExpenses]);
-
-  const lastMonthExpenses = useMemo(() => {
-    const lastMonth = new Date().getMonth() - 1;
-    const year =
-      lastMonth < 0 ? new Date().getFullYear() - 1 : new Date().getFullYear();
-    const month = lastMonth < 0 ? 11 : lastMonth;
-
-    return myExpenses
-      .filter((exp) => {
-        const expDate = new Date(exp.date);
-        return expDate.getMonth() === month && expDate.getFullYear() === year;
-      })
-      .reduce((sum, exp) => sum + exp.amount, 0);
-  }, [myExpenses]);
-
-  const last6MonthsExpenses = useMemo(() => {
-    const data: number[] = [];
-    const now = new Date();
-
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthExpenses = myExpenses
-        .filter((exp) => {
-          const expDate = new Date(exp.date);
-          return (
-            expDate.getMonth() === date.getMonth() &&
-            expDate.getFullYear() === date.getFullYear()
-          );
-        })
-        .reduce((sum, exp) => sum + exp.amount, 0);
-      data.push(monthExpenses);
-    }
-
-    return data;
-  }, [myExpenses]);
-
   const upcomingMaintenance = useMemo(() => {
     return myMaintenanceTasks
       .filter((task) => task.status !== "completed")
@@ -146,15 +87,6 @@ export default function OwnerDashboard() {
       )[0];
   }, [myMaintenanceTasks]);
 
-  const completionRate = useMemo(() => {
-    if (myMaintenanceTasks.length === 0) {
-      return 0;
-    }
-    const completed = myMaintenanceTasks.filter(
-      (t) => t.status === "completed",
-    ).length;
-    return (completed / myMaintenanceTasks.length) * 100;
-  }, [myMaintenanceTasks]);
 
   const getActivityTypeIcon = (type: string) => {
     switch (type) {
@@ -371,60 +303,7 @@ inContainer={true}
           ))}
         </View>
 
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Performance</Text>
-          </View>
-
-          <PressableCard
-            style={styles.performanceCard}
-            onPress={() => router.push("/boat-analytics")}
-          >
-            <View style={styles.performanceContent}>
-              <View style={styles.performanceLeft}>
-                <ProgressRing
-                  progress={completionRate}
-                  size={100}
-                  strokeWidth={10}
-                  color={colors.success}
-                  label="Complete"
-                />
-              </View>
-              <View style={styles.performanceRight}>
-                <Text style={styles.performanceTitle}>Task Completion</Text>
-                <Text style={styles.performanceValue}>
-                  {
-                    myMaintenanceTasks.filter((t) => t.status === "completed")
-                      .length
-                  }{" "}
-                  of {myMaintenanceTasks.length}
-                </Text>
-                <Text style={styles.performanceSubtext}>
-                  {
-                    myMaintenanceTasks.filter((t) => t.status !== "completed")
-                      .length
-                  }{" "}
-                  tasks remaining
-                </Text>
-              </View>
-            </View>
-          </PressableCard>
-
-          <PressableCard
-            style={styles.expenseChartCard}
-            onPress={() => router.push("/boat-analytics")}
-          >
-            <View style={styles.expenseChartHeader}>
-              <Text style={styles.expenseChartTitle}>Expense Trend</Text>
-              <Text style={styles.expenseChartSubtitle}>Last 6 months</Text>
-            </View>
-            <MiniBarChart
-              data={last6MonthsExpenses}
-              color={colors.success}
-              height={80}
-            />
-          </PressableCard>
-        </View>
+        <VesselAnalyticsSection />
 
         {upcomingMaintenance && (
           <View style={styles.section}>
@@ -499,59 +378,6 @@ const styles = StyleSheet.create({
   sectionCount: {
     fontSize: 15,
     color: colors.textTertiary,
-  },
-  // Performance styles (kept — not list items)
-  performanceCard: {
-    marginBottom: 12,
-    marginHorizontal: 20,
-  },
-  performanceContent: {
-    flexDirection: "row",
-  },
-  performanceLeft: {
-    marginRight: 20,
-    justifyContent: "center",
-  },
-  performanceRight: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  performanceTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 6,
-  },
-  performanceValue: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 4,
-    letterSpacing: -0.5,
-  },
-  performanceSubtext: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  // Expense chart styles (kept — not list items)
-  expenseChartCard: {
-    borderRadius: 16,
-    overflow: "hidden",
-    marginHorizontal: 20,
-    elevation: 5,
-  },
-  expenseChartHeader: {
-    marginBottom: 16,
-  },
-  expenseChartTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 2,
-  },
-  expenseChartSubtitle: {
-    fontSize: 13,
-    color: colors.textSecondary,
   },
   emptyText: {
     fontSize: 14,

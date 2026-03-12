@@ -124,7 +124,7 @@ function RootLayoutContent() {
         />
 
         {/* Analytics */}
-        <Stack.Screen name="boat-analytics" options={{ title: "Analytics", ...headerWithBg }} />
+        <Stack.Screen name="boat-analytics" options={{ title: "Total Analytics", ...headerWithBg }} />
 
         {/* Detail screens */}
         <Stack.Screen
