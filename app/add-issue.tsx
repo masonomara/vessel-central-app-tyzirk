@@ -460,7 +460,6 @@ export default function AddIssueScreen() {
                   formStyles.optionChip,
                   priority === p && [
                     formStyles.optionChipActive,
-                    { borderColor: getPriorityColor(p) },
                   ],
                 ]}
                 onPress={() => setPriority(p)}

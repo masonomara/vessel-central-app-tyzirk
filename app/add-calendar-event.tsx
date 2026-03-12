@@ -18,7 +18,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useData } from "../contexts/DataContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { CalendarEventType } from "../types/calendar";
-import { EVENT_TYPE_LABELS, getEventColor } from "../utils/calendar";
+import { EVENT_TYPE_LABELS } from "../utils/calendar";
 import { scrollProps } from "../hooks/useTopPadding";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -257,7 +257,6 @@ export default function AddCalendarEventScreen() {
                     formStyles.optionChip,
                     eventType === type && [
                       formStyles.optionChipActive,
-                      { borderColor: getEventColor(type) },
                     ],
                   ]}
                   onPress={() => setEventType(type)}
@@ -265,7 +264,7 @@ export default function AddCalendarEventScreen() {
                   <Text
                     style={[
                       formStyles.optionChipText,
-                      eventType === type && { color: getEventColor(type) },
+  
                     ]}
                   >
                     {EVENT_TYPE_LABELS[type]}

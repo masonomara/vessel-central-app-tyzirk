@@ -424,7 +424,6 @@ export default function AddPartsRequestScreen() {
                   styles.urgencyCard,
                   urgency === level && [
                     styles.urgencyCardActive,
-                    { borderColor: getUrgencyColor(level) },
                   ],
                 ]}
                 onPress={() => setUrgency(level)}

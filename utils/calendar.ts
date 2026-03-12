@@ -2,16 +2,6 @@
 import { CalendarEvent, CalendarEventType } from '../types/calendar';
 import { colors } from '../styles/commonStyles';
 
-const EVENT_TYPE_COLORS: Record<CalendarEventType, string> = {
-  maintenance: colors.warning,
-  charter: colors.accent,
-  inspection: colors.info,
-  crew_change: '#8B5CF6',
-  provisioning: '#10B981',
-  meeting: '#F59E0B',
-  other: colors.textTertiary,
-};
-
 export const EVENT_TYPE_LABELS: Record<CalendarEventType, string> = {
   maintenance: 'Maintenance',
   charter: 'Charter',
@@ -20,10 +10,6 @@ export const EVENT_TYPE_LABELS: Record<CalendarEventType, string> = {
   provisioning: 'Provisioning',
   meeting: 'Meeting',
   other: 'Other',
-};
-
-export const getEventColor = (type: CalendarEventType): string => {
-  return EVENT_TYPE_COLORS[type] || colors.textTertiary;
 };
 
 export const getEventTypeLabel = (type: CalendarEventType): string => {
