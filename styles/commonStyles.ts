@@ -784,15 +784,15 @@ export const analyticsChartConfig = {
   backgroundGradientFrom: colors.container,
   backgroundGradientTo: colors.container,
   decimalPlaces: 0,
-  color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
-  labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`,
+  color: (opacity = 1) => `rgba(30, 78, 173, ${opacity})`,
+  labelColor: () => colors.textSecondary,
   style: {
     borderRadius: 16,
   },
   propsForDots: {
     r: "6",
     strokeWidth: "2",
-    stroke: colors.accent,
+    stroke: colors.blueForeground,
   },
 };
 

@@ -79,7 +79,7 @@ export default function AnalyticsScreen() {
               </View>
               <View style={styles.statItem}>
                 <Text style={styles.statLabel}>Charter Profit</Text>
-                <Text style={[styles.statValue, { color: charterProfit >= 0 ? colors.success : colors.danger }]}>
+                <Text style={[styles.statValue, { color: charterProfit >= 0 ? colors.greenForeground : colors.redForeground }]}>
                   ${charterProfit.toLocaleString()}
                 </Text>
               </View>
