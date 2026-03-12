@@ -1,7 +1,6 @@
 import { StyleSheet } from "react-native";
 
 export const colors = {
-
   // Accent Colors
   accent: "#3B82F6", // Bright Blue (operational)
   gold: "#C9A84C", // Gold (premium accent)
@@ -181,6 +180,76 @@ export const buttonStyles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 0.3,
   },
+  approvalRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  approveButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 8,
+    borderRadius: 6,
+    backgroundColor: colors.greenForeground,
+  },
+  approveButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.container,
+  },
+  denyButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 8,
+    borderRadius: 6,
+    backgroundColor: colors.redForeground,
+  },
+  denyButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.container,
+  },
+  primaryButtonInverted: {
+    backgroundColor: colors.container,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    ...shadows.medium,
+  },
+  primaryButtonInvertedText: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "600",
+    letterSpacing: 0.3,
+  },
+  outlineButtonInverted: {
+    flexDirection: "row",
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    height: 44,
+    padding: 0,
+    margin: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+  },
+  outlineButtonInvertedText: {
+    color: colors.container,
+    fontSize: 16,
+    fontWeight: "600",
+    letterSpacing: 0.3,
+    padding: 0,
+    margin: 0,
+  },
 });
 
 export const commonStyles = StyleSheet.create({
@@ -344,8 +413,9 @@ export const indexScreenStyles = StyleSheet.create({
   },
   listContent: {
     backgroundColor: colors.surfaceOne,
+ 
   },
-  listHeaderComponent: { marginBottom: 20 },
+  listHeaderComponent: { paddingBottom: 20, backgroundColor: colors.surfaceOne },
 
   // Search bar
   searchContainer: {
@@ -403,7 +473,7 @@ export const indexScreenStyles = StyleSheet.create({
     justifyContent: "space-between",
     height: 56,
     paddingHorizontal: 20,
-    borderTopWidth: 3.5,
+    borderTopWidth: 4,
     borderColor: colors.surfaceTwo,
   },
   sectionHeader: {
@@ -424,7 +494,7 @@ export const indexScreenStyles = StyleSheet.create({
 
   // Card base
   card: {
-    backgroundColor: colors.surfaceOne,
+    backgroundColor: 'transparent',
     marginLeft: 0,
     paddingRight: 20,
     marginBottom: 16,
@@ -444,8 +514,8 @@ export const indexScreenStyles = StyleSheet.create({
     paddingTop: 16,
   },
   cardTitle: {
-    fontSize: 17,
-    lineHeight: 22,
+    fontSize: 16,
+    lineHeight: 21,
     fontWeight: "600",
     color: colors.text,
     flex: 1,
@@ -469,7 +539,7 @@ export const indexScreenStyles = StyleSheet.create({
     marginTop: 2,
   },
   priorityText: {
-    fontSize: 15,
+    fontSize: 14,
     color: colors.textSecondary,
     fontWeight: "500",
     borderRadius: 4,
@@ -491,10 +561,16 @@ export const indexScreenStyles = StyleSheet.create({
   },
 
   iconHolder: {
-    height: 20,
-    width: 20,
-    marginLeft: 24,
-    marginTop: 2,
+    height: 32,
+    width: 32,
+    marginLeft: 20,
+    marginRight: -8,
+    marginBottom: -8,
+    marginTop: -2,
+    backgroundColor: colors.surfaceTwo,
+    borderRadius: 100,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   // Offset for rows under checkbox
@@ -524,7 +600,201 @@ export const indexScreenStyles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
   },
+  listFooterText: {
+    textAlign: "center",
+    fontSize: 14,
+    fontStyle: "italic",
+    color: colors.textTertiary,
+    paddingTop: 24,
+    paddingBottom: 8,
+    paddingHorizontal: 20,
+  },
 });
+
+export const formStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.surfaceOne,
+    
+  },
+  cancelText: {
+    fontSize: 15,
+     fontWeight: "500",
+    color: colors.text,
+    paddingHorizontal: 8,
+  },
+  saveText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: colors.textSecondary,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: colors.container,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: colors.text,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+  },
+  inputFocused: {
+    borderColor: colors.textSecondary
+  },
+  textArea: {
+    minHeight: 100,
+    paddingTop: 14,
+    textAlignVertical: "top",
+  },
+  optionsContainer: {
+    gap: 8,
+  },
+  optionChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+  },
+  optionChipActive: {
+    backgroundColor: colors.surfaceThree,
+    borderColor: colors.surfaceThree,
+  },
+  optionChipText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: colors.text,
+  },
+  optionChipTextActive: {
+    color: colors.text,
+   
+  },
+  dateButton: {
+    backgroundColor: colors.container,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+  },
+  dateButtonText: {
+    fontSize: 16,
+    color: colors.text,
+  },
+  dateTimeRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  dateTimeButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: colors.container,
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+  },
+  dateTimeText: {
+    fontSize: 16,
+    color: colors.text,
+    fontWeight: "500",
+  },
+  switchRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  helperText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 6,
+  },
+  costInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.container,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    paddingLeft: 16,
+  },
+  currencySymbol: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+    marginRight: 8,
+  },
+  costInput: {
+    flex: 1,
+    borderWidth: 0,
+    paddingLeft: 0,
+  },
+  row: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  flex1: {
+    flex: 1,
+  },
+  bottomBar: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 12,
+
+    backgroundColor: colors.surfaceTwo,
+  },
+  submitButton: {
+    backgroundColor: colors.text,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  submitButtonDisabled: {
+    opacity: 0.4,
+  },
+  submitButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    letterSpacing: 0.3,
+  },
+});
+
+export const analyticsChartConfig = {
+  backgroundColor: colors.container,
+  backgroundGradientFrom: colors.container,
+  backgroundGradientTo: colors.container,
+  decimalPlaces: 0,
+  color: (opacity = 1) => `rgba(30, 78, 173, ${opacity})`,
+  labelColor: () => colors.textSecondary,
+  style: {
+    borderRadius: 16,
+  },
+  propsForDots: {
+    r: "6",
+    strokeWidth: "2",
+    stroke: colors.blueForeground,
+  },
+};
 
 export const detailScreenStyles = StyleSheet.create({
   scrollContent: {},
@@ -538,10 +808,11 @@ export const detailScreenStyles = StyleSheet.create({
     gap: 10,
   },
   title: {
-    fontSize: 24,
+    fontSize: 27,
     fontWeight: "600",
     color: colors.text,
     flex: 1,
+    lineHeight: 33,
   },
   subtitle: {
     fontSize: 17,

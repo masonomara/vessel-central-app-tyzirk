@@ -9,14 +9,18 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
+  KeyboardAvoidingView,
+  ActivityIndicator,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { colors } from '../styles/commonStyles';
+import { colors, formStyles } from '../styles/commonStyles';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { IconSymbol } from '../components/IconSymbol';
 import { TaskPriority } from '../types';
+import { getPriorityColor, PRIORITY_OPTIONS } from '../utils/formatting';
 import { scrollProps } from '../hooks/useTopPadding';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SUPPLY_CATEGORIES = [
   'Cleaning',
@@ -30,8 +34,6 @@ const SUPPLY_CATEGORIES = [
   'Linens',
   'Other',
 ];
-
-const PRIORITY_OPTIONS: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
 
 const UNIT_OPTIONS = [
   'units',
@@ -48,6 +50,7 @@ const UNIT_OPTIONS = [
 ];
 
 export default function AddSupplyRequestScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { addSupplyRequest, vessels, getVesselsForUser } = useData();
   const { userId, userName, userRole } = useAuth();
@@ -64,12 +67,24 @@ export default function AddSupplyRequestScreen() {
   const [category, setCategory] = useState('Other');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const selectedVessel = vessels.find(v => v.id === selectedVesselId);
 
+  const canSubmit =
+    itemName.trim().length > 0 &&
+    description.trim().length > 0 &&
+    quantity.trim().length > 0 &&
+    !isNaN(Number(quantity)) &&
+    Number(quantity) > 0 &&
+    estimatedCost.trim().length > 0 &&
+    !isNaN(Number(estimatedCost)) &&
+    Number(estimatedCost) >= 0 &&
+    selectedVesselId.length > 0;
+
   if (userVessels.length === 0) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+      <View style={formStyles.container}>
         <Stack.Screen options={{ title: 'Request Supplies' }} />
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 }}>
           <IconSymbol ios_icon_name="sailboat" android_material_icon_name="sailing" size={48} color={colors.textTertiary} />
@@ -154,55 +169,50 @@ export default function AddSupplyRequestScreen() {
     }
   };
 
-  const getPriorityColor = (p: TaskPriority) => {
-    switch (p) {
-      case 'urgent': return colors.danger;
-      case 'high': return colors.warning;
-      case 'medium': return colors.accent;
-      case 'low': return colors.success;
-      default: return colors.grey;
-    }
-  };
-
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+    <KeyboardAvoidingView
+      style={formStyles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+    >
       <Stack.Screen
         options={{
           title: 'Request Supplies',
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.cancelText}>Cancel</Text>
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
-              <Text style={[styles.saveText, isSubmitting && { opacity: 0.5 }]}>Submit</Text>
+              <Text style={formStyles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           ),
         }}
       />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        {...scrollProps}
+        style={formStyles.scrollView}
+        contentContainerStyle={[
+          formStyles.scrollContent,
+          { paddingBottom: insets.bottom },
+        ]}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
-        <View style={styles.section}>
-          <Text style={styles.label}>Item Name *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Item Name *</Text>
           <TextInput
-            style={styles.input}
+            style={[formStyles.input, focusedField === 'itemName' && formStyles.inputFocused]}
             placeholder="What do you need?"
             placeholderTextColor={colors.textSecondary}
             value={itemName}
             onChangeText={setItemName}
             maxLength={100}
+            onFocus={() => setFocusedField('itemName')}
+            onBlur={() => setFocusedField(null)}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Description *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Description *</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[formStyles.input, formStyles.textArea, focusedField === 'description' && formStyles.inputFocused]}
             placeholder="Detailed description, specifications, brand preferences..."
             placeholderTextColor={colors.textSecondary}
             value={description}
@@ -210,42 +220,46 @@ export default function AddSupplyRequestScreen() {
             multiline
             numberOfLines={4}
             textAlignVertical="top"
+            onFocus={() => setFocusedField('description')}
+            onBlur={() => setFocusedField(null)}
           />
         </View>
 
-        <View style={styles.row}>
-          <View style={[styles.section, styles.flex1]}>
-            <Text style={styles.label}>Quantity *</Text>
+        <View style={formStyles.row}>
+          <View style={[formStyles.section, formStyles.flex1]}>
+            <Text style={formStyles.label}>Quantity *</Text>
             <TextInput
-              style={styles.input}
+              style={[formStyles.input, focusedField === 'quantity' && formStyles.inputFocused]}
               placeholder="0"
               placeholderTextColor={colors.textSecondary}
               value={quantity}
               onChangeText={setQuantity}
               keyboardType="numeric"
+              onFocus={() => setFocusedField('quantity')}
+              onBlur={() => setFocusedField(null)}
             />
           </View>
 
-          <View style={[styles.section, styles.flex1]}>
-            <Text style={styles.label}>Unit *</Text>
+          <View style={[formStyles.section, formStyles.flex1]}>
+            <Text style={formStyles.label}>Unit *</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.unitOptionsContainer}
+              contentContainerStyle={formStyles.optionsContainer}
             >
               {UNIT_OPTIONS.slice(0, 3).map((u) => (
                 <TouchableOpacity
                   key={u}
                   style={[
-                    styles.unitChip,
-                    unit === u && styles.unitChipActive,
+                    formStyles.optionChip,
+                    unit === u && formStyles.optionChipActive,
                   ]}
                   onPress={() => setUnit(u)}
                 >
                   <Text
                     style={[
-                      styles.unitChipText,
-                      unit === u && styles.unitChipTextActive,
+                      formStyles.optionChipText,
+                      unit === u && formStyles.optionChipTextActive,
                     ]}
                   >
                     {u}
@@ -256,26 +270,26 @@ export default function AddSupplyRequestScreen() {
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>All Units</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>All Units</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {UNIT_OPTIONS.map((u) => (
               <TouchableOpacity
                 key={u}
                 style={[
-                  styles.optionChip,
-                  unit === u && styles.optionChipActive,
+                  formStyles.optionChip,
+                  unit === u && formStyles.optionChipActive,
                 ]}
                 onPress={() => setUnit(u)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
-                    unit === u && styles.optionChipTextActive,
+                    formStyles.optionChipText,
+                    unit === u && formStyles.optionChipTextActive,
                   ]}
                 >
                   {u}
@@ -285,41 +299,43 @@ export default function AddSupplyRequestScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Estimated Cost (USD) *</Text>
-          <View style={styles.costInputContainer}>
-            <Text style={styles.currencySymbol}>$</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Estimated Cost (USD) *</Text>
+          <View style={[formStyles.costInputContainer, focusedField === 'estimatedCost' && formStyles.inputFocused]}>
+            <Text style={formStyles.currencySymbol}>$</Text>
             <TextInput
-              style={[styles.input, styles.costInput]}
+              style={[formStyles.input, formStyles.costInput]}
               placeholder="0.00"
               placeholderTextColor={colors.textSecondary}
               value={estimatedCost}
               onChangeText={setEstimatedCost}
               keyboardType="decimal-pad"
+              onFocus={() => setFocusedField('estimatedCost')}
+              onBlur={() => setFocusedField(null)}
             />
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Vessel *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Vessel *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {userVessels.map((vessel) => (
               <TouchableOpacity
                 key={vessel.id}
                 style={[
-                  styles.optionChip,
-                  selectedVesselId === vessel.id && styles.optionChipActive,
+                  formStyles.optionChip,
+                  selectedVesselId === vessel.id && formStyles.optionChipActive,
                 ]}
                 onPress={() => setSelectedVesselId(vessel.id)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
-                    selectedVesselId === vessel.id && styles.optionChipTextActive,
+                    formStyles.optionChipText,
+                    selectedVesselId === vessel.id && formStyles.optionChipTextActive,
                   ]}
                 >
                   {vessel.name}
@@ -329,20 +345,20 @@ export default function AddSupplyRequestScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Priority *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Priority *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {PRIORITY_OPTIONS.map((p) => (
               <TouchableOpacity
                 key={p}
                 style={[
-                  styles.optionChip,
+                  formStyles.optionChip,
                   priority === p && [
-                    styles.optionChipActive,
+                    formStyles.optionChipActive,
                     { backgroundColor: getPriorityColor(p) },
                   ],
                 ]}
@@ -350,37 +366,37 @@ export default function AddSupplyRequestScreen() {
               >
                 <Text
                   style={[
-                    styles.optionChipText,
-                    priority === p && styles.optionChipTextActive,
+                    formStyles.optionChipText,
+                    priority === p && formStyles.optionChipTextActive,
                   ]}
                 >
-                  {p.toUpperCase()}
+                  {p.charAt(0).toUpperCase() + p.slice(1)}
                 </Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Category *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Category *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {SUPPLY_CATEGORIES.map((cat) => (
               <TouchableOpacity
                 key={cat}
                 style={[
-                  styles.optionChip,
-                  category === cat && styles.optionChipActive,
+                  formStyles.optionChip,
+                  category === cat && formStyles.optionChipActive,
                 ]}
                 onPress={() => setCategory(cat)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
-                    category === cat && styles.optionChipTextActive,
+                    formStyles.optionChipText,
+                    category === cat && formStyles.optionChipTextActive,
                   ]}
                 >
                   {cat}
@@ -390,10 +406,10 @@ export default function AddSupplyRequestScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Additional Notes</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Additional Notes</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[formStyles.input, formStyles.textArea, focusedField === 'notes' && formStyles.inputFocused]}
             placeholder="Any additional information, preferred vendors, urgency details..."
             placeholderTextColor={colors.textSecondary}
             value={notes}
@@ -401,151 +417,26 @@ export default function AddSupplyRequestScreen() {
             multiline
             numberOfLines={4}
             textAlignVertical="top"
+            onFocus={() => setFocusedField('notes')}
+            onBlur={() => setFocusedField(null)}
           />
         </View>
-
-        <TouchableOpacity
-          style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
-          onPress={handleSubmit}
-          disabled={isSubmitting}
-        >
-          <Text style={styles.submitButtonText}>
-            {isSubmitting ? 'Submitting...' : 'Submit Request'}
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
-    </View>
+
+      <View style={[formStyles.bottomBar, { paddingBottom: insets.bottom }]}>
+        <TouchableOpacity
+          style={[formStyles.submitButton, !canSubmit && formStyles.submitButtonDisabled]}
+          onPress={handleSubmit}
+          disabled={!canSubmit || isSubmitting}
+          activeOpacity={0.8}
+        >
+          {isSubmitting ? (
+            <ActivityIndicator color="#FFFFFF" size="small" />
+          ) : (
+            <Text style={formStyles.submitButtonText}>Submit</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  cancelText: {
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  saveText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.accent,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 120,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  flex1: {
-    flex: 1,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  textArea: {
-    minHeight: 100,
-    paddingTop: 14,
-  },
-  costInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingLeft: 16,
-  },
-  currencySymbol: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginRight: 8,
-  },
-  costInput: {
-    flex: 1,
-    borderWidth: 0,
-    paddingLeft: 0,
-  },
-  optionsContainer: {
-    gap: 8,
-  },
-  unitOptionsContainer: {
-    gap: 6,
-  },
-  optionChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: colors.surfaceOne,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  optionChipActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  optionChipText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  optionChipTextActive: {
-    color: colors.text,
-  },
-  unitChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
-    backgroundColor: colors.surfaceOne,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  unitChipActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  unitChipText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  unitChipTextActive: {
-    color: colors.text,
-  },
-  submitButton: {
-    backgroundColor: colors.accent,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-  },
-});

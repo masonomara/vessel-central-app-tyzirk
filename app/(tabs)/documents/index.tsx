@@ -6,10 +6,9 @@ import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ItemCard } from "../../../components/ItemCard";
+import { ListItemCard } from "../../../components/ListItemCard";
 import { Document } from "../../../types";
-import { formatDate } from "../../../utils/dateUtils";
-import { formatLabel } from "../../../utils/formatLabel";
+import { formatDate, formatLabel } from "../../../utils/formatting";
 import { scrollProps } from "../../../hooks/useTopPadding";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SearchBar } from "../../../components/SearchBar";
@@ -82,7 +81,7 @@ export default function DocumentsScreen() {
 
   const handleDocumentPress = useCallback(
     (doc: Document) => {
-      router.push({ pathname: "/document-detail", params: { id: doc.id } });
+      router.push({ pathname: "/detail-document", params: { id: doc.id } });
     },
     [router],
   );
@@ -97,7 +96,7 @@ export default function DocumentsScreen() {
       index: number;
       section: { data: Document[] };
     }) => (
-      <ItemCard
+      <ListItemCard
         title={doc.title}
         description={doc.description}
         vesselName={doc.vesselName}
@@ -164,18 +163,25 @@ export default function DocumentsScreen() {
   );
 
   return (
-    <View
-      style={[
-        indexScreenStyles.container,
-        { backgroundColor: colors.surfaceOne },
-      ]}
-    >
+    <>
       <Stack.Screen
         options={{
           title: "Documents",
+          headerLargeTitleEnabled: true,
+          headerLargeTitleStyle: {
+            fontSize: 28,
+            fontWeight: "600",
+            color: colors.text,
+          },
           headerRight: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                marginLeft: 8,
+                marginRight: 8,
+              }}
             >
               {(userRole === "manager" || userRole === "owner") && (
                 <TouchableOpacity onPress={() => router.push("/add-document")}>
@@ -194,6 +200,10 @@ export default function DocumentsScreen() {
       />
 
       <SectionList
+        style={[
+          indexScreenStyles.container,
+          { backgroundColor: colors.surfaceOne },
+        ]}
         sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
@@ -202,9 +212,17 @@ export default function DocumentsScreen() {
         ListFooterComponent={
           <View
             style={{
-              height: insets.bottom + 64,
+              paddingBottom: insets.bottom,
+              borderTopWidth: 4,
+              borderTopColor: colors.surfaceTwo,
             }}
-          />
+          >
+            {sections.reduce((sum, s) => sum + s.count, 0) > 0 && (
+              <Text style={indexScreenStyles.listFooterText}>
+                {sections.reduce((sum, s) => sum + s.count, 0)} {sections.reduce((sum, s) => sum + s.count, 0) === 1 ? "document" : "documents"} on file
+              </Text>
+            )}
+          </View>
         }
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={indexScreenStyles.listContent}
@@ -212,6 +230,6 @@ export default function DocumentsScreen() {
         stickySectionHeadersEnabled={false}
         {...scrollProps}
       />
-    </View>
+    </>
   );
 }

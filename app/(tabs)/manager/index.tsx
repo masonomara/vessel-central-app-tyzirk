@@ -6,23 +6,23 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { ItemCard } from "../../../components/ItemCard";
-import { ListWrapper } from "../../../components/ListWrapper";
-import { PressableCard } from "../../../components/PressableCard";
-import { colors, commonStyles } from "../../../styles/commonStyles";
+import { ListItemCard } from "../../../components/ListItemCard";
+import { GroupedListContainer } from "../../../components/GroupedListContainer";
+import { VesselCard } from "../../../components/VesselCard";
+import { colors, buttonStyles } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ProgressRing } from "../../../components/ProgressRing";
 import GlobalSearch from "../../../components/GlobalSearch";
-import { RealtimeFeed } from "../../../components/RealtimeFeed";
+import { ActivityFeed } from "../../../components/ActivityFeed";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
-import { getPriorityBadgeColors } from "../../../utils/colorUtils";
-import { formatDueDate } from "../../../utils/dateUtils";
+import { getPriorityBadgeColors, formatDueDate } from "../../../utils/formatting";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, router } from "expo-router";
 import { scrollProps } from "../../../hooks/useTopPadding";
 
 export default function ManagerDashboard() {
+  const insets = useSafeAreaInsets();
   const { userName, userId, userRole } = useAuth();
   const [showSearch, setShowSearch] = useState(false);
   const {
@@ -91,13 +91,25 @@ export default function ManagerDashboard() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+    <>
       <Stack.Screen
         options={{
-          title: "Manager Dashboard",
+          title: `Hello, ${userName?.split(" ")[0] || ""}`,
+          headerLargeTitleEnabled: true,
+          headerLargeTitleStyle: {
+            fontSize: 28,
+            fontWeight: "600",
+            color: colors.text,
+          },
           headerRight: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+             gap: 10,
+                marginLeft: 8,
+                marginRight: 8,
+              }}
             >
               <TouchableOpacity onPress={() => setShowSearch(true)}>
                 <IconSymbol
@@ -114,20 +126,14 @@ export default function ManagerDashboard() {
       <GlobalSearch visible={showSearch} onClose={() => setShowSearch(false)} />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        style={[styles.scrollView, { backgroundColor: colors.surfaceOne }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom },
+        ]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
-        <View style={styles.header}>
-          <Text style={styles.greeting}>
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
-          </Text>
-          <Text style={commonStyles.title}>Hello, {userName?.split(" ")[0]}</Text>
-        </View>
         {pendingApprovals.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -137,18 +143,18 @@ export default function ManagerDashboard() {
               </Text>
             </View>
 
-            <ListWrapper>
+            <GroupedListContainer>
               {pendingApprovals.slice(0, 3).map((approval, index) => {
                 const sliced = pendingApprovals.slice(0, 3);
                 return (
-                  <ItemCard
+                  <ListItemCard
                     key={approval.id}
                     title={`${approval.itemName} - $${approval.estimatedCost}`}
                     description={approval.description}
                     vesselName={approval.vesselName}
                     onPress={() =>
                       router.push({
-                        pathname: "/supply-detail",
+                        pathname: "/detail-supply",
                         params: { id: approval.id },
                       })
                     }
@@ -161,38 +167,27 @@ export default function ManagerDashboard() {
                       bg: getPriorityBadgeColors(approval.priority).bg,
                     }}
                     actions={
-                      <View style={styles.approvalActions}>
+                      <View style={[buttonStyles.approvalRow, { marginTop: 12 }]}>
                         <TouchableOpacity
-                          style={styles.approveButton}
+                          style={buttonStyles.approveButton}
                           onPress={() => handleApprove(approval.id)}
                         >
-                          <IconSymbol
-                            ios_icon_name="checkmark.circle.fill"
-                            android_material_icon_name="check-circle"
-                            size={20}
-                            color={colors.success}
-                          />
-                          <Text style={styles.approveButtonText}>Approve</Text>
+                          <Text style={buttonStyles.approveButtonText}>Approve</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                          style={styles.rejectButton}
+                          style={buttonStyles.denyButton}
                           onPress={() => handleReject(approval.id)}
                         >
-                          <IconSymbol
-                            ios_icon_name="xmark.circle.fill"
-                            android_material_icon_name="cancel"
-                            size={20}
-                            color={colors.danger}
-                          />
-                          <Text style={styles.rejectButtonText}>Reject</Text>
+                          <Text style={buttonStyles.denyButtonText}>Deny</Text>
                         </TouchableOpacity>
                       </View>
                     }
+                    inContainer={true}
                     style={{ marginLeft: 0, backgroundColor: "transparent" }}
                   />
                 );
               })}
-            </ListWrapper>
+            </GroupedListContainer>
             {pendingApprovals.length > 3 && (
               <TouchableOpacity
                 style={styles.viewAllButton}
@@ -213,22 +208,22 @@ export default function ManagerDashboard() {
         )}
 
         <View style={styles.section}>
-          <RealtimeFeed
+          <ActivityFeed
             userId={userId}
             limit={5}
             onItemPress={(type, id) => {
               switch (type) {
                 case "issue":
-                  router.push({ pathname: "/issue-detail", params: { id } });
+                  router.push({ pathname: "/detail-issue", params: { id } });
                   break;
                 case "maintenance":
                   router.push({
-                    pathname: "/maintenance-detail",
+                    pathname: "/detail-maintenance",
                     params: { id },
                   });
                   break;
                 case "supply":
-                  router.push({ pathname: "/supply-detail", params: { id } });
+                  router.push({ pathname: "/detail-supply", params: { id } });
                   break;
               }
             }}
@@ -242,117 +237,18 @@ export default function ManagerDashboard() {
               {myVessels.length} {myVessels.length === 1 ? "item" : "items"}
             </Text>
           </View>
-          {myVessels.map((vessel, index) => {
-            const vesselTasks = myMaintenanceTasks.filter(
-              (t) => t.vesselId === vessel.id && t.status !== "completed",
-            );
-            const vesselIssues = myIssues.filter(
-              (i) => i.vesselId === vessel.id && i.status !== "completed",
-            );
-            const vesselCompletion =
-              myMaintenanceTasks.filter((t) => t.vesselId === vessel.id)
-                .length > 0
-                ? (myMaintenanceTasks.filter(
-                    (t) => t.vesselId === vessel.id && t.status === "completed",
-                  ).length /
-                    myMaintenanceTasks.filter((t) => t.vesselId === vessel.id)
-                      .length) *
-                  100
-                : 0;
-
-            return (
-              <PressableCard
-                key={vessel.id}
-                style={styles.vesselCard}
-                onPress={() =>
-                  router.push({
-                    pathname: "/vessel-detail",
-                    params: { id: vessel.id },
-                  })
-                }
-              >
-                <View style={styles.vesselHeader}>
-                  <View style={styles.vesselLeft}>
-                    <View
-                      style={[
-                        styles.iconCircle,
-                        { backgroundColor: colors.accent + "20" },
-                      ]}
-                    >
-                      <IconSymbol
-                        ios_icon_name="sailboat.fill"
-                        android_material_icon_name="sailing"
-                        size={24}
-                        color={colors.accent}
-                      />
-                    </View>
-                    <View style={styles.vesselInfo}>
-                      <Text style={styles.vesselName}>{vessel.name}</Text>
-                      <View
-                        style={[
-                          styles.statusBadge,
-                          vessel.status === "active"
-                            ? styles.statusActive
-                            : styles.statusMaintenance,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.statusText,
-                            vessel.status === "active"
-                              ? styles.statusTextActive
-                              : styles.statusTextMaintenance,
-                          ]}
-                        >
-                          {vessel.status.toUpperCase()}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                  <ProgressRing
-                    progress={vesselCompletion}
-                    size={60}
-                    strokeWidth={6}
-                    color={colors.success}
-                    showPercentage={false}
-                  />
-                </View>
-                <View style={styles.vesselStats}>
-                  <View style={styles.statItem}>
-                    <IconSymbol
-                      ios_icon_name="person.2.fill"
-                      android_material_icon_name="groups"
-                      size={16}
-                      color={colors.textSecondary}
-                    />
-                    <Text style={styles.statText}>{vessel.crewCount} Crew</Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <IconSymbol
-                      ios_icon_name="list.bullet"
-                      android_material_icon_name="list"
-                      size={16}
-                      color={colors.warning}
-                    />
-                    <Text style={styles.statText}>
-                      {vesselTasks.length} Tasks
-                    </Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <IconSymbol
-                      ios_icon_name="exclamationmark.triangle"
-                      android_material_icon_name="warning"
-                      size={16}
-                      color={colors.danger}
-                    />
-                    <Text style={styles.statText}>
-                      {vesselIssues.length} Issues
-                    </Text>
-                  </View>
-                </View>
-              </PressableCard>
-            );
-          })}
+          {myVessels.map((vessel) => (
+            <VesselCard
+              key={vessel.id}
+              vessel={vessel}
+              onPress={() =>
+                router.push({
+                  pathname: "/detail-vessel",
+                  params: { id: vessel.id },
+                })
+              }
+            />
+          ))}
         </View>
 
         <View style={styles.section}>
@@ -363,18 +259,18 @@ export default function ManagerDashboard() {
             </Text>
           </View>
           {upcomingMaintenance.length > 0 ? (
-            <ListWrapper>
+            <GroupedListContainer>
               {upcomingMaintenance.map((item, index) => {
                 const priorityBadge = getPriorityBadgeColors(item.priority);
                 return (
-                  <ItemCard
+                  <ListItemCard
                     key={item.id}
                     title={item.title}
                     description={item.vesselName}
                     vesselName={item.vesselName}
                     onPress={() =>
                       router.push({
-                        pathname: "/maintenance-detail",
+                        pathname: "/detail-maintenance",
                         params: { id: item.id },
                       })
                     }
@@ -387,36 +283,27 @@ export default function ManagerDashboard() {
                       bg: priorityBadge.bg,
                     }}
                     metaText={formatDueDate(item.dueDate)}
+                    inContainer={true}
                     style={{ marginLeft: 0, backgroundColor: "transparent" }}
                   />
                 );
               })}
-            </ListWrapper>
+            </GroupedListContainer>
           ) : (
             <Text style={styles.emptyText}>No upcoming maintenance</Text>
           )}
         </View>
       </ScrollView>
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 0,
-    paddingBottom: 20,
-  },
-  header: {
-    marginBottom: 24,
-    paddingHorizontal: 20,
-  },
-  greeting: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    marginBottom: 4,
   },
   section: {
     marginBottom: 24,
@@ -437,116 +324,6 @@ const styles = StyleSheet.create({
   sectionCount: {
     fontSize: 15,
     color: colors.textTertiary,
-  },
-  // Fleet Status vessel card styles (kept — too specialized for ItemCard)
-  vesselCard: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    marginHorizontal: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  vesselHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  vesselLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-  },
-  iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  vesselInfo: {
-    flex: 1,
-  },
-  vesselName: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 4,
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    alignSelf: "flex-start",
-  },
-  statusActive: {
-    backgroundColor: colors.success + "30",
-  },
-  statusMaintenance: {
-    backgroundColor: colors.warning + "30",
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  statusTextActive: {
-    color: colors.success,
-  },
-  statusTextMaintenance: {
-    color: colors.warning,
-  },
-  vesselStats: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  statItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  statText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    fontWeight: "500",
-  },
-  // Approval action buttons
-  approvalActions: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 12,
-  },
-  approveButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.success + "30",
-    borderRadius: 8,
-    padding: 10,
-    gap: 6,
-  },
-  approveButtonText: {
-    color: colors.success,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  rejectButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.danger + "30",
-    borderRadius: 8,
-    padding: 10,
-    gap: 6,
-  },
-  rejectButtonText: {
-    color: colors.danger,
-    fontSize: 14,
-    fontWeight: "600",
   },
   viewAllButton: {
     flexDirection: "row",

@@ -2,25 +2,28 @@ import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   TextInput,
   Switch,
-  Platform,
   Alert,
+  KeyboardAvoidingView,
+  ActivityIndicator,
+  Platform,
 } from "react-native";
 import { Stack, useRouter, useLocalSearchParams } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { colors, commonStyles, shadows } from "../styles/commonStyles";
+import { colors, formStyles } from "../styles/commonStyles";
 import { useAuth } from "../contexts/AuthContext";
 import { useData } from "../contexts/DataContext";
 import { IconSymbol } from "../components/IconSymbol";
 import { CalendarEventType } from "../types/calendar";
-import { EVENT_TYPE_LABELS, getEventColor } from "../utils/calendarUtils";
+import { EVENT_TYPE_LABELS } from "../utils/calendar";
 import { scrollProps } from "../hooks/useTopPadding";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function AddCalendarEventScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams();
   const { userId, userName, userRole } = useAuth();
@@ -45,15 +48,20 @@ export default function AddCalendarEventScreen() {
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const userVessels = useMemo(() => {
     if (!userId || !userRole) return [];
     return getVesselsForUser(userId, userRole);
   }, [userId, userRole, vessels, getVesselsForUser]);
 
+  const canSubmit =
+    title.trim().length > 0 && selectedVesselId.length > 0;
+
   if (userVessels.length === 0) {
     return (
-      <View style={commonStyles.container}>
+      <View style={formStyles.container}>
         <Stack.Screen options={{ title: "New Event" }} />
         <View
           style={{
@@ -94,7 +102,7 @@ export default function AddCalendarEventScreen() {
     "other",
   ];
 
-  const handleSave = () => {
+  const handleSubmit = async () => {
     if (!title.trim()) {
       Alert.alert("Error", "Please enter an event title");
       return;
@@ -116,31 +124,40 @@ export default function AddCalendarEventScreen() {
       return;
     }
 
-    addCalendarEvent({
-      title: title.trim(),
-      description: description.trim(),
-      type: eventType,
-      status: "scheduled",
-      startDate,
-      endDate,
-      allDay,
-      vesselId: selectedVesselId,
-      vesselName: selectedVessel.name,
-      location: location.trim(),
-      attendees: [userId],
-      attendeeNames: [userName],
-      createdBy: userId,
-      createdByName: userName,
-      notes: notes.trim(),
-      reminders: [
-        { id: Date.now().toString(), minutes: 1440, method: "notification" },
-      ],
-      comments: [],
-    });
+    setIsSubmitting(true);
 
-    Alert.alert("Success", "Calendar event created successfully", [
-      { text: "OK", onPress: () => router.back() },
-    ]);
+    try {
+      addCalendarEvent({
+        title: title.trim(),
+        description: description.trim(),
+        type: eventType,
+        status: "scheduled",
+        startDate,
+        endDate,
+        allDay,
+        vesselId: selectedVesselId,
+        vesselName: selectedVessel.name,
+        location: location.trim(),
+        attendees: [userId],
+        attendeeNames: [userName],
+        createdBy: userId,
+        createdByName: userName,
+        notes: notes.trim(),
+        reminders: [
+          { id: Date.now().toString(), minutes: 1440, method: "notification" },
+        ],
+        comments: [],
+      });
+
+      Alert.alert("Success", "Calendar event created successfully", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      Alert.alert("Error", "Failed to create event. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleStartDateChange = (event: any, selectedDate?: Date) => {
@@ -186,64 +203,68 @@ export default function AddCalendarEventScreen() {
   };
 
   return (
-    <View style={commonStyles.container}>
+    <View style={formStyles.container}>
       <Stack.Screen
         options={{
           title: "New Event",
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.cancelText}>Cancel</Text>
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <TouchableOpacity onPress={handleSave}>
-              <Text style={styles.saveText}>Save</Text>
+              <Text style={formStyles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           ),
         }}
       />
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        {...scrollProps}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <View style={styles.form}>
+        <ScrollView
+          style={formStyles.scrollView}
+          contentContainerStyle={formStyles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          {...scrollProps}
+        >
           {/* Title */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Event Title *</Text>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Event Title *</Text>
             <TextInput
-              style={styles.input}
+              style={[
+                formStyles.input,
+                focusedField === "title" && formStyles.inputFocused,
+              ]}
               value={title}
               onChangeText={setTitle}
               placeholder="Enter event title"
               placeholderTextColor={colors.textTertiary}
+              onFocus={() => setFocusedField("title")}
+              onBlur={() => setFocusedField(null)}
             />
           </View>
 
           {/* Event Type */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Event Type</Text>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Event Type</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              style={styles.typeScroll}
+              contentContainerStyle={formStyles.optionsContainer}
             >
               {eventTypes.map((type) => (
                 <TouchableOpacity
                   key={type}
                   style={[
-                    styles.typeChip,
-                    eventType === type && styles.typeChipSelected,
-                    { borderColor: getEventColor(type) },
+                    formStyles.optionChip,
+                    eventType === type && [
+                      formStyles.optionChipActive,
+                    ],
                   ]}
                   onPress={() => setEventType(type)}
                 >
                   <Text
                     style={[
-                      styles.typeChipText,
-                      eventType === type && { color: getEventColor(type) },
+                      formStyles.optionChipText,
+  
                     ]}
                   >
                     {EVENT_TYPE_LABELS[type]}
@@ -254,27 +275,28 @@ export default function AddCalendarEventScreen() {
           </View>
 
           {/* Vessel */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Vessel *</Text>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Vessel *</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              style={styles.vesselScroll}
+              contentContainerStyle={formStyles.optionsContainer}
             >
               {userVessels.map((vessel) => (
                 <TouchableOpacity
                   key={vessel.id}
                   style={[
-                    styles.vesselChip,
-                    selectedVesselId === vessel.id && styles.vesselChipSelected,
+                    formStyles.optionChip,
+                    selectedVesselId === vessel.id &&
+                      formStyles.optionChipActive,
                   ]}
                   onPress={() => setSelectedVesselId(vessel.id)}
                 >
                   <Text
                     style={[
-                      styles.vesselChipText,
+                      formStyles.optionChipText,
                       selectedVesselId === vessel.id &&
-                        styles.vesselChipTextSelected,
+                        formStyles.optionChipTextActive,
                     ]}
                   >
                     {vessel.name}
@@ -285,24 +307,24 @@ export default function AddCalendarEventScreen() {
           </View>
 
           {/* All Day Toggle */}
-          <View style={styles.formGroup}>
-            <View style={styles.switchRow}>
-              <Text style={styles.label}>All Day Event</Text>
+          <View style={formStyles.section}>
+            <View style={formStyles.switchRow}>
+              <Text style={formStyles.label}>All Day Event</Text>
               <Switch
                 value={allDay}
                 onValueChange={setAllDay}
-                trackColor={{ false: colors.border, true: colors.accent }}
-                thumbColor={colors.text}
+                trackColor={{ false: colors.borderSoft, true: colors.text }}
+                thumbColor="#FFFFFF"
               />
             </View>
           </View>
 
           {/* Start Date/Time */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Start</Text>
-            <View style={styles.dateTimeRow}>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Start</Text>
+            <View style={formStyles.dateTimeRow}>
               <TouchableOpacity
-                style={styles.dateTimeButton}
+                style={formStyles.dateTimeButton}
                 onPress={() => setShowStartDatePicker(true)}
               >
                 <IconSymbol
@@ -311,14 +333,14 @@ export default function AddCalendarEventScreen() {
                   size={20}
                   color={colors.textSecondary}
                 />
-                <Text style={styles.dateTimeText}>
+                <Text style={formStyles.dateTimeText}>
                   {startDate.toLocaleDateString()}
                 </Text>
               </TouchableOpacity>
 
               {!allDay && (
                 <TouchableOpacity
-                  style={styles.dateTimeButton}
+                  style={formStyles.dateTimeButton}
                   onPress={() => setShowStartTimePicker(true)}
                 >
                   <IconSymbol
@@ -327,7 +349,7 @@ export default function AddCalendarEventScreen() {
                     size={20}
                     color={colors.textSecondary}
                   />
-                  <Text style={styles.dateTimeText}>
+                  <Text style={formStyles.dateTimeText}>
                     {startDate.toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -339,11 +361,11 @@ export default function AddCalendarEventScreen() {
           </View>
 
           {/* End Date/Time */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>End</Text>
-            <View style={styles.dateTimeRow}>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>End</Text>
+            <View style={formStyles.dateTimeRow}>
               <TouchableOpacity
-                style={styles.dateTimeButton}
+                style={formStyles.dateTimeButton}
                 onPress={() => setShowEndDatePicker(true)}
               >
                 <IconSymbol
@@ -352,14 +374,14 @@ export default function AddCalendarEventScreen() {
                   size={20}
                   color={colors.textSecondary}
                 />
-                <Text style={styles.dateTimeText}>
+                <Text style={formStyles.dateTimeText}>
                   {endDate.toLocaleDateString()}
                 </Text>
               </TouchableOpacity>
 
               {!allDay && (
                 <TouchableOpacity
-                  style={styles.dateTimeButton}
+                  style={formStyles.dateTimeButton}
                   onPress={() => setShowEndTimePicker(true)}
                 >
                   <IconSymbol
@@ -368,7 +390,7 @@ export default function AddCalendarEventScreen() {
                     size={20}
                     color={colors.textSecondary}
                   />
-                  <Text style={styles.dateTimeText}>
+                  <Text style={formStyles.dateTimeText}>
                     {endDate.toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -380,46 +402,86 @@ export default function AddCalendarEventScreen() {
           </View>
 
           {/* Location */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Location</Text>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Location</Text>
             <TextInput
-              style={styles.input}
+              style={[
+                formStyles.input,
+                focusedField === "location" && formStyles.inputFocused,
+              ]}
               value={location}
               onChangeText={setLocation}
               placeholder="Enter location"
               placeholderTextColor={colors.textTertiary}
+              onFocus={() => setFocusedField("location")}
+              onBlur={() => setFocusedField(null)}
             />
           </View>
 
           {/* Description */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Description</Text>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Description</Text>
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={[
+                formStyles.input,
+                formStyles.textArea,
+                focusedField === "description" && formStyles.inputFocused,
+              ]}
               value={description}
               onChangeText={setDescription}
               placeholder="Enter event description"
               placeholderTextColor={colors.textTertiary}
               multiline
               numberOfLines={4}
+              onFocus={() => setFocusedField("description")}
+              onBlur={() => setFocusedField(null)}
             />
           </View>
 
           {/* Notes */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Notes</Text>
+          <View style={formStyles.section}>
+            <Text style={formStyles.label}>Notes</Text>
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={[
+                formStyles.input,
+                formStyles.textArea,
+                focusedField === "notes" && formStyles.inputFocused,
+              ]}
               value={notes}
               onChangeText={setNotes}
               placeholder="Additional notes"
               placeholderTextColor={colors.textTertiary}
               multiline
               numberOfLines={3}
+              onFocus={() => setFocusedField("notes")}
+              onBlur={() => setFocusedField(null)}
             />
           </View>
+        </ScrollView>
+
+        <View
+          style={[
+            formStyles.bottomBar,
+            { paddingBottom: insets.bottom },
+          ]}
+        >
+          <TouchableOpacity
+            style={[
+              formStyles.submitButton,
+              !canSubmit && formStyles.submitButtonDisabled,
+            ]}
+            onPress={handleSubmit}
+            disabled={!canSubmit || isSubmitting}
+            activeOpacity={0.8}
+          >
+            {isSubmitting ? (
+              <ActivityIndicator color="#FFFFFF" size="small" />
+            ) : (
+              <Text style={formStyles.submitButtonText}>Save</Text>
+            )}
+          </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Date/Time Pickers */}
       {showStartDatePicker && (
@@ -457,115 +519,3 @@ export default function AddCalendarEventScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 120,
-  },
-  cancelText: {
-    fontSize: 16,
-    color: colors.text,
-  },
-  saveText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-  },
-  form: {
-    paddingHorizontal: 20,
-  },
-  formGroup: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.textSecondary,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: colors.container,
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  textArea: {
-    minHeight: 100,
-    textAlignVertical: "top",
-  },
-  typeScroll: {
-    marginTop: 8,
-  },
-  typeChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: colors.surfaceOne,
-    borderWidth: 2,
-    borderColor: colors.border,
-    marginRight: 8,
-  },
-  typeChipSelected: {
-    backgroundColor: colors.surfaceOne,
-  },
-  typeChipText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
-  vesselScroll: {
-    marginTop: 8,
-  },
-  vesselChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: colors.surfaceOne,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginRight: 8,
-  },
-  vesselChipSelected: {
-    backgroundColor: colors.surfaceOne,
-    borderColor: colors.text,
-  },
-  vesselChipText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
-  vesselChipTextSelected: {
-    color: colors.text,
-  },
-  switchRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  dateTimeRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  dateTimeButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  dateTimeText: {
-    fontSize: 16,
-    color: colors.text,
-    fontWeight: "500",
-  },
-});

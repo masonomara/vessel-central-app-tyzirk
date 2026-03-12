@@ -1,0 +1,33 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "info": {
+      "en-US": {
+        "title": "Vessel & Co.",
+        "subtitle": "Yacht Fleet Management",
+        "description": "Vessel & Co. is a comprehensive yacht fleet management app built for vessel owners, fleet managers, and crew members. Manage every aspect of your maritime operations from a single, intuitive interface.\n\nWhether you oversee one yacht or an entire fleet, Vessel & Co. gives you the tools to stay organized, keep your vessels in top condition, and coordinate your team effectively.\n\nROLE-BASED DASHBOARDS\n\nEvery user gets a dashboard tailored to their role:\n\n- Owners see fleet-wide KPIs, expense summaries, and operational status at a glance\n- Managers track task assignments, upcoming deadlines, and resource allocation\n- Crew members view their assignments, report issues, and log completed work\n\nMAINTENANCE MANAGEMENT\n\nSchedule recurring and one-time maintenance tasks. Assign work to crew, track costs, attach photos and documents, and maintain a complete history of every service performed on every vessel.\n\nISSUE TRACKING\n\nReport and resolve problems quickly. Create issue reports with priority levels, assign them to crew, attach photos for documentation, and track resolution from open to closed.\n\nSUPPLY REQUESTS\n\nStreamline procurement with a built-in supply request workflow. Submit requests, track approval status (pending, approved, ordered, received, denied), and keep a clear paper trail.\n\nDOCUMENT MANAGEMENT\n\nStore and organize vessel documents -- registrations, insurance policies, inspection reports, and more. Track expiration dates so nothing lapses. Control access by role.\n\nCREW CERTIFICATIONS\n\nMonitor crew qualifications and certification expiry dates. Get alerts before certifications lapse so you can plan renewals in advance.\n\nCHARTER LOGS\n\nRecord charter activity including dates, guest counts, itineraries, revenue, expenses, and broker information. Build a complete history of your charter operations.\n\nEQUIPMENT INVENTORY\n\nCatalog equipment across your fleet. Track condition, location, inspection dates, and maintenance history for every asset.\n\nCALENDAR & SCHEDULING\n\nPlan and coordinate events, maintenance windows, charter schedules, and crew rotations. Sync with your device calendar and set reminders.\n\nCONTACTS DIRECTORY\n\nKeep crew, vendors, marinas, emergency contacts, and owner contacts organized and accessible to the right people.\n\nEXPENSE TRACKING\n\nLog expenses with approval workflows. Owners and managers can review and approve costs to maintain financial oversight.\n\nACTIVITY LOGS\n\nA complete audit trail of all actions taken in the app. Know who did what and when.\n\nKEY FEATURES\n\n- Works offline -- all data stored locally on your device\n- No subscription required -- completely free\n- Portrait and landscape support on iPad\n- Push notifications for task assignments and deadline reminders\n- Global search across all vessels, tasks, issues, and documents\n- Clean, professional interface designed for maritime professionals\n\nVessel & Co. is built by Vessel and Co Yacht Management L.L.C., based in St. Petersburg, Florida.",
+        "keywords": [
+          "yacht",
+          "vessel",
+          "fleet",
+          "management",
+          "maintenance",
+          "maritime",
+          "boat",
+          "crew",
+          "charter",
+          "marine",
+          "sailing",
+          "captain",
+          "dock"
+        ],
+        "releaseNotes": "Initial release.",
+        "promoText": "Manage your yacht fleet from anywhere. Track maintenance, issues, supplies, documents, certifications, charters, and crew -- all in one app. Free for owners and managers.",
+        "marketingUrl": "https://www.vesselandco.yachts",
+        "supportUrl": "https://www.vesselandco.yachts/support",
+        "privacyPolicyUrl": "https://www.vesselandco.yachts/privacy",
+        "privacyChoicesUrl": ""
+      }
+    }
+  }
+}

@@ -1,19 +1,23 @@
 import { useMemo } from "react";
 import { StyleSheet, View, Text, ScrollView } from "react-native";
-import { ItemCard } from "../../../components/ItemCard";
-import { ListWrapper } from "../../../components/ListWrapper";
-import { PressableCard } from "../../../components/PressableCard";
-import { colors, commonStyles } from "../../../styles/commonStyles";
+import { ListItemCard } from "../../../components/ListItemCard";
+import { GroupedListContainer } from "../../../components/GroupedListContainer";
+import { VesselCard } from "../../../components/VesselCard";
+import { colors } from "../../../styles/commonStyles";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
-import { IconSymbol } from "../../../components/IconSymbol";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
-import { getPriorityBadgeColors } from "../../../utils/colorUtils";
-import { formatDueDate, formatDate } from "../../../utils/dateUtils";
+import {
+  getPriorityBadgeColors,
+  formatDueDate,
+  formatDate,
+} from "../../../utils/formatting";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, router } from "expo-router";
 import { scrollProps } from "../../../hooks/useTopPadding";
 
 export default function CrewDashboard() {
+  const insets = useSafeAreaInsets();
   const { userName, userId, userRole } = useAuth();
   const {
     getVesselsForUser,
@@ -52,31 +56,41 @@ export default function CrewDashboard() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+    <>
       <Stack.Screen
         options={{
-          title: "Crew Dashboard",
-          headerRight: () => <ProfileHeaderButton />,
+          title: `Hello, ${userName?.split(" ")[0] || ""}`,
+          headerLargeTitleEnabled: true,
+          headerLargeTitleStyle: {
+            fontSize: 28,
+            fontWeight: "600",
+            color: colors.text,
+          },
+
+          headerRight: () => (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                  gap: 10,
+                marginLeft: 8,
+                marginRight: 8,
+              }}
+            >
+              <ProfileHeaderButton />
+            </View>
+          ),
         }}
       />
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        style={[styles.scrollView, { backgroundColor: colors.surfaceOne }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom },
+        ]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >
-        <View style={styles.header}>
-          <Text style={styles.greeting}>
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
-          </Text>
-          <Text style={commonStyles.title}>
-            Hello, {userName?.split(" ")[0]}
-          </Text>
-        </View>
-
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My Tasks</Text>
@@ -86,18 +100,18 @@ export default function CrewDashboard() {
           </View>
 
           {myTasks.length > 0 ? (
-            <ListWrapper>
+            <GroupedListContainer>
               {myTasks.map((task, index) => {
                 const priorityBadge = getPriorityBadgeColors(task.priority);
                 return (
-                  <ItemCard
+                  <ListItemCard
                     key={task.id}
                     title={task.title}
                     description={task.description}
                     vesselName={task.vesselName}
                     onPress={() =>
                       router.push({
-                        pathname: "/maintenance-detail",
+                        pathname: "/detail-maintenance",
                         params: { id: task.id },
                       })
                     }
@@ -118,11 +132,12 @@ export default function CrewDashboard() {
                         ? "Completed"
                         : formatDueDate(task.dueDate)
                     }
+                    inContainer={true}
                     style={{ marginLeft: 0, backgroundColor: "transparent" }}
                   />
                 );
               })}
-            </ListWrapper>
+            </GroupedListContainer>
           ) : (
             <Text style={styles.emptyText}>No tasks assigned</Text>
           )}
@@ -137,16 +152,16 @@ export default function CrewDashboard() {
             </Text>
           </View>
           {mySupplyRequests.length > 0 ? (
-            <ListWrapper>
+            <GroupedListContainer>
               {mySupplyRequests.map((request, index) => (
-                <ItemCard
+                <ListItemCard
                   key={request.id}
                   title={`${request.itemName} - $${request.estimatedCost}`}
                   description={`${request.quantity} ${request.unit}`}
                   vesselName={request.vesselName}
                   onPress={() =>
                     router.push({
-                      pathname: "/supply-detail",
+                      pathname: "/detail-supply",
                       params: { id: request.id },
                     })
                   }
@@ -161,10 +176,11 @@ export default function CrewDashboard() {
                     bg: getPriorityBadgeColors(request.priority).bg,
                   }}
                   metaText={formatDate(request.createdAt)}
+                  inContainer={true}
                   style={{ marginLeft: 0, backgroundColor: "transparent" }}
                 />
               ))}
-            </ListWrapper>
+            </GroupedListContainer>
           ) : (
             <Text style={styles.emptyText}>No supply requests</Text>
           )}
@@ -178,50 +194,29 @@ export default function CrewDashboard() {
             </Text>
           </View>
           {myVessels.map((vessel) => (
-            <PressableCard
+            <VesselCard
               key={vessel.id}
-              style={styles.vesselCard}
+              vessel={vessel}
               onPress={() =>
                 router.push({
-                  pathname: "/vessel-detail",
+                  pathname: "/detail-vessel",
                   params: { id: vessel.id },
                 })
               }
-            >
-              <IconSymbol
-                ios_icon_name="sailboat.fill"
-                android_material_icon_name="sailing"
-                size={24}
-                color={colors.accent}
-              />
-              <View style={styles.vesselInfo}>
-                <Text style={styles.vesselName}>{vessel.name}</Text>
-                <Text style={styles.vesselLocation}>{vessel.location}</Text>
-              </View>
-            </PressableCard>
+            />
           ))}
         </View>
       </ScrollView>
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 0,
-    paddingBottom: 20,
-  },
-  header: {
-    marginBottom: 20,
-  },
-  greeting: {
-    fontSize: 16,
-    lineHeight: 21,
-    color: colors.textSecondary,
-    marginBottom: 6,
   },
   section: {
     marginBottom: 20,
@@ -242,30 +237,6 @@ const styles = StyleSheet.create({
   sectionCount: {
     fontSize: 15,
     color: colors.textTertiary,
-  },
-  vesselCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 12,
-  },
-  vesselInfo: {
-    flex: 1,
-  },
-  vesselName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 2,
-  },
-  vesselLocation: {
-    fontSize: 14,
-    color: colors.textSecondary,
   },
   emptyText: {
     fontSize: 14,

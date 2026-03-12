@@ -8,7 +8,7 @@ export {
 
 // Shared enums
 
-export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type TaskPriority = 'none' | 'low' | 'medium' | 'high' | 'urgent' | 'critical';
 
 export type TaskStatus = 'open' | 'in_progress' | 'completed' | 'waiting_on_parts';
 
@@ -30,7 +30,15 @@ export type NotificationType = 'issue' | 'supply' | 'maintenance' | 'document' |
 
 export type NotificationPriority = 'low' | 'medium' | 'high';
 
-export type ActivityLogType = 'issue' | 'supply' | 'maintenance' | 'approval' | 'document' | 'system' | 'task';
+export type ActivityLogType = 'issue' | 'supply' | 'maintenance' | 'approval' | 'document' | 'system' | 'task' | 'contact' | 'certification' | 'charter' | 'equipment';
+
+// Core entities
+
+export type ContactType = 'crew' | 'vendor' | 'marina' | 'emergency' | 'owner' | 'other';
+export type CertificationStatus = 'valid' | 'expiring_soon' | 'expired';
+export type CharterStatus = 'upcoming' | 'in_progress' | 'completed' | 'cancelled';
+export type EquipmentCategory = 'safety' | 'water_toys' | 'navigation' | 'communication' | 'anchoring' | 'tender' | 'galley' | 'other';
+export type EquipmentCondition = 'good' | 'fair' | 'poor' | 'needs_replacement';
 
 // Core entities
 
@@ -43,6 +51,8 @@ export interface Vessel {
   ownerId: string;
   managerId: string;
   crewIds?: string[];
+  engineHours?: number;
+  image?: number;
 }
 
 export interface Attachment {
@@ -217,4 +227,101 @@ export interface Expense {
   approvedByName: string;
   status: 'pending' | 'approved' | 'paid' | 'rejected';
   attachments: Attachment[];
+}
+
+export interface EngineHourLog {
+  id: string;
+  vesselId: string;
+  vesselName: string;
+  previousHours: number;
+  newHours: number;
+  updatedBy: string;
+  updatedByName: string;
+  notes: string;
+  timestamp: Date;
+}
+
+export interface Contact {
+  id: string;
+  name: string;
+  role: string;
+  contactType: ContactType;
+  phone: string;
+  email: string;
+  company?: string;
+  vesselIds: string[];
+  vesselNames: string[];
+  notes: string;
+  createdBy: string;
+  createdByName: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CrewCertification {
+  id: string;
+  crewId: string;
+  crewName: string;
+  certType: string;
+  issuingAuthority: string;
+  certificateNumber?: string;
+  issueDate: Date;
+  expiryDate: Date;
+  vesselId: string;
+  vesselName: string;
+  notes: string;
+  createdBy: string;
+  createdByName: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CharterLog {
+  id: string;
+  title: string;
+  vesselId: string;
+  vesselName: string;
+  startDate: Date;
+  endDate: Date;
+  status: CharterStatus;
+  guestCount: number;
+  guestNames?: string;
+  itinerary: string;
+  departurePort: string;
+  arrivalPort: string;
+  revenue: number;
+  expenses: number;
+  brokerName?: string;
+  brokerCommission?: number;
+  specialRequests?: string;
+  notes: string;
+  createdBy: string;
+  createdByName: string;
+  createdAt: Date;
+  updatedAt: Date;
+  comments: Comment[];
+}
+
+export interface Equipment {
+  id: string;
+  name: string;
+  description: string;
+  category: EquipmentCategory;
+  vesselId: string;
+  vesselName: string;
+  quantity: number;
+  condition: EquipmentCondition;
+  serialNumber?: string;
+  manufacturer?: string;
+  model?: string;
+  purchaseDate?: Date;
+  lastInspectionDate?: Date;
+  nextInspectionDate?: Date;
+  location: string;
+  notes: string;
+  createdBy: string;
+  createdByName: string;
+  createdAt: Date;
+  updatedAt: Date;
+  comments: Comment[];
 }

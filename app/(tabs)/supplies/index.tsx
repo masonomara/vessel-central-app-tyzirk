@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
 import {
-  StyleSheet,
   View,
   Text,
   SectionList,
@@ -9,14 +8,13 @@ import {
 import { Stack, useRouter } from "expo-router";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
 import { scrollProps } from "../../../hooks/useTopPadding";
-import { colors, indexScreenStyles } from "../../../styles/commonStyles";
+import { colors, buttonStyles, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ItemCard } from "../../../components/ItemCard";
+import { ListItemCard } from "../../../components/ListItemCard";
 import { SupplyRequest } from "../../../types";
-import { formatDate } from "../../../utils/dateUtils";
-import { getPriorityBadgeColors } from "../../../utils/colorUtils";
+import { formatDate, getPriorityBadgeColors } from "../../../utils/formatting";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SearchBar } from "../../../components/SearchBar";
 import { FilterRow } from "../../../components/FilterRow";
@@ -53,8 +51,8 @@ export default function SuppliesScreen() {
     });
   }, []);
 
-  const sections = useMemo(() => {
-    const filtered = supplyRequests.filter((request) => {
+  const filtered = useMemo(() => {
+    return supplyRequests.filter((request) => {
       const matchesVessel =
         filterVessel === "all" || request.vesselName === filterVessel;
       const matchesSearch =
@@ -62,7 +60,9 @@ export default function SuppliesScreen() {
         request.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesVessel && matchesSearch;
     });
+  }, [supplyRequests, filterVessel, searchQuery]);
 
+  const sections = useMemo(() => {
     const needsApproval = filtered.filter((r) => r.status === "pending");
     const approved = filtered.filter((r) => r.status === "approved");
     const ordered = filtered.filter((r) => r.status === "ordered");
@@ -84,7 +84,13 @@ export default function SuppliesScreen() {
         count: s.items.length,
         data: collapsedSections.has(s.title) ? [] : s.items,
       }));
-  }, [supplyRequests, filterVessel, searchQuery, collapsedSections]);
+  }, [filtered, collapsedSections]);
+
+  const summary = useMemo(() => {
+    const pending = filtered.filter((r) => r.status === "pending").length;
+    const received = filtered.filter((r) => r.status === "received").length;
+    return { pending, received, total: filtered.length };
+  }, [filtered]);
 
   const handleApprove = useCallback(
     (id: string) => {
@@ -102,7 +108,7 @@ export default function SuppliesScreen() {
 
   const handleRequestPress = useCallback(
     (request: SupplyRequest) => {
-      router.push({ pathname: "/supply-detail", params: { id: request.id } });
+      router.push({ pathname: "/detail-supply", params: { id: request.id } });
     },
     [router],
   );
@@ -117,7 +123,7 @@ export default function SuppliesScreen() {
       index: number;
       section: { data: SupplyRequest[] };
     }) => (
-      <ItemCard
+      <ListItemCard
         title={`${item.itemName} - $${item.estimatedCost}`}
         description={item.description}
         vesselName={item.vesselName}
@@ -132,13 +138,20 @@ export default function SuppliesScreen() {
         }}
         metaText={formatDate(item.createdAt)}
         actions={
-          (userRole === "manager" || userRole === "owner") && item.status === "pending" ? (
-            <View style={styles.actionButtons}>
-              <TouchableOpacity style={styles.approveButton} onPress={() => handleApprove(item.id)}>
-                <Text style={styles.approveButtonText}>Approve</Text>
+          (userRole === "manager" || userRole === "owner") &&
+          item.status === "pending" ? (
+            <View style={[buttonStyles.approvalRow, { paddingTop: 16 }]}>
+              <TouchableOpacity
+                style={buttonStyles.approveButton}
+                onPress={() => handleApprove(item.id)}
+              >
+                <Text style={buttonStyles.approveButtonText}>Approve</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.denyButton} onPress={() => handleDeny(item.id)}>
-                <Text style={styles.denyButtonText}>Deny</Text>
+              <TouchableOpacity
+                style={buttonStyles.denyButton}
+                onPress={() => handleDeny(item.id)}
+              >
+                <Text style={buttonStyles.denyButtonText}>Deny</Text>
               </TouchableOpacity>
             </View>
           ) : undefined
@@ -198,18 +211,26 @@ export default function SuppliesScreen() {
   );
 
   return (
-    <View
-      style={[
-        indexScreenStyles.container,
-        { backgroundColor: colors.surfaceOne },
-      ]}
-    >
+    <>
       <Stack.Screen
         options={{
           title: "Supplies",
+          headerLargeTitleEnabled: true,
+          headerBackTitle: "Back",
+          headerLargeTitleStyle: {
+            fontSize: 28,
+            fontWeight: "600",
+            color: colors.text,
+          },
           headerRight: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+         gap: 10,
+                marginLeft: 8,
+                marginRight: 8,
+              }}
             >
               {userRole === "crew" && (
                 <TouchableOpacity
@@ -230,17 +251,27 @@ export default function SuppliesScreen() {
       />
 
       <SectionList
+        style={[
+          indexScreenStyles.container,
+          { backgroundColor: colors.surfaceOne },
+        ]}
         sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         renderSectionHeader={renderSectionHeader}
         ListHeaderComponent={ListHeaderComponent}
         ListFooterComponent={
-          <View
-            style={{
-              height: insets.bottom + 64,
-            }}
-          />
+          <View style={{
+                        paddingBottom: insets.bottom,
+                        borderTopWidth: 4,
+                        borderTopColor: colors.surfaceTwo,
+                      }}>
+            {summary.total > 0 && (
+              <Text style={indexScreenStyles.listFooterText}>
+                {summary.pending} {summary.pending === 1 ? "request" : "requests"} pending
+              </Text>
+            )}
+          </View>
         }
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={indexScreenStyles.listContent}
@@ -248,38 +279,7 @@ export default function SuppliesScreen() {
         stickySectionHeadersEnabled={false}
         {...scrollProps}
       />
-    </View>
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  actionButtons: {
-    flexDirection: "row",
-    gap: 8,
-    paddingTop: 16,
-  },
-  approveButton: {
-    flex: 1,
-    alignItems: "center",
-    backgroundColor: colors.greenForeground,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  approveButtonText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.container,
-  },
-  denyButton: {
-    flex: 1,
-    alignItems: "center",
-    backgroundColor: colors.redForeground,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  denyButtonText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.container,
-  },
-});

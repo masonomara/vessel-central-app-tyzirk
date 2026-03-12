@@ -6,10 +6,9 @@ import { scrollProps } from "../../../hooks/useTopPadding";
 import { colors, indexScreenStyles } from "../../../styles/commonStyles";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ItemCard } from "../../../components/ItemCard";
+import { ListItemCard } from "../../../components/ListItemCard";
 import { Issue } from "../../../types";
-import { formatDate } from "../../../utils/dateUtils";
-import { getPriorityBadgeColors } from "../../../utils/colorUtils";
+import { formatDate, getPriorityBadgeColors } from "../../../utils/formatting";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SearchBar } from "../../../components/SearchBar";
 import { FilterRow } from "../../../components/FilterRow";
@@ -45,8 +44,8 @@ export default function IssuesScreen() {
     });
   }, []);
 
-  const sections = useMemo(() => {
-    const filtered = issues.filter((issue) => {
+  const filtered = useMemo(() => {
+    return issues.filter((issue) => {
       const matchesVessel =
         filterVessel === "all" || issue.vesselName === filterVessel;
       const matchesSearch =
@@ -54,7 +53,9 @@ export default function IssuesScreen() {
         issue.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesVessel && matchesSearch;
     });
+  }, [issues, filterVessel, searchQuery]);
 
+  const sections = useMemo(() => {
     const open = filtered.filter((i) => i.status === "open");
     const inProgress = filtered.filter((i) => i.status === "in_progress");
     const waitingOnParts = filtered.filter(
@@ -76,11 +77,17 @@ export default function IssuesScreen() {
         count: s.items.length,
         data: collapsedSections.has(s.title) ? [] : s.items,
       }));
-  }, [issues, filterVessel, searchQuery, collapsedSections]);
+  }, [filtered, collapsedSections]);
+
+  const summary = useMemo(() => {
+    const open = filtered.filter((i) => i.status !== "completed").length;
+    const completed = filtered.filter((i) => i.status === "completed").length;
+    return { open, completed, total: filtered.length };
+  }, [filtered]);
 
   const handleIssuePress = useCallback(
     (issue: Issue) => {
-      router.push({ pathname: "/issue-detail", params: { id: issue.id } });
+      router.push({ pathname: "/detail-issue", params: { id: issue.id } });
     },
     [router],
   );
@@ -102,7 +109,7 @@ export default function IssuesScreen() {
       index: number;
       section: { data: Issue[] };
     }) => (
-      <ItemCard
+      <ListItemCard
         title={item.title}
         description={item.description}
         vesselName={item.vesselName}
@@ -174,18 +181,25 @@ export default function IssuesScreen() {
   );
 
   return (
-    <View
-      style={[
-        indexScreenStyles.container,
-        { backgroundColor: colors.surfaceOne },
-      ]}
-    >
+    <>
       <Stack.Screen
         options={{
           title: "Issues",
+          headerLargeTitleEnabled: true,
+          headerLargeTitleStyle: {
+            fontSize: 28,
+            fontWeight: "600",
+            color: colors.text,
+          },
           headerRight: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                marginLeft: 8,
+                marginRight: 8,
+              }}
             >
               <TouchableOpacity onPress={() => router.push("/add-issue")}>
                 <IconSymbol
@@ -202,6 +216,10 @@ export default function IssuesScreen() {
       />
 
       <SectionList
+        style={[
+          indexScreenStyles.container,
+          { backgroundColor: colors.surfaceOne },
+        ]}
         sections={sections}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
@@ -210,9 +228,17 @@ export default function IssuesScreen() {
         ListFooterComponent={
           <View
             style={{
-              height: insets.bottom + 64,
+              paddingBottom: insets.bottom,
+              borderTopWidth: 4,
+              borderTopColor: colors.surfaceTwo,
             }}
-          />
+          >
+            {summary.total > 0 && (
+              <Text style={indexScreenStyles.listFooterText}>
+                {summary.open} {summary.open === 1 ? "issue" : "issues"} open
+              </Text>
+            )}
+          </View>
         }
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={indexScreenStyles.listContent}
@@ -220,6 +246,6 @@ export default function IssuesScreen() {
         stickySectionHeadersEnabled={false}
         {...scrollProps}
       />
-    </View>
+    </>
   );
 }

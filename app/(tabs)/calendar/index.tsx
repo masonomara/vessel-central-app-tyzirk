@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,36 +9,34 @@ import {
 import { Stack, useRouter } from "expo-router";
 import { scrollProps } from "../../../hooks/useTopPadding";
 import { ProfileHeaderButton } from "../../../components/ProfileHeaderButton";
-import { colors, commonStyles, shadows } from "../../../styles/commonStyles";
+import { colors, commonStyles } from "../../../styles/commonStyles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useData } from "../../../contexts/DataContext";
 import { IconSymbol } from "../../../components/IconSymbol";
-import { ItemCard } from "../../../components/ItemCard";
+import { ListItemCard } from "../../../components/ListItemCard";
+import { GroupedListContainer } from "../../../components/GroupedListContainer";
 import {
   getEventsForDate,
   getEventsForMonth,
   getDaysInMonth,
   getFirstDayOfMonth,
   getMonthName,
-  formatEventTime,
   formatEventDateRange,
-  getEventColor,
   getEventTypeLabel,
   sortEventsByDate,
-} from "../../../utils/calendarUtils";
+} from "../../../utils/calendar";
 import { CalendarEvent } from "../../../types/calendar";
 
 export default function CalendarScreen() {
   const router = useRouter();
   const { userId, userRole } = useAuth();
-  const { calendarEvents, getCalendarEventsForUser } = useData();
+  const { getCalendarEventsForUser } = useData();
 
   const insets = useSafeAreaInsets();
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
 
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
@@ -47,7 +45,7 @@ export default function CalendarScreen() {
   const userEvents = useMemo(() => {
     if (!userId || !userRole) return [];
     return getCalendarEventsForUser(userId, userRole);
-  }, [userId, userRole, calendarEvents, getCalendarEventsForUser]);
+  }, [userId, userRole, getCalendarEventsForUser]);
 
   // Get events for the selected date
   const selectedDateEvents = useMemo(() => {
@@ -103,7 +101,7 @@ export default function CalendarScreen() {
   const handleEventPress = useCallback(
     (event: CalendarEvent) => {
       router.push({
-        pathname: "/calendar-event-detail",
+        pathname: "/detail-calendar-event",
         params: { eventId: event.id },
       });
     },
@@ -203,7 +201,7 @@ export default function CalendarScreen() {
 
   const renderEventItem = useCallback(
     (event: CalendarEvent, index: number, array: CalendarEvent[]) => (
-      <ItemCard
+      <ListItemCard
         key={event.id}
         title={event.title}
         description={event.description}
@@ -211,7 +209,6 @@ export default function CalendarScreen() {
         onPress={() => handleEventPress(event)}
         isFirst={index === 0}
         isLast={index === array.length - 1}
-        bordered
         icon={{ iosName: "calendar", androidName: "event" }}
         badge={{
           label: getEventTypeLabel(event.type),
@@ -223,26 +220,40 @@ export default function CalendarScreen() {
           event.endDate,
           event.allDay,
         )}
+        inContainer={true}
         secondaryMetaText={event.location || undefined}
+        style={{ marginLeft: 0, backgroundColor: "transparent" }}
       />
     ),
     [handleEventPress],
   );
 
   return (
-    <View style={commonStyles.container}>
+    <>
       <Stack.Screen
         options={{
           title: "Calendar",
+          headerLargeTitleEnabled: true,
+          headerLargeTitleStyle: {
+            fontSize: 28,
+            fontWeight: "600",
+            color: colors.text,
+          },
           headerRight: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                marginLeft: 8,
+                marginRight: 8,
+              }}
             >
               <TouchableOpacity onPress={handleAddEvent}>
                 <IconSymbol
                   ios_icon_name="plus"
                   android_material_icon_name="add"
-                  size={24}
+                  size={28}
                   color={colors.text}
                 />
               </TouchableOpacity>
@@ -252,10 +263,10 @@ export default function CalendarScreen() {
         }}
       />
       <ScrollView
-        style={styles.scrollView}
+        style={[styles.scrollView, commonStyles.container]}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + 64 },
+          { paddingBottom: insets.bottom },
         ]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}
@@ -348,13 +359,13 @@ export default function CalendarScreen() {
               </TouchableOpacity>
             </View>
           ) : (
-            <View style={styles.eventsList}>
+            <GroupedListContainer>
               {selectedDateEvents.map(renderEventItem)}
-            </View>
+            </GroupedListContainer>
           )}
         </View>
       </ScrollView>
-    </View>
+    </>
   );
 }
 
@@ -489,9 +500,6 @@ const styles = StyleSheet.create({
   eventsCount: {
     fontSize: 15,
     color: colors.textTertiary,
-  },
-  eventsList: {
-    gap: 8,
   },
   emptyState: {
     alignItems: "center",

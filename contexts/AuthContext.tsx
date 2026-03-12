@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     _email: string,
     _password: string
   ): Promise<{ error: AuthError | null }> => {
-    return { error: { message: 'Use quick login for demo mode', name: 'DemoMode', status: 400 } };
+    return { error: { message: 'Use quick login to sign in', name: 'QuickLoginRequired', status: 400 } };
   };
 
   const signOut = async (): Promise<{ error: AuthError | null }> => {

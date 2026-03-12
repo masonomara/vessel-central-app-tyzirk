@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -9,60 +8,79 @@ import {
   TouchableOpacity,
   Alert,
   Image,
-  Platform,
   ActivityIndicator,
-} from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
-import { colors } from '../styles/commonStyles';
-import { useData } from '../contexts/DataContext';
-import { useAuth } from '../contexts/AuthContext';
-import { IconSymbol } from '../components/IconSymbol';
-import { TaskPriority, Attachment } from '../types';
-import { optimizeImage, formatFileSize, validateImage } from '../utils/imageUtils';
-import { scrollProps } from '../hooks/useTopPadding';
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { Stack, useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { colors, formStyles } from "../styles/commonStyles";
+import { useData } from "../contexts/DataContext";
+import { useAuth } from "../contexts/AuthContext";
+import { IconSymbol } from "../components/IconSymbol";
+import { TaskPriority, Attachment } from "../types";
+import { optimizeImage } from "../utils/files";
+import { validateImage } from "../utils/validation";
+import {
+  formatFileSize,
+  getPriorityColor,
+  PRIORITY_OPTIONS,
+} from "../utils/formatting";
+import { scrollProps } from "../hooks/useTopPadding";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ISSUE_CATEGORIES = [
-  'Structural',
-  'Electrical',
-  'Plumbing',
-  'Mechanical',
-  'Safety',
-  'Interior',
-  'Exterior',
-  'Navigation',
-  'Communication',
-  'Other',
+  "Structural",
+  "Electrical",
+  "Plumbing",
+  "Mechanical",
+  "Safety",
+  "Interior",
+  "Exterior",
+  "Navigation",
+  "Communication",
+  "Other",
 ];
 
-const PRIORITY_OPTIONS: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
-
 export default function AddIssueScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { addIssue, vessels, getVesselsForUser } = useData();
   const { userId, userName, userRole } = useAuth();
 
-  const userVessels = getVesselsForUser(userId, userRole || 'crew');
+  const userVessels = getVesselsForUser(userId, userRole || "crew");
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [selectedVesselId, setSelectedVesselId] = useState(userVessels[0]?.id || '');
-  const [priority, setPriority] = useState<TaskPriority>('medium');
-  const [category, setCategory] = useState('Other');
-  const [location, setLocation] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [selectedVesselId, setSelectedVesselId] = useState(
+    userVessels[0]?.id || "",
+  );
+  const [priority, setPriority] = useState<TaskPriority>("medium");
+  const [category, setCategory] = useState("Other");
+  const [location, setLocation] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOptimizing, setIsOptimizing] = useState(false);
-  const [optimizationProgress, setOptimizationProgress] = useState({ current: 0, total: 0 });
+  const [optimizationProgress, setOptimizationProgress] = useState({
+    current: 0,
+    total: 0,
+  });
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  const selectedVessel = vessels.find(v => v.id === selectedVesselId);
+  const selectedVessel = vessels.find((v) => v.id === selectedVesselId);
+
+  const canSubmit =
+    title.trim().length > 0 &&
+    description.trim().length > 0 &&
+    selectedVesselId.length > 0 &&
+    location.trim().length > 0;
 
   const handlePickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images', 'videos'],
+        mediaTypes: ["images", "videos"],
         allowsMultipleSelection: true,
-        quality: 1, // Get full quality, we'll optimize it ourselves
+        quality: 1,
       });
 
       if (!result.canceled) {
@@ -73,57 +91,63 @@ export default function AddIssueScreen() {
 
         for (let i = 0; i < result.assets.length; i++) {
           const asset = result.assets[i];
-          
-          // Update progress
-          setOptimizationProgress({ current: i + 1, total: result.assets.length });
 
-          if (asset.type === 'video') {
-            // Don't optimize videos, just add them
+          setOptimizationProgress({
+            current: i + 1,
+            total: result.assets.length,
+          });
+
+          if (asset.type === "video") {
             newAttachments.push({
-              id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+              id:
+                Date.now().toString() +
+                Math.random().toString(36).substr(2, 9),
               name: asset.fileName || `video_${Date.now()}`,
               uri: asset.uri,
-              type: 'video',
+              type: "video",
               size: asset.fileSize || 0,
               uploadedBy: userId,
               uploadedAt: new Date(),
               mimeType: asset.mimeType,
             });
           } else {
-            // Validate image
             const validation = validateImage(asset.mimeType, asset.fileSize);
             if (!validation.valid) {
-              Alert.alert('Invalid Image', validation.error || 'Image validation failed');
+              Alert.alert(
+                "Invalid Image",
+                validation.message || "Image validation failed",
+              );
               continue;
             }
 
             try {
-              // Optimize image
               const optimized = await optimizeImage(asset.uri, {
                 maxWidth: 1920,
                 maxHeight: 1920,
                 quality: 0.8,
-                format: 'jpeg',
+                format: "jpeg",
               });
 
               newAttachments.push({
-                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                id:
+                  Date.now().toString() +
+                  Math.random().toString(36).substr(2, 9),
                 name: asset.fileName || `photo_${Date.now()}`,
                 uri: optimized.uri,
-                type: 'image',
+                type: "image",
                 size: optimized.size || 0,
                 uploadedBy: userId,
                 uploadedAt: new Date(),
-                mimeType: 'image/jpeg',
+                mimeType: "image/jpeg",
               });
-
             } catch {
-              // Fall back to original image if optimization fails
               newAttachments.push({
-                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                id:
+                  Date.now().toString() +
+                  Math.random().toString(36).substr(2, 9),
                 name: asset.fileName || `photo_${Date.now()}`,
                 uri: asset.uri,
-                type: 'image',
+                type: "image",
                 size: asset.fileSize || 0,
                 uploadedBy: userId,
                 uploadedAt: new Date(),
@@ -138,66 +162,72 @@ export default function AddIssueScreen() {
         setOptimizationProgress({ current: 0, total: 0 });
       }
     } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image. Please try again.');
+      console.error("Error picking image:", error);
+      Alert.alert("Error", "Failed to pick image. Please try again.");
       setIsOptimizing(false);
     }
   };
 
   const handleTakePhoto = async () => {
     try {
-      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-      
+      const permissionResult =
+        await ImagePicker.requestCameraPermissionsAsync();
+
       if (!permissionResult.granted) {
-        Alert.alert('Permission Required', 'Camera permission is required to take photos.');
+        Alert.alert(
+          "Permission Required",
+          "Camera permission is required to take photos.",
+        );
         return;
       }
 
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: false,
-        quality: 1, // Get full quality, we'll optimize it ourselves
+        quality: 1,
       });
 
       if (!result.canceled) {
         const asset = result.assets[0];
-        
-        // Validate image
+
         const validation = validateImage(asset.mimeType, asset.fileSize);
         if (!validation.valid) {
-          Alert.alert('Invalid Image', validation.error || 'Image validation failed');
+          Alert.alert(
+            "Invalid Image",
+            validation.message || "Image validation failed",
+          );
           return;
         }
 
         setIsOptimizing(true);
 
         try {
-          // Optimize image
           const optimized = await optimizeImage(asset.uri, {
             maxWidth: 1920,
             maxHeight: 1920,
             quality: 0.8,
-            format: 'jpeg',
+            format: "jpeg",
           });
 
           const newAttachment: Attachment = {
-            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            id:
+              Date.now().toString() + Math.random().toString(36).substr(2, 9),
             name: asset.fileName || `photo_${Date.now()}`,
             uri: optimized.uri,
-            type: 'image',
+            type: "image",
             size: optimized.size || 0,
             uploadedBy: userId,
             uploadedAt: new Date(),
-            mimeType: 'image/jpeg',
+            mimeType: "image/jpeg",
           };
 
           setAttachments([...attachments, newAttachment]);
         } catch {
-          // Fall back to original image if optimization fails
           const newAttachment: Attachment = {
-            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            id:
+              Date.now().toString() + Math.random().toString(36).substr(2, 9),
             name: asset.fileName || `photo_${Date.now()}`,
             uri: asset.uri,
-            type: 'image',
+            type: "image",
             size: asset.fileSize || 0,
             uploadedBy: userId,
             uploadedAt: new Date(),
@@ -210,44 +240,41 @@ export default function AddIssueScreen() {
         }
       }
     } catch (error) {
-      console.error('Error taking photo:', error);
-      Alert.alert('Error', 'Failed to take photo. Please try again.');
+      console.error("Error taking photo:", error);
+      Alert.alert("Error", "Failed to take photo. Please try again.");
       setIsOptimizing(false);
     }
   };
 
   const handleRemoveAttachment = (id: string) => {
-    setAttachments(attachments.filter(a => a.id !== id));
+    setAttachments(attachments.filter((a) => a.id !== id));
   };
 
   const validateForm = (): boolean => {
     if (!title.trim()) {
-      Alert.alert('Validation Error', 'Please enter an issue title.');
+      Alert.alert("Validation Error", "Please enter an issue title.");
       return false;
     }
-
     if (!description.trim()) {
-      Alert.alert('Validation Error', 'Please enter a description.');
+      Alert.alert("Validation Error", "Please enter a description.");
       return false;
     }
-
     if (!selectedVesselId) {
-      Alert.alert('Validation Error', 'Please select a vessel.');
+      Alert.alert("Validation Error", "Please select a vessel.");
       return false;
     }
-
     if (!location.trim()) {
-      Alert.alert('Validation Error', 'Please enter the location on the vessel.');
+      Alert.alert(
+        "Validation Error",
+        "Please enter the location on the vessel.",
+      );
       return false;
     }
-
     return true;
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
 
@@ -256,12 +283,12 @@ export default function AddIssueScreen() {
         title: title.trim(),
         description: description.trim(),
         vesselId: selectedVesselId,
-        vesselName: selectedVessel?.name || '',
+        vesselName: selectedVessel?.name || "",
         reportedBy: userId,
         reportedByName: userName,
         assignedTo: null,
         assignedToName: null,
-        status: 'open',
+        status: "open",
         priority,
         category,
         location: location.trim(),
@@ -269,41 +296,46 @@ export default function AddIssueScreen() {
         comments: [],
       });
 
-      Alert.alert(
-        'Success',
-        'Issue reported successfully!',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.back(),
-          },
-        ]
-      );
+      Alert.alert("Success", "Issue reported successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ]);
     } catch (error) {
-      console.error('Error submitting issue:', error);
-      Alert.alert('Error', 'Failed to submit issue. Please try again.');
+      console.error("Error submitting issue:", error);
+      Alert.alert("Error", "Failed to submit issue. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const getPriorityColor = (p: TaskPriority) => {
-    switch (p) {
-      case 'urgent': return colors.danger;
-      case 'high': return colors.warning;
-      case 'medium': return colors.accent;
-      case 'low': return colors.success;
-      default: return colors.grey;
-    }
-  };
-
   if (userVessels.length === 0) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
-        <Stack.Screen options={{ title: 'Report Issue' }} />
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 }}>
-          <IconSymbol ios_icon_name="sailboat" android_material_icon_name="sailing" size={48} color={colors.textTertiary} />
-          <Text style={{ fontSize: 16, color: colors.textSecondary, textAlign: 'center', marginTop: 16 }}>
+      <View style={formStyles.container}>
+        <Stack.Screen options={{ title: "Report Issue" }} />
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 40,
+          }}
+        >
+          <IconSymbol
+            ios_icon_name="sailboat"
+            android_material_icon_name="sailing"
+            size={48}
+            color={colors.textTertiary}
+          />
+          <Text
+            style={{
+              fontSize: 16,
+              color: colors.textSecondary,
+              textAlign: "center",
+              marginTop: 16,
+            }}
+          >
             No vessels assigned to your account. Contact your manager.
           </Text>
         </View>
@@ -312,18 +344,16 @@ export default function AddIssueScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surfaceOne }]}>
+    <KeyboardAvoidingView
+      style={formStyles.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
       <Stack.Screen
         options={{
-          title: 'Report Issue',
+          title: "Report Issue",
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.cancelText}>Cancel</Text>
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
-              <Text style={[styles.saveText, isSubmitting && { opacity: 0.5 }]}>Submit</Text>
+              <Text style={formStyles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           ),
         }}
@@ -344,56 +374,69 @@ export default function AddIssueScreen() {
       )}
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        {...scrollProps}
+        style={formStyles.scrollView}
+        contentContainerStyle={formStyles.scrollContent}
         showsVerticalScrollIndicator={false}
+        {...scrollProps}
       >
-        <View style={styles.section}>
-          <Text style={styles.label}>Issue Title *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Issue Title *</Text>
           <TextInput
-            style={styles.input}
+            style={[
+              formStyles.input,
+              focusedField === "title" && formStyles.inputFocused,
+            ]}
             placeholder="Brief description of the issue"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={title}
             onChangeText={setTitle}
+            onFocus={() => setFocusedField("title")}
+            onBlur={() => setFocusedField(null)}
             maxLength={100}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Description *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Description *</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[
+              formStyles.input,
+              formStyles.textArea,
+              focusedField === "description" && formStyles.inputFocused,
+            ]}
             placeholder="Detailed description of the issue..."
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={description}
             onChangeText={setDescription}
+            onFocus={() => setFocusedField("description")}
+            onBlur={() => setFocusedField(null)}
             multiline
             numberOfLines={6}
             textAlignVertical="top"
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Vessel *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Vessel *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {userVessels.map((vessel) => (
               <TouchableOpacity
                 key={vessel.id}
                 style={[
-                  styles.optionChip,
-                  selectedVesselId === vessel.id && styles.optionChipActive,
+                  formStyles.optionChip,
+                  selectedVesselId === vessel.id && formStyles.optionChipActive,
                 ]}
                 onPress={() => setSelectedVesselId(vessel.id)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
-                    selectedVesselId === vessel.id && styles.optionChipTextActive,
+                    formStyles.optionChipText,
+                    selectedVesselId === vessel.id &&
+                      formStyles.optionChipTextActive,
                   ]}
                 >
                   {vessel.name}
@@ -403,58 +446,57 @@ export default function AddIssueScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Priority *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Priority *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {PRIORITY_OPTIONS.map((p) => (
               <TouchableOpacity
                 key={p}
                 style={[
-                  styles.optionChip,
+                  formStyles.optionChip,
                   priority === p && [
-                    styles.optionChipActive,
-                    { backgroundColor: getPriorityColor(p) },
+                    formStyles.optionChipActive,
                   ],
                 ]}
                 onPress={() => setPriority(p)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
-                    priority === p && styles.optionChipTextActive,
+                    formStyles.optionChipText,
+                    priority === p && formStyles.optionChipTextActive,
                   ]}
                 >
-                  {p.toUpperCase()}
+                  {p.charAt(0).toUpperCase() + p.slice(1)}
                 </Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Category *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Category *</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.optionsContainer}
+            contentContainerStyle={formStyles.optionsContainer}
           >
             {ISSUE_CATEGORIES.map((cat) => (
               <TouchableOpacity
                 key={cat}
                 style={[
-                  styles.optionChip,
-                  category === cat && styles.optionChipActive,
+                  formStyles.optionChip,
+                  category === cat && formStyles.optionChipActive,
                 ]}
                 onPress={() => setCategory(cat)}
               >
                 <Text
                   style={[
-                    styles.optionChipText,
-                    category === cat && styles.optionChipTextActive,
+                    formStyles.optionChipText,
+                    category === cat && formStyles.optionChipTextActive,
                   ]}
                 >
                   {cat}
@@ -464,56 +506,67 @@ export default function AddIssueScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Location on Vessel *</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Location on Vessel *</Text>
           <TextInput
-            style={styles.input}
+            style={[
+              formStyles.input,
+              focusedField === "location" && formStyles.inputFocused,
+            ]}
             placeholder="e.g., Forward Deck, Engine Room, Galley"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textTertiary}
             value={location}
             onChangeText={setLocation}
+            onFocus={() => setFocusedField("location")}
+            onBlur={() => setFocusedField(null)}
             maxLength={100}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Attachments (Photos/Videos)</Text>
+        <View style={formStyles.section}>
+          <Text style={formStyles.label}>Attachments (Photos/Videos)</Text>
           <View style={styles.attachmentButtons}>
-            <TouchableOpacity 
-              style={styles.attachmentButton} 
+            <TouchableOpacity
+              style={styles.attachmentButton}
               onPress={handleTakePhoto}
               disabled={isOptimizing}
+              activeOpacity={0.7}
             >
               <IconSymbol
                 ios_icon_name="camera.fill"
                 android_material_icon_name="photo-camera"
-                size={24}
-                color={isOptimizing ? colors.textSecondary : colors.accent}
+                size={20}
+                color={isOptimizing ? colors.textTertiary : colors.textTertiary}
               />
-              <Text style={[
-                styles.attachmentButtonText,
-                isOptimizing && styles.attachmentButtonTextDisabled
-              ]}>
+              <Text
+                style={[
+                  styles.attachmentButtonText,
+                  isOptimizing && styles.attachmentButtonTextDisabled,
+                ]}
+              >
                 Take Photo
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={styles.attachmentButton} 
+            <TouchableOpacity
+              style={styles.attachmentButton}
               onPress={handlePickImage}
               disabled={isOptimizing}
+              activeOpacity={0.7}
             >
               <IconSymbol
                 ios_icon_name="photo.fill"
                 android_material_icon_name="photo-library"
-                size={24}
-                color={isOptimizing ? colors.textSecondary : colors.accent}
+                size={20}
+                color={isOptimizing ? colors.textTertiary : colors.textTertiary}
               />
-              <Text style={[
-                styles.attachmentButtonText,
-                isOptimizing && styles.attachmentButtonTextDisabled
-              ]}>
-                Choose from Library
+              <Text
+                style={[
+                  styles.attachmentButtonText,
+                  isOptimizing && styles.attachmentButtonTextDisabled,
+                ]}
+              >
+                Library
               </Text>
             </TouchableOpacity>
           </View>
@@ -522,8 +575,11 @@ export default function AddIssueScreen() {
             <View style={styles.attachmentsList}>
               {attachments.map((attachment) => (
                 <View key={attachment.id} style={styles.attachmentItem}>
-                  {attachment.type === 'image' ? (
-                    <Image source={{ uri: attachment.uri }} style={styles.attachmentImage} />
+                  {attachment.type === "image" ? (
+                    <Image
+                      source={{ uri: attachment.uri }}
+                      style={styles.attachmentImage}
+                    />
                   ) : (
                     <View style={styles.videoPlaceholder}>
                       <IconSymbol
@@ -555,166 +611,114 @@ export default function AddIssueScreen() {
             </View>
           )}
         </View>
-
-        <TouchableOpacity
-          style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
-          onPress={handleSubmit}
-          disabled={isSubmitting}
-        >
-          <Text style={styles.submitButtonText}>
-            {isSubmitting ? 'Submitting...' : 'Report Issue'}
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
-    </View>
+
+      <View
+        style={[
+          formStyles.bottomBar,
+          { paddingBottom: insets.bottom },
+        ]}
+      >
+        <TouchableOpacity
+          style={[
+            formStyles.submitButton,
+            !canSubmit && formStyles.submitButtonDisabled,
+          ]}
+          onPress={handleSubmit}
+          disabled={!canSubmit || isSubmitting}
+          activeOpacity={0.8}
+        >
+          {isSubmitting ? (
+            <ActivityIndicator color="#FFFFFF" size="small" />
+          ) : (
+            <Text style={formStyles.submitButtonText}>Submit</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  cancelText: {
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  saveText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.accent,
-  },
   optimizingOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 1000,
   },
   optimizingCard: {
     backgroundColor: colors.surfaceOne,
     borderRadius: 16,
     padding: 32,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 16,
   },
   optimizingText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   optimizingProgress: {
     fontSize: 14,
     color: colors.textSecondary,
   },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 120,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  textArea: {
-    minHeight: 120,
-    paddingTop: 14,
-  },
-  optionsContainer: {
-    gap: 8,
-  },
-  optionChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: colors.surfaceOne,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  optionChipActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  optionChipText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  optionChipTextActive: {
-    color: colors.text,
-  },
   attachmentButtons: {
-    flexDirection: 'row',
-    gap: 12,
+    flexDirection: "row",
+    gap: 10,
   },
   attachmentButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
-    backgroundColor: colors.surfaceOne,
-    borderRadius: 12,
-    paddingVertical: 16,
+    borderRadius: 8,
+    paddingVertical: 12,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   attachmentButtonText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: colors.accent,
-  },
-  attachmentButtonTextDisabled: {
+    fontWeight: "500",
     color: colors.textSecondary,
   },
+  attachmentButtonTextDisabled: {
+    color: colors.textTertiary,
+  },
   attachmentsList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
     marginTop: 16,
   },
   attachmentItem: {
-    position: 'relative',
+    position: "relative",
     width: 100,
     height: 100,
   },
   attachmentImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: 12,
   },
   videoPlaceholder: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: 12,
     backgroundColor: colors.surfaceOne,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   attachmentInfo: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
     padding: 4,
@@ -722,29 +726,13 @@ const styles = StyleSheet.create({
   attachmentSize: {
     fontSize: 10,
     color: colors.text,
-    textAlign: 'center',
+    textAlign: "center",
   },
   removeAttachmentButton: {
-    position: 'absolute',
+    position: "absolute",
     top: -8,
     right: -8,
     backgroundColor: colors.surfaceOne,
     borderRadius: 12,
-  },
-  submitButton: {
-    backgroundColor: colors.danger,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
   },
 });
